@@ -1,0 +1,75 @@
+{		
+	"window.openFilesInNewWindow": "off",
+	"editor.tabSize": 2,
+	"window.zoomLevel": 2, // Зум vscode
+	//"editor.folding": false,  // Сворачивание кода
+	"editor.insertSpaces": false,
+	"editor.smoothScrolling": true, // Плавный скролинг
+	"editor.minimap.enabled": false,
+	"editor.detectIndentation": true,
+	"editor.suggestSelection": "first",
+	"editor.multiCursorModifier": "ctrlCmd",
+	"editor.quickSuggestionsDelay": 0, // Быстрые подсказки в коде
+	"html.completion.attributeDefaultValue": "singlequotes", // Одинраные ковычки в html для атрибутов у тегов
+	// "editor.bracketPairColorization.enabled": false, // Подсветка вложенности кода {} 
+	"editor.glyphMargin": false, // Отступы документа от проводника 
+	"editor.scrollbar.horizontal": "hidden", // Горизонтальный скоролл вкл/выкл
+	// "editor.scrollbar.vertical": "hidden", // Вертикальный скоролл вкл/выкл
+	"workbench.productIconTheme": "fluent-icons",
+	"window.density.editorTabHeight": "compact", // Размер табов файлов
+	"workbench.activityBar.location": "top", // Расположение  бара vscode 
+	"editor.accessibilitySupport": "off", // Отключение поддержки доступности 
+	"window.commandCenter": false, // Командный центр
+	"workbench.layoutControl.enabled": false, // Контроль лайаута vscode
+
+	// Font
+	"editor.fontSize": 18,
+	"editor.lineHeight": 30,
+	"editor.fontLigatures": true,
+
+	// Cursor
+	"editor.cursorBlinking": "expand",
+	"editor.cursorStyle": "line-thin",
+	"editor.cursorSmoothCaretAnimation": "explicit",
+
+	//Explorer
+	// "explorer.confirmDelete": false, // Подтверждение удаления файлов 
+	"explorer.compactFolders": false, // Компактные папки или мамки ыыыыы
+	//"explorer.confirmDragAndDrop": false, // Подтверждение переноса файлов
+
+	//Debug Мы не дебажим код это для лохов
+	"debug.toolBarLocation": "hidden",
+	"debug.focusWindowOnBreak": false,
+	"debug.showInlineBreakpointCandidates": false,
+	"debug.showBreakpointsInOverviewRuler": false,
+
+	// Emmet
+	"emmet.includeLanguages": {
+		"blade": "html",
+		"javascript": "javascriptreact"
+	},
+	"emmet.triggerExpansionOnTab": true,
+
+
+	//Breadcrumbs
+	"breadcrumbs.icons": false,
+	"breadcrumbs.showKeys": false,
+	"breadcrumbs.showFiles": false,
+	"breadcrumbs.symbolPath": "off",
+	"breadcrumbs.showArrays": false,
+	"breadcrumbs.showEvents": false,
+	"breadcrumbs.showFields": false,
+	"breadcrumbs.showClasses": false,
+	"breadcrumbs.showMethods": false,
+	"breadcrumbs.showBooleans": false,
+	"breadcrumbs.showFunctions": false,
+	"breadcrumbs.showConstants": false,
+	"breadcrumbs.showEnumMembers": false,
+	"breadcrumbs.showConstructors": false,
+
+	// Theme & Icons vs-code
+	"workbench.iconTheme": "catppuccin-macchiato",
+	"workbench.colorTheme": "Catppuccin Macchiato",
+	"window.customTitleBarVisibility": "auto",
+	"files.autoSave": "onWindowChange",
+}
