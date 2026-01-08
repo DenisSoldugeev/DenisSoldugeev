@@ -8,7 +8,9 @@
 
 ### :man_technologist: About Me :
 
-I am a Front-end Developer :fire:
+I am a Front-end Developer with a passion for Web3 technologies :fire:
+
+Currently exploring decentralized applications and blockchain integration.
 
 ---
 
@@ -26,5 +28,14 @@ I am a Front-end Developer :fire:
 ---
 
 ### 🔗 Links :
-
+[![telegram](https://img.shields.io/badge/telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/it_den)
 [![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/denis-soldugeev-977a671b9/)
+[![email](https://img.shields.io/badge/email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:den.soldugeev@icloud.com)
+
+---
+
+### 🚀 Interests :
+
+- 🌐 Web3 & Blockchain technologies
+- 🔗 Decentralized applications (dApps)
+- 💎 Smart contracts & DeFi
