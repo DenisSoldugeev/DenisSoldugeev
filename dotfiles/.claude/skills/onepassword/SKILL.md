@@ -11,6 +11,8 @@ description: >-
   "теги паролей", "untagged secrets", "reused/weak passwords", "1password
   environments", ".env secrets". Read-only audit first; changes only after the
   user confirms.
+metadata:
+  short-description: 1Password vault hygiene (op CLI) + Environments (MCP)
 ---
 
 # 1Password
