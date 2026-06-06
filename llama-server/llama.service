@@ -1,0 +1,15 @@
+[Unit]
+Description=llama.cpp server (Qwen2.5 14B, Vulkan/RTX 3060)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/llama.cpp/serve.sh
+Restart=on-failure
+RestartSec=5
+# the model takes a few seconds to load into VRAM — give it time
+TimeoutStartSec=120
+
+[Install]
+WantedBy=default.target
