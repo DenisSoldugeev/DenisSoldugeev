@@ -22,7 +22,15 @@
 set -euo pipefail
 
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TAXONOMY="${ONEP_TAXONOMY:-$SKILL_DIR/assets/taxonomy.txt}"
+# Taxonomy precedence: $ONEP_TAXONOMY > assets/taxonomy.local.txt (personal,
+# gitignored) > assets/taxonomy.txt (generic default committed to the repo).
+if [ -n "${ONEP_TAXONOMY:-}" ]; then
+  TAXONOMY="$ONEP_TAXONOMY"
+elif [ -f "$SKILL_DIR/assets/taxonomy.local.txt" ]; then
+  TAXONOMY="$SKILL_DIR/assets/taxonomy.local.txt"
+else
+  TAXONOMY="$SKILL_DIR/assets/taxonomy.txt"
+fi
 
 VAULT=""; STALE_DAYS=730; DEEP=0; MAX_LIST=40
 while [ $# -gt 0 ]; do

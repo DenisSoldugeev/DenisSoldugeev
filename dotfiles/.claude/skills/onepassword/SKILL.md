@@ -58,8 +58,9 @@ scripts/reuse-check.sh --vault Personal
 Then: present the report → for fixable buckets show the `op item edit` commands
 → **get confirmation** → run them → re-run `audit.sh` to verify counts dropped.
 
-Taxonomy of allowed tags lives in `assets/taxonomy.txt` (edit it as the schema
-evolves; supports `#remap A -> B` lines). See `references/vault-hygiene.md`.
+Taxonomy of allowed tags: `assets/taxonomy.txt` is a generic starter; put your
+personal tags in `assets/taxonomy.local.txt` (gitignored — `audit.sh` prefers
+it). Supports `#remap A -> B`. See `references/vault-hygiene.md`.
 
 ## Environments — quick start
 
