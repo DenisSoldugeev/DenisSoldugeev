@@ -28,19 +28,33 @@ current_bin_dir() {
 }
 
 # ── статус сервера ─────────────────────────────────────────────────────────────
-cmd_status() {
+_find_server_pid() {
+  # 1. PID-файл (запущен через llama-mgr start)
   if [[ -f "$PID_FILE" ]]; then
-    local pid
-    pid=$(cat "$PID_FILE")
-    if kill -0 "$pid" 2>/dev/null; then
-      ok "Сервер запущен  PID=$pid"
-      echo -e "   ${C}API:${N}  http://127.0.0.1:8080"
-      echo -e "   ${C}Лог:${N}  $LOG_FILE"
-      local model
-      model=$(ps -p "$pid" -o args= 2>/dev/null | grep -oP '(?<=--model )\S+' || true)
-      [[ -n "$model" ]] && echo -e "   ${C}Модель:${N} $(basename "$model")"
-      return 0
-    fi
+    local pid; pid=$(cat "$PID_FILE")
+    kill -0 "$pid" 2>/dev/null && { echo "$pid"; return; }
+  fi
+  # 2. systemd user service
+  if systemctl --user is-active --quiet llama.service 2>/dev/null; then
+    local spid; spid=$(systemctl --user show llama.service --property=MainPID --value 2>/dev/null)
+    [[ "$spid" =~ ^[0-9]+$ && "$spid" != "0" ]] && { echo "$spid"; return; }
+  fi
+  # 3. fallback: любой llama-server процесс
+  pgrep -x llama-server 2>/dev/null | head -1 || true
+}
+
+cmd_status() {
+  local pid; pid=$(_find_server_pid)
+  if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+    ok "Сервер запущен  PID=$pid"
+    echo -e "   ${C}API:${N}  http://127.0.0.1:8080"
+    echo -e "   ${C}Лог:${N}  $LOG_FILE"
+    local model
+    model=$(ps -p "$pid" -o args= 2>/dev/null | grep -oP '(?<=--model )\S+' || true)
+    [[ -n "$model" ]] && echo -e "   ${C}Модель:${N} $(basename "$model")"
+    systemctl --user is-active --quiet llama.service 2>/dev/null && \
+      echo -e "   ${C}Управление:${N} systemd (llama.service)"
+    return 0
   fi
   warn "Сервер не запущен"
   return 1
@@ -95,6 +109,7 @@ pick_model() {
 # ── конфиг ─────────────────────────────────────────────────────────────────────
 CONF_FILE="$LLAMA_DIR/llama-mgr.conf"
 
+# Дефолты — перекрываются конфигом и CLI-флагами
 CFG_CTX=131072
 CFG_PORT=8080
 CFG_HOST=0.0.0.0
@@ -113,8 +128,8 @@ CFG_TEMP=0.6
 CFG_TOP_K=20
 CFG_TOP_P=0.95
 CFG_MIN_P=0.0
-CFG_NCMOE=32
-CFG_EXTRA_ARGS=""
+CFG_NCMOE=32        # кол-во экспертов MoE (-ncmoe / --n-cpu-moe)
+CFG_EXTRA_ARGS=""   # произвольные доп. флаги llama-server
 
 load_conf() {
   [[ -f "$CONF_FILE" ]] || return 0
@@ -160,7 +175,7 @@ CFG_TOP_P=0.95          # --top-p
 CFG_MIN_P=0.0           # --min-p
 
 # ── MoE ───────────────────────────────────────────────────────────────────────
-CFG_NCMOE=32            # -ncmoe              кол-во активных экспертов (для MoE моделей)
+CFG_NCMOE=32            # -ncmoe              кол-во активных экспертов
 
 # ── всё остальное ─────────────────────────────────────────────────────────────
 # CFG_EXTRA_ARGS="--no-mmap --mlock"
@@ -177,30 +192,31 @@ cmd_start() {
 
   load_conf
 
+  # Парсинг CLI-флагов (перекрывают конфиг)
   local model=""
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --model)       model="$2";             shift 2 ;;
-      --ctx)         CFG_CTX="$2";           shift 2 ;;
-      --port)        CFG_PORT="$2";          shift 2 ;;
-      --host)        CFG_HOST="$2";          shift 2 ;;
-      --parallel)    CFG_PARALLEL="$2";      shift 2 ;;
-      --ngl)         CFG_NGL="$2";           shift 2 ;;
-      --batch)       CFG_BATCH="$2";         shift 2 ;;
-      --ubatch)      CFG_UBATCH="$2";        shift 2 ;;
-      --n-predict)   CFG_N_PREDICT="$2";     shift 2 ;;
-      --cache-reuse) CFG_CACHE_REUSE="$2";   shift 2 ;;
-      --kv-k)        CFG_KV_TYPE_K="$2";     shift 2 ;;
-      --kv-v)        CFG_KV_TYPE_V="$2";     shift 2 ;;
-      --flash)       CFG_FLASH_ATTN="$2";    shift 2 ;;
-      --temp)        CFG_TEMP="$2";          shift 2 ;;
-      --top-k)       CFG_TOP_K="$2";         shift 2 ;;
-      --top-p)       CFG_TOP_P="$2";         shift 2 ;;
-      --min-p)       CFG_MIN_P="$2";         shift 2 ;;
-      --ncmoe)       CFG_NCMOE="$2";         shift 2 ;;
-      --extra)       CFG_EXTRA_ARGS="$2";    shift 2 ;;
-      -*)            die "Неизвестный флаг: $1" ;;
-      *)             model="$1";             shift ;;
+      --model)      model="$2";            shift 2 ;;
+      --ctx)        CFG_CTX="$2";          shift 2 ;;
+      --port)       CFG_PORT="$2";         shift 2 ;;
+      --host)       CFG_HOST="$2";         shift 2 ;;
+      --parallel)   CFG_PARALLEL="$2";     shift 2 ;;
+      --ngl)        CFG_NGL="$2";          shift 2 ;;
+      --batch)      CFG_BATCH="$2";        shift 2 ;;
+      --ubatch)     CFG_UBATCH="$2";       shift 2 ;;
+      --n-predict)  CFG_N_PREDICT="$2";    shift 2 ;;
+      --cache-reuse) CFG_CACHE_REUSE="$2"; shift 2 ;;
+      --kv-k)       CFG_KV_TYPE_K="$2";   shift 2 ;;
+      --kv-v)       CFG_KV_TYPE_V="$2";   shift 2 ;;
+      --flash)      CFG_FLASH_ATTN="$2";   shift 2 ;;
+      --temp)       CFG_TEMP="$2";         shift 2 ;;
+      --top-k)      CFG_TOP_K="$2";        shift 2 ;;
+      --top-p)      CFG_TOP_P="$2";        shift 2 ;;
+      --min-p)      CFG_MIN_P="$2";        shift 2 ;;
+      --ncmoe)      CFG_NCMOE="$2";        shift 2 ;;
+      --extra)      CFG_EXTRA_ARGS="$2";   shift 2 ;;
+      -*)           die "Неизвестный флаг: $1" ;;
+      *)            model="$1";            shift ;;
     esac
   done
 
@@ -271,28 +287,45 @@ cmd_start() {
 
 # ── остановка ──────────────────────────────────────────────────────────────────
 cmd_stop() {
+  local stopped=0
+
+  # systemd user service
+  if systemctl --user is-active --quiet llama.service 2>/dev/null; then
+    systemctl --user stop llama.service
+    ok "Systemd сервис остановлен (llama.service)"
+    stopped=1
+  fi
+
+  # PID-файл (запущен через llama-mgr start)
   if [[ -f "$PID_FILE" ]]; then
-    local pid
-    pid=$(cat "$PID_FILE")
+    local pid; pid=$(cat "$PID_FILE")
     if kill -0 "$pid" 2>/dev/null; then
       kill "$pid"
-      rm -f "$PID_FILE"
       ok "Сервер остановлен (PID=$pid)"
-      return
+      stopped=1
     fi
+    rm -f "$PID_FILE"
   fi
-  warn "Сервер не был запущен"
+
+  # fallback: убить оставшиеся процессы
+  local leftover; leftover=$(pgrep -x llama-server 2>/dev/null || true)
+  if [[ -n "$leftover" ]]; then
+    kill $leftover 2>/dev/null && ok "Убиты оставшиеся процессы: $leftover" || true
+    stopped=1
+  fi
+
+  [[ "$stopped" -eq 0 ]] && warn "Сервер не был запущен"
 }
 
 cmd_restart() {
   cmd_stop || true
   sleep 1
-  cmd_start "$@"
+  cmd_start "$@"   # все флаги пробрасываются
 }
 
 # ── обновление ─────────────────────────────────────────────────────────────────
 cmd_update() {
-  command -v curl  &>/dev/null || die "curl не установлен"
+  command -v curl &>/dev/null || die "curl не установлен"
   command -v unzip &>/dev/null || die "unzip не установлен"
 
   info "Проверяю последний релиз llama.cpp на GitHub..."
@@ -302,10 +335,11 @@ cmd_update() {
 
   local tag
   tag=$(echo "$release" | grep -oP '"tag_name":\s*"\K[^"]+')
-  local build_tag="$tag"   # "b9999"
+  local build="${tag#b}"        # "9999"
+  local build_tag="b$build"    # "b9999"
 
   local cur
-  cur=$(current_build)     # "b9536"
+  cur=$(current_build)          # "b9536"
 
   if [[ "$build_tag" == "$cur" ]]; then
     ok "Уже установлена актуальная версия: $cur"
@@ -314,22 +348,19 @@ cmd_update() {
 
   info "Текущая: $cur  →  Новая: $build_tag"
 
+  # Ищем Linux-CUDA бинарник в assets (cu12 → cu11 → любой cuda)
   local all_assets
   all_assets=$(echo "$release" | grep -oP '"browser_download_url":\s*"\K[^"]+' | grep -v '\.sha256')
 
-  # Ищем Vulkan-бинарник (машина использует Vulkan, не CUDA — драйвер без cuda-toolkit)
   local asset_url
-  asset_url=$(echo "$all_assets" | grep -i 'ubuntu' | grep -i 'vulkan' | grep -i 'x64' | head -1 || true)
-  # Fallback: CUDA cu12 / cu11 / любой
-  [[ -z "$asset_url" ]] && \
-    asset_url=$(echo "$all_assets" | grep -i 'ubuntu' | grep -i 'cuda' | grep -i 'x64' | grep -i 'cu12' | head -1 || true)
+  asset_url=$(echo "$all_assets" | grep -i 'ubuntu' | grep -i 'cuda' | grep -i 'x64' | grep -i 'cu12' | head -1 || true)
   [[ -z "$asset_url" ]] && \
     asset_url=$(echo "$all_assets" | grep -i 'ubuntu' | grep -i 'cuda' | grep -i 'x64' | grep -i 'cu11' | head -1 || true)
   [[ -z "$asset_url" ]] && \
     asset_url=$(echo "$all_assets" | grep -i 'ubuntu' | grep -i 'cuda' | grep -i 'x64' | head -1 || true)
 
   if [[ -z "$asset_url" ]]; then
-    warn "Не найден подходящий бинарник (Vulkan/CUDA, Ubuntu x64) для $build_tag"
+    warn "CUDA-бинарник для Ubuntu x64 не найден в релизе $build_tag"
     info "Доступные активы:"
     echo "$all_assets" | sed 's/^/  /'
     die "Обновление отменено. Скачай нужный пакет вручную."
@@ -346,8 +377,10 @@ cmd_update() {
   info "Распаковываю..."
   unzip -q "$tmp_dir/$zip_name" -d "$tmp_dir/out"
 
+  # Переносим в целевую директорию
   local dest="$LLAMA_DIR/llama-$build_tag"
   mkdir -p "$dest"
+  # Бинарники обычно лежат в build/bin или прямо в корне архива
   local bin_src
   bin_src=$(find "$tmp_dir/out" -name "llama-server" -type f | head -1)
   [[ -n "$bin_src" ]] || die "llama-server не найден в архиве"
@@ -384,11 +417,10 @@ usage() {
   echo -e "  ${B}--port${N}     <N>        порт (сейчас: $CFG_PORT)"
   echo -e "  ${B}--host${N}     <addr>     хост (сейчас: $CFG_HOST)"
   echo -e "  ${B}--parallel${N} <N>        параллельных слотов"
-  echo -e "  ${B}--ngl${N}      <N>        слоёв на GPU (999 = всё)"
+  echo -e "  ${B}--ngl${N}      <N>        слоёв на GPU (пусто = авто)"
   echo -e "  ${B}--kv-k${N}     <type>     квантизация KV K (f16/q8_0/q4_0)"
   echo -e "  ${B}--kv-v${N}     <type>     квантизация KV V"
   echo -e "  ${B}--flash${N}    on|off     flash attention"
-  echo -e "  ${B}--ncmoe${N}    <N>        активных экспертов MoE"
   echo -e "  ${B}--extra${N}    \"...\"      произвольные доп. флаги llama-server\n"
   echo -e "${C}Примеры:${N}"
   echo -e "  llama-mgr start --ctx 32768 --port 8081"
