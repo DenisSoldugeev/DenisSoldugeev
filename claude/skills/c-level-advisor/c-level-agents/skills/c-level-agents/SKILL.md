@@ -1,0 +1,114 @@
+---
+name: "c-level-agents"
+description: "Founder-mode executive team. 8 ds-* C-suite agents (CFO, CMO, CRO, CPO, COO, CHRO, CISO, Chief of Staff) and 17 /ds:* slash commands for forcing-question office hours, multi-role boardroom deliberation, strategic sprint pipeline, and meta routing. Use when the founder needs a virtual executive team, when invoking /ds:* commands, or when orchestrating multi-role decisions."
+license: MIT
+metadata:
+  version: 1.0.0
+  category: c-level
+  domain: executive-orchestration
+  updated: 2026-05-12
+  agents: ds-cfo-advisor, ds-cmo-advisor, ds-cro-advisor, ds-cpo-advisor, ds-coo-advisor, ds-chro-advisor, ds-ciso-advisor, ds-chief-of-staff
+  commands: ds-office-hours, ds-cfo-review, ds-cmo-review, ds-cpo-review, ds-cro-review, ds-cto-review, ds-ciso-review, ds-gc-review, ds-brief, ds-boardroom, ds-decide, ds-execute, ds-post-mortem, ds-founder-mode, ds-onboard, ds-cross-eval, ds-freeze
+---
+
+# c-level-agents — Founder-Mode Executive Team
+
+A virtual C-suite delivered through slash commands and persona agents.
+
+## Keywords
+
+founder mode, virtual c-suite, executive team, boardroom, office hours, cfo review, cmo review, strategic sprint, decision logging, cross-model consensus, persona agents, chief of staff, forcing questions
+
+## What This Plugin Provides
+
+### 8 ds-* Agents (in `agents/`)
+
+Each agent wraps an existing c-level skill and adds:
+- A distinct cognitive voice (numerate skeptic, narrative-first, etc.)
+- Forcing questions specific to the role
+- Workflow orchestration tied to skill Python tools
+- Output template: Bottom Line → What → Why → How to Act → Your Decision
+
+See `../references/persona-voices.md` for voice specs.
+
+### 17 /ds:* Slash Commands (in `skills/`)
+
+**Forcing-question office hours (8):**
+- `/ds:office-hours` — YC-style 6-question intake
+- `/ds:cfo-review` — unit economics, runway, dilution
+- `/ds:cmo-review` — ICP, CAC payback, positioning
+- `/ds:cpo-review` — RICE, JTBD, North Star, PMF
+- `/ds:cro-review` — pipeline coverage, win rate, NRR
+- `/ds:cto-review` — architecture risk, scaling cliff
+- `/ds:ciso-review` — threat model, blast radius, compliance
+- `/ds:gc-review` — contracts, IP, regulatory, term sheets
+
+**Strategic sprint pipeline (5):**
+- `/ds:brief` → `/ds:boardroom` → `/ds:decide` → `/ds:execute` → `/ds:post-mortem`
+
+**Meta + safety (4):**
+- `/ds:founder-mode` — auto-routes to the right C-role
+- `/ds:onboard` — founder interview → `company-context.md`
+- `/ds:cross-eval` — multi-model consensus
+- `/ds:freeze` — cooldown lock on a decision
+
+## Quick Start
+
+```
+/ds:onboard                          # populate company context first
+/ds:office-hours "should we hire a VP Sales?"
+/ds:founder-mode "runway pressure"   # auto-routes to CFO
+/ds:boardroom briefs/pricing-v3.md   # full panel
+```
+
+## Architecture
+
+```
+User question
+   │
+   ├─ Single-role? → ds-{role}-advisor agent
+   │                     ↓
+   │                  /ds:{role}-review command (forcing Qs)
+   │                     ↓
+   │                  Skill tools + references
+   │                     ↓
+   │                  Bottom Line + Memo
+   │
+   └─ Multi-role?  → /ds:boardroom
+                        ↓
+                     6-phase deliberation (Phase 2 isolation)
+                        ↓
+                     /ds:decide → decision-logger (two-layer memory)
+                        ↓
+                     /ds:execute → 90-day plan
+```
+
+## Integration Points
+
+- **Existing 28 c-level skills** — wrapped, not replaced
+- **decision-logger** — every `/ds:decide` writes here
+- **chief-of-staff** — routing layer the agent orchestrates
+- **board-meeting** — protocol the `/ds:boardroom` command runs
+- **llm-wiki** — optional persistent memory bridge (see `../references/llm-wiki-bridge.md`)
+- **executive-mentor** — adversarial `/em:*` commands stack cleanly on top
+
+## Design Principles
+
+1. **Voice is bookended, analysis is neutral.**
+2. **Artifacts over chat.** Every command produces a Markdown artifact the next command consumes.
+3. **Phase 2 isolation in boardroom.** Independent thinking before cross-examination.
+4. **Graceful degradation.** `/ds:cross-eval` falls back to Claude-only.
+5. **No paid dependencies.** All Python tools are stdlib-only.
+
+## References
+
+- [persona-voices.md](../../references/persona-voices.md)
+- [llm-wiki-bridge.md](../../references/llm-wiki-bridge.md)
+- [Parent c-level CLAUDE.md](../../../CLAUDE.md)
+- [Existing executive-mentor sibling](../../../executive-mentor/)
+
+---
+
+**Version:** 1.0.0
+**Last Updated:** 2026-05-12
+**Status:** Production Ready
