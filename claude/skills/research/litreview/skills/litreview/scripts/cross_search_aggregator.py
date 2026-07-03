@@ -87,7 +87,7 @@ SAMPLE_RESULTS = {
 
 def aggregate(results: Dict[str, Any]) -> Dict[str, Any]:
     paper_appearances: Dict[str, Dict[str, Any]] = {}
-    author_appearances: Counter = Counter
+    author_appearances: Counter = Counter()
     author_paper_sub_areas: Dict[str, set] = {}
 
     for search in results.get("searches", []):
@@ -103,19 +103,19 @@ def aggregate(results: Dict[str, Any]) -> Dict[str, Any]:
                     "authors": paper.get("authors", []),
                     "year": paper.get("year"),
                     "citations": paper.get("citations", 0),
-                    "sub_areas": set,
+                    "sub_areas": set(),
                 }
             paper_appearances[url]["sub_areas"].add(sub_area)
 
             for author in paper.get("authors", []):
                 author_appearances[author] += 1
                 if author not in author_paper_sub_areas:
-                    author_paper_sub_areas[author] = set
+                    author_paper_sub_areas[author] = set()
                 author_paper_sub_areas[author].add(sub_area)
 
     # Tracker 1: Repeat-hit papers
     repeat_hits: List[Dict[str, Any]] = []
-    for url, p in paper_appearances.items:
+    for url, p in paper_appearances.items():
         if len(p["sub_areas"]) >= REPEAT_HIT_THRESHOLD:
             entry = {
                 "url": p["url"],
@@ -136,13 +136,13 @@ def aggregate(results: Dict[str, Any]) -> Dict[str, Any]:
             recurring_authors.append({
                 "author": author,
                 "appearances": count,
-                "sub_areas": sorted(author_paper_sub_areas.get(author, set)),
+                "sub_areas": sorted(author_paper_sub_areas.get(author, set())),
             })
 
     # Tracker 3: Citation-per-year
-    current_year = datetime.now.year
+    current_year = datetime.now().year
     cited_per_year: List[Dict[str, Any]] = []
-    for url, p in paper_appearances.items:
+    for url, p in paper_appearances.items():
         year = p.get("year")
         cites = p.get("citations", 0) or 0
         if year and year <= current_year and cites > 0:
@@ -218,7 +218,7 @@ def main(argv: List[str]) -> int:
         result = aggregate(SAMPLE_RESULTS)
     elif args.results_file:
         p = Path(args.results_file)
-        if not p.exists:
+        if not p.exists():
             print(f"error: {args.results_file} not found", file=sys.stderr); return 2
         try:
             data = json.loads(p.read_text(encoding="utf-8"))
@@ -226,7 +226,7 @@ def main(argv: List[str]) -> int:
             print(f"error: invalid JSON in {args.results_file}: {e}", file=sys.stderr); return 2
         result = aggregate(data)
     else:
-        parser.print_help; return 0
+        parser.print_help(); return 0
 
     if args.output == "json":
         print(json.dumps(result, indent=2, default=str))

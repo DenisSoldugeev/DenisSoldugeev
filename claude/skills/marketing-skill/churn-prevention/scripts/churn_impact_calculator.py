@@ -156,14 +156,14 @@ def print_report(result):
     print(f"\n🔍 PRIORITY RECOMMENDATION")
     print(f"   Voluntary opportunity:   ${pri['voluntary_save_opportunity_mrr']:,.0f}/mo")
     print(f"   Involuntary opportunity: ${pri['involuntary_recovery_opportunity_mrr']:,.0f}/mo")
-    print(f"   Focus on:               {pri['recommendation'].replace('-', ' ').title}")
+    print(f"   Focus on:               {pri['recommendation'].replace('-', ' ').title()}")
     if pri['note']:
         print(f"   Note:                   {pri['note'].replace('-', ' ')}")
 
     print("\n" + "="*60 + "\n")
 
 
-def main:
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -177,7 +177,7 @@ def main:
         "--json", action="store_true",
         help="Output results as JSON"
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.input_file:
         with open(args.input_file) as f:
@@ -196,4 +196,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

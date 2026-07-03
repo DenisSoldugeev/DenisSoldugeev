@@ -24,7 +24,7 @@ Get-MgPolicyAuthorizationPolicy | Select-Object AllowInvitesFrom, DefaultUserRol
 ```powershell
 # CSV columns: DisplayName, UserPrincipalName, Department, LicenseSku
 Import-Csv .\new_users.csv | ForEach-Object {
-    $passwordProfile = @{ Password = (New-Guid).ToString.Substring(0,16) + "!"; ForceChangePasswordNextSignIn = $true }
+    $passwordProfile = @{ Password = (New-Guid).ToString().Substring(0,16) + "!"; ForceChangePasswordNextSignIn = $true }
     New-MgUser -DisplayName $_.DisplayName -UserPrincipalName $_.UserPrincipalName `
                -Department $_.Department -AccountEnabled -PasswordProfile $passwordProfile
 }
@@ -43,6 +43,28 @@ $policy = @{
 New-MgIdentityConditionalAccessPolicy -BodyParameter $policy
 ```
 
+### Bundled Python Generators
+
+Three stdlib tools generate the PowerShell artifacts deterministically — prefer them over hand-writing scripts for bulk/repeatable work. Sample input: `sample_input.json`; expected shape: `expected_output.json`.
+
+```bash
+# Tenant setup: checklist + DNS records + license plan (JSON), or the full setup script
+python3 scripts/tenant_setup.py --config sample_input.json --format json -o tenant_plan.json
+python3 scripts/tenant_setup.py --config sample_input.json --format powershell -o tenant_setup.ps1
+
+# User lifecycle: validate first, then generate creation/offboarding scripts
+python3 scripts/user_management.py --domain acme.com --action validate --users users.json
+python3 scripts/user_management.py --domain acme.com --action create --users users.json -o create_users.ps1
+python3 scripts/user_management.py --domain acme.com --action offboard --user-email jane@acme.com -o offboard.ps1
+
+# Admin scripts: CA policy / security audit / bulk licensing
+python3 scripts/powershell_generator.py --tenant-domain acme.com --task conditional-access --policy-config policy.json -o ca_policy.ps1
+python3 scripts/powershell_generator.py --tenant-domain acme.com --task security-audit -o audit.ps1
+python3 scripts/powershell_generator.py --tenant-domain acme.com --task bulk-license --users-csv users.csv --license-sku ENTERPRISEPACK -o licenses.ps1
+```
+
+**Gate:** for user creation, run `--action validate` first and require every entry to report `"is_valid": true` before generating the creation script. Review every generated `.ps1` against the workflows below before running it in the tenant.
+
 ---
 
 ## Workflows
@@ -50,6 +72,8 @@ New-MgIdentityConditionalAccessPolicy -BodyParameter $policy
 ### Workflow 1: New Tenant Setup
 
 **Step 1: Generate Setup Checklist**
+
+Run `python3 scripts/tenant_setup.py --config tenant.json --format json` and work through `setup_checklist` phase by phase; `dns_records` feeds Step 2 and `license_recommendations` feeds the licensing workflow.
 
 Confirm prerequisites before provisioning:
 - Global Admin account created and secured with MFA
@@ -93,8 +117,8 @@ $licenseSku = (Get-MgSubscribedSku | Where-Object { $_.SkuPartNumber -eq "ENTERP
 Import-Csv .\employees.csv | ForEach-Object {
     try {
         $user = New-MgUser -DisplayName $_.DisplayName -UserPrincipalName $_.UserPrincipalName `
-                           -AccountEnabled -PasswordProfile @{ Password = (New-Guid).ToString.Substring(0,12)+"!"; ForceChangePasswordNextSignIn = $true }
-        Set-MgUserLicense -UserId $user.Id -AddLicenses @(@{ SkuId = $licenseSku }) -RemoveLicenses @
+                           -AccountEnabled -PasswordProfile @{ Password = (New-Guid).ToString().Substring(0,12)+"!"; ForceChangePasswordNextSignIn = $true }
+        Set-MgUserLicense -UserId $user.Id -AddLicenses @(@{ SkuId = $licenseSku }) -RemoveLicenses @()
         Write-Host "Provisioned: $($_.UserPrincipalName)"
     } catch {
         Write-Warning "Failed $($_.UserPrincipalName): $_"
@@ -181,7 +205,7 @@ $licenses | ForEach-Object { Write-Host "[WhatIf] Would remove SKU: $_" }
 
 ```powershell
 # Remove licenses
-Set-MgUserLicense -UserId $user.Id -AddLicenses @ -RemoveLicenses $licenses
+Set-MgUserLicense -UserId $user.Id -AddLicenses @() -RemoveLicenses $licenses
 
 # Convert mailbox to shared (requires ExchangeOnlineManagement module)
 Set-Mailbox -Identity $upn -Type Shared

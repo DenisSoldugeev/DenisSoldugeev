@@ -34,7 +34,7 @@ METRIC = "runway_months"
 
 
 def main(argv: list[str] | None = None) -> int:
-    c = cfg.load_config
+    c = cfg.load_config()
     p = argparse.ArgumentParser(description="Autoresearch evaluator: R&D program runway in months.")
     p.add_argument("--target", help="path to ledger JSON (or env AR_TARGET)")
     p.add_argument("--threshold-months", type=float, default=None)
@@ -71,4 +71,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

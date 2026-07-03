@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-GLOBAL_CONFIG_DIR = Path.home / ".config" / "handoff"
+GLOBAL_CONFIG_DIR = Path.home() / ".config" / "handoff"
 GLOBAL_CONFIG_PATH = GLOBAL_CONFIG_DIR / "config.json"
 GLOBAL_SETUP_DECLINED = GLOBAL_CONFIG_DIR / ".setup-declined"
 
@@ -40,7 +40,7 @@ DEFAULTS: dict[str, Any] = {
 
 
 def project_config_path(cwd: Path | None = None) -> Path:
-    cwd = cwd or Path.cwd
+    cwd = cwd or Path.cwd()
     return cwd / PROJECT_CONFIG_DIRNAME / PROJECT_CONFIG_FILENAME
 
 
@@ -57,7 +57,7 @@ def _read_json(path: Path) -> dict[str, Any] | None:
 
 def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
     out = dict(base)
-    for k, v in override.items:
+    for k, v in override.items():
         if isinstance(v, dict) and isinstance(out.get(k), dict):
             out[k] = _deep_merge(out[k], v)
         else:
@@ -77,40 +77,40 @@ def load_config(cwd: Path | None = None) -> dict[str, Any]:
     return config
 
 
-def setup_completed -> bool:
+def setup_completed() -> bool:
     """True if global setup has run at least once."""
     cfg = _read_json(GLOBAL_CONFIG_PATH)
     return bool(cfg and cfg.get("setup_completed_at"))
 
 
-def setup_declined -> bool:
+def setup_declined() -> bool:
     """True if the user explicitly declined first-run setup."""
-    return GLOBAL_SETUP_DECLINED.exists
+    return GLOBAL_SETUP_DECLINED.exists()
 
 
 def should_prompt_setup(cwd: Path | None = None) -> bool:
     """Show 'Run setup now? (Y/n)' only if config absent AND not declined."""
-    if setup_completed:
+    if setup_completed():
         return False
-    if setup_declined:
+    if setup_declined():
         return False
     if _read_json(project_config_path(cwd)):
         return False
     return True
 
 
-def mark_setup_declined -> None:
+def mark_setup_declined() -> None:
     GLOBAL_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-    GLOBAL_SETUP_DECLINED.touch
+    GLOBAL_SETUP_DECLINED.touch()
 
 
 def write_global_config(config: dict[str, Any]) -> Path:
     GLOBAL_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     with GLOBAL_CONFIG_PATH.open("w", encoding="utf-8") as f:
         json.dump(config, f, indent=2, sort_keys=True)
-    if GLOBAL_SETUP_DECLINED.exists:
+    if GLOBAL_SETUP_DECLINED.exists():
         try:
-            GLOBAL_SETUP_DECLINED.unlink
+            GLOBAL_SETUP_DECLINED.unlink()
         except OSError:
             pass
     return GLOBAL_CONFIG_PATH
@@ -139,13 +139,13 @@ def main(argv: list[str] | None = None) -> int:
         print(
             json.dumps(
                 {
-                    "global_config_exists": GLOBAL_CONFIG_PATH.exists,
+                    "global_config_exists": GLOBAL_CONFIG_PATH.exists(),
                     "global_config_path": str(GLOBAL_CONFIG_PATH),
-                    "project_config_exists": project_config_path.exists,
-                    "project_config_path": str(project_config_path),
-                    "setup_completed": setup_completed,
-                    "setup_declined": setup_declined,
-                    "should_prompt_setup": should_prompt_setup,
+                    "project_config_exists": project_config_path().exists(),
+                    "project_config_path": str(project_config_path()),
+                    "setup_completed": setup_completed(),
+                    "setup_declined": setup_declined(),
+                    "should_prompt_setup": should_prompt_setup(),
                 },
                 indent=2,
             )
@@ -153,11 +153,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.show or not any([args.sample, args.status]):
-        print(json.dumps(load_config, indent=2, sort_keys=True))
+        print(json.dumps(load_config(), indent=2, sort_keys=True))
         return 0
 
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -59,7 +59,7 @@ function SelectOption({ value, children }: { value: string; children: React.Reac
 
   return (
     <div
-      onClick={ => context.onChange(value)}
+      onClick={() => context.onChange(value)}
       className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${
         context.value === value ? 'bg-blue-50' : ''
       }`}
@@ -94,12 +94,12 @@ interface MousePosition {
 function MouseTracker({ render }: { render: (pos: MousePosition) => React.ReactNode }) {
   const [position, setPosition] = useState<MousePosition>({ x: 0, y: 0 });
 
-  useEffect( => {
+  useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       setPosition({ x: e.clientX, y: e.clientY });
     };
     window.addEventListener('mousemove', handleMouseMove);
-    return  => window.removeEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   return <>{render(position)}</>;
@@ -120,7 +120,7 @@ Use HOCs for cross-cutting concerns like authentication or logging.
 ```tsx
 function withAuth<P extends object>(WrappedComponent: React.ComponentType<P>) {
   return function AuthenticatedComponent(props: P) {
-    const { user, isLoading } = useAuth;
+    const { user, isLoading } = useAuth();
 
     if (isLoading) return <LoadingSpinner />;
     if (!user) return <Navigate to="/login" />;
@@ -146,25 +146,25 @@ interface AsyncState<T> {
   status: 'idle' | 'loading' | 'success' | 'error';
 }
 
-function useAsync<T>(asyncFn:  => Promise<T>, deps: any[] = []) {
+function useAsync<T>(asyncFn: () => Promise<T>, deps: any[] = []) {
   const [state, setState] = useState<AsyncState<T>>({
     data: null,
     error: null,
     status: 'idle',
   });
 
-  const execute = useCallback(async  => {
+  const execute = useCallback(async () => {
     setState({ data: null, error: null, status: 'loading' });
     try {
-      const data = await asyncFn;
+      const data = await asyncFn();
       setState({ data, error: null, status: 'success' });
     } catch (error) {
       setState({ data: null, error: error as Error, status: 'error' });
     }
   }, deps);
 
-  useEffect( => {
-    execute;
+  useEffect(() => {
+    execute();
   }, [execute]);
 
   return { ...state, refetch: execute };
@@ -173,7 +173,7 @@ function useAsync<T>(asyncFn:  => Promise<T>, deps: any[] = []) {
 // Usage
 function UserProfile({ userId }: { userId: string }) {
   const { data: user, status, error, refetch } = useAsync(
-     => fetchUser(userId),
+    () => fetchUser(userId),
     [userId]
   );
 
@@ -191,20 +191,20 @@ function UserProfile({ userId }: { userId: string }) {
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
-  useEffect( => {
-    const timer = setTimeout( => setDebouncedValue(value), delay);
-    return  => clearTimeout(timer);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
   }, [value, delay]);
 
   return debouncedValue;
 }
 
 // Usage
-function SearchInput {
+function SearchInput() {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 300);
 
-  useEffect( => {
+  useEffect(() => {
     if (debouncedQuery) {
       searchAPI(debouncedQuery);
     }
@@ -218,7 +218,7 @@ function SearchInput {
 
 ```tsx
 function useLocalStorage<T>(key: string, initialValue: T) {
-  const [storedValue, setStoredValue] = useState<T>( => {
+  const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === 'undefined') return initialValue;
     try {
       const item = window.localStorage.getItem(key);
@@ -253,20 +253,20 @@ const [theme, setTheme] = useLocalStorage('theme', 'light');
 function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(false);
 
-  useEffect( => {
+  useEffect(() => {
     const media = window.matchMedia(query);
     setMatches(media.matches);
 
     const listener = (e: MediaQueryListEvent) => setMatches(e.matches);
     media.addEventListener('change', listener);
-    return  => media.removeEventListener('change', listener);
+    return () => media.removeEventListener('change', listener);
   }, [query]);
 
   return matches;
 }
 
 // Usage
-function ResponsiveNav {
+function ResponsiveNav() {
   const isMobile = useMediaQuery('(max-width: 768px)');
   return isMobile ? <MobileNav /> : <DesktopNav />;
 }
@@ -276,9 +276,9 @@ function ResponsiveNav {
 
 ```tsx
 function usePrevious<T>(value: T): T | undefined {
-  const ref = useRef<T>;
+  const ref = useRef<T>();
 
-  useEffect( => {
+  useEffect(() => {
     ref.current = value;
   }, [value]);
 
@@ -286,7 +286,7 @@ function usePrevious<T>(value: T): T | undefined {
 }
 
 // Usage
-function Counter {
+function Counter() {
   const [count, setCount] = useState(0);
   const prevCount = usePrevious(count);
 
@@ -377,7 +377,7 @@ function CartProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, { items: [], total: 0 });
 
   // Compute total whenever items change
-  const stateWithTotal = useMemo( => ({
+  const stateWithTotal = useMemo(() => ({
     ...state,
     total: state.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
   }), [state.items]);
@@ -389,7 +389,7 @@ function CartProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-function useCart {
+function useCart() {
   const context = useContext(CartContext);
   if (!context) throw new Error('useCart must be used within CartProvider');
   return context;
@@ -406,10 +406,10 @@ interface AuthStore {
   user: User | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
-  logout:  => void;
+  logout: () => void;
 }
 
-const useAuthStore = create<AuthStore>(
+const useAuthStore = create<AuthStore>()(
   persist(
     (set) => ({
       user: null,
@@ -418,15 +418,15 @@ const useAuthStore = create<AuthStore>(
         const { user, token } = await authAPI.login(email, password);
         set({ user, token });
       },
-      logout:  => set({ user: null, token: null }),
+      logout: () => set({ user: null, token: null }),
     }),
     { name: 'auth-storage' }
   )
 );
 
 // Usage
-function Profile {
-  const { user, logout } = useAuthStore;
+function Profile() {
+  const { user, logout } = useAuthStore();
   return user ? <div>{user.name} <button onClick={logout}>Logout</button></div> : null;
 }
 ```
@@ -446,7 +446,7 @@ interface ListItemProps {
 const ListItem = React.memo(
   function ListItem({ item, onSelect }: ListItemProps) {
     return (
-      <div onClick={ => onSelect(item.id)}>
+      <div onClick={() => onSelect(item.id)}>
         {item.name} ({item.count})
       </div>
     );
@@ -470,10 +470,10 @@ function DataTable({ data, sortColumn, filterText }: {
   sortColumn: string;
   filterText: string;
 }) {
-  const processedData = useMemo( => {
+  const processedData = useMemo(() => {
     // Filter
     let result = data.filter(item =>
-      item.name.toLowerCase.includes(filterText.toLowerCase)
+      item.name.toLowerCase().includes(filterText.toLowerCase())
     );
 
     // Sort
@@ -499,7 +499,7 @@ function DataTable({ data, sortColumn, filterText }: {
 ### useCallback for Stable References
 
 ```tsx
-function ParentComponent {
+function ParentComponent() {
   const [items, setItems] = useState<Item[]>([]);
 
   // Stable reference - won't cause child re-renders
@@ -532,17 +532,17 @@ function VirtualList({ items }: { items: Item[] }) {
 
   const virtualizer = useVirtualizer({
     count: items.length,
-    getScrollElement:  => parentRef.current,
-    estimateSize:  => 50, // estimated row height
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 50, // estimated row height
     overscan: 5,
   });
 
   return (
     <div ref={parentRef} className="h-[400px] overflow-auto">
       <div
-        style={{ height: `${virtualizer.getTotalSize}px`, position: 'relative' }}
+        style={{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }}
       >
-        {virtualizer.getVirtualItems.map(virtualRow => (
+        {virtualizer.getVirtualItems().map(virtualRow => (
           <div
             key={virtualRow.key}
             style={{
@@ -594,14 +594,14 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
     console.error('Error caught:', error, errorInfo);
   }
 
-  render {
+  render() {
     if (this.state.hasError) {
       return this.props.fallback || (
         <div className="p-4 bg-red-50 border border-red-200 rounded">
           <h2 className="text-red-800 font-bold">Something went wrong</h2>
           <p className="text-red-600">{this.state.error?.message}</p>
           <button
-            onClick={ => this.setState({ hasError: false, error: null })}
+            onClick={() => this.setState({ hasError: false, error: null })}
             className="mt-2 px-4 py-2 bg-red-600 text-white rounded"
           >
             Try Again
@@ -626,7 +626,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 ### Suspense with Error Boundary
 
 ```tsx
-function DataComponent {
+function DataComponent() {
   return (
     <ErrorBoundary fallback={<ErrorMessage />}>
       <Suspense fallback={<LoadingSpinner />}>
@@ -653,7 +653,7 @@ const items = [1, 2, 3];
 <Component style={style} items={items} />
 
 // Or with useMemo for dynamic values
-const style = useMemo( => ({ color: theme.primary }), [theme.primary]);
+const style = useMemo(() => ({ color: theme.primary }), [theme.primary]);
 ```
 
 ### Avoid: Index as Key for Dynamic Lists
@@ -685,7 +685,7 @@ const style = useMemo( => ({ color: theme.primary }), [theme.primary]);
 // GOOD - Use Context
 const UserContext = createContext<User | null>(null);
 
-function App {
+function App() {
   return (
     <UserContext.Provider value={user}>
       <Layout>
@@ -697,7 +697,7 @@ function App {
   );
 }
 
-function UserInfo {
+function UserInfo() {
   const user = useContext(UserContext);
   return <div>{user?.name}</div>;
 }
@@ -730,7 +730,7 @@ const updateUser = (field: string, value: string) => {
 const [items, setItems] = useState<Item[]>([]);
 const [total, setTotal] = useState(0);
 
-useEffect( => {
+useEffect(() => {
   setTotal(items.reduce((sum, item) => sum + item.price, 0));
 }, [items]);
 
@@ -740,7 +740,7 @@ const total = items.reduce((sum, item) => sum + item.price, 0);
 
 // Or useMemo for expensive calculations
 const total = useMemo(
-   => items.reduce((sum, item) => sum + item.price, 0),
+  () => items.reduce((sum, item) => sum + item.price, 0),
   [items]
 );
 ```

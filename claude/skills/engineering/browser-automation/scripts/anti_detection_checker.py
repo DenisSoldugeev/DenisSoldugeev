@@ -60,17 +60,17 @@ class AntiDetectionChecker:
 
     def check_all(self) -> List[Finding]:
         """Run all detection checks."""
-        self._check_headless_mode
-        self._check_user_agent
-        self._check_viewport
-        self._check_webdriver_flag
-        self._check_navigator_properties
-        self._check_request_delays
-        self._check_error_handling
-        self._check_proxy
-        self._check_session_management
-        self._check_browser_close
-        self._check_stealth_imports
+        self._check_headless_mode()
+        self._check_user_agent()
+        self._check_viewport()
+        self._check_webdriver_flag()
+        self._check_navigator_properties()
+        self._check_request_delays()
+        self._check_error_handling()
+        self._check_proxy()
+        self._check_session_management()
+        self._check_browser_close()
+        self._check_stealth_imports()
         return self.findings
 
     def _find_line(self, pattern: str) -> Optional[int]:
@@ -136,7 +136,7 @@ class AntiDetectionChecker:
                 severity="low",
                 description="Custom user agent set but no rotation detected. Single user agent is fingerprint-able at scale.",
                 line=self._find_line(r"user_agent\s*="),
-                recommendation="Rotate through 5-10 recent user agents using random.choice.",
+                recommendation="Rotate through 5-10 recent user agents using random.choice().",
                 weight=SEVERITY_WEIGHTS["low"],
             ))
 
@@ -193,7 +193,7 @@ class AntiDetectionChecker:
                 line=None,
                 recommendation=(
                     "Add init script to remove the flag:\n"
-                    "  await page.add_init_script(\"Object.defineProperty(navigator, 'webdriver', {get:  => undefined});\")"
+                    "  await page.add_init_script(\"Object.defineProperty(navigator, 'webdriver', {get: () => undefined});\")"
                 ),
                 weight=SEVERITY_WEIGHTS["critical"],
             ))
@@ -216,7 +216,7 @@ class AntiDetectionChecker:
         }
 
         overridden_count = 0
-        for prop, (pattern, desc) in checks.items:
+        for prop, (pattern, desc) in checks.items():
             if self._has_pattern(pattern):
                 overridden_count += 1
 
@@ -226,7 +226,7 @@ class AntiDetectionChecker:
                 severity="medium",
                 description="No navigator property hardening detected. Advanced anti-bot services check plugins, languages, and platform properties.",
                 line=None,
-                recommendation="Override navigator.plugins, navigator.languages, and navigator.platform via add_init_script to match realistic browser fingerprints.",
+                recommendation="Override navigator.plugins, navigator.languages, and navigator.platform via add_init_script() to match realistic browser fingerprints.",
                 weight=SEVERITY_WEIGHTS["medium"],
             ))
         elif overridden_count < 3:
@@ -323,7 +323,7 @@ class AntiDetectionChecker:
                 severity="low",
                 description="No session persistence detected. Each run will start fresh, requiring re-authentication.",
                 line=None,
-                recommendation="Use storage_state to save/restore sessions across runs. This avoids repeated logins that may trigger security alerts.",
+                recommendation="Use storage_state() to save/restore sessions across runs. This avoids repeated logins that may trigger security alerts.",
                 weight=SEVERITY_WEIGHTS["low"],
             ))
 
@@ -336,9 +336,9 @@ class AntiDetectionChecker:
             self.findings.append(Finding(
                 category="Resource Cleanup",
                 severity="medium",
-                description="No browser.close or context manager detected. Browser processes will leak on failure.",
+                description="No browser.close() or context manager detected. Browser processes will leak on failure.",
                 line=None,
-                recommendation="Use 'async with async_playwright as p:' or ensure browser.close is in a finally block.",
+                recommendation="Use 'async with async_playwright() as p:' or ensure browser.close() is in a finally block.",
                 weight=SEVERITY_WEIGHTS["medium"],
             ))
 
@@ -363,7 +363,7 @@ class AntiDetectionChecker:
 
     def get_risk_level(self) -> str:
         """Get human-readable risk level."""
-        score = self.get_risk_score
+        score = self.get_risk_score()
         if score <= 10:
             return "LOW"
         elif score <= 30:
@@ -381,8 +381,8 @@ class AntiDetectionChecker:
 
         return {
             "file": self.file_path,
-            "risk_score": self.get_risk_score,
-            "risk_level": self.get_risk_level,
+            "risk_score": self.get_risk_score(),
+            "risk_level": self.get_risk_level(),
             "total_findings": len(self.findings),
             "severity_counts": severity_counts,
             "actionable_findings": len([f for f in self.findings if f.severity != "info"]),
@@ -392,7 +392,7 @@ class AntiDetectionChecker:
 def format_text_report(checker: AntiDetectionChecker, verbose: bool = False) -> str:
     """Format findings as human-readable text."""
     lines = []
-    summary = checker.get_summary
+    summary = checker.get_summary()
 
     lines.append("=" * 60)
     lines.append("  ANTI-DETECTION AUDIT REPORT")
@@ -406,7 +406,7 @@ def format_text_report(checker: AntiDetectionChecker, verbose: bool = False) -> 
     for sev in ["critical", "high", "medium", "low"]:
         count = summary["severity_counts"][sev]
         if count > 0:
-            lines.append(f"  {sev.upper:10s} {count}")
+            lines.append(f"  {sev.upper():10s} {count}")
     lines.append("")
 
     # Findings grouped by severity
@@ -419,7 +419,7 @@ def format_text_report(checker: AntiDetectionChecker, verbose: bool = False) -> 
         if not sev_findings:
             continue
 
-        lines.append(f"--- {sev.upper} ---")
+        lines.append(f"--- {sev.upper()} ---")
         for f in sev_findings:
             line_info = f" (line {f.line})" if f.line else ""
             lines.append(f"  [{f.category}]{line_info}")
@@ -441,7 +441,7 @@ def format_text_report(checker: AntiDetectionChecker, verbose: bool = False) -> 
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Audit a Playwright script for common bot detection vectors.",
         epilog=(
@@ -476,7 +476,7 @@ def main:
         help="Include informational (non-actionable) findings in output",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     file_path = os.path.abspath(args.file)
     if not os.path.isfile(file_path):
@@ -485,20 +485,20 @@ def main:
 
     try:
         with open(file_path, "r", encoding="utf-8") as f:
-            content = f.read
+            content = f.read()
     except Exception as e:
         print(f"Error reading file: {e}", file=sys.stderr)
         sys.exit(2)
 
-    if not content.strip:
+    if not content.strip():
         print("Error: File is empty.", file=sys.stderr)
         sys.exit(2)
 
     checker = AntiDetectionChecker(content, file_path)
-    checker.check_all
+    checker.check_all()
 
     if args.json_output:
-        output = checker.get_summary
+        output = checker.get_summary()
         output["findings"] = [asdict(f) for f in checker.findings]
         if not args.verbose:
             output["findings"] = [f for f in output["findings"] if f["severity"] != "info"]
@@ -507,7 +507,7 @@ def main:
         print(format_text_report(checker, verbose=args.verbose))
 
     # Exit code based on risk
-    score = checker.get_risk_score
+    score = checker.get_risk_score()
     if score <= 10:
         sys.exit(0)
     elif score <= 50:
@@ -517,4 +517,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

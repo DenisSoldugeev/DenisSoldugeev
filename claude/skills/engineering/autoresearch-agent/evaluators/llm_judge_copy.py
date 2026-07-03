@@ -68,7 +68,7 @@ engagement_score: <average of all 5>
 Be harsh. Most copy is mediocre (4-6). Only exceptional copy scores 8+."""
 
 try:
-    content = Path(TARGET_FILE).read_text
+    content = Path(TARGET_FILE).read_text()
 except FileNotFoundError:
     print(f"Target file not found: {TARGET_FILE}", file=sys.stderr)
     sys.exit(1)
@@ -86,8 +86,8 @@ if result.returncode != 0:
 
 output = result.stdout
 found_scores = False
-for line in output.splitlines:
-    line = line.strip
+for line in output.splitlines():
+    line = line.strip()
     if line.startswith("engagement_score:") or line.startswith("criterion_"):
         print(line)
         found_scores = True
@@ -96,10 +96,10 @@ for line in output.splitlines:
 if not found_scores:
     import re
     fallback_scores = []
-    for line in output.splitlines:
-        line = line.strip
+    for line in output.splitlines():
+        line = line.strip()
         match = re.match(r'^(\w[\w\s]*?):\s*(\d+(?:\.\d+)?)\s*$', line)
-        if match and match.group(1).lower not in ("engagement_score",):
+        if match and match.group(1).lower() not in ("engagement_score",):
             fallback_scores.append(float(match.group(2)))
             print(f"criterion_{len(fallback_scores)}: {match.group(2)}")
     if fallback_scores:

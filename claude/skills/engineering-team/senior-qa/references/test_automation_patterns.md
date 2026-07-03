@@ -41,21 +41,21 @@ export class LoginPage {
     this.errorMessage = page.getByRole('alert');
   }
 
-  async goto {
+  async goto() {
     await this.page.goto('/login');
   }
 
   async login(email: string, password: string) {
     await this.emailInput.fill(email);
     await this.passwordInput.fill(password);
-    await this.submitButton.click;
+    await this.submitButton.click();
   }
 
   async expectError(message: string) {
     await expect(this.errorMessage).toContainText(message);
   }
 
-  async expectRedirectToDashboard {
+  async expectRedirectToDashboard() {
     await expect(this.page).toHaveURL('/dashboard');
   }
 }
@@ -68,20 +68,20 @@ export class LoginPage {
 import { test, expect } from '@playwright/test';
 import { LoginPage } from './pages/LoginPage';
 
-test.describe('Authentication',  => {
+test.describe('Authentication', () => {
   let loginPage: LoginPage;
 
   test.beforeEach(async ({ page }) => {
     loginPage = new LoginPage(page);
-    await loginPage.goto;
+    await loginPage.goto();
   });
 
-  test('successful login redirects to dashboard', async  => {
+  test('successful login redirects to dashboard', async () => {
     await loginPage.login('user@example.com', 'password123');
-    await loginPage.expectRedirectToDashboard;
+    await loginPage.expectRedirectToDashboard();
   });
 
-  test('invalid credentials show error', async  => {
+  test('invalid credentials show error', async () => {
     await loginPage.login('user@example.com', 'wrongpassword');
     await loginPage.expectError('Invalid credentials');
   });
@@ -96,19 +96,19 @@ import { screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 export class LoginFormObject {
-  get emailInput {
+  get emailInput() {
     return screen.getByLabelText(/email/i);
   }
 
-  get passwordInput {
+  get passwordInput() {
     return screen.getByLabelText(/password/i);
   }
 
-  get submitButton {
+  get submitButton() {
     return screen.getByRole('button', { name: /sign in/i });
   }
 
-  get errorMessage {
+  get errorMessage() {
     return screen.queryByRole('alert');
   }
 
@@ -120,18 +120,18 @@ export class LoginFormObject {
     await userEvent.type(this.passwordInput, password);
   }
 
-  async submit {
+  async submit() {
     await userEvent.click(this.submitButton);
   }
 
   async login(email: string, password: string) {
     await this.fillEmail(email);
     await this.fillPassword(password);
-    await this.submit;
+    await this.submit();
   }
 
   async expectError(message: string) {
-    await waitFor( => {
+    await waitFor(() => {
       expect(this.errorMessage).toHaveTextContent(message);
     });
   }
@@ -256,31 +256,31 @@ export class OrderBuilder {
     return this;
   }
 
-  build: Order {
+  build(): Order {
     const total = this.items.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     );
 
     return {
-      id: this.order.id || `order-${Date.now}`,
+      id: this.order.id || `order-${Date.now()}`,
       userId: this.order.userId || 'user-1',
       items: this.items,
       status: this.order.status || 'pending',
       total,
-      shippingAddress: this.order.shippingAddress || createAddress,
-      createdAt: new Date,
+      shippingAddress: this.order.shippingAddress || createAddress(),
+      createdAt: new Date(),
     };
   }
 }
 
 // Usage
-const order = new OrderBuilder
+const order = new OrderBuilder()
   .forUser('user-123')
   .withItem('product-1', 2, 29.99)
   .withItem('product-2', 1, 49.99)
   .withStatus('processing')
-  .build;
+  .build();
 ```
 
 ### Factory with Faker
@@ -301,19 +301,19 @@ interface Product {
 
 export function createProduct(overrides: Partial<Product> = {}): Product {
   return {
-    id: faker.string.uuid,
-    name: faker.commerce.productName,
-    description: faker.commerce.productDescription,
+    id: faker.string.uuid(),
+    name: faker.commerce.productName(),
+    description: faker.commerce.productDescription(),
     price: parseFloat(faker.commerce.price({ min: 10, max: 500 })),
-    category: faker.commerce.department,
+    category: faker.commerce.department(),
     inStock: faker.datatype.boolean({ probability: 0.8 }),
-    imageUrl: faker.image.url,
+    imageUrl: faker.image.url(),
     ...overrides,
   };
 }
 
 export function createProducts(count: number): Product[] {
-  return Array.from({ length: count },  => createProduct);
+  return Array.from({ length: count }, () => createProduct());
 }
 ```
 
@@ -338,7 +338,7 @@ interface AuthFixtures {
 
 export const test = base.extend<AuthFixtures>({
   testUser: async ({}, use) => {
-    const user = createUser;
+    const user = createUser();
     await use(user);
   },
 
@@ -352,8 +352,8 @@ export const test = base.extend<AuthFixtures>({
     });
 
     // Get session cookie
-    const cookies = await page.context.cookies;
-    await page.context.addCookies(cookies);
+    const cookies = await page.context().cookies();
+    await page.context().addCookies(cookies);
 
     await use(page);
   },
@@ -383,12 +383,12 @@ import { test, expect } from './fixtures/auth';
 
 test('dashboard shows user name', async ({ authenticatedPage, testUser }) => {
   await authenticatedPage.goto('/dashboard');
-  await expect(authenticatedPage.getByText(testUser.name)).toBeVisible;
+  await expect(authenticatedPage.getByText(testUser.name)).toBeVisible();
 });
 
 test('admin sees admin panel', async ({ adminPage }) => {
   await adminPage.goto('/dashboard');
-  await expect(adminPage.getByText('Admin Panel')).toBeVisible;
+  await expect(adminPage.getByText('Admin Panel')).toBeVisible();
 });
 ```
 
@@ -400,35 +400,35 @@ import '@testing-library/jest-dom';
 import { server } from './__tests__/mocks/server';
 
 // Start MSW server before all tests
-beforeAll( => server.listen({ onUnhandledRequest: 'error' }));
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 
 // Reset handlers after each test
-afterEach( => server.resetHandlers);
+afterEach(() => server.resetHandlers());
 
 // Clean up after all tests
-afterAll( => server.close);
+afterAll(() => server.close());
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn.mockImplementation(query => ({
+  value: jest.fn().mockImplementation(query => ({
     matches: false,
     media: query,
     onchange: null,
-    addListener: jest.fn,
-    removeListener: jest.fn,
-    addEventListener: jest.fn,
-    removeEventListener: jest.fn,
-    dispatchEvent: jest.fn,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
   })),
 });
 
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
-  constructor {}
-  observe {}
-  unobserve {}
-  disconnect {}
+  constructor() {}
+  observe() {}
+  unobserve() {}
+  disconnect() {}
 };
 ```
 
@@ -490,7 +490,7 @@ export const handlers = [
   // GET /api/products
   rest.get('/api/products', (req, res, ctx) => {
     const category = req.url.searchParams.get('category');
-    const products = Array.from({ length: 10 },  => createProduct);
+    const products = Array.from({ length: 10 }, () => createProduct());
     const filtered = category
       ? products.filter(p => p.category === category)
       : products;
@@ -499,11 +499,11 @@ export const handlers = [
 
   // POST /api/orders
   rest.post('/api/orders', async (req, res, ctx) => {
-    const body = await req.json;
+    const body = await req.json();
     return res(
       ctx.status(201),
       ctx.json({
-        id: `order-${Date.now}`,
+        id: `order-${Date.now()}`,
         ...body,
         status: 'pending',
       })
@@ -539,20 +539,20 @@ import { rest } from 'msw';
 import { server } from '../mocks/server';
 import { ProductList } from '../../src/components/ProductList';
 
-describe('ProductList',  => {
-  it('shows loading state',  => {
+describe('ProductList', () => {
+  it('shows loading state', () => {
     render(<ProductList />);
-    expect(screen.getByText('Loading...')).toBeInTheDocument;
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
-  it('renders products', async  => {
+  it('renders products', async () => {
     render(<ProductList />);
-    await waitFor( => {
+    await waitFor(() => {
       expect(screen.getAllByTestId('product-card')).toHaveLength(10);
     });
   });
 
-  it('shows error state on API failure', async  => {
+  it('shows error state on API failure', async () => {
     server.use(
       rest.get('/api/products', (req, res, ctx) => {
         return res(ctx.status(500));
@@ -560,12 +560,12 @@ describe('ProductList',  => {
     );
 
     render(<ProductList />);
-    await waitFor( => {
-      expect(screen.getByText(/error loading products/i)).toBeInTheDocument;
+    await waitFor(() => {
+      expect(screen.getByText(/error loading products/i)).toBeInTheDocument();
     });
   });
 
-  it('shows empty state when no products', async  => {
+  it('shows empty state when no products', async () => {
     server.use(
       rest.get('/api/products', (req, res, ctx) => {
         return res(ctx.json([]));
@@ -573,8 +573,8 @@ describe('ProductList',  => {
     );
 
     render(<ProductList />);
-    await waitFor( => {
-      expect(screen.getByText('No products found')).toBeInTheDocument;
+    await waitFor(() => {
+      expect(screen.getByText('No products found')).toBeInTheDocument();
     });
   });
 });
@@ -584,26 +584,26 @@ describe('ProductList',  => {
 
 ```typescript
 // Mocking a module
-jest.mock('../../src/services/analytics',  => ({
-  trackEvent: jest.fn,
-  trackPageView: jest.fn,
-  setUser: jest.fn,
+jest.mock('../../src/services/analytics', () => ({
+  trackEvent: jest.fn(),
+  trackPageView: jest.fn(),
+  setUser: jest.fn(),
 }));
 
 // Mocking with implementation
-jest.mock('next/router',  => ({
-  useRouter: jest.fn.mockReturnValue({
+jest.mock('next/router', () => ({
+  useRouter: jest.fn().mockReturnValue({
     pathname: '/test',
-    push: jest.fn,
-    replace: jest.fn,
+    push: jest.fn(),
+    replace: jest.fn(),
     query: {},
   }),
 }));
 
 // Partial mock (keep some real implementations)
-jest.mock('../../src/utils/helpers',  => ({
+jest.mock('../../src/utils/helpers', () => ({
   ...jest.requireActual('../../src/utils/helpers'),
-  sendEmail: jest.fn.mockResolvedValue({ success: true }),
+  sendEmail: jest.fn().mockResolvedValue({ success: true }),
 }));
 ```
 
@@ -619,18 +619,18 @@ jest.mock('../../src/services/auth');
 
 const mockAuthService = authService as jest.Mocked<typeof authService>;
 
-describe('useAuth',  => {
-  beforeEach( => {
-    jest.clearAllMocks;
+describe('useAuth', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('logs in user successfully', async  => {
+  it('logs in user successfully', async () => {
     const mockUser = { id: '1', email: 'test@example.com' };
     mockAuthService.login.mockResolvedValue(mockUser);
 
-    const { result } = renderHook( => useAuth);
+    const { result } = renderHook(() => useAuth());
 
-    await act(async  => {
+    await act(async () => {
       await result.current.login('test@example.com', 'password');
     });
 
@@ -638,12 +638,12 @@ describe('useAuth',  => {
     expect(result.current.isAuthenticated).toBe(true);
   });
 
-  it('handles login error', async  => {
+  it('handles login error', async () => {
     mockAuthService.login.mockRejectedValue(new Error('Invalid credentials'));
 
-    const { result } = renderHook( => useAuth);
+    const { result } = renderHook(() => useAuth());
 
-    await act(async  => {
+    await act(async () => {
       try {
         await result.current.login('test@example.com', 'wrong');
       } catch (e) {
@@ -651,7 +651,7 @@ describe('useAuth',  => {
       }
     });
 
-    expect(result.current.user).toBeNull;
+    expect(result.current.user).toBeNull();
     expect(result.current.error).toBe('Invalid credentials');
   });
 });
@@ -723,19 +723,19 @@ import { render, screen } from '../utils/renderWithProviders';
 import { Dashboard } from '../../src/components/Dashboard';
 import { createUser } from '../factories/userFactory';
 
-describe('Dashboard',  => {
-  it('shows user greeting when authenticated',  => {
+describe('Dashboard', () => {
+  it('shows user greeting when authenticated', () => {
     const user = createUser({ name: 'John Doe' });
     render(<Dashboard />, { initialUser: user });
-    expect(screen.getByText('Hello, John Doe')).toBeInTheDocument;
+    expect(screen.getByText('Hello, John Doe')).toBeInTheDocument();
   });
 
-  it('shows login prompt when not authenticated',  => {
+  it('shows login prompt when not authenticated', () => {
     render(<Dashboard />, { initialUser: null });
-    expect(screen.getByText('Please log in')).toBeInTheDocument;
+    expect(screen.getByText('Please log in')).toBeInTheDocument();
   });
 
-  it('applies dark theme',  => {
+  it('applies dark theme', () => {
     render(<Dashboard />, { theme: 'dark' });
     expect(document.body).toHaveClass('dark');
   });
@@ -750,16 +750,16 @@ import { expect } from '@playwright/test';
 
 expect.extend({
   async toHaveLoadedSuccessfully(page) {
-    const hasNoErrors = await page.evaluate( => {
+    const hasNoErrors = await page.evaluate(() => {
       return !document.querySelector('[data-error]');
     });
-    const isLoaded = await page.evaluate( => {
+    const isLoaded = await page.evaluate(() => {
       return document.readyState === 'complete';
     });
 
     return {
       pass: hasNoErrors && isLoaded,
-      message:  =>
+      message: () =>
         hasNoErrors
           ? 'Page loaded with errors'
           : 'Page did not finish loading',
@@ -770,7 +770,7 @@ expect.extend({
     const pass = received >= floor && received <= ceiling;
     return {
       pass,
-      message:  =>
+      message: () =>
         `expected ${received} ${pass ? 'not ' : ''}to be within range ${floor} - ${ceiling}`,
     };
   },
@@ -780,7 +780,7 @@ expect.extend({
 declare global {
   namespace PlaywrightTest {
     interface Matchers<R> {
-      toHaveLoadedSuccessfully: Promise<R>;
+      toHaveLoadedSuccessfully(): Promise<R>;
     }
   }
 }
@@ -797,17 +797,17 @@ declare global {
 const element = await screen.findByText('Loaded');
 
 // Wait for element to appear
-await waitFor( => {
-  expect(screen.getByText('Loaded')).toBeInTheDocument;
+await waitFor(() => {
+  expect(screen.getByText('Loaded')).toBeInTheDocument();
 });
 
 // Wait for element to disappear
-await waitForElementToBeRemoved( => screen.queryByText('Loading...'));
+await waitForElementToBeRemoved(() => screen.queryByText('Loading...'));
 
 // Wait with custom timeout
 await waitFor(
-   => {
-    expect(mockFn).toHaveBeenCalled;
+  () => {
+    expect(mockFn).toHaveBeenCalled();
   },
   { timeout: 5000 }
 );
@@ -821,28 +821,28 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AsyncButton } from '../../src/components/AsyncButton';
 
-describe('AsyncButton',  => {
-  it('shows loading state during async operation', async  => {
-    const user = userEvent.setup;
-    const onClickMock = jest.fn.mockImplementation(
-       => new Promise(resolve => setTimeout(resolve, 100))
+describe('AsyncButton', () => {
+  it('shows loading state during async operation', async () => {
+    const user = userEvent.setup();
+    const onClickMock = jest.fn().mockImplementation(
+      () => new Promise(resolve => setTimeout(resolve, 100))
     );
 
     render(<AsyncButton onClick={onClickMock}>Submit</AsyncButton>);
 
     // Initial state
     expect(screen.getByRole('button')).toHaveTextContent('Submit');
-    expect(screen.getByRole('button')).not.toBeDisabled;
+    expect(screen.getByRole('button')).not.toBeDisabled();
 
     // Click and verify loading state
     await user.click(screen.getByRole('button'));
     expect(screen.getByRole('button')).toHaveTextContent('Loading...');
-    expect(screen.getByRole('button')).toBeDisabled;
+    expect(screen.getByRole('button')).toBeDisabled();
 
     // Wait for completion
-    await waitFor( => {
+    await waitFor(() => {
       expect(screen.getByRole('button')).toHaveTextContent('Submit');
-      expect(screen.getByRole('button')).not.toBeDisabled;
+      expect(screen.getByRole('button')).not.toBeDisabled();
     });
   });
 });
@@ -857,12 +857,12 @@ import userEvent from '@testing-library/user-event';
 import { SearchInput } from '../../src/components/SearchInput';
 
 // Use fake timers for debounce testing
-jest.useFakeTimers;
+jest.useFakeTimers();
 
-describe('SearchInput',  => {
-  it('debounces search calls', async  => {
+describe('SearchInput', () => {
+  it('debounces search calls', async () => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    const onSearchMock = jest.fn;
+    const onSearchMock = jest.fn();
 
     render(<SearchInput onSearch={onSearchMock} debounceMs={300} />);
 
@@ -870,7 +870,7 @@ describe('SearchInput',  => {
     await user.type(screen.getByRole('textbox'), 'test');
 
     // No calls yet (debouncing)
-    expect(onSearchMock).not.toHaveBeenCalled;
+    expect(onSearchMock).not.toHaveBeenCalled();
 
     // Advance timers past debounce threshold
     jest.advanceTimersByTime(300);
@@ -893,7 +893,7 @@ test('waits for API response', async ({ page }) => {
   const responsePromise = page.waitForResponse('/api/data');
   await page.click('button.load-data');
   const response = await responsePromise;
-  expect(response.status).toBe(200);
+  expect(response.status()).toBe(200);
 });
 
 test('waits for navigation', async ({ page }) => {
@@ -934,26 +934,26 @@ test('retries assertion until pass', async ({ page }) => {
 import { render } from '@testing-library/react';
 import { Button } from '../../src/components/Button';
 
-describe('Button snapshots',  => {
-  it('renders primary variant',  => {
+describe('Button snapshots', () => {
+  it('renders primary variant', () => {
     const { container } = render(
       <Button variant="primary">Click me</Button>
     );
-    expect(container.firstChild).toMatchSnapshot;
+    expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('renders secondary variant',  => {
+  it('renders secondary variant', () => {
     const { container } = render(
       <Button variant="secondary">Click me</Button>
     );
-    expect(container.firstChild).toMatchSnapshot;
+    expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('renders disabled state',  => {
+  it('renders disabled state', () => {
     const { container } = render(
       <Button disabled>Click me</Button>
     );
-    expect(container.firstChild).toMatchSnapshot;
+    expect(container.firstChild).toMatchSnapshot();
   });
 });
 ```
@@ -962,12 +962,12 @@ describe('Button snapshots',  => {
 
 ```typescript
 // Good for small, stable outputs
-it('formats date correctly',  => {
+it('formats date correctly', () => {
   const result = formatDate(new Date('2024-01-15'));
   expect(result).toMatchInlineSnapshot(`"January 15, 2024"`);
 });
 
-it('generates expected error message',  => {
+it('generates expected error message', () => {
   const error = new ValidationError('email', 'Invalid format');
   expect(error.message).toMatchInlineSnapshot(
     `"Validation failed for 'email': Invalid format"`
@@ -985,15 +985,15 @@ it('generates expected error message',  => {
 
 ```typescript
 // Filtering dynamic content from snapshots
-it('renders user card',  => {
+it('renders user card', () => {
   const { container } = render(<UserCard user={mockUser} />);
 
   // Remove dynamic elements before snapshot
   const card = container.firstChild;
   const timestamp = card.querySelector('.timestamp');
-  timestamp?.remove;
+  timestamp?.remove();
 
-  expect(card).toMatchSnapshot;
+  expect(card).toMatchSnapshot();
 });
 ```
 

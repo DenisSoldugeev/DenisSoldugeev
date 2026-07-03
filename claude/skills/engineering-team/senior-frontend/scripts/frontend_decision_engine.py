@@ -32,7 +32,7 @@ from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Any
 
-SCRIPT_DIR = Path(__file__).resolve.parent
+SCRIPT_DIR = Path(__file__).resolve().parent
 PROFILES_DIR = SCRIPT_DIR.parent / "profiles"
 
 
@@ -77,12 +77,12 @@ class Match:
     profile_data: dict[str, Any] = field(default_factory=dict)
 
 
-def load_profiles -> dict[str, dict[str, Any]]:
+def load_profiles() -> dict[str, dict[str, Any]]:
     profiles: dict[str, dict[str, Any]] = {}
-    if not PROFILES_DIR.exists:
+    if not PROFILES_DIR.exists():
         return profiles
     for p in sorted(PROFILES_DIR.glob("*.json")):
-        with p.open as f:
+        with p.open() as f:
             data = json.load(f)
         profiles[data.get("profile_name", p.stem)] = data
     return profiles
@@ -137,7 +137,7 @@ def score_profile(profile: dict[str, Any], inputs: Inputs) -> Match:
 
 
 def rank(profiles: dict[str, dict[str, Any]], inputs: Inputs) -> list[Match]:
-    matches = [score_profile(p, inputs) for p in profiles.values]
+    matches = [score_profile(p, inputs) for p in profiles.values()]
     matches.sort(key=lambda m: m.score, reverse=True)
     return matches
 
@@ -148,7 +148,7 @@ def render_markdown(inputs: Inputs, matches: list[Match], kills: list[str]) -> s
     L.append("")
     L.append("## Inputs (your assumptions, Karpathy #1)")
     L.append("")
-    for k, v in asdict(inputs).items:
+    for k, v in asdict(inputs).items():
         L.append(f"- **{k}**: `{v}`")
     L.append("")
     if kills:
@@ -193,14 +193,14 @@ def render_markdown(inputs: Inputs, matches: list[Match], kills: list[str]) -> s
     if anti:
         L.append("## Anti-patterns (DO NOT introduce on this profile)")
         L.append("")
-        for k, v in anti.items:
+        for k, v in anti.items():
             L.append(f"- **{k}** — {v}")
         L.append("")
     thresh = top.profile_data.get("success_thresholds", {})
     if thresh:
         L.append("## Verifiable success criteria (Karpathy #4)")
         L.append("")
-        for k, v in thresh.items:
+        for k, v in thresh.items():
             L.append(f"- `{k}` = {v}")
         L.append("")
     gates = top.profile_data.get("ci_gates", [])
@@ -246,7 +246,7 @@ def render_json(inputs: Inputs, matches: list[Match], kills: list[str]) -> str:
     )
 
 
-def build_parser -> argparse.ArgumentParser:
+def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         description="Deterministic frontend framework + rendering picker. Surfaces tradeoffs + bundle budget + anti-patterns. Never auto-approves.",
         epilog="See ../references/forcing_questions.md for the 7-question grill.",
@@ -269,15 +269,15 @@ def build_parser -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = build_parser
+    parser = build_parser()
     args = parser.parse_args(argv)
-    profiles = load_profiles
+    profiles = load_profiles()
 
     if args.list_profiles:
         if not profiles:
             print("No profiles found in", PROFILES_DIR, file=sys.stderr)
             return 1
-        for name, data in profiles.items:
+        for name, data in profiles.items():
             print(f"{name}: {data.get('description', '')[:120]}")
         return 0
 
@@ -314,7 +314,7 @@ def main(argv: list[str] | None = None) -> int:
             inp_target_ms=args.inp_target_ms,
         )
 
-    kills = inputs.kill_criteria_check
+    kills = inputs.kill_criteria_check()
     matches = rank(profiles, inputs)
     if args.output == "json":
         print(render_json(inputs, matches, kills))
@@ -324,4 +324,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

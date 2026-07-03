@@ -1,6 +1,6 @@
 ---
 name: "cro-review"
-description: "/ds:cro-review <plan> — Pipeline-paranoid interrogation of revenue, win rate, NRR, and ramp time."
+description: "/ds:cro-review <plan> — Pipeline-paranoid interrogation of revenue, win rate, NRR, and ramp time. Use when the forecast misses pipeline coverage, win rates drop, or before scaling the sales team."
 ---
 
 # /ds:cro-review — CRO Forcing Questions
@@ -52,8 +52,8 @@ The pipeline-paranoid operator pressure-tests revenue assumptions. Six questions
 ## Workflow
 
 ```bash
-python ../../../skills/cro-advisor/scripts/revenue_forecast_model.py
-python ../../../skills/cro-advisor/scripts/churn_analyzer.py
+python ../../../cro-advisor/scripts/revenue_forecast_model.py
+python ../../../cro-advisor/scripts/churn_analyzer.py
 ```
 
 ## Output Format

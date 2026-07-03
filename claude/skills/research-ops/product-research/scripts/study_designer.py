@@ -118,7 +118,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--sample", action="store_true", help="use the embedded sample")
     args = p.parse_args(argv)
 
-    conf = _cfg.load_config if _cfg else {}
+    conf = _cfg.load_config() if _cfg else {}
     profile_default = conf.get("default_profile", "b2b-saas")
     goal, stage, profile = ("discovery", "prototype", profile_default) if args.sample \
         else (args.goal, args.stage, args.profile or profile_default)
@@ -136,4 +136,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -6,7 +6,7 @@ PreToolUse hook that checks Edit/Write/MultiEdit operations for security
 anti-patterns and emits a structured warning before the tool runs.
 
 Ported from David Dworken's MIT-licensed plugin at:
-  
+  /aeo-box/blob/main/.claude/plugins/security-guidance/
 
 Modifications from upstream:
   - Verbatim pattern table preserved (12 patterns)
@@ -27,13 +27,13 @@ from datetime import datetime
 from pathlib import Path
 
 # Debug log location (moved to ~/.claude/ for persistence)
-DEBUG_LOG_FILE = str(Path.home / ".claude" / "security-warnings-log.txt")
+DEBUG_LOG_FILE = str(Path.home() / ".claude" / "security-warnings-log.txt")
 
 
 def debug_log(message):
     """Append debug message to log file with timestamp."""
     try:
-        timestamp = datetime.now.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         Path(DEBUG_LOG_FILE).parent.mkdir(parents=True, exist_ok=True)
         with open(DEBUG_LOG_FILE, "a") as f:
             f.write(f"[{timestamp}] {message}\n")
@@ -87,7 +87,7 @@ Other risky inputs to be careful with:
     {
         "ruleName": "child_process_exec",
         "substrings": ["child_process.exec", "exec(", "execSync("],
-        "reminder": """⚠️ Security Warning: Using child_process.exec can lead to command injection vulnerabilities.
+        "reminder": """⚠️ Security Warning: Using child_process.exec() can lead to command injection vulnerabilities.
 
 Instead of:
   exec(`command ${userInput}`)
@@ -100,17 +100,17 @@ execFile (or spawn with shell:false):
 - Handles arguments as a list (no interpolation)
 - Recommended whenever you don't actually need shell features
 
-Only use exec if you absolutely need shell features AND the input is guaranteed to be safe (e.g., from a hardcoded allowlist).""",
+Only use exec() if you absolutely need shell features AND the input is guaranteed to be safe (e.g., from a hardcoded allowlist).""",
     },
     {
         "ruleName": "new_function_injection",
         "substrings": ["new Function"],
-        "reminder": "⚠️ Security Warning: Using new Function with dynamic strings can lead to code injection vulnerabilities. Consider alternative approaches that don't evaluate arbitrary code. Only use new Function if you truly need to evaluate arbitrary dynamic code.",
+        "reminder": "⚠️ Security Warning: Using new Function() with dynamic strings can lead to code injection vulnerabilities. Consider alternative approaches that don't evaluate arbitrary code. Only use new Function() if you truly need to evaluate arbitrary dynamic code.",
     },
     {
         "ruleName": "eval_injection",
         "substrings": ["eval("],
-        "reminder": "⚠️ Security Warning: eval executes arbitrary code and is a major security risk. Consider using JSON.parse for data parsing or alternative design patterns that don't require code evaluation. Only use eval if you truly need to evaluate arbitrary code.",
+        "reminder": "⚠️ Security Warning: eval() executes arbitrary code and is a major security risk. Consider using JSON.parse() for data parsing or alternative design patterns that don't require code evaluation. Only use eval() if you truly need to evaluate arbitrary code.",
     },
     {
         "ruleName": "react_dangerously_set_html",
@@ -120,7 +120,7 @@ Only use exec if you absolutely need shell features AND the input is guaranteed 
     {
         "ruleName": "document_write_xss",
         "substrings": ["document.write"],
-        "reminder": "⚠️ Security Warning: document.write can be exploited for XSS attacks and has performance issues. Use DOM manipulation methods like createElement and appendChild instead.",
+        "reminder": "⚠️ Security Warning: document.write() can be exploited for XSS attacks and has performance issues. Use DOM manipulation methods like createElement() and appendChild() instead.",
     },
     {
         "ruleName": "innerHTML_xss",
@@ -145,12 +145,12 @@ Only use exec if you absolutely need shell features AND the input is guaranteed 
     {
         "ruleName": "sql_format_string",
         "substrings": [".format(", "f\"SELECT", "f'SELECT", "f\"INSERT", "f'INSERT", "f\"UPDATE", "f'UPDATE", "f\"DELETE", "f'DELETE"],
-        "reminder": "⚠️ Security Warning: Building SQL queries with .format or f-strings can lead to SQL injection. Use parameterized queries (cursor.execute(sql, params)) or an ORM. Only inline values if they come from a trusted, validated source.",
+        "reminder": "⚠️ Security Warning: Building SQL queries with .format() or f-strings can lead to SQL injection. Use parameterized queries (cursor.execute(sql, params)) or an ORM. Only inline values if they come from a trusted, validated source.",
     },
     {
         "ruleName": "yaml_unsafe_load",
         "substrings": ["yaml.load(", "yaml.unsafe_load"],
-        "reminder": "⚠️ Security Warning: yaml.load without Loader= or yaml.unsafe_load can execute arbitrary code. Use yaml.safe_load instead, which only parses standard YAML types.",
+        "reminder": "⚠️ Security Warning: yaml.load() without Loader= or yaml.unsafe_load() can execute arbitrary code. Use yaml.safe_load() instead, which only parses standard YAML types.",
     },
 ]
 
@@ -160,14 +160,14 @@ def get_state_file(session_id):
     return os.path.expanduser(f"~/.claude/security_warnings_state_{session_id}.json")
 
 
-def cleanup_old_state_files:
+def cleanup_old_state_files():
     """Remove state files older than 30 days."""
     try:
         state_dir = os.path.expanduser("~/.claude")
         if not os.path.exists(state_dir):
             return
 
-        current_time = datetime.now.timestamp
+        current_time = datetime.now().timestamp()
         thirty_days_ago = current_time - (30 * 24 * 60 * 60)
 
         for filename in os.listdir(state_dir):
@@ -191,8 +191,8 @@ def load_state(session_id):
             with open(state_file, "r") as f:
                 return set(json.load(f))
         except (json.JSONDecodeError, IOError):
-            return set
-    return set
+            return set()
+    return set()
 
 
 def save_state(session_id, shown_warnings):
@@ -239,19 +239,19 @@ def extract_content_from_input(tool_name, tool_input):
     return ""
 
 
-def main:
+def main():
     """Main hook function."""
     # Check if security reminders are enabled
     if os.environ.get("ENABLE_SECURITY_REMINDER", "1") == "0":
         sys.exit(0)
 
     # Periodically clean up old state files (10% chance per run)
-    if random.random < 0.1:
-        cleanup_old_state_files
+    if random.random() < 0.1:
+        cleanup_old_state_files()
 
     # Read hook input from stdin
     try:
-        input_data = json.loads(sys.stdin.read)
+        input_data = json.loads(sys.stdin.read())
     except json.JSONDecodeError as e:
         debug_log(f"JSON decode error: {e}")
         sys.exit(0)
@@ -288,4 +288,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

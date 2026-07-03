@@ -101,7 +101,7 @@ DEMO_CHECKS = [
 def get_weights(industry=None):
     weights = dict(DEFAULT_WEIGHTS)
     if industry and industry in INDUSTRY_ADJUSTMENTS:
-        for cat, adj in INDUSTRY_ADJUSTMENTS[industry].items:
+        for cat, adj in INDUSTRY_ADJUSTMENTS[industry].items():
             weights[cat] = weights.get(cat, 0) + adj
     return weights
 
@@ -110,18 +110,18 @@ def score_checks(checks, industry=None):
     weights = get_weights(industry)
     by_category = defaultdict(list)
     for c in checks:
-        cat = c.get("category", "other").lower.replace("-", "_").replace(" ", "_")
+        cat = c.get("category", "other").lower().replace("-", "_").replace(" ", "_")
         by_category[cat].append(c)
 
     category_scores = {}
     all_findings = []
 
-    for cat, cat_checks in by_category.items:
+    for cat, cat_checks in by_category.items():
         if not cat_checks:
             continue
         total = 0.0
         for check in cat_checks:
-            result = check.get("result", "fail").lower
+            result = check.get("result", "fail").lower()
             total += RESULT_SCORES.get(result, 0.0)
             if result != "pass":
                 all_findings.append({
@@ -137,7 +137,7 @@ def score_checks(checks, industry=None):
     # Weighted overall score
     overall = 0.0
     total_weight = 0.0
-    for cat, weight in weights.items:
+    for cat, weight in weights.items():
         if cat in category_scores:
             overall += category_scores[cat] * weight
             total_weight += weight
@@ -169,7 +169,7 @@ def score_checks(checks, industry=None):
         "overall_score": round(overall, 1),
         "grade": grade,
         "industry": industry or "general",
-        "weights_used": {k: round(v, 2) for k, v in weights.items},
+        "weights_used": {k: round(v, 2) for k, v in weights.items()},
         "category_scores": category_scores,
         "total_checks": len(checks),
         "passed": sum(1 for c in checks if c.get("result") == "pass"),
@@ -190,32 +190,32 @@ def print_report(result):
     print(f"SEO Health Score: {result['overall_score']}/100 (Grade: {result['grade']})")
     print(f"Industry profile: {result['industry']}")
     print(f"Checks: {result['total_checks']} total — {result['passed']} pass, {result['warnings']} warn, {result['failures']} fail")
-    print
+    print()
 
     print("Category Breakdown:")
-    for cat, score in sorted(result["category_scores"].items):
+    for cat, score in sorted(result["category_scores"].items()):
         weight = result["weights_used"].get(cat, 0)
         bar = "█" * int(score / 5) + "░" * (20 - int(score / 5))
         print(f"  {cat:15s} {bar} {score:5.1f}/100 (weight {weight:.0%})")
-    print
+    print()
 
     if result["quick_wins"]:
         print(f"Quick Wins ({len(result['quick_wins'])}):")
         for f in result["quick_wins"]:
-            print(f"  ⚡ [{f['severity'].upper}] {f['check']}: {f['detail']}")
-        print
+            print(f"  ⚡ [{f['severity'].upper()}] {f['check']}: {f['detail']}")
+        print()
 
     for level in ("critical", "high", "medium", "low"):
         items = result["action_plan"][level]
         if items:
-            print(f"{level.upper} ({len(items)}):")
+            print(f"{level.upper()} ({len(items)}):")
             for f in items:
                 detail = f" — {f['detail']}" if f["detail"] else ""
-                print(f"  [{f['result'].upper}] {f['check']}{detail}")
-            print
+                print(f"  [{f['result'].upper()}] {f['check']}{detail}")
+            print()
 
 
-def main:
+def main():
     p = argparse.ArgumentParser(
         description="Compute a weighted 0-100 SEO health score across 7 categories.",
         epilog="Run with --demo to see a sample report. Provide checks as JSON for real audits.",
@@ -229,18 +229,18 @@ def main:
     )
     p.add_argument("--json", action="store_true", help="JSON output")
     p.add_argument("--demo", action="store_true", help="Run with demo data")
-    args = p.parse_args
+    args = p.parse_args()
 
     if args.demo:
         checks = DEMO_CHECKS
     elif args.checks:
         path = Path(args.checks)
-        if not path.exists:
+        if not path.exists():
             print(f"[error] {path} not found", file=sys.stderr)
             sys.exit(1)
         checks = json.loads(path.read_text(encoding="utf-8"))
     else:
-        p.print_help
+        p.print_help()
         sys.exit(0)
 
     result = score_checks(checks, industry=args.industry)
@@ -252,4 +252,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

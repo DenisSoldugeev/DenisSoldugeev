@@ -23,7 +23,7 @@ DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".grow
 
 
 def get_data_file(handle: str) -> str:
-    clean = handle.lstrip("@").lower
+    clean = handle.lstrip("@").lower()
     os.makedirs(DATA_DIR, exist_ok=True)
     return os.path.join(DATA_DIR, f"{clean}.jsonl")
 
@@ -31,7 +31,7 @@ def get_data_file(handle: str) -> str:
 def record_snapshot(handle: str, followers: int, following: int = 0,
                     eng_rate: float = 0, posts_week: float = 0, notes: str = ""):
     entry = {
-        "timestamp": datetime.now.isoformat,
+        "timestamp": datetime.now().isoformat(),
         "handle": handle,
         "followers": followers,
         "following": following,
@@ -55,11 +55,11 @@ def load_snapshots(handle: str, period_days: int = 0) -> list:
     entries = []
     cutoff = None
     if period_days > 0:
-        cutoff = datetime.now - timedelta(days=period_days)
+        cutoff = datetime.now() - timedelta(days=period_days)
 
     with open(filepath) as f:
         for line in f:
-            line = line.strip
+            line = line.strip()
             if not line:
                 continue
             entry = json.loads(line)
@@ -137,7 +137,7 @@ def project_milestone(handle: str, entries: list, target: int) -> dict:
 
     remaining = target - current
     days_needed = remaining / daily_growth
-    target_date = datetime.now + timedelta(days=days_needed)
+    target_date = datetime.now() + timedelta(days=days_needed)
 
     return {
         "handle": handle,
@@ -158,7 +158,7 @@ def print_report(report: dict):
     if "error" in report:
         print(f"\n  ⚠️  {report['error']}")
         print(f"  Record data first: python3 growth_tracker.py --record --handle {report['handle']} --followers N")
-        print
+        print()
         return
 
     print(f"\n  Current followers:    {report['current_followers']:,}")
@@ -182,7 +182,7 @@ def print_report(report: dict):
     print(f"\n{'='*60}\n")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Track X/Twitter account growth over time",
         formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -201,7 +201,7 @@ def main:
     parser.add_argument("--target", type=int, default=0, help="Follower milestone target")
     parser.add_argument("--json", action="store_true", help="Output JSON")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if not args.handle.startswith("@"):
         args.handle = f"@{args.handle}"
@@ -249,11 +249,11 @@ def main:
                 print(f"  Gap:      {result['remaining']:,}")
                 print(f"  Growth:   {result['daily_growth']:+.1f}/day")
                 print(f"  ETA:      {result['projected_date']} (~{result['days_needed']} days)")
-                print
+                print()
 
     else:
-        parser.print_help
+        parser.print_help()
 
 
 if __name__ == "__main__":
-    main
+    main()

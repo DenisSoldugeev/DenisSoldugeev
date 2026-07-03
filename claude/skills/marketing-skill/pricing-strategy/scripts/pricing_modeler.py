@@ -162,7 +162,7 @@ def print_report(result, inputs):
     print(f"   Gross margin (est.):     {cur['gross_margin_pct']:.1f}%")
 
     print(f"\n💡 PRICE ELASTICITY SIGNAL")
-    print(f"   Signal:    {elast['signal'].replace('-', ' ').upper}")
+    print(f"   Signal:    {elast['signal'].replace('-', ' ').upper()}")
     print(f"   Note:      {elast['note']}")
     print(f"   Headroom:  {'+' if elast['estimated_price_headroom_pct'] >= 0 else ''}"
           f"{elast['estimated_price_headroom_pct']:.0f}%")
@@ -170,7 +170,7 @@ def print_report(result, inputs):
 
     print(f"\n📐 RECOMMENDED TIER STRUCTURE")
     tier_rat = tiers['rationale']
-    print(f"   Market position:  {tier_rat['pricing_vs_market'].replace('-', ' ').title}")
+    print(f"   Market position:  {tier_rat['pricing_vs_market'].replace('-', ' ').title()}")
     print(f"   Competitor range: {tier_rat['competitor_range']}")
     print(f"   Min viable price: ${tier_rat['min_viable_price']:.2f}/mo")
     print(f"\n   ┌─────────────────┬────────────┬────────────────────────────────────┐")
@@ -206,7 +206,7 @@ def print_report(result, inputs):
     print("\n" + "="*65 + "\n")
 
 
-def main:
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -220,7 +220,7 @@ def main:
         "--json", action="store_true",
         help="Output results as JSON"
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.input_file:
         with open(args.input_file) as f:
@@ -280,4 +280,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

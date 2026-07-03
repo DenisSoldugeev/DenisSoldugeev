@@ -107,7 +107,7 @@ e2e/
 ```typescript
 import { test, expect } from '@playwright/test';
 
-test.describe('Homepage',  => {
+test.describe('Homepage', () => {
   test('should load successfully', async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveTitle(/.+/);
@@ -115,7 +115,7 @@ test.describe('Homepage',  => {
 
   test('should have visible navigation', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('navigation')).toBeVisible;
+    await expect(page.getByRole('navigation')).toBeVisible();
   });
 });
 ```
@@ -149,7 +149,7 @@ jobs:
       - name: "run-playwright-tests"
         run: npx playwright test
       - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled }}
+        if: ${{ !cancelled() }}
         with:
           name: "playwright-report"
           path: playwright-report/

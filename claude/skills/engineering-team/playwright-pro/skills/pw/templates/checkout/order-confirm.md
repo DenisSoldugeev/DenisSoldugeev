@@ -14,42 +14,42 @@ Tests the success page and order details after checkout.
 ```typescript
 import { test, expect } from '@playwright/test';
 
-test.describe('Order Confirmation',  => {
+test.describe('Order Confirmation', () => {
   test.use({ storageState: '{{authStorageStatePath}}' });
 
   // Happy path: confirmation page content
   test('shows order confirmation with correct details', async ({ page }) => {
     await page.goto('{{baseUrl}}/order-confirmation/{{orderId}}');
-    await expect(page.getByRole('heading', { name: /order confirmed|thank you/i })).toBeVisible;
-    await expect(page.getByText('{{orderId}}')).toBeVisible;
-    await expect(page.getByText('{{productName}}')).toBeVisible;
-    await expect(page.getByText('{{orderTotal}}')).toBeVisible;
+    await expect(page.getByRole('heading', { name: /order confirmed|thank you/i })).toBeVisible();
+    await expect(page.getByText('{{orderId}}')).toBeVisible();
+    await expect(page.getByText('{{productName}}')).toBeVisible();
+    await expect(page.getByText('{{orderTotal}}')).toBeVisible();
   });
 
   // Happy path: confirmation email notice
   test('shows confirmation email notice', async ({ page }) => {
     await page.goto('{{baseUrl}}/order-confirmation/{{orderId}}');
-    await expect(page.getByText(/confirmation.*sent to|email.*{{username}}/i)).toBeVisible;
+    await expect(page.getByText(/confirmation.*sent to|email.*{{username}}/i)).toBeVisible();
   });
 
   // Happy path: billing and shipping details shown
   test('displays shipping address on confirmation page', async ({ page }) => {
     await page.goto('{{baseUrl}}/order-confirmation/{{orderId}}');
-    await expect(page.getByText('{{shippingAddress}}')).toBeVisible;
-    await expect(page.getByText('{{billingAddress}}')).toBeVisible;
+    await expect(page.getByText('{{shippingAddress}}')).toBeVisible();
+    await expect(page.getByText('{{billingAddress}}')).toBeVisible();
   });
 
   // Happy path: CTA navigates to order history
   test('"view your orders" link navigates to order history', async ({ page }) => {
     await page.goto('{{baseUrl}}/order-confirmation/{{orderId}}');
-    await page.getByRole('link', { name: /view.*orders|my orders/i }).click;
+    await page.getByRole('link', { name: /view.*orders|my orders/i }).click();
     await expect(page).toHaveURL('{{baseUrl}}/orders');
   });
 
   // Happy path: continue shopping CTA
   test('"continue shopping" returns to products', async ({ page }) => {
     await page.goto('{{baseUrl}}/order-confirmation/{{orderId}}');
-    await page.getByRole('link', { name: /continue shopping/i }).click;
+    await page.getByRole('link', { name: /continue shopping/i }).click();
     await expect(page).toHaveURL('{{baseUrl}}/products');
   });
 
@@ -74,14 +74,14 @@ test.describe('Order Confirmation',  => {
 ```javascript
 const { test, expect } = require('@playwright/test');
 
-test.describe('Order Confirmation',  => {
+test.describe('Order Confirmation', () => {
   test.use({ storageState: '{{authStorageStatePath}}' });
 
   test('shows order id and total on confirmation', async ({ page }) => {
     await page.goto('{{baseUrl}}/order-confirmation/{{orderId}}');
-    await expect(page.getByRole('heading', { name: /order confirmed|thank you/i })).toBeVisible;
-    await expect(page.getByText('{{orderId}}')).toBeVisible;
-    await expect(page.getByText('{{orderTotal}}')).toBeVisible;
+    await expect(page.getByRole('heading', { name: /order confirmed|thank you/i })).toBeVisible();
+    await expect(page.getByText('{{orderId}}')).toBeVisible();
+    await expect(page.getByText('{{orderTotal}}')).toBeVisible();
   });
 
   test('cart is empty after checkout', async ({ page }) => {

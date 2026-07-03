@@ -156,7 +156,7 @@ class FormatDetector:
         Returns:
             Format type (lcov, json, xml, unknown)
         """
-        content_stripped = content.strip
+        content_stripped = content.strip()
 
         # LCOV format
         if content_stripped.startswith('TN:') or 'SF:' in content_stripped[:200]:
@@ -228,7 +228,7 @@ class FormatDetector:
         import os
 
         file_name = os.path.basename(file_path)
-        file_ext = os.path.splitext(file_name)[1].lower
+        file_ext = os.path.splitext(file_name)[1].lower()
 
         # Extension to language mapping
         ext_to_lang = {
@@ -244,7 +244,7 @@ class FormatDetector:
         }
 
         # Test file patterns
-        is_test = any(pattern in file_name.lower
+        is_test = any(pattern in file_name.lower()
                      for pattern in ['test', 'spec', '_test.', '.test.'])
 
         return {
@@ -276,7 +276,7 @@ class FormatDetector:
         elif framework in ['pytest', 'unittest']:
             return f"test_{base_name}.py"
         elif framework in ['junit', 'testng']:
-            return f"{base_name.capitalize}Test.java"
+            return f"{base_name.capitalize()}Test.java"
         else:
             return f"{base_name}_test{ext}"
 
@@ -293,11 +293,11 @@ class FormatDetector:
         patterns = []
 
         # Arrange-Act-Assert pattern
-        if any(comment in code.lower for comment in ['// arrange', '# arrange', '// act', '# act']):
+        if any(comment in code.lower() for comment in ['// arrange', '# arrange', '// act', '# act']):
             patterns.append('AAA (Arrange-Act-Assert)')
 
         # Given-When-Then pattern
-        if any(comment in code.lower for comment in ['given', 'when', 'then']):
+        if any(comment in code.lower() for comment in ['given', 'when', 'then']):
             patterns.append('Given-When-Then')
 
         # Setup/Teardown pattern
@@ -305,7 +305,7 @@ class FormatDetector:
             patterns.append('Setup-Teardown')
 
         # Mocking pattern
-        if any(keyword in code.lower for keyword in ['mock', 'stub', 'spy']):
+        if any(keyword in code.lower() for keyword in ['mock', 'stub', 'spy']):
             patterns.append('Mocking/Stubbing')
 
         # Parameterized tests
@@ -344,7 +344,7 @@ class FormatDetector:
                 source_files.append(file_path)
 
         # Determine primary language
-        primary_language = max(languages.items, key=lambda x: x[1])[0] if languages else 'unknown'
+        primary_language = max(languages.items(), key=lambda x: x[1])[0] if languages else 'unknown'
 
         return {
             'primary_language': primary_language,

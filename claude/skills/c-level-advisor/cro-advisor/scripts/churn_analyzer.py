@@ -54,11 +54,11 @@ class Customer:
 
     @staticmethod
     def _parse_date(value):
-        if not value or str(value).strip in ("", "None", "null"):
+        if not value or str(value).strip() in ("", "None", "null"):
             return None
         for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%d/%m/%Y", "%Y/%m/%d"):
             try:
-                return datetime.strptime(str(value).strip, fmt).date
+                return datetime.strptime(str(value).strip(), fmt).date()
             except ValueError:
                 continue
         raise ValueError(f"Cannot parse date: {value!r}")
@@ -67,13 +67,13 @@ class Customer:
         return self.churn_date is not None
 
     def is_active(self, as_of=None):
-        as_of = as_of or date.today
+        as_of = as_of or date.today()
         if self.churn_date and self.churn_date <= as_of:
             return False
         return self.start_date <= as_of
 
     def tenure_days(self, as_of=None):
-        as_of = as_of or date.today
+        as_of = as_of or date.today()
         end = self.churn_date if self.churn_date else as_of
         return (end - self.start_date).days
 
@@ -93,7 +93,7 @@ class Customer:
         return self.arr + self.expansion_arr - self.contraction_arr
 
     def days_since_acquisition(self, as_of=None):
-        as_of = as_of or date.today
+        as_of = as_of or date.today()
         return (as_of - self.start_date).days
 
 
@@ -104,7 +104,7 @@ class Customer:
 class RetentionAnalyzer:
     def __init__(self, customers, as_of=None):
         self.customers = customers
-        self.as_of = as_of or date.today
+        self.as_of = as_of or date.today()
 
     def active_customers(self, as_of=None):
         as_of = as_of or self.as_of
@@ -151,11 +151,11 @@ class RetentionAnalyzer:
         # Expansion and contraction: from customers active at opening
         expansion = sum(
             c.expansion_arr for c in opening_customers
-            if not c.is_churned or (c.churn_date and c.churn_date > period_end)
+            if not c.is_churned() or (c.churn_date and c.churn_date > period_end)
         )
         contraction = sum(
             c.contraction_arr for c in opening_customers
-            if not c.is_churned or (c.churn_date and c.churn_date > period_end)
+            if not c.is_churned() or (c.churn_date and c.churn_date > period_end)
         )
 
         closing_arr = opening_arr + new_arr + expansion - contraction - churned_arr
@@ -164,8 +164,8 @@ class RetentionAnalyzer:
         nrr = (opening_arr + expansion - contraction - churned_arr) / opening_arr if opening_arr else 0
 
         return {
-            "period_start":   period_start.isoformat,
-            "period_end":     period_end.isoformat,
+            "period_start":   period_start.isoformat(),
+            "period_end":     period_end.isoformat(),
             "opening_arr":    opening_arr,
             "new_arr":        new_arr,
             "expansion_arr":  expansion,
@@ -210,8 +210,8 @@ class CohortAnalyzer:
         """Group customers by acquisition cohort (month)."""
         cohorts = defaultdict(list)
         for c in self.customers:
-            cohorts[c.cohort_month].append(c)
-        return dict(sorted(cohorts.items))
+            cohorts[c.cohort_month()].append(c)
+        return dict(sorted(cohorts.items()))
 
     def retention_at_month(self, cohort_customers, months_after):
         """
@@ -227,7 +227,7 @@ class CohortAnalyzer:
         earliest_start = min(c.start_date for c in cohort_customers)
         check_date = earliest_start + timedelta(days=int(months_after * 30.44))
 
-        if check_date > date.today:
+        if check_date > date.today():
             return None  # Future — no data
 
         retained_arr = sum(
@@ -249,15 +249,15 @@ class CohortAnalyzer:
 
     def cohort_report(self):
         """Returns dict: cohort → {size, opening_arr, retention_curve}."""
-        cohorts = self.build_cohorts
+        cohorts = self.build_cohorts()
         report = {}
-        for cohort_month, customers in cohorts.items:
+        for cohort_month, customers in cohorts.items():
             curve = self.retention_curve(customers)
             report[cohort_month] = {
                 "customer_count": len(customers),
                 "opening_arr":    sum(c.arr for c in customers),
-                "churned_count":  sum(1 for c in customers if c.is_churned),
-                "current_retention": curve.get(12, curve.get(max(curve.keys) if curve else 0)),
+                "churned_count":  sum(1 for c in customers if c.is_churned()),
+                "current_retention": curve.get(12, curve.get(max(curve.keys()) if curve else 0)),
                 "retention_curve": curve,
             }
         return report
@@ -271,7 +271,7 @@ class CohortAnalyzer:
         """
         at_risk = []
         for c in self.customers:
-            if c.is_churned:
+            if c.is_churned():
                 continue
             reasons = []
             score = 0
@@ -282,7 +282,7 @@ class CohortAnalyzer:
                 score += 40
 
             # Early tenure risk
-            tenure = c.tenure_months
+            tenure = c.tenure_months()
             if tenure < tenure_months_max:
                 reasons.append(f"Tenure {tenure:.1f} months (< {tenure_months_max})")
                 score += 20
@@ -322,7 +322,7 @@ class ExpansionAnalyzer:
         self.customers = customers
 
     def expansion_summary(self):
-        active = [c for c in self.customers if not c.is_churned]
+        active = [c for c in self.customers if not c.is_churned()]
         expanding = [c for c in active if c.expansion_arr > 0]
         contracting = [c for c in active if c.contraction_arr > 0]
 
@@ -343,7 +343,7 @@ class ExpansionAnalyzer:
         }
 
     def expansion_by_segment(self):
-        active = [c for c in self.customers if not c.is_churned]
+        active = [c for c in self.customers if not c.is_churned()]
         by_segment = defaultdict(lambda: {"arr": 0.0, "expansion": 0.0,
                                           "contraction": 0.0, "count": 0})
         for c in active:
@@ -354,7 +354,7 @@ class ExpansionAnalyzer:
             by_segment[seg]["count"] += 1
 
         result = {}
-        for seg, data in by_segment.items:
+        for seg, data in by_segment.items():
             arr = data["arr"]
             result[seg] = {
                 "customer_count":  data["count"],
@@ -371,10 +371,10 @@ class ExpansionAnalyzer:
         Customers who are active, healthy tenure, but have zero expansion.
         These are upsell/expansion targets.
         """
-        active = [c for c in self.customers if not c.is_churned]
+        active = [c for c in self.customers if not c.is_churned()]
         candidates = []
         for c in active:
-            tenure = c.tenure_months
+            tenure = c.tenure_months()
             if (tenure >= min_tenure_months
                     and c.arr >= min_arr
                     and c.expansion_arr == 0
@@ -428,7 +428,7 @@ def grr_status(grr):
 
 def print_header(title):
     width = 70
-    print
+    print()
     print("=" * width)
     print(f"  {title}")
     print("=" * width)
@@ -444,7 +444,7 @@ def print_full_report(customers, period_start, period_end):
     expansion_analyzer = ExpansionAnalyzer(customers)
 
     print_header("CHURN & RETENTION ANALYZER")
-    print(f"  Analysis period: {period_start.isoformat} → {period_end.isoformat}")
+    print(f"  Analysis period: {period_start.isoformat()} → {period_end.isoformat()}")
     print(f"  Total customers in dataset: {len(customers)}")
     active = analyzer.active_customers(period_end)
     churned_in_period = analyzer.churned_customers(period_start, period_end)
@@ -477,12 +477,12 @@ def print_full_report(customers, period_start, period_end):
     if wf["opening_arr"] > 0:
         expansion_rate = wf["expansion_arr"] / wf["opening_arr"]
         print(f"  Expansion Rate (period):       {fmt_pct(expansion_rate)}")
-    print
+    print()
     print(f"  NRR Benchmark: >120% world-class | 100-120% healthy | <100% fix immediately")
 
     # ── Expansion summary
     print_section("EXPANSION REVENUE")
-    exp = expansion_analyzer.expansion_summary
+    exp = expansion_analyzer.expansion_summary()
     print(f"  Expanding customers:  {exp['expanding_count']} / {exp['active_customers']} ({fmt_pct(exp['expanding_count']/exp['active_customers']) if exp['active_customers'] else '—'})")
     print(f"  Contracting:          {exp['contracting_count']} / {exp['active_customers']}")
     print(f"  Expansion ARR:        {fmt_currency(exp['expansion_arr'])} ({fmt_pct(exp['expansion_rate'])} of base)")
@@ -491,13 +491,13 @@ def print_full_report(customers, period_start, period_end):
 
     # ── Segment breakdown
     print_section("SEGMENT BREAKDOWN (NRR Components)")
-    seg_data = expansion_analyzer.expansion_by_segment
+    seg_data = expansion_analyzer.expansion_by_segment()
     col_w = [18, 8, 12, 10, 10, 10]
     h = (f"  {'Segment':<{col_w[0]}} {'Custs':>{col_w[1]}} {'ARR':>{col_w[2]}} "
          f"{'Expansion':>{col_w[3]}} {'Contraction':>{col_w[4]}} {'NRR':>{col_w[5]}}")
     print(h)
     print("  " + "-" * (sum(col_w) + 5))
-    for seg, data in sorted(seg_data.items, key=lambda x: -x[1]["arr"]):
+    for seg, data in sorted(seg_data.items(), key=lambda x: -x[1]["arr"]):
         print(f"  {seg:<{col_w[0]}} {data['customer_count']:>{col_w[1]}} "
               f"{fmt_currency(data['arr']):>{col_w[2]}} "
               f"{fmt_currency(data['expansion_arr']):>{col_w[3]}} "
@@ -506,10 +506,10 @@ def print_full_report(customers, period_start, period_end):
 
     # ── Cohort retention
     print_section("COHORT RETENTION CURVES")
-    cohort_report = cohort_analyzer.cohort_report
+    cohort_report = cohort_analyzer.cohort_report()
     print(f"  {'Cohort':<10} {'Custs':>6} {'Opening ARR':>13} {'Mo.3':>8} {'Mo.6':>8} {'Mo.12':>8}")
     print("  " + "-" * 57)
-    for cohort, data in cohort_report.items:
+    for cohort, data in cohort_report.items():
         curve = data["retention_curve"]
         m3 = fmt_pct(curve[3]) if 3 in curve else "  —"
         m6 = fmt_pct(curve[6]) if 6 in curve else "  —"
@@ -520,7 +520,7 @@ def print_full_report(customers, period_start, period_end):
 
     # ── At-risk accounts
     print_section("AT-RISK ACCOUNTS")
-    at_risk = cohort_analyzer.identify_at_risk
+    at_risk = cohort_analyzer.identify_at_risk()
     if at_risk:
         print(f"  {'Customer':<22} {'Segment':<14} {'ARR':>10} {'Tenure':>8} {'Risk':>6}  Reason")
         print("  " + "-" * 80)
@@ -537,7 +537,7 @@ def print_full_report(customers, period_start, period_end):
 
     # ── Expansion candidates
     print_section("EXPANSION CANDIDATES (no expansion yet, healthy tenure)")
-    candidates = expansion_analyzer.top_expansion_candidates
+    candidates = expansion_analyzer.top_expansion_candidates()
     if candidates:
         print(f"  {'Customer':<22} {'Segment':<14} {'ARR':>10} {'Tenure':>8}  Action")
         print("  " + "-" * 70)
@@ -572,7 +572,7 @@ def print_full_report(customers, period_start, period_end):
     else:
         print("  ✅ No critical health flags")
 
-    print
+    print()
 
 
 # ---------------------------------------------------------------------------
@@ -637,7 +637,7 @@ def load_customers_from_csv(csv_text):
 def parse_period(period_str):
     """Parse 'YYYY-QN' or 'YYYY-MM' into (start_date, end_date)."""
     if not period_str:
-        today = date.today
+        today = date.today()
         q = (today.month - 1) // 3
         start = date(today.year, q * 3 + 1, 1)
         # End of current quarter
@@ -667,7 +667,7 @@ def parse_period(period_str):
     return start, end
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Churn & Retention Analyzer — NRR, cohort analysis, at-risk detection"
     )
@@ -684,13 +684,13 @@ def main:
         default="full",
         help="Output format (default: full)"
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Load data
     if args.csv:
         try:
             with open(args.csv, "r", encoding="utf-8") as f:
-                csv_text = f.read
+                csv_text = f.read()
         except FileNotFoundError:
             print(f"Error: File not found: {args.csv}", file=sys.stderr)
             sys.exit(1)
@@ -711,32 +711,32 @@ def main:
         expansion_analyzer = ExpansionAnalyzer(customers)
         wf = analyzer.arr_waterfall(period_start, period_end)
         output = {
-            "period": {"start": period_start.isoformat, "end": period_end.isoformat},
+            "period": {"start": period_start.isoformat(), "end": period_end.isoformat()},
             "arr_waterfall": wf,
             "logo_churn_rate": analyzer.logo_churn_rate(period_start, period_end),
             "revenue_churn_rate": analyzer.revenue_churn_rate(period_start, period_end),
-            "cohort_report": {k: {**v, "retention_curve": {str(m): r for m, r in v["retention_curve"].items}}
-                              for k, v in cohort_analyzer.cohort_report.items},
-            "at_risk_accounts": cohort_analyzer.identify_at_risk,
-            "expansion_summary": expansion_analyzer.expansion_summary,
-            "expansion_by_segment": expansion_analyzer.expansion_by_segment,
-            "expansion_candidates": expansion_analyzer.top_expansion_candidates,
+            "cohort_report": {k: {**v, "retention_curve": {str(m): r for m, r in v["retention_curve"].items()}}
+                              for k, v in cohort_analyzer.cohort_report().items()},
+            "at_risk_accounts": cohort_analyzer.identify_at_risk(),
+            "expansion_summary": expansion_analyzer.expansion_summary(),
+            "expansion_by_segment": expansion_analyzer.expansion_by_segment(),
+            "expansion_candidates": expansion_analyzer.top_expansion_candidates(),
         }
         print(json.dumps(output, indent=2))
     elif args.output == "summary":
         analyzer = RetentionAnalyzer(customers, as_of=period_end)
         wf = analyzer.arr_waterfall(period_start, period_end)
         print_header("NRR SUMMARY")
-        print(f"  Period:  {period_start.isoformat} → {period_end.isoformat}")
+        print(f"  Period:  {period_start.isoformat()} → {period_end.isoformat()}")
         print(f"  NRR:     {fmt_pct(wf['nrr'])}  {nrr_status(wf['nrr'])}")
         print(f"  GRR:     {fmt_pct(wf['grr'])}  {grr_status(wf['grr'])}")
         print(f"  Opening: {fmt_currency(wf['opening_arr'])}")
         print(f"  Closing: {fmt_currency(wf['closing_arr'])}")
         print(f"  Net New: {fmt_currency(wf['net_new_arr'])}")
-        print
+        print()
     else:
         print_full_report(customers, period_start, period_end)
 
 
 if __name__ == "__main__":
-    main
+    main()

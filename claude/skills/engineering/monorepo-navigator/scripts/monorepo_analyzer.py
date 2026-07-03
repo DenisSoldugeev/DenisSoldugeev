@@ -20,13 +20,13 @@ def load_json(path: Path) -> Dict:
 
 def detect_repo_type(root: Path) -> List[str]:
     detected: List[str] = []
-    if (root / "turbo.json").exists:
+    if (root / "turbo.json").exists():
         detected.append("Turborepo")
-    if (root / "nx.json").exists:
+    if (root / "nx.json").exists():
         detected.append("Nx")
-    if (root / "pnpm-workspace.yaml").exists:
+    if (root / "pnpm-workspace.yaml").exists():
         detected.append("pnpm-workspaces")
-    if (root / "lerna.json").exists:
+    if (root / "lerna.json").exists():
         detected.append("Lerna")
 
     pkg = load_json(root / "package.json")
@@ -37,18 +37,18 @@ def detect_repo_type(root: Path) -> List[str]:
 
 def parse_pnpm_workspace(root: Path) -> List[str]:
     workspace_file = root / "pnpm-workspace.yaml"
-    if not workspace_file.exists:
+    if not workspace_file.exists():
         return []
 
     patterns: List[str] = []
     in_packages = False
-    for line in workspace_file.read_text(encoding="utf-8", errors="ignore").splitlines:
-        stripped = line.strip
+    for line in workspace_file.read_text(encoding="utf-8", errors="ignore").splitlines():
+        stripped = line.strip()
         if stripped.startswith("packages:"):
             in_packages = True
             continue
         if in_packages and stripped.startswith("-"):
-            item = stripped[1:].strip.strip('"').strip("'")
+            item = stripped[1:].strip().strip('"').strip("'")
             if item:
                 patterns.append(item)
         elif in_packages and stripped and not stripped.startswith("#") and not stripped.startswith("-"):
@@ -67,12 +67,12 @@ def parse_package_workspaces(root: Path) -> List[str]:
 
 
 def expand_workspace_patterns(root: Path, patterns: List[str]) -> List[Path]:
-    paths: Set[Path] = set
+    paths: Set[Path] = set()
     for pattern in patterns:
         for match in glob.glob(str(root / pattern)):
             p = Path(match)
-            if p.is_dir and (p / "package.json").exists:
-                paths.add(p.resolve)
+            if p.is_dir() and (p / "package.json").exists():
+                paths.add(p.resolve())
     return sorted(paths)
 
 
@@ -91,14 +91,14 @@ def load_workspace_packages(workspaces: List[Path]) -> Dict[str, Dict]:
 
 
 def build_dependency_graph(packages: Dict[str, Dict]) -> Dict[str, List[str]]:
-    package_names = set(packages.keys)
+    package_names = set(packages.keys())
     graph: Dict[str, List[str]] = {}
-    for name, meta in packages.items:
-        deps: Set[str] = set
+    for name, meta in packages.items():
+        deps: Set[str] = set()
         for section in ("dependencies", "devDependencies", "peerDependencies"):
             dep_map = meta.get(section, {})
             if isinstance(dep_map, dict):
-                for dep_name in dep_map.keys:
+                for dep_name in dep_map.keys():
                     if dep_name in package_names:
                         deps.add(dep_name)
         graph[name] = sorted(deps)
@@ -112,17 +112,17 @@ def format_tree_paths(root: Path, workspaces: List[Path]) -> List[str]:
     return out
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Analyze monorepo type, workspaces, and internal dependency graph.")
     parser.add_argument("path", help="Monorepo root path")
     parser.add_argument("--json", action="store_true", help="Output JSON")
-    return parser.parse_args
+    return parser.parse_args()
 
 
-def main -> int:
-    args = parse_args
-    root = Path(args.path).expanduser.resolve
-    if not root.exists or not root.is_dir:
+def main() -> int:
+    args = parse_args()
+    root = Path(args.path).expanduser().resolve()
+    if not root.exists() or not root.is_dir():
         raise SystemExit(f"Path is not a directory: {root}")
 
     types = detect_repo_type(root)
@@ -158,11 +158,11 @@ def main -> int:
             print("- none detected")
         print("")
         print("Internal dependency graph")
-        for pkg, deps in graph.items:
+        for pkg, deps in graph.items():
             print(f"- {pkg} -> {', '.join(deps) if deps else '(no internal deps)'}")
 
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main)
+    raise SystemExit(main())

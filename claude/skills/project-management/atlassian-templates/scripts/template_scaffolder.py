@@ -23,7 +23,7 @@ from typing import Any, Dict, List, Optional
 # Macro Generators
 # ---------------------------------------------------------------------------
 
-def macro_toc -> str:
+def macro_toc() -> str:
     """Generate table of contents macro."""
     return '<ac:structured-macro ac:name="toc"><ac:parameter ac:name="printable">true</ac:parameter><ac:parameter ac:name="style">disc</ac:parameter><ac:parameter ac:name="maxLevel">3</ac:parameter></ac:structured-macro>'
 
@@ -96,10 +96,10 @@ def _table(headers: List[str], rows: List[List[str]]) -> str:
     return ''.join(parts)
 
 
-def template_meeting_notes -> Dict[str, Any]:
+def template_meeting_notes() -> Dict[str, Any]:
     """Generate meeting notes template."""
-    today = datetime.now.strftime("%Y-%m-%d")
-    body = macro_toc + '\n'
+    today = datetime.now().strftime("%Y-%m-%d")
+    body = macro_toc() + '\n'
     body += macro_info_panel("Replace placeholder text with your meeting details.") + '\n'
     body += _section("Meeting Details", _table(
         ["Field", "Value"],
@@ -121,10 +121,10 @@ def template_meeting_notes -> Dict[str, Any]:
     return {"name": "Meeting Notes", "body": body, "labels": ["meeting-notes", "template"]}
 
 
-def template_decision_log -> Dict[str, Any]:
+def template_decision_log() -> Dict[str, Any]:
     """Generate decision log template."""
-    today = datetime.now.strftime("%Y-%m-%d")
-    body = macro_toc + '\n'
+    today = datetime.now().strftime("%Y-%m-%d")
+    body = macro_toc() + '\n'
     body += _section("Decision Log", macro_info_panel("Track key decisions, context, and outcomes."))
     body += _table(
         ["ID", "Date", "Decision", "Context", "Alternatives Considered", "Outcome", "Owner", "Status"],
@@ -144,9 +144,9 @@ def template_decision_log -> Dict[str, Any]:
     return {"name": "Decision Log", "body": body, "labels": ["decision-log", "template"]}
 
 
-def template_runbook -> Dict[str, Any]:
+def template_runbook() -> Dict[str, Any]:
     """Generate runbook template."""
-    body = macro_toc + '\n'
+    body = macro_toc() + '\n'
     body += macro_warning_panel("This runbook should be tested and reviewed quarterly.") + '\n'
     body += _section("Overview", '<p>Brief description of what this runbook covers.</p>'
         + _table(["Field", "Value"], [
@@ -168,10 +168,10 @@ def template_runbook -> Dict[str, Any]:
     return {"name": "Runbook", "body": body, "labels": ["runbook", "operations", "template"]}
 
 
-def template_project_kickoff -> Dict[str, Any]:
+def template_project_kickoff() -> Dict[str, Any]:
     """Generate project kickoff template."""
-    today = datetime.now.strftime("%Y-%m-%d")
-    body = macro_toc + '\n'
+    today = datetime.now().strftime("%Y-%m-%d")
+    body = macro_toc() + '\n'
     body += _section("Project Overview", _table(
         ["Field", "Value"],
         [["Project Name", ""], ["Start Date", today], ["Target End Date", ""],
@@ -198,9 +198,9 @@ def template_project_kickoff -> Dict[str, Any]:
     return {"name": "Project Kickoff", "body": body, "labels": ["project-kickoff", "template"]}
 
 
-def template_sprint_retro -> Dict[str, Any]:
+def template_sprint_retro() -> Dict[str, Any]:
     """Generate sprint retrospective template."""
-    body = macro_toc + '\n'
+    body = macro_toc() + '\n'
     body += _section("Sprint Info", _table(
         ["Field", "Value"],
         [["Sprint", ""], ["Date Range", ""], ["Facilitator", ""],
@@ -225,9 +225,9 @@ def template_sprint_retro -> Dict[str, Any]:
     return {"name": "Sprint Retrospective", "body": body, "labels": ["sprint-retro", "agile", "template"]}
 
 
-def template_how_to_guide -> Dict[str, Any]:
+def template_how_to_guide() -> Dict[str, Any]:
     """Generate how-to guide template."""
-    body = macro_toc + '\n'
+    body = macro_toc() + '\n'
     body += macro_info_panel("This guide explains how to accomplish a specific task.") + '\n'
     body += _section("Overview", '<p>Brief description of what this guide covers and who it is for.</p>')
     body += _section("Prerequisites", '<ul><li><p>Prerequisite 1</p></li><li><p>Prerequisite 2</p></li></ul>')
@@ -266,12 +266,12 @@ def build_custom_template(
 
     # Add requested macros at the top
     if "toc" in macros:
-        body += macro_toc + '\n'
+        body += macro_toc() + '\n'
     if "status" in macros:
-        body += '<p>Status: ' + macro_status + '</p>\n'
+        body += '<p>Status: ' + macro_status() + '</p>\n'
 
     for section in sections:
-        section = section.strip
+        section = section.strip()
         if not section:
             continue
         body += _section(section, '<p></p>')
@@ -316,8 +316,8 @@ def format_list_output(output_format: str) -> str:
     """Format available templates list."""
     if output_format == "json":
         templates = {}
-        for name, func in TEMPLATE_REGISTRY.items:
-            result = func
+        for name, func in TEMPLATE_REGISTRY.items():
+            result = func()
             templates[name] = {
                 "name": result["name"],
                 "labels": result["labels"],
@@ -329,8 +329,8 @@ def format_list_output(output_format: str) -> str:
     lines.append("AVAILABLE TEMPLATES")
     lines.append("=" * 60)
     lines.append("")
-    for name, func in TEMPLATE_REGISTRY.items:
-        result = func
+    for name, func in TEMPLATE_REGISTRY.items():
+        result = func()
         lines.append(f"  {name}")
         lines.append(f"    Name: {result['name']}")
         lines.append(f"    Labels: {', '.join(result['labels'])}")
@@ -347,7 +347,7 @@ def format_list_output(output_format: str) -> str:
 # CLI Interface
 # ---------------------------------------------------------------------------
 
-def main -> int:
+def main() -> int:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Generate Confluence page template markup"
@@ -377,7 +377,7 @@ def main -> int:
         help='Comma-separated macro names to include (e.g., "toc,status,info")',
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         if args.list:
@@ -387,18 +387,18 @@ def main -> int:
         if not args.template:
             parser.error("template name is required unless --list is used")
 
-        template_name = args.template.lower
+        template_name = args.template.lower()
 
         if template_name == "custom":
             if not args.sections:
                 parser.error("--sections is required for custom templates")
-            sections = [s.strip for s in args.sections.split(",")]
-            macros = [m.strip for m in args.macros.split(",")] if args.macros else []
+            sections = [s.strip() for s in args.sections.split(",")]
+            macros = [m.strip() for m in args.macros.split(",")] if args.macros else []
             result = build_custom_template(sections, macros)
         elif template_name in TEMPLATE_REGISTRY:
-            result = TEMPLATE_REGISTRYtemplate_name
+            result = TEMPLATE_REGISTRY[template_name]()
         else:
-            available = ", ".join(sorted(TEMPLATE_REGISTRY.keys))
+            available = ", ".join(sorted(TEMPLATE_REGISTRY.keys()))
             print(f"Error: Unknown template '{template_name}'. Available: {available}", file=sys.stderr)
             return 1
 
@@ -415,4 +415,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

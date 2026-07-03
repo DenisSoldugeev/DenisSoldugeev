@@ -56,7 +56,7 @@ class AuditReport:
 
 def audit_bio(profile: ProfileData) -> list:
     findings = []
-    bio = profile.bio.strip
+    bio = profile.bio.strip()
 
     if not bio:
         findings.append(AuditFinding("Bio", "CRITICAL", "No bio provided for audit",
@@ -84,7 +84,7 @@ def audit_bio(profile: ProfileData) -> list:
     # Buzzword check
     buzzwords = ['entrepreneur', 'guru', 'ninja', 'rockstar', 'visionary', 'hustler',
                  'thought leader', 'serial entrepreneur', 'dreamer', 'doer']
-    found = [bw for bw in buzzwords if bw.lower in bio.lower]
+    found = [bw for bw in buzzwords if bw.lower() in bio.lower()]
     if found:
         findings.append(AuditFinding("Bio", "WARN", f"Buzzwords detected: {', '.join(found)}",
                                      "Replace with specific, concrete descriptions of what you do"))
@@ -219,13 +219,13 @@ def generate_recommendations(findings: list, profile: ProfileData) -> list:
     return recs
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Audit an X/Twitter profile for growth readiness",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s --handle @janedoe --bio "CTO building AI products" --followers 5000
+  %(prog)s --handle @rezarezvani --bio "CTO building AI products" --followers 5000
   %(prog)s --bio "Entrepreneur | Dreamer | Hustle" --followers 200 --posts-per-week 3
   %(prog)s --handle @example --followers 50000 --posts-per-week 21 --reply-ratio 0.4 --json
         """)
@@ -241,7 +241,7 @@ Examples:
     parser.add_argument("--has-link", action="store_true", help="Has link in profile")
     parser.add_argument("--json", action="store_true", help="Output JSON")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     profile = ProfileData(
         handle=args.handle,
@@ -291,4 +291,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

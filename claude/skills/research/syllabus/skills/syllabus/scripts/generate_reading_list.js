@@ -29,10 +29,10 @@ const fs = require('fs');
 const path = require('path');
 
 // Multi-location require for docx package
-function loadDocx {
+function loadDocx() {
   const candidates = [
     'docx',                                           // Local node_modules
-    path.join(process.cwd, 'node_modules', 'docx'), // Explicit local
+    path.join(process.cwd(), 'node_modules', 'docx'), // Explicit local
     '/usr/lib/node_modules/docx',                     // Global Linux
     '/usr/local/lib/node_modules/docx',               // Global macOS / brew
     path.join(process.env.HOME || '', '.npm-global', 'lib', 'node_modules', 'docx'),
@@ -48,7 +48,7 @@ function loadDocx {
   process.exit(2);
 }
 
-const docx = loadDocx;
+const docx = loadDocx();
 const {
   Document, Paragraph, TextRun, Packer, AlignmentType, HeadingLevel,
   ExternalHyperlink, Table, TableRow, TableCell, WidthType, ShadingType,
@@ -59,7 +59,7 @@ const {
 // ----------------------------------------------------------------------------
 // CLI args
 // ----------------------------------------------------------------------------
-function parseArgs {
+function parseArgs() {
   const args = process.argv.slice(2);
   const opts = {};
   for (let i = 0; i < args.length; i++) {
@@ -136,7 +136,7 @@ function buildTitlePage(data) {
       spacing: { after: 800 },
     }) : null,
     new Paragraph({
-      children: [new TextRun({ text: `Generated: ${data.generatedDate || new Date.toISOString.split('T')[0]}`, size: 18, color: GRAY })],
+      children: [new TextRun({ text: `Generated: ${data.generatedDate || new Date().toISOString().split('T')[0]}`, size: 18, color: GRAY })],
       alignment: AlignmentType.CENTER,
       spacing: { after: 100 },
     }),
@@ -145,7 +145,7 @@ function buildTitlePage(data) {
       alignment: AlignmentType.CENTER,
       spacing: { after: 200 },
     }),
-    new Paragraph({ children: [new PageBreak] }),
+    new Paragraph({ children: [new PageBreak()] }),
   ].filter(Boolean);
 }
 
@@ -230,7 +230,7 @@ function buildSection(section, sectionIndex) {
     }));
     // Author / journal / year (italic gray)
     const meta = `${paper.authors || ''}${paper.journal ? ' • ' + paper.journal : ''}${paper.year ? ' (' + paper.year + ')' : ''}`;
-    if (meta.trim) {
+    if (meta.trim()) {
       elements.push(new Paragraph({
         children: [new TextRun({ text: meta, italics: true, size: 18, color: GRAY })],
         spacing: { after: 60 },
@@ -263,7 +263,7 @@ function buildSection(section, sectionIndex) {
 function buildAuditLogSection(audit) {
   if (!audit) return [];
   const elements = [
-    new Paragraph({ children: [new PageBreak] }),
+    new Paragraph({ children: [new PageBreak()] }),
     new Paragraph({
       heading: HeadingLevel.HEADING_1,
       children: [new TextRun({ text: 'Audit Log', color: NAVY, bold: true, size: 28 })],
@@ -345,8 +345,8 @@ function buildFooter(data) {
 // ----------------------------------------------------------------------------
 // Main
 // ----------------------------------------------------------------------------
-function main {
-  const opts = parseArgs;
+function main() {
+  const opts = parseArgs();
   let data;
   try {
     data = JSON.parse(fs.readFileSync(opts.input, 'utf-8'));
@@ -357,7 +357,7 @@ function main {
 
   validateInput(data);
 
-  const sections = data.sections.map((s, i) => buildSection(s, i + 1)).flat;
+  const sections = data.sections.map((s, i) => buildSection(s, i + 1)).flat();
 
   const doc = new Document({
     creator: 'syllabus skill',
@@ -392,4 +392,4 @@ function main {
   });
 }
 
-main;
+main();

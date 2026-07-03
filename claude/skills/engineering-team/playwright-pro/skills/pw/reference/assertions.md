@@ -6,9 +6,9 @@ Auto-retry until timeout. Safe for dynamic content.
 
 ```typescript
 // Visibility
-await expect(locator).toBeVisible;
-await expect(locator).not.toBeVisible;
-await expect(locator).toBeHidden;
+await expect(locator).toBeVisible();
+await expect(locator).not.toBeVisible();
+await expect(locator).toBeHidden();
 
 // Text
 await expect(locator).toHaveText('exact text');
@@ -25,12 +25,12 @@ await expect(locator).toHaveClass(/active/);
 await expect(locator).toHaveId('main-nav');
 
 // State
-await expect(locator).toBeEnabled;
-await expect(locator).toBeDisabled;
-await expect(locator).toBeChecked;
-await expect(locator).toBeEditable;
-await expect(locator).toBeFocused;
-await expect(locator).toBeAttached;
+await expect(locator).toBeEnabled();
+await expect(locator).toBeDisabled();
+await expect(locator).toBeChecked();
+await expect(locator).toBeEditable();
+await expect(locator).toBeFocused();
+await expect(locator).toBeAttached();
 
 // Count
 await expect(locator).toHaveCount(5);
@@ -57,15 +57,15 @@ await expect(page).toHaveTitle(/Dashboard/);
 
 ```typescript
 // BAD — no auto-retry
-const text = await locator.textContent;
+const text = await locator.textContent();
 expect(text).toBe('Hello');
 
 // BAD — snapshot in time, not reactive
-const isVisible = await locator.isVisible;
+const isVisible = await locator.isVisible();
 expect(isVisible).toBe(true);
 
 // BAD — evaluating in page context
-const value = await page.evaluate( =>
+const value = await page.evaluate(() =>
   document.querySelector('input')?.value
 );
 expect(value).toBe('test');

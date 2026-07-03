@@ -32,11 +32,11 @@ class PIRGenerator:
     
     def __init__(self):
         """Initialize the PIR generator with templates and frameworks."""
-        self.rca_frameworks = self._load_rca_frameworks
-        self.pir_templates = self._load_pir_templates
-        self.severity_guidelines = self._load_severity_guidelines
-        self.action_item_types = self._load_action_item_types
-        self.lessons_learned_categories = self._load_lessons_learned_categories
+        self.rca_frameworks = self._load_rca_frameworks()
+        self.pir_templates = self._load_pir_templates()
+        self.severity_guidelines = self._load_severity_guidelines()
+        self.action_item_types = self._load_action_item_types()
+        self.lessons_learned_categories = self._load_lessons_learned_categories()
     
     def _load_rca_frameworks(self) -> Dict[str, Dict]:
         """Load root cause analysis framework definitions."""
@@ -372,16 +372,16 @@ class PIRGenerator:
             "rca_results": rca_results,
             "lessons_learned": lessons_learned,
             "action_items": action_items,
-            "generation_timestamp": datetime.now(timezone.utc).isoformat
+            "generation_timestamp": datetime.now(timezone.utc).isoformat()
         }
     
     def _extract_incident_info(self, incident_data: Dict) -> Dict[str, Any]:
         """Extract and normalize incident information."""
         return {
-            "incident_id": incident_data.get("incident_id", "INC-" + datetime.now.strftime("%Y%m%d-%H%M")),
+            "incident_id": incident_data.get("incident_id", "INC-" + datetime.now().strftime("%Y%m%d-%H%M")),
             "title": incident_data.get("title", incident_data.get("description", "Incident")[:50]),
             "description": incident_data.get("description", "No description provided"),
-            "severity": incident_data.get("severity", "unknown").lower,
+            "severity": incident_data.get("severity", "unknown").lower(),
             "start_time": self._parse_timestamp(incident_data.get("start_time", incident_data.get("timestamp", ""))),
             "end_time": self._parse_timestamp(incident_data.get("end_time", "")),
             "duration": self._calculate_duration(incident_data),
@@ -423,7 +423,7 @@ class PIRGenerator:
         
         if start_time and end_time:
             duration = end_time - start_time
-            total_minutes = int(duration.total_seconds / 60)
+            total_minutes = int(duration.total_seconds() / 60)
             
             if total_minutes < 60:
                 return f"{total_minutes} minutes"
@@ -582,7 +582,7 @@ class PIRGenerator:
         answers = []
         
         # Look for clues in incident description
-        description = incident_data.get("description", "").lower
+        description = incident_data.get("description", "").lower()
         
         # Common patterns and their inferred answers
         if "database" in description and ("timeout" in description or "slow" in description):
@@ -617,14 +617,14 @@ class PIRGenerator:
         if timeline_data and "timeline" in timeline_data:
             events = timeline_data["timeline"].get("events", [])
             for event in events:
-                event_message = event.get("message", "").lower
-                if any(keyword in event_message for keyword in answer.lower.split):
+                event_message = event.get("message", "").lower()
+                if any(keyword in event_message for keyword in answer.lower().split()):
                     evidence.append(f"Timeline event: {event['message']}")
         
         # Check incident metadata for supporting info
         metadata = incident_data.get("metadata", {})
-        for key, value in metadata.items:
-            if isinstance(value, str) and any(keyword in value.lower for keyword in answer.lower.split):
+        for key, value in metadata.items():
+            if isinstance(value, str) and any(keyword in value.lower() for keyword in answer.lower().split()):
                 evidence.append(f"Incident metadata: {key} = {value}")
         
         return evidence[:3]  # Return top 3 pieces of evidence
@@ -636,7 +636,7 @@ class PIRGenerator:
         # The deepest "why" answers are typically closest to root causes
         if len(whys) >= 3:
             for i, why in enumerate(whys[-2:]):  # Look at last 2 whys
-                if "further investigation needed" not in why["answer"].lower:
+                if "further investigation needed" not in why["answer"].lower():
                     root_causes.append({
                         "cause": why["answer"],
                         "category": self._categorize_root_cause(why["answer"]),
@@ -648,7 +648,7 @@ class PIRGenerator:
     
     def _categorize_root_cause(self, cause: str) -> str:
         """Categorize a root cause into standard categories."""
-        cause_lower = cause.lower
+        cause_lower = cause.lower()
         
         if any(keyword in cause_lower for keyword in ["process", "procedure", "review", "change management"]):
             return "Process"
@@ -664,7 +664,7 @@ class PIRGenerator:
     def _identify_category_factors(self, category: str, incident_data: Dict, timeline_data: Optional[Dict]) -> List[Dict]:
         """Identify contributing factors for a Fishbone category."""
         factors = []
-        description = incident_data.get("description", "").lower
+        description = incident_data.get("description", "").lower()
         
         if category == "People":
             if "misconfigured" in description or "human error" in description:
@@ -675,7 +675,7 @@ class PIRGenerator:
         elif category == "Process":
             if "deployment" in description:
                 factors.append({"factor": "Insufficient deployment validation", "likelihood": "high"})
-            if "code review" in incident_data.get("context", "").lower:
+            if "code review" in incident_data.get("context", "").lower():
                 factors.append({"factor": "Code review process gaps", "likelihood": "medium"})
             
         elif category == "Technology":
@@ -696,7 +696,7 @@ class PIRGenerator:
         """Identify primary contributing factors across all categories."""
         primary_factors = []
         
-        for category_name, category_data in categories.items:
+        for category_name, category_data in categories.items():
             high_likelihood_factors = [
                 f for f in category_data["factors"] 
                 if f.get("likelihood") == "high"
@@ -718,10 +718,10 @@ class PIRGenerator:
             category_factors[factor["category"]].append(factor)
         
         # Create root causes from categories with multiple factors
-        for category, factors in category_factors.items:
+        for category, factors in category_factors.items():
             if len(factors) > 1:
                 root_causes.append({
-                    "cause": f"Multiple {category.lower} issues contributed to the incident",
+                    "cause": f"Multiple {category.lower()} issues contributed to the incident",
                     "category": category,
                     "contributing_factors": [f["factor"] for f in factors],
                     "confidence": "high"
@@ -849,7 +849,7 @@ class PIRGenerator:
     def _identify_threats(self, incident_data: Dict, timeline_data: Optional[Dict]) -> List[Dict]:
         """Identify threats for Bow Tie analysis."""
         threats = []
-        description = incident_data.get("description", "").lower
+        description = incident_data.get("description", "").lower()
         
         if "deployment" in description:
             threats.append({"threat": "Defective code deployment", "likelihood": "medium"})
@@ -864,8 +864,8 @@ class PIRGenerator:
         """Identify consequences for Bow Tie analysis."""
         consequences = []
         
-        customer_impact = incident_data.get("customer_impact", "").lower
-        business_impact = incident_data.get("business_impact", "").lower
+        customer_impact = incident_data.get("customer_impact", "").lower()
+        business_impact = incident_data.get("business_impact", "").lower()
         
         if "all users" in customer_impact or "complete outage" in customer_impact:
             consequences.append({"consequence": "Complete service unavailability", "severity": "critical"})
@@ -884,7 +884,7 @@ class PIRGenerator:
             events = timeline_data["timeline"].get("events", [])
             
             for event in events:
-                message = event.get("message", "").lower
+                message = event.get("message", "").lower()
                 if "alert" in message or "monitoring" in message:
                     barriers.append({
                         "barrier": "Monitoring and alerting system",
@@ -905,13 +905,13 @@ class PIRGenerator:
         recommendations = []
         
         for threat in threats:
-            if "deployment" in threat["threat"].lower:
+            if "deployment" in threat["threat"].lower():
                 recommendations.append({
                     "barrier": "Enhanced pre-deployment testing",
                     "type": "preventive",
                     "justification": "Prevent defective deployments reaching production"
                 })
-            elif "load" in threat["threat"].lower:
+            elif "load" in threat["threat"].lower():
                 recommendations.append({
                     "barrier": "Auto-scaling and load shedding",
                     "type": "preventive",
@@ -956,7 +956,7 @@ class PIRGenerator:
         # Lessons from RCA
         root_causes = rca_results.get("root_causes", [])
         for root_cause in root_causes:
-            category = root_cause.get("category", "technical_systems").lower
+            category = root_cause.get("category", "technical_systems").lower()
             category_key = self._map_to_lessons_category(category)
             
             lesson = f"Identified: {root_cause['cause']}"
@@ -972,7 +972,7 @@ class PIRGenerator:
                     )
         
         # Generic lessons based on incident characteristics
-        severity = incident_data.get("severity", "").lower
+        severity = incident_data.get("severity", "").lower()
         if severity in ["sev1", "critical"]:
             lessons["detection_and_monitoring"].append(
                 "Critical incidents require immediate detection and alerting"
@@ -1014,7 +1014,7 @@ class PIRGenerator:
             })
         
         # Actions from lessons learned
-        for category, lessons in lessons_learned.items:
+        for category, lessons in lessons_learned.items():
             if len(lessons) > 1:  # Multiple lessons in same category indicate systematic issue
                 action_items.append({
                     "title": f"Improve {category.replace('_', ' ')}",
@@ -1027,7 +1027,7 @@ class PIRGenerator:
                 })
         
         # Standard actions based on severity
-        severity = incident_data.get("severity", "").lower
+        severity = incident_data.get("severity", "").lower()
         if severity in ["sev1", "critical"]:
             action_items.append({
                 "title": "Conduct comprehensive post-incident review",
@@ -1043,8 +1043,8 @@ class PIRGenerator:
     
     def _determine_action_type(self, root_cause: Dict) -> str:
         """Determine action item type based on root cause."""
-        cause_text = root_cause.get("cause", "").lower
-        category = root_cause.get("category", "").lower
+        cause_text = root_cause.get("cause", "").lower()
+        category = root_cause.get("category", "").lower()
         
         if any(keyword in cause_text for keyword in ["bug", "error", "failure", "crash"]):
             return "immediate_fix"
@@ -1074,7 +1074,7 @@ class PIRGenerator:
             
             phases = timeline_data["timeline"]["phases"]
             for phase in phases:
-                timeline_content.append(f"**{phase['name'].title} Phase**")
+                timeline_content.append(f"**{phase['name'].title()} Phase**")
                 timeline_content.append(f"- Start: {phase['start_time']}")
                 timeline_content.append(f"- Duration: {phase['duration_minutes']} minutes")
                 timeline_content.append(f"- Events: {phase['event_count']}")
@@ -1104,11 +1104,11 @@ class PIRGenerator:
         sections["incident_id"] = incident_info["incident_id"]
         sections["incident_date"] = incident_info["start_time"].strftime("%Y-%m-%d %H:%M:%S UTC") if incident_info["start_time"] else "Unknown"
         sections["duration"] = incident_info["duration"]
-        sections["severity"] = incident_info["severity"].upper
-        sections["status"] = incident_info["status"].title
+        sections["severity"] = incident_info["severity"].upper()
+        sections["status"] = incident_info["status"].title()
         sections["incident_commander"] = incident_info["incident_commander"]
         sections["responders"] = ", ".join(incident_info["responders"]) if incident_info["responders"] else "TBD"
-        sections["generation_date"] = datetime.now.strftime("%Y-%m-%d")
+        sections["generation_date"] = datetime.now().strftime("%Y-%m-%d")
         
         # Impact sections
         sections["customer_impact"] = incident_info["customer_impact"]
@@ -1183,7 +1183,7 @@ class PIRGenerator:
             rca_content.append("#### Contributing Factor Analysis")
             rca_content.append("")
             
-            for category, data in rca_results["categories"].items:
+            for category, data in rca_results["categories"].items():
                 if data["factors"]:
                     rca_content.append(f"**{category}:**")
                     for factor in data["factors"]:
@@ -1239,9 +1239,9 @@ class PIRGenerator:
             issues.append(cause["cause"])
         
         # Issues from lessons learned
-        for category, lessons in lessons_learned.items:
+        for category, lessons in lessons_learned.items():
             if lessons:
-                issues.append(f"{category.replace('_', ' ').title}: {lessons[0]}")
+                issues.append(f"{category.replace('_', ' ').title()}: {lessons[0]}")
         
         if not issues:
             issues.append("Analysis in progress")
@@ -1252,9 +1252,9 @@ class PIRGenerator:
         """Create lessons learned section."""
         content = []
         
-        for category, lessons in lessons_learned.items:
+        for category, lessons in lessons_learned.items():
             if lessons:
-                content.append(f"### {category.replace('_', ' ').title}")
+                content.append(f"### {category.replace('_', ' ').title()}")
                 content.append("")
                 
                 for lesson in lessons:
@@ -1314,7 +1314,7 @@ class PIRGenerator:
         content.append("")
         
         # Extract prevention-focused action items
-        prevention_items = [item for item in action_items if "prevent" in item.get("description", "").lower]
+        prevention_items = [item for item in action_items if "prevent" in item.get("description", "").lower()]
         
         if prevention_items:
             for item in prevention_items:
@@ -1459,15 +1459,15 @@ def format_text_output(result: Dict) -> str:
     # Basic info
     output.append("INCIDENT INFORMATION:")
     output.append(f"  PIR ID: {metadata.get('pir_id', 'Unknown')}")
-    output.append(f"  Severity: {incident_info.get('severity', 'Unknown').upper}")
+    output.append(f"  Severity: {incident_info.get('severity', 'Unknown').upper()}")
     output.append(f"  Duration: {incident_info.get('duration', 'Unknown')}")
-    output.append(f"  Status: {incident_info.get('status', 'Unknown').title}")
+    output.append(f"  Status: {incident_info.get('status', 'Unknown').title()}")
     output.append("")
     
     # RCA summary
     output.append("ROOT CAUSE ANALYSIS:")
     output.append(f"  Method: {rca_results.get('method', 'Unknown')}")
-    output.append(f"  Confidence: {rca_results.get('confidence', 'Unknown').title}")
+    output.append(f"  Confidence: {rca_results.get('confidence', 'Unknown').title()}")
     
     root_causes = rca_results.get("root_causes", [])
     if root_causes:
@@ -1498,7 +1498,7 @@ def format_text_output(result: Dict) -> str:
     return "\n".join(output)
 
 
-def main:
+def main():
     """Main function with argument parsing and execution."""
     parser = argparse.ArgumentParser(
         description="Generate Post-Incident Review documents with RCA and action items",
@@ -1567,15 +1567,15 @@ Incident JSON format:
         help="Generate detailed action items"
     )
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
-    generator = PIRGenerator
+    generator = PIRGenerator()
     
     try:
         # Read incident data
-        if args.incident == "-" or (not args.incident and not sys.stdin.isatty):
+        if args.incident == "-" or (not args.incident and not sys.stdin.isatty()):
             # Read from stdin
-            input_text = sys.stdin.read.strip
+            input_text = sys.stdin.read().strip()
             if not input_text:
                 parser.error("No incident data provided")
             incident_data = json.loads(input_text)
@@ -1635,4 +1635,4 @@ Incident JSON format:
 
 
 if __name__ == "__main__":
-    main
+    main()

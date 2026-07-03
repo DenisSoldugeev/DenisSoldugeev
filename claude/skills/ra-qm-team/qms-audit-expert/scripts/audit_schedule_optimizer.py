@@ -93,7 +93,7 @@ class AuditScheduleOptimizer:
     def __init__(self, processes: List[Process], audit_days_per_month: int = 4):
         self.processes = processes
         self.audit_days_per_month = audit_days_per_month
-        self.today = datetime.now
+        self.today = datetime.now()
 
     def calculate_priority_score(self, process: Process) -> float:
         """Calculate audit priority score based on multiple factors."""
@@ -265,7 +265,7 @@ def format_text_output(schedule: AuditSchedule) -> str:
         "Quarterly Distribution:",
     ]
 
-    for q, count in schedule.audits_by_quarter.items:
+    for q, count in schedule.audits_by_quarter.items():
         bar = "█" * count + "░" * (10 - count)
         lines.append(f"  {q}: {bar} {count}")
 
@@ -301,7 +301,7 @@ def format_text_output(schedule: AuditSchedule) -> str:
     return "\n".join(lines)
 
 
-def interactive_mode:
+def interactive_mode():
     """Run interactive schedule generation."""
     print("=" * 60)
     print("Audit Schedule Optimizer - Interactive Mode")
@@ -311,24 +311,24 @@ def interactive_mode:
     print("\nEnter processes (blank name to finish):\n")
 
     while True:
-        name = input("Process name (or Enter to finish): ").strip
+        name = input("Process name (or Enter to finish): ").strip()
         if not name:
             break
 
-        clause = input("ISO 13485 clause (e.g., 7.3): ").strip
-        risk = input("Risk level (H/M/L): ").strip.upper
+        clause = input("ISO 13485 clause (e.g., 7.3): ").strip()
+        risk = input("Risk level (H/M/L): ").strip().upper()
         risk_level = {
             "H": RiskLevel.HIGH,
             "M": RiskLevel.MEDIUM,
             "L": RiskLevel.LOW
         }.get(risk, RiskLevel.MEDIUM)
 
-        last_audit = input("Last audit date (YYYY-MM-DD, or Enter if never): ").strip
+        last_audit = input("Last audit date (YYYY-MM-DD, or Enter if never): ").strip()
         if not last_audit:
             last_audit = None
 
-        findings = input("Previous findings count (default 0): ").strip
-        findings = int(findings) if findings.isdigit else 0
+        findings = input("Previous findings count (default 0): ").strip()
+        findings = int(findings) if findings.isdigit() else 0
 
         processes.append(Process(
             name=name,
@@ -348,11 +348,11 @@ def interactive_mode:
         ]
 
     optimizer = AuditScheduleOptimizer(processes)
-    schedule = optimizer.generate_schedule
+    schedule = optimizer.generate_schedule()
     print("\n" + format_text_output(schedule))
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Risk-Based Audit Schedule Optimizer"
     )
@@ -379,10 +379,10 @@ def main:
         help="Planning horizon in months"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.interactive:
-        interactive_mode
+        interactive_mode()
         return
 
     if args.processes:
@@ -391,7 +391,7 @@ def main:
 
         processes = []
         for p in data.get("processes", []):
-            risk = RiskLevel[p.get("risk_level", "MEDIUM").upper]
+            risk = RiskLevel[p.get("risk_level", "MEDIUM").upper()]
             processes.append(Process(
                 name=p["name"],
                 iso_clause=p.get("iso_clause", ""),
@@ -417,4 +417,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

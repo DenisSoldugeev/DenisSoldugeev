@@ -15,5 +15,5 @@ server.tool(
   }
 );
 
-server.run;
+server.run();
 ```

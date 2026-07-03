@@ -72,15 +72,15 @@ def split_into_sections(text: str) -> Dict[str, str]:
     sections: Dict[str, str] = {}
     current_header = "_preamble_"
     buffer: List[str] = []
-    for line in text.splitlines:
+    for line in text.splitlines():
         m = re.match(r"^##\s+(.+?)\s*$", line)
         if m:
-            sections[current_header] = "\n".join(buffer).strip
-            current_header = m.group(1).strip.lower
+            sections[current_header] = "\n".join(buffer).strip()
+            current_header = m.group(1).strip().lower()
             buffer = []
         else:
             buffer.append(line)
-    sections[current_header] = "\n".join(buffer).strip
+    sections[current_header] = "\n".join(buffer).strip()
     return sections
 
 
@@ -100,9 +100,9 @@ def extract_terms(language_section: str) -> List[Tuple[str, str, str]]:
         re.MULTILINE,
     )
     for match in pattern.finditer(language_section):
-        term = match.group(1).strip
-        definition = match.group(2).strip
-        avoid = (match.group(3) or "").strip
+        term = match.group(1).strip()
+        definition = match.group(2).strip()
+        avoid = (match.group(3) or "").strip()
         results.append((term, definition, avoid))
     return results
 
@@ -114,7 +114,7 @@ def lint(text: str) -> Dict[str, Any]:
         findings.append({"rule": rule, "level": level, "message": message})
 
     # Rule 1: H1 present
-    lines = text.splitlines
+    lines = text.splitlines()
     h1_line_index = None
     for i, line in enumerate(lines):
         if re.match(r"^#\s+\S", line):
@@ -131,9 +131,9 @@ def lint(text: str) -> Dict[str, Any]:
         for line in lines[h1_line_index + 1 :]:
             if re.match(r"^##\s", line):
                 break
-            if line.strip:
-                desc_lines.append(line.strip)
-        desc = " ".join(desc_lines).strip
+            if line.strip():
+                desc_lines.append(line.strip())
+        desc = " ".join(desc_lines).strip()
         sentence_count = len(re.findall(r"[.!?](?:\s|$)", desc))
         if not desc:
             add("description-present", "FAIL", "No description sentence between the H1 and the first ## section.")
@@ -252,12 +252,12 @@ def main(argv: List[str]) -> int:
         text = SAMPLE_CONTEXT_MD
     elif args.path:
         p = Path(args.path)
-        if not p.exists:
+        if not p.exists():
             print(f"error: {args.path} not found", file=sys.stderr)
             return 2
         text = p.read_text(encoding="utf-8")
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     result = lint(text)

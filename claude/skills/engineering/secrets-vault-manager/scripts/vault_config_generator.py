@@ -83,7 +83,7 @@ SECRET_TYPE_MAP = {
 
 def parse_secrets(secrets_str):
     """Parse comma-separated secret types into list."""
-    secrets = [s.strip for s in secrets_str.split(",") if s.strip]
+    secrets = [s.strip() for s in secrets_str.split(",") if s.strip()]
     valid = []
     unknown = []
     for s in secrets:
@@ -98,7 +98,7 @@ def generate_policy_hcl(app_name, secrets, environment="production"):
     """Generate HCL policy document."""
     lines = [
         f'# Vault policy for {app_name}',
-        f'# Generated: {datetime.now.strftime("%Y-%m-%d %H:%M:%S")}',
+        f'# Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}',
         f'# Environment: {environment}',
         '',
     ]
@@ -182,7 +182,7 @@ def build_output(app_name, auth_method, secrets, environment, namespace):
         return {
             "error": "No valid secret types provided",
             "unknown": unknown_secrets,
-            "available_types": list(SECRET_TYPE_MAP.keys),
+            "available_types": list(SECRET_TYPE_MAP.keys()),
         }
 
     policy_name = f"{app_name}-policy"
@@ -208,11 +208,11 @@ def build_output(app_name, auth_method, secrets, environment, namespace):
         "policy_hcl": policy_hcl,
         "auth_commands": auth_commands,
         "secrets": secret_details,
-        "generated_at": datetime.now.isoformat,
+        "generated_at": datetime.now().isoformat(),
     }
 
     if unknown_secrets:
-        result["warnings"] = [f"Unknown secret type '{u}' — skipped. Available: {list(SECRET_TYPE_MAP.keys)}" for u in unknown_secrets]
+        result["warnings"] = [f"Unknown secret type '{u}' — skipped. Available: {list(SECRET_TYPE_MAP.keys())}" for u in unknown_secrets]
     if namespace:
         result["namespace"] = namespace
 
@@ -232,25 +232,25 @@ def print_human(result):
     print(f"Auth Method: {result['auth_method']}")
     print(f"Environment: {result['environment']}")
     print(f"Policy Name: {result['policy_name']}")
-    print
+    print()
 
     if result.get("warnings"):
         for w in result["warnings"]:
             print(f"WARNING: {w}")
-        print
+        print()
 
     print("--- Policy HCL ---")
     print(result["policy_hcl"])
-    print
+    print()
 
     print(f"Write policy: vault policy write {result['policy_name']} {result['policy_name']}.hcl")
-    print
+    print()
 
     print("--- Auth Method Setup ---")
     for cmd_info in result["auth_commands"]:
         print(f"# {cmd_info['description']}")
         print(cmd_info["command"])
-        print
+        print()
 
     print("--- Secret Paths ---")
     for s in result["secrets"]:
@@ -258,7 +258,7 @@ def print_human(result):
         print(f"  {s['type']:15s}  {s['path']:50s}  [{caps}]")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Generate Vault policy and auth configuration from application requirements.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -289,7 +289,7 @@ def main:
     parser.add_argument("--namespace", help="Kubernetes namespace (for kubernetes auth method)")
     parser.add_argument("--json", action="store_true", dest="json_output", help="Output as JSON")
 
-    args = parser.parse_args
+    args = parser.parse_args()
     result = build_output(args.app_name, args.auth_method, args.secrets, args.environment, args.namespace)
 
     if args.json_output:
@@ -299,4 +299,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

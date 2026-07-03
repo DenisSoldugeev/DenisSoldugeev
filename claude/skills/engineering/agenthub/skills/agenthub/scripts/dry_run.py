@@ -50,7 +50,7 @@ class Results:
         if verbose:
             for icon, msg in self.details:
                 print(f"  {icon} {msg}")
-            print
+            print()
         total = self.passed + self.failed
         status = "PASS" if self.failed == 0 else "FAIL"
         color = "\033[32m" if self.failed == 0 else "\033[31m"
@@ -89,7 +89,7 @@ def check_json(results):
         if name.endswith("plugin.json"):
             allowed = {"name", "description", "version", "author", "homepage",
                        "repository", "license", "skills"}
-            extra = set(data.keys) - allowed
+            extra = set(data.keys()) - allowed
             if extra:
                 results.fail(f"{name} — disallowed fields: {extra}")
             else:
@@ -126,17 +126,17 @@ def check_frontmatter(results):
     for path in skill_files:
         name = rel(path)
         with open(path) as f:
-            content = f.read
+            content = f.read()
         m = FRONTMATTER_RE.match(content)
         if not m:
             results.fail(f"{name} — missing YAML frontmatter")
             continue
         # Lightweight key check (no PyYAML dependency)
         fm_text = m.group(1)
-        found_keys = set
-        for line in fm_text.splitlines:
+        found_keys = set()
+        for line in fm_text.splitlines():
             if ":" in line:
-                key = line.split(":", 1)[0].strip
+                key = line.split(":", 1)[0].strip()
                 found_keys.add(key)
         missing = REQUIRED_FM_KEYS - found_keys
         if missing:
@@ -158,10 +158,10 @@ def check_markdown(results):
     for path in md_files:
         name = rel(path)
         with open(path) as f:
-            lines = f.readlines
+            lines = f.readlines()
 
         # Code fences must be balanced
-        fence_count = sum(1 for ln in lines if ln.strip.startswith("```"))
+        fence_count = sum(1 for ln in lines if ln.strip().startswith("```"))
         if fence_count % 2 != 0:
             results.fail(f"{name} — unbalanced code fences ({fence_count} found)")
         else:
@@ -172,7 +172,7 @@ def check_markdown(results):
         table_pipes = 0
         table_ok = True
         for i, ln in enumerate(lines, 1):
-            stripped = ln.strip
+            stripped = ln.strip()
             if stripped.startswith("|") and stripped.endswith("|"):
                 pipes = stripped.count("|")
                 if not in_table:
@@ -268,8 +268,8 @@ def check_cross_domain(results):
             results.fail(f"{filepath} — missing (cannot check cross-domain)")
             continue
         with open(path) as f:
-            content = f.read
-        if needle.lower in content.lower:
+            content = f.read()
+        if needle.lower() in content.lower():
             results.ok(f"{filepath} — contains cross-domain example (\"{needle}\")")
         else:
             results.fail(f"{filepath} — missing cross-domain marker \"{needle}\"")
@@ -277,13 +277,13 @@ def check_cross_domain(results):
 
 # ── Main ─────────────────────────────────────────────────────────────
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Dry-run validation for the AgentHub plugin."
     )
     parser.add_argument("--verbose", "-v", action="store_true",
                         help="Show per-file check details")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     print(f"AgentHub dry-run validation")
     print(f"Plugin root: {PLUGIN_ROOT}\n")
@@ -300,12 +300,12 @@ def main:
 
     for title, fn in sections:
         print(f"── {title} ──")
-        r = Results
+        r = Results()
         fn(r)
         ok = r.print(verbose=args.verbose)
         if not ok:
             all_ok = False
-        print
+        print()
 
     if all_ok:
         print("\033[32mAll checks passed.\033[0m")
@@ -315,4 +315,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -10,7 +10,7 @@ Analyzes SQL queries for common performance issues:
 - Missing LIMIT on unbounded SELECTs
 - Function calls on indexed columns (non-sargable)
 - LIKE with leading wildcard
-- ORDER BY RAND
+- ORDER BY RAND()
 - UNION instead of UNION ALL
 - NOT IN with subquery (NULL-unsafe)
 
@@ -73,7 +73,7 @@ def check_select_star(sql: str) -> Optional[Issue]:
 
 def check_missing_where(sql: str) -> Optional[Issue]:
     """Detect UPDATE/DELETE without WHERE."""
-    upper = sql.upper.strip
+    upper = sql.upper().strip()
     for keyword in ("UPDATE", "DELETE"):
         if upper.startswith(keyword) and "WHERE" not in upper:
             return Issue(
@@ -87,7 +87,7 @@ def check_missing_where(sql: str) -> Optional[Issue]:
 
 def check_cartesian_join(sql: str) -> Optional[Issue]:
     """Detect comma-separated tables without explicit JOIN or WHERE join condition."""
-    upper = sql.upper
+    upper = sql.upper()
     if "SELECT" not in upper:
         return None
     from_match = re.search(r'\bFROM\s+(.+?)(?:\bWHERE\b|\bGROUP\b|\bORDER\b|\bLIMIT\b|\bHAVING\b|;|$)',
@@ -99,7 +99,7 @@ def check_cartesian_join(sql: str) -> Optional[Issue]:
     if re.search(r'\bJOIN\b', from_clause, re.IGNORECASE):
         return None
     # Count comma-separated tables
-    tables = [t.strip for t in from_clause.split(",") if t.strip]
+    tables = [t.strip() for t in from_clause.split(",") if t.strip()]
     if len(tables) > 1 and "WHERE" not in upper:
         return Issue(
             severity="critical",
@@ -127,7 +127,7 @@ def check_subquery_in_select(sql: str) -> Optional[Issue]:
 
 def check_missing_limit(sql: str) -> Optional[Issue]:
     """Detect unbounded SELECT without LIMIT."""
-    upper = sql.upper.strip
+    upper = sql.upper().strip()
     if not upper.startswith("SELECT"):
         return None
     # Skip if it's a subquery or aggregate-only
@@ -155,11 +155,11 @@ def check_function_on_column(sql: str) -> Optional[Issue]:
         where_clause, re.IGNORECASE
     )
     if non_sargable:
-        func = non_sargable.group(1).upper
+        func = non_sargable.group(1).upper()
         return Issue(
             severity="warning",
             rule="non-sargable",
-            message=f"Function {func} on column in WHERE prevents index usage.",
+            message=f"Function {func}() on column in WHERE prevents index usage.",
             suggestion="Rewrite to compare the raw column against transformed constants.",
         )
     return None
@@ -178,12 +178,12 @@ def check_leading_wildcard(sql: str) -> Optional[Issue]:
 
 
 def check_order_by_rand(sql: str) -> Optional[Issue]:
-    """Detect ORDER BY RAND / RANDOM."""
+    """Detect ORDER BY RAND() / RANDOM()."""
     if re.search(r'ORDER\s+BY\s+(RAND|RANDOM)\s*\(\)', sql, re.IGNORECASE):
         return Issue(
             severity="warning",
             rule="order-by-rand",
-            message="ORDER BY RAND scans and sorts the entire table.",
+            message="ORDER BY RAND() scans and sorts the entire table.",
             suggestion="Use application-side random sampling or TABLESAMPLE.",
         )
     return None
@@ -250,14 +250,14 @@ def analyze_query(sql: str, dialect: str = "postgres") -> QueryAnalysis:
             score -= 5
     score = max(0, score)
 
-    return QueryAnalysis(query=sql.strip, issues=issues, score=score)
+    return QueryAnalysis(query=sql.strip(), issues=issues, score=score)
 
 
 def split_queries(text: str) -> List[str]:
     """Split SQL text into individual statements."""
     queries = []
     for stmt in text.split(";"):
-        stmt = stmt.strip
+        stmt = stmt.strip()
         if stmt and len(stmt) > 5:
             queries.append(stmt + ";")
     return queries
@@ -291,7 +291,7 @@ def format_text(analyses: List[QueryAnalysis]) -> str:
 def format_json(analyses: List[QueryAnalysis]) -> str:
     """Format analysis results as JSON."""
     return json.dumps(
-        {"analyses": [a.to_dict for a in analyses], "total_queries": len(analyses)},
+        {"analyses": [a.to_dict() for a in analyses], "total_queries": len(analyses)},
         indent=2,
     )
 
@@ -300,7 +300,7 @@ def format_json(analyses: List[QueryAnalysis]) -> str:
 # CLI
 # ---------------------------------------------------------------------------
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Analyze SQL queries for common performance issues.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -323,18 +323,18 @@ Examples:
         "--json", action="store_true", dest="json_output",
         help="Output results as JSON",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Determine if query is a file path or inline SQL
     sql_text = args.query
     if os.path.isfile(args.query):
         with open(args.query, "r") as f:
-            sql_text = f.read
+            sql_text = f.read()
 
     queries = split_queries(sql_text)
     if not queries:
         # Treat the whole input as a single query
-        queries = [sql_text.strip]
+        queries = [sql_text.strip()]
 
     analyses = [analyze_query(q, args.dialect) for q in queries]
 
@@ -345,4 +345,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

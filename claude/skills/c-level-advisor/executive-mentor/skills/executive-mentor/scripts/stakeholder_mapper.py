@@ -191,7 +191,7 @@ def render_grid(stakeholders: List[Dict], width: int = 60) -> str:
         col = max(0, min(cols - 1, col))
         row = max(0, min(rows - 1, row))
         
-        initial = s["name"][0].upper
+        initial = s["name"][0].upper()
         if grid[row][col] == ' ':
             grid[row][col] = initial
         else:
@@ -218,7 +218,7 @@ def render_grid(stakeholders: List[Dict], width: int = 60) -> str:
     lines.append("  Legend (initials):")
     for s in stakeholders:
         cls = classify_stakeholder(s["influence"], s["alignment"])
-        lines.append(f"    {s['name'][0].upper} = {s['name']} ({cls['symbol']} {cls['quadrant']})")
+        lines.append(f"    {s['name'][0].upper()} = {s['name']} ({cls['symbol']} {cls['quadrant']})")
     
     return "\n".join(lines)
 
@@ -241,7 +241,7 @@ def print_report(data: Dict):
         s["alignment"] = max(1, min(10, float(s["alignment"])))
         s["interest"] = max(1, min(10, float(s["interest"])))
     
-    print
+    print()
     print(hr("═"))
     print(f"  STAKEHOLDER ANALYSIS")
     print(f"  {initiative}")
@@ -249,15 +249,15 @@ def print_report(data: Dict):
     
     # Overall assessment
     overall = calculate_overall_alignment(stakeholders)
-    print
+    print()
     print("OVERALL ASSESSMENT")
-    print(hr)
+    print(hr())
     print(f"  Weighted alignment score: {overall['score']}/10")
     print(f"  Verdict: {overall['verdict']}")
     
     # Grid visualization
-    print
-    print(hr)
+    print()
+    print(hr())
     print(render_grid(stakeholders))
     
     # Stakeholder profiles by quadrant
@@ -273,19 +273,19 @@ def print_report(data: Dict):
     
     quadrant_order = ["Blocker", "Swing Vote", "Champion", "Supporter", "Bystander"]
     
-    print
+    print()
     print("STAKEHOLDER PROFILES")
-    print(hr)
+    print(hr())
     
     for q_name in quadrant_order:
         if q_name not in quadrants:
             continue
         group = quadrants[q_name]
         first = group[0]
-        print
-        print(f"  {first['symbol']} {q_name.upper}S  ({len(group)} stakeholder{'s' if len(group)>1 else ''})")
+        print()
+        print(f"  {first['symbol']} {q_name.upper()}S  ({len(group)} stakeholder{'s' if len(group)>1 else ''})")
         print(f"  Strategy: {first['strategy']}")
-        print
+        print()
         
         for s in group:
             cls = classify_stakeholder(s["influence"], s["alignment"])
@@ -304,13 +304,13 @@ def print_report(data: Dict):
             if s.get("notes"):
                 print(f"    Notes: {s['notes']}")
             
-            print
+            print()
     
     # Engagement plan
-    print
+    print()
     print("ENGAGEMENT PLAN (sequenced by priority)")
-    print(hr)
-    print
+    print(hr())
+    print()
     print(f"  {'#':<3} {'Name':<22} {'Quadrant':<14} {'Priority':<10} {'First Action'}")
     print(f"  {hr('-', 63)}")
     
@@ -327,13 +327,13 @@ def print_report(data: Dict):
         print(f"  {i:<3} {s['name']:<22} {s['quadrant']:<14} {s['priority']:<10} {action}")
     
     # Risk summary
-    print
+    print()
     print("RISK SUMMARY")
-    print(hr)
+    print(hr())
     
     critical_path = find_critical_path(stakeholders)
     if critical_path:
-        print
+        print()
         print("  High-influence stakeholders (outcome depends on these):")
         for s in critical_path:
             cls = classify_stakeholder(s["influence"], s["alignment"])
@@ -348,46 +348,46 @@ def print_report(data: Dict):
             all_flags.append((s["name"], flag))
     
     if all_flags:
-        print
+        print()
         print("  Risk flags:")
         for name, flag in all_flags:
             print(f"  [{name}] {flag}")
     
-    print
+    print()
     print(hr("═"))
-    print
+    print()
 
 # ─────────────────────────────────────────────────────
 # Interactive mode
 # ─────────────────────────────────────────────────────
 
-def interactive_mode:
-    print
+def interactive_mode():
+    print()
     print(hr("═"))
     print("  STAKEHOLDER MAPPER — Interactive Mode")
     print(hr("═"))
     
     data = {}
-    data["initiative"] = input("\nWhat initiative or decision are you mapping?\n> ").strip
+    data["initiative"] = input("\nWhat initiative or decision are you mapping?\n> ").strip()
     
     print("\nAdd stakeholders one at a time. Empty name to finish.")
     print("Scores: 1=low, 10=high")
-    print
+    print()
     
     stakeholders = []
     while True:
-        name = input(f"Stakeholder {len(stakeholders)+1} name (or ENTER to finish): ").strip
+        name = input(f"Stakeholder {len(stakeholders)+1} name (or ENTER to finish): ").strip()
         if not name:
             if len(stakeholders) < 1:
                 print("  Need at least 1 stakeholder.")
                 continue
             break
         
-        role = input(f"  Role/title: ").strip
+        role = input(f"  Role/title: ").strip()
         
         def get_score(prompt, default=5):
             while True:
-                s = input(f"  {prompt} (1–10, default {default}): ").strip
+                s = input(f"  {prompt} (1–10, default {default}): ").strip()
                 if not s:
                     return float(default)
                 try:
@@ -401,7 +401,7 @@ def interactive_mode:
         influence = get_score("Influence (power over this decision)")
         alignment = get_score("Alignment (1=opposed, 10=champion)")
         interest = get_score("Interest level (how engaged are they)")
-        notes = input(f"  Notes (optional): ").strip
+        notes = input(f"  Notes (optional): ").strip()
         
         stakeholders.append({
             "name": name,
@@ -411,7 +411,7 @@ def interactive_mode:
             "interest": interest,
             "notes": notes
         })
-        print
+        print()
     
     data["stakeholders"] = stakeholders
     print_report(data)
@@ -494,7 +494,7 @@ SAMPLE_DATA = {
 # Main
 # ─────────────────────────────────────────────────────
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Stakeholder Mapper — influence, alignment, and engagement strategy"
     )
@@ -514,14 +514,14 @@ def main:
         help="Print sample JSON structure and exit"
     )
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     if args.sample:
         print(json.dumps(SAMPLE_DATA, indent=2))
         return
     
     if args.interactive:
-        interactive_mode
+        interactive_mode()
         return
     
     if args.file:
@@ -538,10 +538,10 @@ def main:
         return
     
     # Default: sample data
-    print
+    print()
     print("Running with sample data. Use --interactive for custom input or --file for JSON.")
     print_report(SAMPLE_DATA)
 
 
 if __name__ == "__main__":
-    main
+    main()

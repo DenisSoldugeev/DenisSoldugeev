@@ -193,7 +193,7 @@ SAMPLE_DATA = {
 }
 
 
-def main:
+def main():
     use_json = "--json" in sys.argv
     args = [a for a in sys.argv[1:] if a != "--json"]
 
@@ -214,4 +214,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

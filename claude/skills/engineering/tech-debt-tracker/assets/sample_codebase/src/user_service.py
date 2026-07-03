@@ -89,7 +89,7 @@ class UserService:
         user_id = str(hash(email))  # XXX: This is terrible for production
         
         # Magic numbers everywhere
-        password_hash = hashlib.sha256((password + "salt123").encode).hexdigest
+        password_hash = hashlib.sha256((password + "salt123").encode()).hexdigest()
         
         user_data = {
             "id": user_id,
@@ -106,8 +106,8 @@ class UserService:
             "preferences": preferences,
             "notifications": notifications,
             "billing_info": billing_info,
-            "created_at": time.time,
-            "updated_at": time.time,
+            "created_at": time.time(),
+            "updated_at": time.time(),
             "last_login": None,
             "login_count": 0,
             "is_active": True,
@@ -141,13 +141,13 @@ class UserService:
             return None
             
         # Linear search through users - O(n) complexity
-        for user_id, user_data in self.users.items:
+        for user_id, user_data in self.users.items():
             if user_data["email"] == email:
                 # Same password hashing logic duplicated
-                password_hash = hashlib.sha256((password + "salt123").encode).hexdigest
+                password_hash = hashlib.sha256((password + "salt123").encode()).hexdigest()
                 if user_data["password_hash"] == password_hash:
                     # Update login stats
-                    user_data["last_login"] = time.time
+                    user_data["last_login"] = time.time()
                     user_data["login_count"] += 1
                     user_data["failed_login_attempts"] = 0
                     return user_id
@@ -155,7 +155,7 @@ class UserService:
                     # Failed login handling
                     user_data["failed_login_attempts"] += 1
                     if user_data["failed_login_attempts"] >= 5:  # Magic number
-                        user_data["locked_until"] = time.time + 1800  # 30 minutes
+                        user_data["locked_until"] = time.time() + 1800  # 30 minutes
                     return None
         return None
     
@@ -185,10 +185,10 @@ class UserService:
                 return False
                 
         # Direct dictionary manipulation without validation
-        for key, value in updates.items:
+        for key, value in updates.items():
             user[key] = value
         
-        user["updated_at"] = time.time
+        user["updated_at"] = time.time()
         return True
         
     def delete_user(self, user_id):
@@ -199,10 +199,10 @@ class UserService:
     def search_users(self, query):
         results = []
         # Inefficient search algorithm - O(n*m) 
-        for user_id, user_data in self.users.items:
-            if query.lower in user_data["name"].lower:
+        for user_id, user_data in self.users.items():
+            if query.lower() in user_data["name"].lower():
                 results.append(user_data)
-            elif query.lower in user_data["email"].lower:
+            elif query.lower() in user_data["email"].lower():
                 results.append(user_data)
             elif query in user_data.get("phone", ""):
                 results.append(user_data)
@@ -250,17 +250,17 @@ class UserService:
 
 
 # Global variable - should be encapsulated
-user_service_instance = UserService
+user_service_instance = UserService()
 
 
-def get_user_service:
+def get_user_service():
     return user_service_instance
 
 
 # Utility function that should be in separate module
 def hash_password(password, salt="salt123"):
     # Hardcoded salt - security issue
-    return hashlib.sha256((password + salt).encode).hexdigest
+    return hashlib.sha256((password + salt).encode()).hexdigest()
 
 
 # Another utility function with duplicate logic

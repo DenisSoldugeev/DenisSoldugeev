@@ -112,7 +112,7 @@ def compare_segments(segments: Dict[str, Dict[str, Any]], stages: List[str]) -> 
     """
     segment_results: Dict[str, Dict[str, Any]] = {}
 
-    for seg_name, seg_data in segments.items:
+    for seg_name, seg_data in segments.items():
         counts = seg_data.get("counts", [])
         if len(counts) != len(stages):
             raise ValueError(
@@ -122,7 +122,7 @@ def compare_segments(segments: Dict[str, Dict[str, Any]], stages: List[str]) -> 
 
     # Rank segments by overall conversion rate
     ranked = sorted(
-        segment_results.items,
+        segment_results.items(),
         key=lambda x: x[1]["overall_conversion_rate"],
         reverse=True,
     )
@@ -207,16 +207,16 @@ def format_text(results: Dict[str, Any]) -> str:
             )
 
         lines.append("")
-        for seg_name, seg_result in results["segment_results"].items:
+        for seg_name, seg_result in results["segment_results"].items():
             lines.append("")
-            lines.append(format_single_funnel_text(seg_result, title=f"SEGMENT: {seg_name.upper}"))
+            lines.append(format_single_funnel_text(seg_result, title=f"SEGMENT: {seg_name.upper()}"))
 
         # Stage comparison table
         lines.append("")
         lines.append("-" * 70)
         lines.append("STAGE-BY-STAGE COMPARISON")
         lines.append("-" * 70)
-        seg_names = list(results["segment_results"].keys)
+        seg_names = list(results["segment_results"].keys())
         header = f"  {'Stage':<20}"
         for sn in seg_names:
             header += f" {sn:>20}"
@@ -239,7 +239,7 @@ def format_text(results: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def main -> None:
+def main() -> None:
     """Main entry point for the funnel analyzer."""
     parser = argparse.ArgumentParser(
         description="Analyze conversion funnels with bottleneck detection and segment comparison.",
@@ -257,7 +257,7 @@ def main -> None:
         help="Output format (default: text)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Load input data
     try:
@@ -302,4 +302,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

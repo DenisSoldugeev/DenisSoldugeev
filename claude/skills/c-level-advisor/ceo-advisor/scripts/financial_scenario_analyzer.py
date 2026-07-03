@@ -97,7 +97,7 @@ class FinancialScenarioAnalyzer:
         
         # Calculate metrics for each year
         projections = []
-        current_state = projected_financials.copy
+        current_state = projected_financials.copy()
         
         for year in range(1, 4):  # 3-year projection
             year_projection = self._project_year(
@@ -126,10 +126,10 @@ class FinancialScenarioAnalyzer:
     
     def _apply_scenario_changes(self, base_case: Dict, scenario: Dict) -> Dict:
         """Apply scenario changes to base case"""
-        result = base_case.copy
+        result = base_case.copy()
         changes = scenario.get('changes', {})
         
-        for key, change in changes.items:
+        for key, change in changes.items():
             if key in result:
                 if isinstance(change, dict):
                     # Relative change
@@ -337,7 +337,7 @@ class FinancialScenarioAnalyzer:
 
 def analyze_financial_scenarios(base_case: Dict, scenarios: List[Dict]) -> str:
     """Main function to analyze financial scenarios"""
-    analyzer = FinancialScenarioAnalyzer
+    analyzer = FinancialScenarioAnalyzer()
     results = analyzer.analyze_scenarios(base_case, scenarios)
     
     # Format output

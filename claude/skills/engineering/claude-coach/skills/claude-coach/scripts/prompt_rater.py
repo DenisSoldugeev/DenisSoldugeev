@@ -55,28 +55,28 @@ def _verb_strength(text: str) -> int:
 
 
 def rate(prompt: str) -> Rating:
-    p = prompt.strip
+    p = prompt.strip()
     rating = Rating(prompt=p)
 
     verb_score = _verb_strength(p)
     length_ok = _has_any(p, LENGTH_TOKENS)
     ends_with_question = p.endswith("?")
-    is_vague_open = ends_with_question and len(p.split) < 8
+    is_vague_open = ends_with_question and len(p.split()) < 8
 
-    rating.clarity = max(0, min(3, verb_score + (0 if is_vague_open else 1) + (1 if len(p.split) >= 6 else 0)))
+    rating.clarity = max(0, min(3, verb_score + (0 if is_vague_open else 1) + (1 if len(p.split()) >= 6 else 0)))
     rating.constraint = 2 if length_ok or _has_any(p, (r"\bno\s+(more|less)\s+than\b", r"\bmust\b", r"\bcannot\b", r"\bavoid\b", r"\bonly\b")) else 0
     rating.fmt = 2 if _has_any(p, FORMAT_TOKENS) else 0
     rating.audience = 2 if (_has_any(p, AUDIENCE_TOKENS) or _has_any(p, ROLE_TOKENS)) else 0
 
     raw = rating.clarity + rating.constraint + rating.fmt + rating.audience
-    rating.score = min(10, raw + (1 if len(p.split) >= 12 else 0))
+    rating.score = min(10, raw + (1 if len(p.split()) >= 12 else 0))
 
     rating.breakdown = {
         "clarity": f"{rating.clarity}/3",
         "constraint": f"{rating.constraint}/2",
         "format": f"{rating.fmt}/2",
         "audience": f"{rating.audience}/2",
-        "length_bonus": "+1" if len(p.split) >= 12 else "+0",
+        "length_bonus": "+1" if len(p.split()) >= 12 else "+0",
     }
 
     if rating.score >= 8:
@@ -123,7 +123,7 @@ def _augment(prompt: str, rating: Rating, aggressive: bool = False) -> str:
         return prompt
     base = prompt.rstrip(" .?")
     suffix = ", ".join(additions)
-    if aggressive and not any(v in prompt.lower for v in CLARITY_VERBS):
+    if aggressive and not any(v in prompt.lower() for v in CLARITY_VERBS):
         base = f"Write a focused response to: {base}"
     return f"{base}, {suffix}."
 
@@ -138,14 +138,17 @@ def render_human(r: Rating) -> str:
     )
 
 
-def sample_run -> int:
+def sample_run(as_json: bool = False) -> int:
     samples = [
         "Can you help me with my email?",
         "Write a 200-word product description for a noise-cancelling headphone targeting remote workers, focused on the focus-time benefit, no marketing fluff.",
         "thoughts?",
     ]
-    for s in samples:
-        r = rate(s)
+    ratings = [rate(s) for s in samples]
+    if as_json:
+        print(json.dumps([asdict(r) for r in ratings], indent=2))
+        return 0
+    for r in ratings:
         print(render_human(r))
         print("-" * 60)
     return 0
@@ -159,7 +162,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.sample:
-        return sample_run
+        return sample_run(args.json)
 
     if not args.prompt:
         parser.error("--prompt is required unless --sample is passed")
@@ -173,4 +176,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

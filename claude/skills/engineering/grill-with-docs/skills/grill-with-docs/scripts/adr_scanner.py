@@ -77,10 +77,10 @@ def parse_frontmatter(text: str) -> Tuple[Dict[str, str], str]:
     fm_block = text[4:end_marker]
     body = text[end_marker + 5 :]
     fm: Dict[str, str] = {}
-    for line in fm_block.splitlines:
+    for line in fm_block.splitlines():
         if ":" in line:
             k, v = line.split(":", 1)
-            fm[k.strip.lower] = v.strip
+            fm[k.strip().lower()] = v.strip()
     return fm, body
 
 
@@ -91,15 +91,15 @@ def scan_directory(adr_dir: Path) -> Dict[str, Any]:
     def add(file: str, rule: str, level: str, message: str) -> None:
         findings.append({"file": file, "rule": rule, "level": level, "message": message})
 
-    if not adr_dir.exists:
+    if not adr_dir.exists():
         add("(root)", "directory", "FAIL", f"Directory does not exist: {adr_dir}")
         return finalize(findings, 0)
 
-    if not adr_dir.is_dir:
+    if not adr_dir.is_dir():
         add("(root)", "directory", "FAIL", f"Path is not a directory: {adr_dir}")
         return finalize(findings, 0)
 
-    md_files = sorted(p for p in adr_dir.iterdir if p.is_file and p.suffix == ".md")
+    md_files = sorted(p for p in adr_dir.iterdir() if p.is_file() and p.suffix == ".md")
     if not md_files:
         add("(root)", "directory", "WARN", "Directory is empty — no ADRs scanned. Create lazily when the first ADR is needed.")
         return finalize(findings, 0)
@@ -120,12 +120,12 @@ def scan_directory(adr_dir: Path) -> Dict[str, Any]:
     seen: Dict[int, List[str]] = {}
     for number, name, _ in files:
         seen.setdefault(number, []).append(name)
-    for number, names in seen.items:
+    for number, names in seen.items():
         if len(names) > 1:
             add(", ".join(names), "numbering-duplicate", "FAIL", f"Duplicate ADR number {number:04d}.")
     if files:
         expected = list(range(1, files[-1][0] + 1))
-        actual = sorted(seen.keys)
+        actual = sorted(seen.keys())
         gaps = [n for n in expected if n not in actual]
         if gaps:
             add("(root)", "numbering-gap", "WARN", f"Number gap(s) in sequence: {', '.join(f'{g:04d}' for g in gaps)}. Either commit withdrawn ADRs as 'proposed → withdrawn' or renumber.")
@@ -135,7 +135,7 @@ def scan_directory(adr_dir: Path) -> Dict[str, Any]:
     # Rules 3, 4, 5, 6: per-ADR
     numbers_present = {n for n, _, _ in files}
     for number, name, path in files:
-        text = path.read_text(encoding="utf-8") if path.is_file else SAMPLE_ADRS.get(name, "")
+        text = path.read_text(encoding="utf-8") if path.is_file() else SAMPLE_ADRS.get(name, "")
         fm, body = parse_frontmatter(text)
 
         # Rule 3: H1 present
@@ -144,10 +144,10 @@ def scan_directory(adr_dir: Path) -> Dict[str, Any]:
             add(name, "h1-present", "FAIL", "No H1 (`# Title`) found in body.")
             continue
         else:
-            add(name, "h1-present", "PASS", f"H1 found: '{h1_match.group(1).strip}'.")
+            add(name, "h1-present", "PASS", f"H1 found: '{h1_match.group(1).strip()}'.")
 
         # Rule 4: non-empty body after H1
-        after_h1 = body[h1_match.end:].strip
+        after_h1 = body[h1_match.end():].strip()
         if not after_h1:
             add(name, "body-non-empty", "FAIL", "ADR has H1 but no body. The 1-3 sentence context+decision is required.")
         else:
@@ -158,7 +158,7 @@ def scan_directory(adr_dir: Path) -> Dict[str, Any]:
                 add(name, "body-non-empty", "PASS", f"Body present ({word_count} words).")
 
         # Rule 5: optional status frontmatter sanity
-        status = fm.get("status", "").strip.lower if fm else ""
+        status = fm.get("status", "").strip().lower() if fm else ""
         if status:
             if status in VALID_STATUSES:
                 add(name, "status-frontmatter", "PASS", f"Status '{status}' is valid.")
@@ -203,14 +203,14 @@ def render_human(result: Dict[str, Any]) -> str:
     return "\n".join(out)
 
 
-def run_sample -> Dict[str, Any]:
+def run_sample() -> Dict[str, Any]:
     """Scan the embedded sample by writing it to a tempdir."""
     import tempfile
 
-    with tempfile.TemporaryDirectory as td:
+    with tempfile.TemporaryDirectory() as td:
         d = Path(td) / "adr"
-        d.mkdir
-        for name, content in SAMPLE_ADRS.items:
+        d.mkdir()
+        for name, content in SAMPLE_ADRS.items():
             (d / name).write_text(content, encoding="utf-8")
         return scan_directory(d)
 
@@ -223,11 +223,11 @@ def main(argv: List[str]) -> int:
     args = parser.parse_args(argv)
 
     if args.sample:
-        result = run_sample
+        result = run_sample()
     elif args.adr_dir:
         result = scan_directory(Path(args.adr_dir))
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     if args.output == "json":

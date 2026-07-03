@@ -14,16 +14,16 @@ Tests live data via WebSocket or polling, connection handling, and reconnection.
 ```typescript
 import { test, expect } from '@playwright/test';
 
-test.describe('Realtime Updates',  => {
+test.describe('Realtime Updates', () => {
   test.use({ storageState: '{{authStorageStatePath}}' });
 
   // Happy path: live metric updates via WebSocket
   test('updates metric when WebSocket message received', async ({ page }) => {
     await page.goto('{{baseUrl}}/dashboard');
-    await expect(page.getByTestId('{{metricId}}')).toBeVisible;
+    await expect(page.getByTestId('{{metricId}}')).toBeVisible();
 
     // Inject a WS message to simulate server push
-    await page.evaluate( => {
+    await page.evaluate(() => {
       const ws = (window as any).__dashboardWs;
       if (ws) ws.dispatchEvent(new MessageEvent('message', {
         data: JSON.stringify({ type: 'metric_update', id: '{{metricId}}', value: 9999 })
@@ -35,13 +35,13 @@ test.describe('Realtime Updates',  => {
   // Happy path: connection status indicator
   test('shows "connected" status indicator', async ({ page }) => {
     await page.goto('{{baseUrl}}/dashboard');
-    await expect(page.getByRole('status', { name: /live|connected/i })).toBeVisible;
+    await expect(page.getByRole('status', { name: /live|connected/i })).toBeVisible();
   });
 
   // Happy path: data highlighted on update
   test('highlights updated value briefly', async ({ page }) => {
     await page.goto('{{baseUrl}}/dashboard');
-    await page.evaluate( => {
+    await page.evaluate(() => {
       const ws = (window as any).__dashboardWs;
       if (ws) ws.dispatchEvent(new MessageEvent('message', {
         data: JSON.stringify({ type: 'metric_update', id: '{{metricId}}', value: 42 })
@@ -55,17 +55,17 @@ test.describe('Realtime Updates',  => {
   // Error case: WebSocket disconnected — shows offline indicator
   test('shows disconnected state when WebSocket closes', async ({ page }) => {
     await page.goto('{{baseUrl}}/dashboard');
-    await page.evaluate( => {
+    await page.evaluate(() => {
       const ws = (window as any).__dashboardWs;
-      if (ws) ws.close;
+      if (ws) ws.close();
     });
-    await expect(page.getByRole('status', { name: /disconnected|offline/i })).toBeVisible;
-    await expect(page.getByText(/reconnecting/i)).toBeVisible;
+    await expect(page.getByRole('status', { name: /disconnected|offline/i })).toBeVisible();
+    await expect(page.getByText(/reconnecting/i)).toBeVisible();
   });
 
   // Error case: connection refused — error state shown
   test('shows connection error when WebSocket cannot connect', async ({ page }) => {
-    await page.route('**/{{wsEndpoint}}', route => route.abort);
+    await page.route('**/{{wsEndpoint}}', route => route.abort());
     await page.goto('{{baseUrl}}/dashboard');
     await expect(page.getByRole('alert')).toContainText(/connection.*failed|live updates.*unavailable/i);
   });
@@ -73,23 +73,23 @@ test.describe('Realtime Updates',  => {
   // Edge case: reconnects automatically after disconnect
   test('reconnects automatically after network interruption', async ({ page }) => {
     await page.goto('{{baseUrl}}/dashboard');
-    await page.evaluate( => {
+    await page.evaluate(() => {
       const ws = (window as any).__dashboardWs;
-      if (ws) ws.close;
+      if (ws) ws.close();
     });
-    await expect(page.getByRole('status', { name: /disconnected/i })).toBeVisible;
+    await expect(page.getByRole('status', { name: /disconnected/i })).toBeVisible();
     // Wait for auto-reconnect
-    await expect(page.getByRole('status', { name: /connected|live/i })).toBeVisible;
+    await expect(page.getByRole('status', { name: /connected|live/i })).toBeVisible();
   });
 
   // Edge case: stale data badge shown when disconnected
   test('shows stale data warning when disconnected', async ({ page }) => {
     await page.goto('{{baseUrl}}/dashboard');
-    await page.evaluate( => {
+    await page.evaluate(() => {
       const ws = (window as any).__dashboardWs;
-      if (ws) ws.close;
+      if (ws) ws.close();
     });
-    await expect(page.getByText(/data may be outdated|stale/i)).toBeVisible;
+    await expect(page.getByText(/data may be outdated|stale/i)).toBeVisible();
   });
 });
 ```
@@ -101,26 +101,26 @@ test.describe('Realtime Updates',  => {
 ```javascript
 const { test, expect } = require('@playwright/test');
 
-test.describe('Realtime Updates',  => {
+test.describe('Realtime Updates', () => {
   test.use({ storageState: '{{authStorageStatePath}}' });
 
   test('shows connected status on load', async ({ page }) => {
     await page.goto('{{baseUrl}}/dashboard');
-    await expect(page.getByRole('status', { name: /live|connected/i })).toBeVisible;
+    await expect(page.getByRole('status', { name: /live|connected/i })).toBeVisible();
   });
 
   test('shows disconnected state when WS closes', async ({ page }) => {
     await page.goto('{{baseUrl}}/dashboard');
-    await page.evaluate( => {
+    await page.evaluate(() => {
       const ws = window.__dashboardWs;
-      if (ws) ws.close;
+      if (ws) ws.close();
     });
-    await expect(page.getByRole('status', { name: /disconnected|offline/i })).toBeVisible;
+    await expect(page.getByRole('status', { name: /disconnected|offline/i })).toBeVisible();
   });
 
   test('updates metric on WS message', async ({ page }) => {
     await page.goto('{{baseUrl}}/dashboard');
-    await page.evaluate( => {
+    await page.evaluate(() => {
       const ws = window.__dashboardWs;
       if (ws) ws.dispatchEvent(new MessageEvent('message', {
         data: JSON.stringify({ type: 'metric_update', id: '{{metricId}}', value: 9999 })

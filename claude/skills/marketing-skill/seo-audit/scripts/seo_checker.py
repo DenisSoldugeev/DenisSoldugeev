@@ -21,7 +21,7 @@ from html.parser import HTMLParser
 
 class SEOParser(HTMLParser):
     def __init__(self):
-        super.__init__
+        super().__init__()
         self.title = ""
         self._in_title = False
         self.meta_description = ""
@@ -41,13 +41,13 @@ class SEOParser(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         attrs_dict = dict(attrs)
-        tag = tag.lower
+        tag = tag.lower()
 
         if tag == "title":
             self._in_title = True
         elif tag == "meta":
-            name = attrs_dict.get("name", "").lower
-            prop = attrs_dict.get("property", "").lower
+            name = attrs_dict.get("name", "").lower()
+            prop = attrs_dict.get("property", "").lower()
             if name == "description":
                 self.meta_description = attrs_dict.get("content", "")
             if name == "viewport":
@@ -74,19 +74,19 @@ class SEOParser(HTMLParser):
             self._in_style = True
 
     def handle_endtag(self, tag):
-        tag = tag.lower
+        tag = tag.lower()
         if tag == "title":
             self._in_title = False
         elif tag in ("h1", "h2", "h3", "h4", "h5", "h6"):
             if self._current_h is not None:
-                self.h_tags.append((self._current_h, " ".join(self._current_h_text).strip))
+                self.h_tags.append((self._current_h, " ".join(self._current_h_text).strip()))
             self._current_h = None
             self._current_h_text = []
         elif tag == "a":
             if self._in_link:
                 self.links.append({
                     "href": self._current_link_href,
-                    "text": " ".join(self._current_link_text).strip,
+                    "text": " ".join(self._current_link_text).strip(),
                 })
             self._in_link = False
             self._current_link_text = []
@@ -118,13 +118,13 @@ def _is_external(href, base_domain=""):
 
 
 def analyze_html(html: str, base_domain: str = "") -> dict:
-    parser = SEOParser
+    parser = SEOParser()
     parser.feed(html)
 
     results = {}
 
     # --- Title ---
-    title = parser.title.strip
+    title = parser.title.strip()
     title_len = len(title)
     title_ok = 50 <= title_len <= 60
     results["title"] = {
@@ -139,7 +139,7 @@ def analyze_html(html: str, base_domain: str = "") -> dict:
     }
 
     # --- Meta description ---
-    desc = parser.meta_description.strip
+    desc = parser.meta_description.strip()
     desc_len = len(desc)
     desc_ok = 150 <= desc_len <= 160
     results["meta_description"] = {
@@ -185,7 +185,7 @@ def analyze_html(html: str, base_domain: str = "") -> dict:
 
     # --- Image alt text ---
     total_imgs = len(parser.images)
-    imgs_with_alt = sum(1 for img in parser.images if img["alt"] is not None and img["alt"].strip)
+    imgs_with_alt = sum(1 for img in parser.images if img["alt"] is not None and img["alt"].strip())
     alt_pct = (imgs_with_alt / total_imgs * 100) if total_imgs else 100
     alt_ok = alt_pct == 100
     results["image_alt_text"] = {
@@ -248,8 +248,8 @@ def compute_overall_score(results: dict) -> int:
         "word_count": 15,
         "viewport_meta": 5,
     }
-    total_w = sum(weights.values)
-    score = sum(results[k]["score"] * w for k, w in weights.items if k in results)
+    total_w = sum(weights.values())
+    score = sum(results[k]["score"] * w for k, w in weights.items() if k in results)
     return round(score / total_w)
 
 
@@ -296,7 +296,7 @@ DEMO_HTML = """<!DOCTYPE html>
 # Main
 # ---------------------------------------------------------------------------
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="On-page SEO checker — scores an HTML page 0-100."
     )
@@ -304,14 +304,14 @@ def main:
     parser.add_argument("--url", help="URL to fetch and analyze")
     parser.add_argument("--domain", default="", help="Base domain for internal link detection")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.file:
         with open(args.file, "r", encoding="utf-8", errors="replace") as f:
-            html = f.read
+            html = f.read()
     elif args.url:
         with urllib.request.urlopen(args.url, timeout=10) as resp:
-            html = resp.read.decode("utf-8", errors="replace")
+            html = resp.read().decode("utf-8", errors="replace")
     else:
         html = DEMO_HTML
         if not args.json:
@@ -358,4 +358,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

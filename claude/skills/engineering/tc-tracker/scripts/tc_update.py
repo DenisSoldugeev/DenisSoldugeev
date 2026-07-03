@@ -60,7 +60,7 @@ VALID_SCOPES = ("feature", "bugfix", "refactor", "infrastructure", "documentatio
 VALID_PRIORITIES = ("critical", "high", "medium", "low")
 
 
-def now_iso -> str:
+def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
@@ -72,12 +72,12 @@ def write_json_atomic(path: Path, data: dict) -> None:
 
 def find_record_path(tc_dir: Path, tc_id: str) -> Path | None:
     direct = tc_dir / "records" / tc_id / "tc_record.json"
-    if direct.exists:
+    if direct.exists():
         return direct
     for entry in (tc_dir / "records").glob("*"):
-        if entry.is_dir and entry.name.startswith(tc_id):
+        if entry.is_dir() and entry.name.startswith(tc_id):
             candidate = entry / "tc_record.json"
-            if candidate.exists:
+            if candidate.exists():
                 return candidate
     return None
 
@@ -118,14 +118,14 @@ def parse_file_arg(spec: str) -> tuple[str, str]:
     """Parse 'path:action' or just 'path' (default action: modified)."""
     if ":" in spec:
         path, action = spec.rsplit(":", 1)
-        action = action.strip
+        action = action.strip()
         if action not in VALID_FILE_ACTIONS:
             raise ValueError(f"Invalid file action '{action}'. Must be one of {VALID_FILE_ACTIONS}")
-        return path.strip, action
-    return spec.strip, "modified"
+        return path.strip(), action
+    return spec.strip(), "modified"
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(description="Update an existing TC record.")
     parser.add_argument("--root", default=".", help="Project root (default: current directory)")
     parser.add_argument("--tc-id", required=True, help="Target TC ID (full or prefix)")
@@ -149,14 +149,14 @@ def main -> int:
     parser.add_argument("--tag", action="append", default=[], help="Add a tag. Repeatable.")
 
     parser.add_argument("--json", action="store_true", help="Output as JSON")
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    root = Path(args.root).resolve
+    root = Path(args.root).resolve()
     tc_dir = root / "docs" / "TC"
     config_path = tc_dir / "tc_config.json"
     registry_path = tc_dir / "tc_registry.json"
 
-    if not config_path.exists or not registry_path.exists:
+    if not config_path.exists() or not registry_path.exists():
         msg = f"TC tracking not initialized at {tc_dir}. Run tc_init.py first."
         print(json.dumps({"status": "error", "error": msg}) if args.json else f"ERROR: {msg}")
         return 2
@@ -177,7 +177,7 @@ def main -> int:
         return 2
 
     author = args.author or config.get("default_author", "Claude")
-    ts = now_iso
+    ts = now_iso()
 
     field_changes = []
     summary_parts = []
@@ -280,7 +280,7 @@ def main -> int:
     if args.note:
         existing = record.get("notes", "") or ""
         addition = f"[{ts}] {args.note}"
-        record["notes"] = (existing + "\n" + addition).strip if existing else addition
+        record["notes"] = (existing + "\n" + addition).strip() if existing else addition
         field_changes.append({
             "field": "notes", "action": "added",
             "new_value": args.note, "reason": args.reason or None,
@@ -358,4 +358,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

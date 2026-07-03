@@ -18,7 +18,7 @@ func (r *MyAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
     }
 
     // 2. Handle deletion via finalizer
-    if !cr.DeletionTimestamp.IsZero {
+    if !cr.DeletionTimestamp.IsZero() {
         return r.reconcileDelete(ctx, &cr)
     }
     if !controllerutil.ContainsFinalizer(&cr, finalizerName) {
@@ -37,7 +37,7 @@ func (r *MyAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
     res, err := r.reconcileNormal(ctx, &cr)
 
     // 5. Update status (always — even on error)
-    if statusErr := r.Status.Update(ctx, &cr); statusErr != nil {
+    if statusErr := r.Status().Update(ctx, &cr); statusErr != nil {
         log.Error(statusErr, "failed to update status")
         return res, errors.Join(err, statusErr)
     }
@@ -60,7 +60,7 @@ func (r *MyAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 
 ```go
 deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: cr.Name, Namespace: cr.Namespace}}
-op, err := controllerutil.CreateOrUpdate(ctx, r.Client, deployment, func error {
+op, err := controllerutil.CreateOrUpdate(ctx, r.Client, deployment, func() error {
     deployment.Spec.Replicas = &cr.Spec.Replicas
     deployment.Spec.Template.Spec.Containers = buildContainers(&cr.Spec)
     return controllerutil.SetControllerReference(&cr, deployment, r.Scheme)
@@ -121,7 +121,7 @@ meta.SetStatusCondition(&cr.Status.Conditions, metav1.Condition{
 cr.Status.ObservedGeneration = cr.Generation
 
 // Update status — uses /status subresource
-if err := r.Status.Update(ctx, &cr); err != nil { ... }
+if err := r.Status().Update(ctx, &cr); err != nil { ... }
 ```
 
 **Never** call `r.Update(ctx, &cr)` to update status. It uses the spec subresource, which the user owns.
@@ -201,8 +201,8 @@ log.Error(err, "failed to create deployment")
 - `time.Sleep` inside reconcile → starves queue; use `RequeueAfter`
 - `os.Exit` / `log.Fatal` → kills the controller; return an error
 - `panic` → same; return an error
-- `r.Update` to set status → use `r.Status.Update`
-- `r.Update` of the CR while the user could be editing it → use `r.Status.Update` or use Patch
+- `r.Update` to set status → use `r.Status().Update`
+- `r.Update` of the CR while the user could be editing it → use `r.Status().Update` or use Patch
 - Reading the same resource multiple times in one reconcile → read once
 - Reconcile body > 80 lines → extract `reconcileXxx` subroutines per phase
 - HTTP calls without `ctx` → can't cancel during shutdown

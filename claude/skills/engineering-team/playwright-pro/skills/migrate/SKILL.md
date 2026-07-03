@@ -63,18 +63,18 @@ cy.visit(url)           → page.goto(url)
 cy.get(selector)        → page.locator(selector) or page.getByRole(...)
 cy.contains(text)       → page.getByText(text)
 cy.find(selector)       → locator.locator(selector)
-cy.click              → locator.click
+cy.click()              → locator.click()
 cy.type(text)           → locator.fill(text)
-cy.should('be.visible') → expect(locator).toBeVisible
+cy.should('be.visible') → expect(locator).toBeVisible()
 cy.should('have.text')  → expect(locator).toHaveText(text)
-cy.intercept          → page.route
-cy.wait('@alias')       → page.waitForResponse
-cy.fixture            → JSON import or test data file
+cy.intercept()          → page.route()
+cy.wait('@alias')       → page.waitForResponse()
+cy.fixture()            → JSON import or test data file
 ```
 
 **Cypress custom commands** → Playwright fixtures or helper functions
 **Cypress plugins** → Playwright config or fixtures
-**`before`/`beforeEach`** → `test.beforeAll` / `test.beforeEach`
+**`before`/`beforeEach`** → `test.beforeAll()` / `test.beforeEach()`
 
 #### Selenium → Playwright
 
@@ -85,25 +85,25 @@ Key translations:
 driver.get(url)                    → page.goto(url)
 driver.findElement(By.id('x'))     → page.locator('#x') or page.getByTestId('x')
 driver.findElement(By.css('.x'))   → page.locator('.x') or page.getByRole(...)
-element.click                    → locator.click
+element.click()                    → locator.click()
 element.sendKeys(text)             → locator.fill(text)
-element.getText                  → locator.textContent
-WebDriverWait + ExpectedConditions → expect(locator).toBeVisible
-driver.switchTo.frame          → page.frameLocator
-Actions                            → locator.hover, locator.dragTo
+element.getText()                  → locator.textContent()
+WebDriverWait + ExpectedConditions → expect(locator).toBeVisible()
+driver.switchTo().frame()          → page.frameLocator()
+Actions                            → locator.hover(), locator.dragTo()
 ```
 
 ### 5. Upgrade Locators
 
 During conversion, upgrade selectors to Playwright best practices:
-- `#id` → `getByTestId` or `getByRole`
-- `.class` → `getByRole` or `getByText`
-- `[data-testid]` → `getByTestId`
+- `#id` → `getByTestId()` or `getByRole()`
+- `.class` → `getByRole()` or `getByText()`
+- `[data-testid]` → `getByTestId()`
 - XPath → role-based locators
 
 ### 6. Convert Custom Commands / Utilities
 
-- Cypress custom commands → Playwright custom fixtures via `test.extend`
+- Cypress custom commands → Playwright custom fixtures via `test.extend()`
 - Selenium page objects → Playwright page objects (keep structure, update API)
 - Shared helpers → TypeScript utility functions
 

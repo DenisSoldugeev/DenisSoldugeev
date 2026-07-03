@@ -1,14 +1,14 @@
 ---
 name: "c-level-agents"
-description: "Founder-mode executive team. 8 ds-* C-suite agents (CFO, CMO, CRO, CPO, COO, CHRO, CISO, Chief of Staff) and 17 /ds:* slash commands for forcing-question office hours, multi-role boardroom deliberation, strategic sprint pipeline, and meta routing. Use when the founder needs a virtual executive team, when invoking /ds:* commands, or when orchestrating multi-role decisions."
+description: "Founder-mode executive team. 13 ds-* C-suite agents (CFO, CMO, CRO, CPO, COO, CHRO, CISO, GC, CDO, CAIO, CCO, VPE, Chief of Staff) and 21 /ds:* slash commands for forcing-question office hours, multi-role boardroom deliberation, strategic sprint pipeline, and meta routing. Use when the founder needs a virtual executive team, when invoking /ds:* commands, or when orchestrating multi-role decisions."
 license: MIT
 metadata:
   version: 1.0.0
   category: c-level
   domain: executive-orchestration
   updated: 2026-05-12
-  agents: ds-cfo-advisor, ds-cmo-advisor, ds-cro-advisor, ds-cpo-advisor, ds-coo-advisor, ds-chro-advisor, ds-ciso-advisor, ds-chief-of-staff
-  commands: ds-office-hours, ds-cfo-review, ds-cmo-review, ds-cpo-review, ds-cro-review, ds-cto-review, ds-ciso-review, ds-gc-review, ds-brief, ds-boardroom, ds-decide, ds-execute, ds-post-mortem, ds-founder-mode, ds-onboard, ds-cross-eval, ds-freeze
+  agents: ds-cfo-advisor, ds-cmo-advisor, ds-cro-advisor, ds-cpo-advisor, ds-coo-advisor, ds-chro-advisor, ds-ciso-advisor, ds-general-counsel-advisor, ds-cdo-advisor, ds-caio-advisor, ds-cco-advisor, ds-vpe-advisor, ds-chief-of-staff
+  commands: ds-office-hours, ds-cfo-review, ds-cmo-review, ds-cpo-review, ds-cro-review, ds-cto-review, ds-ciso-review, ds-gc-review, ds-cdo-review, ds-caio-review, ds-cco-review, ds-vpe-review, ds-brief, ds-boardroom, ds-decide, ds-execute, ds-post-mortem, ds-founder-mode, ds-onboard, ds-cross-eval, ds-freeze
 ---
 
 # c-level-agents — Founder-Mode Executive Team
@@ -21,7 +21,7 @@ founder mode, virtual c-suite, executive team, boardroom, office hours, cfo revi
 
 ## What This Plugin Provides
 
-### 8 ds-* Agents (in `agents/`)
+### 13 ds-* Agents (in `agents/`)
 
 Each agent wraps an existing c-level skill and adds:
 - A distinct cognitive voice (numerate skeptic, narrative-first, etc.)
@@ -29,11 +29,11 @@ Each agent wraps an existing c-level skill and adds:
 - Workflow orchestration tied to skill Python tools
 - Output template: Bottom Line → What → Why → How to Act → Your Decision
 
-See `../references/persona-voices.md` for voice specs.
+See `../../references/persona-voices.md` for voice specs.
 
-### 17 /ds:* Slash Commands (in `skills/`)
+### 21 /ds:* Slash Commands (in `skills/`)
 
-**Forcing-question office hours (8):**
+**Forcing-question office hours (12):**
 - `/ds:office-hours` — YC-style 6-question intake
 - `/ds:cfo-review` — unit economics, runway, dilution
 - `/ds:cmo-review` — ICP, CAC payback, positioning
@@ -42,6 +42,10 @@ See `../references/persona-voices.md` for voice specs.
 - `/ds:cto-review` — architecture risk, scaling cliff
 - `/ds:ciso-review` — threat model, blast radius, compliance
 - `/ds:gc-review` — contracts, IP, regulatory, term sheets
+- `/ds:cdo-review` — training-data rights, data products, data assets
+- `/ds:caio-review` — model selection, evals, AI risk, AI costs
+- `/ds:cco-review` — GRR/NRR decomposition, churn root cause, CS coverage
+- `/ds:vpe-review` — DORA metrics, cycle time, eng hiring funnel, team structure
 
 **Strategic sprint pipeline (5):**
 - `/ds:brief` → `/ds:boardroom` → `/ds:decide` → `/ds:execute` → `/ds:post-mortem`
@@ -85,11 +89,11 @@ User question
 
 ## Integration Points
 
-- **Existing 28 c-level skills** — wrapped, not replaced
+- **Existing 33 c-level skills** — wrapped, not replaced
 - **decision-logger** — every `/ds:decide` writes here
 - **chief-of-staff** — routing layer the agent orchestrates
 - **board-meeting** — protocol the `/ds:boardroom` command runs
-- **llm-wiki** — optional persistent memory bridge (see `../references/llm-wiki-bridge.md`)
+- **llm-wiki** — optional persistent memory bridge (see `../../references/llm-wiki-bridge.md`)
 - **executive-mentor** — adversarial `/em:*` commands stack cleanly on top
 
 ## Design Principles

@@ -25,23 +25,23 @@ Pairs with `ds-cto-advisor` (security architecture), `ds-cfo-advisor` (risk quan
 
 ## Skill Integration
 
-**Skill Location:** `../../skills/ciso-advisor/`
+**Skill Location:** `../../ciso-advisor/`
 
 ### Python Tools
 
 1. **Risk Quantifier**
-   - Path: `../../skills/ciso-advisor/scripts/risk_quantifier.py`
+   - Path: `../../ciso-advisor/scripts/risk_quantifier.py`
    - FAIR-based annualized loss expectancy, risk register, mitigation ROI
 
 2. **Compliance Tracker**
-   - Path: `../../skills/ciso-advisor/scripts/compliance_tracker.py`
+   - Path: `../../ciso-advisor/scripts/compliance_tracker.py`
    - SOC 2 / ISO 27001 / HIPAA / GDPR control mapping, gap analysis, audit readiness
 
 ### Knowledge Bases
 
-- `../../skills/ciso-advisor/references/threat_modeling.md` — STRIDE, PASTA, attacker journey
-- `../../skills/ciso-advisor/references/compliance_roadmap.md` — SOC 2 Type 2, ISO 27001, GDPR sequencing
-- `../../skills/ciso-advisor/references/incident_response.md` — IR runbooks, comms plan, regulator notification windows
+- `../../ciso-advisor/references/security_strategy.md` — STRIDE, PASTA, attacker journey
+- `../../ciso-advisor/references/compliance_roadmap.md` — SOC 2 Type 2, ISO 27001, GDPR sequencing
+- `../../ciso-advisor/references/incident_response.md` — IR runbooks, comms plan, regulator notification windows
 
 ### Adjacent Skills
 
@@ -68,7 +68,7 @@ Pairs with `ds-cto-advisor` (security architecture), `ds-cfo-advisor` (risk quan
 4. Output: 18-month roadmap, audit budget, controls owners
 
 ```bash
-python ../../skills/ciso-advisor/scripts/compliance_tracker.py
+python ../../ciso-advisor/scripts/compliance_tracker.py
 ```
 
 ### Workflow 3: Incident Response Readiness
@@ -94,9 +94,9 @@ python ../../skills/ciso-advisor/scripts/compliance_tracker.py
 
 ```bash
 echo "🔐 CISO Pre-Prod Gate"
-python ../../skills/ciso-advisor/scripts/risk_quantifier.py
-python ../../skills/ciso-advisor/scripts/compliance_tracker.py
-echo "IR runbook check: ../../skills/ciso-advisor/references/incident_response.md"
+python ../../ciso-advisor/scripts/risk_quantifier.py
+python ../../ciso-advisor/scripts/compliance_tracker.py
+echo "IR runbook check: ../../ciso-advisor/references/incident_response.md"
 ```
 
 ## Success Metrics
@@ -110,14 +110,14 @@ echo "IR runbook check: ../../skills/ciso-advisor/references/incident_response.m
 
 ## Related Agents
 
-- [ds-cto-advisor](../../../../agents/c-level/ds-cto-advisor.md) — security architecture
+- [ds-cto-advisor](../../../agents/c-level/ds-cto-advisor.md) — security architecture
 - [ds-cfo-advisor](ds-cfo-advisor.md) — risk → insurance, audit budget
-- [ds-quality-regulatory](../../../../agents/ra-qm-team/ds-quality-regulatory.md) — ISO 27001, GDPR execution
-- [ds-senior-engineer](../../../../agents/engineering/ds-senior-engineer.md) — secure coding
+- [ds-quality-regulatory](../../../agents/ra-qm-team/ds-quality-regulatory.md) — ISO 27001, GDPR execution
+- [ds-senior-engineer](../../../agents/engineering/ds-senior-engineer.md) — secure coding
 
 ## References
 
-- Skill: [../../skills/ciso-advisor/SKILL.md](../../ciso-advisor/SKILL.md)
+- Skill: [../../ciso-advisor/SKILL.md](../../ciso-advisor/SKILL.md)
 - Voice spec: [../references/persona-voices.md](../references/persona-voices.md)
 
 ---

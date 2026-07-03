@@ -36,7 +36,7 @@ ADVERB_PATTERN = re.compile(r"\b\w+ly\b", re.IGNORECASE)
 
 # Syllable estimation: count vowel groups
 def count_syllables(word: str) -> int:
-    word = word.lower.strip(".,!?;:\"'")
+    word = word.lower().strip(".,!?;:\"'")
     if not word:
         return 0
     # Silent e
@@ -48,8 +48,8 @@ def count_syllables(word: str) -> int:
 
 def split_sentences(text: str) -> list:
     # Split on sentence-ending punctuation
-    parts = re.split(r"(?<=[.!?])\s+", text.strip)
-    return [p.strip for p in parts if p.strip]
+    parts = re.split(r"(?<=[.!?])\s+", text.strip())
+    return [p.strip() for p in parts if p.strip()]
 
 
 def split_words(text: str) -> list:
@@ -114,14 +114,14 @@ def analyze_text(text: str) -> dict:
     non_adverb = {"family", "early", "only", "likely", "nearly", "really",
                   "daily", "weekly", "monthly", "yearly", "friendly", "lovely",
                   "lonely", "lively", "elderly", "costly"}
-    adverbs = [a for a in adverb_matches if a.lower not in non_adverb]
+    adverbs = [a for a in adverb_matches if a.lower() not in non_adverb]
     adverb_density = round(len(adverbs) / num_words * 100, 1)
 
     # Filler words
-    text_lower = text.lower
-    word_tokens_lower = [w.lower for w in words]
+    text_lower = text.lower()
+    word_tokens_lower = [w.lower() for w in words]
     filler_found = {fw: word_tokens_lower.count(fw) for fw in FILLER_WORDS if fw in word_tokens_lower}
-    filler_total = sum(filler_found.values)
+    filler_total = sum(filler_found.values())
 
     # Scoring:
     # FRE already 0-100 (higher = easier = better for marketing copy)
@@ -197,20 +197,20 @@ builds trust. Vague promises are ignored.
 # Main
 # ---------------------------------------------------------------------------
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Readability scorer for marketing copy — Flesch, passive voice, filler words."
     )
     parser.add_argument("--file", help="Path to text file")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.file:
         with open(args.file, "r", encoding="utf-8", errors="replace") as f:
-            text = f.read
-    elif not sys.stdin.isatty:
-        text = sys.stdin.read
-        if not text.strip:
+            text = f.read()
+    elif not sys.stdin.isatty():
+        text = sys.stdin.read()
+        if not text.strip():
             text = DEMO_TEXT
             if not args.json:
                 print("No input provided — running in demo mode.\n")
@@ -245,17 +245,17 @@ def main:
     print("=" * 62)
     print(f"  {fre['label']}")
     print(f"  Target: {fre['target']}")
-    print
+    print()
     print(f"  📊 Stats")
     print(f"     Words:              {stats['word_count']}")
     print(f"     Sentences:          {stats['sentence_count']}")
     print(f"     Avg sentence length:{stats['avg_sentence_length']} words")
     print(f"     Avg word length:    {stats['avg_word_length']} chars")
     print(f"     Syllables/word:     {stats['avg_syllables_per_word']}")
-    print
+    print()
     print(f"  📐 Flesch-Kincaid Grade Level: {fk['grade_level']}")
     print(f"     {fk['note']}")
-    print
+    print()
 
     pv_icon = PASS if passive["pass"] else FAIL
     print(f"  {pv_icon} Passive Voice: {passive['count']} instances ({passive['percentage']}%)")
@@ -270,10 +270,10 @@ def main:
     fw_icon = PASS if filler_ok else FAIL
     print(f"  {fw_icon} Filler Words: {fillers['total_count']} total ({fillers['per_100_words']} per 100 words)")
     if fillers["breakdown"]:
-        top = sorted(fillers["breakdown"].items, key=lambda x: -x[1])[:5]
+        top = sorted(fillers["breakdown"].items(), key=lambda x: -x[1])[:5]
         print(f"     Top: {', '.join(f'{w}({c})' for w,c in top)}")
 
-    print
+    print()
     print("=" * 62)
     score_bar_len = round(score / 10)
     bar = "█" * score_bar_len + "░" * (10 - score_bar_len)
@@ -282,4 +282,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

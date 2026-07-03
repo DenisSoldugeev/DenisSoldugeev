@@ -51,7 +51,7 @@ class Migration:
 def parse_add_column(desc: str) -> Optional[dict]:
     """Parse: add <column> <type> to <table>"""
     m = re.match(
-        r'add\s+(?:column\s+)?(\w+)\s+(\w[\w,.]*)\s+(?:to|on)\s+(\w+)',
+        r'add\s+(?:column\s+)?(\w+)\s+(\w[\w(),.]*)\s+(?:to|on)\s+(\w+)',
         desc, re.IGNORECASE,
     )
     if m:
@@ -88,7 +88,7 @@ def parse_add_table(desc: str) -> Optional[dict]:
         desc, re.IGNORECASE,
     )
     if m:
-        cols = [c.strip for c in m.group(2).split(",")]
+        cols = [c.strip() for c in m.group(2).split(",")]
         return {"op": "add_table", "table": m.group(1), "columns": cols}
     return None
 
@@ -108,8 +108,8 @@ def parse_add_index(desc: str) -> Optional[dict]:
         desc, re.IGNORECASE,
     )
     if m:
-        unique = "unique" in desc.lower
-        cols = [c.strip for c in m.group(2).split(",")]
+        unique = "unique" in desc.lower()
+        cols = [c.strip() for c in m.group(2).split(",")]
         return {"op": "add_index", "table": m.group(1), "columns": cols, "unique": unique}
     return None
 
@@ -117,7 +117,7 @@ def parse_add_index(desc: str) -> Optional[dict]:
 def parse_change_type(desc: str) -> Optional[dict]:
     """Parse: change <column> type to <type> in <table>"""
     m = re.match(
-        r'change\s+(?:column\s+)?(\w+)\s+type\s+to\s+(\w[\w,.]*)\s+in\s+(\w+)',
+        r'change\s+(?:column\s+)?(\w+)\s+type\s+to\s+(\w[\w(),.]*)\s+in\s+(\w+)',
         desc, re.IGNORECASE,
     )
     if m:
@@ -165,10 +165,10 @@ TYPE_MAP = {
 
 def map_type(type_name: str, dialect: str) -> str:
     """Map a generic type name to a dialect-specific type."""
-    key = type_name.lower.rstrip("")
+    key = type_name.lower().rstrip("()")
     if key in TYPE_MAP and dialect in TYPE_MAP[key]:
         return TYPE_MAP[key][dialect]
-    return type_name.upper
+    return type_name.upper()
 
 
 def gen_add_column(change: dict, dialect: str) -> Tuple[str, str, List[str]]:
@@ -217,8 +217,8 @@ def gen_add_table(change: dict, dialect: str) -> Tuple[str, str, List[str]]:
     col_defs = []
     has_id = False
     for col in cols:
-        col = col.strip
-        if col.lower == "id":
+        col = col.strip()
+        if col.lower() == "id":
             has_id = True
             if dialect == "postgres":
                 col_defs.append("    id SERIAL PRIMARY KEY")
@@ -230,7 +230,7 @@ def gen_add_table(change: dict, dialect: str) -> Tuple[str, str, List[str]]:
                 col_defs.append("    id INT IDENTITY(1,1) PRIMARY KEY")
         else:
             # Check if type is specified (e.g., "rating int")
-            parts = col.split
+            parts = col.split()
             if len(parts) >= 2:
                 col_defs.append(f"    {parts[0]} {map_type(parts[1], dialect)}")
             else:
@@ -306,8 +306,8 @@ GENERATORS = {
 
 def wrap_sql(up: str, down: str, description: str) -> Tuple[str, str]:
     """Wrap as plain SQL migration files."""
-    timestamp = datetime.now.strftime("%Y%m%d%H%M%S")
-    header = f"-- Migration: {description}\n-- Generated: {datetime.now.isoformat}\n\n"
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    header = f"-- Migration: {description}\n-- Generated: {datetime.now().isoformat()}\n\n"
     return header + "-- Up\n" + up, header + "-- Down\n" + down
 
 
@@ -319,8 +319,8 @@ def wrap_prisma(up: str, down: str, description: str) -> Tuple[str, str]:
 
 def wrap_alembic(up: str, down: str, description: str) -> Tuple[str, str]:
     """Format as Alembic Python migration."""
-    slug = re.sub(r'\W+', '_', description.lower)[:40]
-    revision = datetime.now.strftime("%Y%m%d%H%M")
+    slug = re.sub(r'\W+', '_', description.lower())[:40]
+    revision = datetime.now().strftime("%Y%m%d%H%M")
     template = textwrap.dedent(f'''\
         """
         {description}
@@ -334,13 +334,13 @@ def wrap_alembic(up: str, down: str, description: str) -> Tuple[str, str]:
         down_revision = None  # Set to previous revision
 
 
-        def upgrade:
+        def upgrade():
             op.execute("""
         {textwrap.indent(up, "        ")}
             """)
 
 
-        def downgrade:
+        def downgrade():
             op.execute("""
         {textwrap.indent(down, "        ")}
             """)
@@ -359,7 +359,7 @@ FORMATTERS = {
 # CLI
 # ---------------------------------------------------------------------------
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Generate database migration templates from change descriptions.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -387,7 +387,7 @@ Examples:
                         dest="fmt", help="Output format (default: sql)")
     parser.add_argument("--output", help="Write migration to file instead of stdout")
     parser.add_argument("--json", action="store_true", dest="json_output", help="Output as JSON")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     change = parse_change(args.change)
     if not change:
@@ -415,7 +415,7 @@ Examples:
     )
 
     if args.json_output:
-        print(json.dumps(migration.to_dict, indent=2))
+        print(json.dumps(migration.to_dict(), indent=2))
     else:
         if args.output:
             with open(args.output, "w") as f:
@@ -439,4 +439,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

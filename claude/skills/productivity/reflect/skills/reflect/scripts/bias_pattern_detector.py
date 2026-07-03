@@ -136,7 +136,7 @@ def detect_biases(conversation: str) -> Dict[str, Any]:
             ),
         }
 
-    detected_biases = [b for b, d in results.items if d["detected"]]
+    detected_biases = [b for b, d in results.items() if d["detected"]]
     return {
         "biases_detected": detected_biases,
         "biases_clear": [b for b in results if b not in detected_biases],
@@ -151,7 +151,7 @@ def render_human(result: Dict[str, Any]) -> str:
         for bias in result["biases_detected"]:
             d = result["details"][bias]
             out.append(f"")
-            out.append(f"  [!] {bias.upper}")
+            out.append(f"  [!] {bias.upper()}")
             out.append(f"      Rationale: {d['rationale']}")
             if "match_examples" in d and d["match_examples"]:
                 out.append(f"      Example matches: {d['match_examples']}")
@@ -180,12 +180,12 @@ def main(argv: List[str]) -> int:
         text = SAMPLE_CONVERSATION
     elif args.conversation:
         p = Path(args.conversation)
-        if not p.exists:
+        if not p.exists():
             print(f"error: {args.conversation} not found", file=sys.stderr)
             return 2
         text = p.read_text(encoding="utf-8")
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     result = detect_biases(text)

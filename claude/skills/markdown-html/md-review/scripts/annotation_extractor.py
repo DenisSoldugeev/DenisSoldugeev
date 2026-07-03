@@ -60,8 +60,8 @@ def extract_annotations(
     severity_convention: list[str],
 ) -> dict[str, Any]:
     """Returns {annotations: [...], approvals: [...], summary: {...}}."""
-    lines = text.splitlines
-    upper_severities = {s.upper for s in severity_convention}
+    lines = text.splitlines()
+    upper_severities = {s.upper() for s in severity_convention}
 
     # Index of diff-block source lines, for attachment lookup
     diff_source_lines: list[tuple[int, int]] = []  # (source_line, block_index)
@@ -88,7 +88,7 @@ def extract_annotations(
         # GFM callout (multi-line)
         m_open = CALLOUT_OPEN_RE.match(ln)
         if m_open:
-            severity_raw = m_open.group(1).upper
+            severity_raw = m_open.group(1).upper()
             body_lines: list[str] = []
             j = i + 1
             while j < len(lines):
@@ -102,9 +102,9 @@ def extract_annotations(
                     "kind": "callout",
                     "severity": severity_raw,
                     "severity_rank": severity_convention.index(
-                        next(s for s in severity_convention if s.upper == severity_raw)
+                        next(s for s in severity_convention if s.upper() == severity_raw)
                     ),
-                    "body": " ".join(b.strip for b in body_lines).strip,
+                    "body": " ".join(b.strip() for b in body_lines).strip(),
                     "source_line": i,
                     "attached_block": nearest_preceding_block(i),
                 })
@@ -112,10 +112,10 @@ def extract_annotations(
             continue
 
         # Approval marker (LGTM, etc.)
-        if APPROVAL_RE.match(ln.strip):
+        if APPROVAL_RE.match(ln.strip()):
             approvals.append({
                 "kind": "approval",
-                "marker": ln.strip,
+                "marker": ln.strip(),
                 "source_line": i,
                 "attached_block": nearest_preceding_block(i),
             })
@@ -123,17 +123,17 @@ def extract_annotations(
             continue
 
         # Inline marker (single-line, prose-leading)
-        m_inline = INLINE_MARKER_RE.match(ln.strip)
+        m_inline = INLINE_MARKER_RE.match(ln.strip())
         if m_inline:
-            sev_raw = m_inline.group("sev").upper
+            sev_raw = m_inline.group("sev").upper()
             if sev_raw in upper_severities:
                 annotations.append({
                     "kind": "inline",
                     "severity": sev_raw,
                     "severity_rank": severity_convention.index(
-                        next(s for s in severity_convention if s.upper == sev_raw)
+                        next(s for s in severity_convention if s.upper() == sev_raw)
                     ),
-                    "body": m_inline.group("body").strip,
+                    "body": m_inline.group("body").strip(),
                     "source_line": i,
                     "attached_block": nearest_preceding_block(i),
                 })
@@ -172,24 +172,24 @@ def main(argv: list[str]) -> int:
                    help="Run on a built-in sample PR review")
     args = p.parse_args(argv)
 
-    severity_convention = [s.strip.upper for s in args.severity_convention.split(",")]
+    severity_convention = [s.strip().upper() for s in args.severity_convention.split(",")]
     if len(severity_convention) < 2:
         print("error: --severity-convention needs at least 2 tiers", file=sys.stderr)
         return 2
 
     if args.sample:
-        sys.path.insert(0, str(Path(__file__).resolve.parent))
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
         import diff_parser
         text = diff_parser.SAMPLE_MARKDOWN
         diff_blocks = diff_parser.parse_markdown_for_diffs(text)
     elif args.input:
-        text = sys.stdin.read if args.input == "-" else Path(args.input).read_text(encoding="utf-8")
+        text = sys.stdin.read() if args.input == "-" else Path(args.input).read_text(encoding="utf-8")
         diff_blocks = (
             json.loads(Path(args.diff_blocks).read_text(encoding="utf-8"))
             if args.diff_blocks else None
         )
     else:
-        p.print_help
+        p.print_help()
         return 0
 
     result = extract_annotations(text, diff_blocks, severity_convention)

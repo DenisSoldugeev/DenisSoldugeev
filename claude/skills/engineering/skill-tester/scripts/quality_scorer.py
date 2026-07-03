@@ -8,6 +8,8 @@ Generates letter grades, tier recommendations, and improvement roadmaps.
 
 Usage:
     python quality_scorer.py <skill_path> [--detailed] [--minimum-score SCORE] [--json]
+
+Author: Claude Skills Engineering Team
 Version: 2.0.0
 Dependencies: Python Standard Library Only
 Changelog:
@@ -39,12 +41,12 @@ except ImportError:
         @staticmethod
         def safe_load(text):
             result = {}
-            for line in text.strip.splitlines:
+            for line in text.strip().splitlines():
                 if ':' in line:
                     key, _, value = line.partition(':')
-                    result[key.strip] = value.strip
+                    result[key.strip()] = value.strip()
             return result if result else None
-    yaml = _YamlStub
+    yaml = _YamlStub()
 
 
 class QualityDimension:
@@ -74,8 +76,8 @@ class QualityDimension:
             self.score = 0.0
             return
             
-        total_score = sum(detail["score"] for detail in self.details.values)
-        total_max = sum(detail["max_score"] for detail in self.details.values)
+        total_score = sum(detail["score"] for detail in self.details.values())
+        total_max = sum(detail["max_score"] for detail in self.details.values())
         
         self.score = (total_score / total_max * 100) if total_max > 0 else 0.0
         
@@ -89,7 +91,7 @@ class QualityReport:
     
     def __init__(self, skill_path: str):
         self.skill_path = skill_path
-        self.timestamp = datetime.utcnow.isoformat + "Z"
+        self.timestamp = datetime.utcnow().isoformat() + "Z"
         self.dimensions = {}
         self.overall_score = 0.0
         self.letter_grade = "F"
@@ -109,7 +111,7 @@ class QualityReport:
         total_weighted_score = 0.0
         total_weight = 0.0
         
-        for dimension in self.dimensions.values:
+        for dimension in self.dimensions.values():
             total_weighted_score += dimension.score * dimension.weight
             total_weight += dimension.weight
             
@@ -140,13 +142,13 @@ class QualityReport:
             self.letter_grade = "F"
             
         # Recommend tier based on overall score and specific criteria
-        self._calculate_tier_recommendation
+        self._calculate_tier_recommendation()
         
         # Generate improvement roadmap
-        self._generate_improvement_roadmap
+        self._generate_improvement_roadmap()
         
         # Calculate summary statistics
-        self._calculate_summary_stats
+        self._calculate_summary_stats()
         
     def _calculate_tier_recommendation(self):
         """Calculate recommended tier based on quality scores"""
@@ -191,7 +193,7 @@ class QualityReport:
         all_suggestions = []
         
         # Collect suggestions from all dimensions with scores
-        for dim_name, dimension in self.dimensions.items:
+        for dim_name, dimension in self.dimensions.items():
             for suggestion in dimension.suggestions:
                 priority = "HIGH" if dimension.score < 60 else "MEDIUM" if dimension.score < 75 else "LOW"
                 all_suggestions.append({
@@ -209,11 +211,11 @@ class QualityReport:
         
     def _calculate_summary_stats(self):
         """Calculate summary statistics"""
-        scores = [dim.score for dim in self.dimensions.values]
+        scores = [dim.score for dim in self.dimensions.values()]
         
         self.summary_stats = {
-            "highest_dimension": max(self.dimensions.items, key=lambda x: x[1].score)[0] if scores else "None",
-            "lowest_dimension": min(self.dimensions.items, key=lambda x: x[1].score)[0] if scores else "None",
+            "highest_dimension": max(self.dimensions.items(), key=lambda x: x[1].score)[0] if scores else "None",
+            "lowest_dimension": min(self.dimensions.items(), key=lambda x: x[1].score)[0] if scores else "None",
             "score_variance": sum((score - self.overall_score) ** 2 for score in scores) / len(scores) if scores else 0,
             "dimensions_above_70": sum(1 for score in scores if score >= 70),
             "dimensions_below_50": sum(1 for score in scores if score < 50)
@@ -224,7 +226,7 @@ class QualityScorer:
     """Main quality scoring engine"""
     
     def __init__(self, skill_path: str, detailed: bool = False, verbose: bool = False, include_security: bool = False):
-        self.skill_path = Path(skill_path).resolve
+        self.skill_path = Path(skill_path).resolve()
         self.detailed = detailed
         self.verbose = verbose
         self.include_security = include_security
@@ -241,7 +243,7 @@ class QualityScorer:
             self.log_verbose(f"Starting quality assessment for {self.skill_path}")
             
             # Check if skill path exists
-            if not self.skill_path.exists:
+            if not self.skill_path.exists():
                 raise ValueError(f"Skill path does not exist: {self.skill_path}")
                 
             # Score each dimension
@@ -260,7 +262,7 @@ class QualityScorer:
                 self._score_usability(0.25)
             
             # Calculate overall metrics
-            self.report.calculate_overall_score
+            self.report.calculate_overall_score()
             
             self.log_verbose(f"Quality assessment completed. Overall score: {self.report.overall_score:.1f}")
             
@@ -288,21 +290,21 @@ class QualityScorer:
         # Score examples and usage clarity
         self._score_examples(dimension)
         
-        dimension.calculate_final_score
+        dimension.calculate_final_score()
         self.report.add_dimension(dimension)
         
     def _score_skill_md(self, dimension: QualityDimension):
         """Score SKILL.md quality"""
         skill_md_path = self.skill_path / "SKILL.md"
         
-        if not skill_md_path.exists:
+        if not skill_md_path.exists():
             dimension.add_score("skill_md_existence", 0, 25, "SKILL.md does not exist")
             dimension.add_suggestion("Create comprehensive SKILL.md file")
             return
             
         try:
             content = skill_md_path.read_text(encoding='utf-8')
-            lines = [line for line in content.split('\n') if line.strip]
+            lines = [line for line in content.split('\n') if line.strip()]
             
             # Score based on length and depth
             line_count = len(lines)
@@ -355,7 +357,7 @@ class QualityScorer:
             if end_marker == -1:
                 return 5
                 
-            frontmatter_text = content[3:end_marker].strip
+            frontmatter_text = content[3:end_marker].strip()
             frontmatter = yaml.safe_load(frontmatter_text)
             
             if not isinstance(frontmatter, dict):
@@ -373,8 +375,8 @@ class QualityScorer:
             
             # Quality of field values (5 points)
             quality_bonus = 0
-            for field, value in frontmatter.items:
-                if isinstance(value, str) and len(value.strip) > 3:
+            for field, value in frontmatter.items():
+                if isinstance(value, str) and len(value.strip()) > 3:
                     quality_bonus += 0.5
                     
             score += min(quality_bonus, 5)
@@ -420,7 +422,7 @@ class QualityScorer:
         # Technical depth indicators (8 points)
         depth_indicators = ['API', 'algorithm', 'architecture', 'implementation', 'performance', 
                            'scalability', 'security', 'integration', 'configuration', 'parameters']
-        depth_score = sum(1 for indicator in depth_indicators if indicator.lower in content.lower)
+        depth_score = sum(1 for indicator in depth_indicators if indicator.lower() in content.lower())
         score += min(depth_score * 0.8, 8)
         
         # Usage examples (9 points)
@@ -434,7 +436,7 @@ class QualityScorer:
         """Score README.md quality"""
         readme_path = self.skill_path / "README.md"
         
-        if not readme_path.exists:
+        if not readme_path.exists():
             dimension.add_score("readme_existence", 10, 25, "README.md exists (partial credit)")
             dimension.add_suggestion("Create README.md with usage instructions")
             return
@@ -443,11 +445,11 @@ class QualityScorer:
             content = readme_path.read_text(encoding='utf-8')
             
             # Length and substance
-            if len(content.strip) >= 1000:
+            if len(content.strip()) >= 1000:
                 length_score = 25
-            elif len(content.strip) >= 500:
+            elif len(content.strip()) >= 500:
                 length_score = 20
-            elif len(content.strip) >= 200:
+            elif len(content.strip()) >= 200:
                 length_score = 15
             else:
                 length_score = 10
@@ -455,7 +457,7 @@ class QualityScorer:
             dimension.add_score("readme_quality", length_score, 25,
                                f"README.md content quality ({len(content)} characters)")
                                
-            if len(content.strip) < 500:
+            if len(content.strip()) < 500:
                 dimension.add_suggestion("Expand README.md with more detailed usage examples")
                 
         except Exception:
@@ -465,7 +467,7 @@ class QualityScorer:
         """Score reference documentation quality"""
         references_dir = self.skill_path / "references"
         
-        if not references_dir.exists:
+        if not references_dir.exists():
             dimension.add_score("references_existence", 0, 25, "No references directory")
             dimension.add_suggestion("Add references directory with documentation")
             return
@@ -485,7 +487,7 @@ class QualityScorer:
         for ref_file in ref_files:
             try:
                 content = ref_file.read_text(encoding='utf-8')
-                total_content += len(content.strip)
+                total_content += len(content.strip())
             except:
                 continue
                 
@@ -505,7 +507,7 @@ class QualityScorer:
         
         for location in example_locations:
             location_path = self.skill_path / location
-            if location_path.exists:
+            if location_path.exists():
                 example_files.extend(location_path.glob("*example*"))
                 example_files.extend(location_path.glob("*sample*"))
                 example_files.extend(location_path.glob("*demo*"))
@@ -531,10 +533,10 @@ class QualityScorer:
         dimension = QualityDimension("Code Quality", weight, "Quality of Python scripts and implementation")
         
         scripts_dir = self.skill_path / "scripts"
-        if not scripts_dir.exists:
+        if not scripts_dir.exists():
             dimension.add_score("scripts_existence", 0, 100, "No scripts directory")
             dimension.add_suggestion("Create scripts directory with Python files")
-            dimension.calculate_final_score
+            dimension.calculate_final_score()
             self.report.add_dimension(dimension)
             return
             
@@ -542,7 +544,7 @@ class QualityScorer:
         if not python_files:
             dimension.add_score("python_scripts", 0, 100, "No Python scripts found")
             dimension.add_suggestion("Add Python scripts to scripts directory")
-            dimension.calculate_final_score
+            dimension.calculate_final_score()
             self.report.add_dimension(dimension)
             return
             
@@ -558,7 +560,7 @@ class QualityScorer:
         # Score output format support
         self._score_output_support(python_files, dimension)
         
-        dimension.calculate_final_score
+        dimension.calculate_final_score()
         self.report.add_dimension(dimension)
         
     def _score_script_complexity(self, python_files: List[Path], dimension: QualityDimension):
@@ -572,7 +574,7 @@ class QualityScorer:
                 
                 # Count lines of code (excluding empty lines and comments)
                 lines = content.split('\n')
-                loc = len([line for line in lines if line.strip and not line.strip.startswith('#')])
+                loc = len([line for line in lines if line.strip() and not line.strip().startswith('#')])
                 
                 # Score based on LOC
                 if loc >= 800:
@@ -662,7 +664,7 @@ class QualityScorer:
                     structure_score += 3
                     
                 # Check for imports organization
-                if content.lstrip.startswith(('import ', 'from ')):
+                if content.lstrip().startswith(('import ', 'from ')):
                     structure_score += 2  # Imports at top
                     
                 total_structure_score += min(structure_score, 25)
@@ -729,7 +731,7 @@ class QualityScorer:
         # Score test coverage
         self._score_test_coverage(dimension)
         
-        dimension.calculate_final_score
+        dimension.calculate_final_score()
         self.report.add_dimension(dimension)
         
     def _score_directory_structure(self, dimension: QualityDimension):
@@ -741,13 +743,13 @@ class QualityScorer:
         
         # Required directories (15 points)
         for dir_name in required_dirs:
-            if (self.skill_path / dir_name).exists:
+            if (self.skill_path / dir_name).exists():
                 score += 15 / len(required_dirs)
                 
         # Recommended directories (10 points)
         present_recommended = 0
         for dir_name in recommended_dirs:
-            if (self.skill_path / dir_name).exists:
+            if (self.skill_path / dir_name).exists():
                 present_recommended += 1
                 
         score += (present_recommended / len(recommended_dirs)) * 10
@@ -755,7 +757,7 @@ class QualityScorer:
         dimension.add_score("directory_structure", score, 25,
                            f"Directory structure completeness")
                            
-        missing_recommended = [d for d in recommended_dirs if not (self.skill_path / d).exists]
+        missing_recommended = [d for d in recommended_dirs if not (self.skill_path / d).exists()]
         if missing_recommended:
             dimension.add_suggestion(f"Add recommended directories: {', '.join(missing_recommended)}")
             
@@ -763,12 +765,12 @@ class QualityScorer:
         """Score asset availability and quality"""
         assets_dir = self.skill_path / "assets"
         
-        if not assets_dir.exists:
+        if not assets_dir.exists():
             dimension.add_score("assets_existence", 5, 25, "Assets directory missing")
             dimension.add_suggestion("Create assets directory with sample data")
             return
             
-        asset_files = [f for f in assets_dir.rglob("*") if f.is_file]
+        asset_files = [f for f in assets_dir.rglob("*") if f.is_file()]
         
         if not asset_files:
             dimension.add_score("assets_content", 10, 25, "Assets directory empty")
@@ -779,7 +781,7 @@ class QualityScorer:
         score = min(len(asset_files) * 3, 20)  # Up to 20 points for multiple assets
         
         # Bonus for diverse file types
-        extensions = set(f.suffix.lower for f in asset_files if f.suffix)
+        extensions = set(f.suffix.lower() for f in asset_files if f.suffix)
         if len(extensions) >= 3:
             score += 5  # Bonus for file type diversity
             
@@ -790,12 +792,12 @@ class QualityScorer:
         """Score expected outputs availability"""
         expected_dir = self.skill_path / "expected_outputs"
         
-        if not expected_dir.exists:
+        if not expected_dir.exists():
             dimension.add_score("expected_outputs", 10, 25, "Expected outputs directory missing")
             dimension.add_suggestion("Add expected_outputs directory with sample results")
             return
             
-        output_files = [f for f in expected_dir.rglob("*") if f.is_file]
+        output_files = [f for f in expected_dir.rglob("*") if f.is_file()]
         
         if len(output_files) >= 3:
             score = 25
@@ -851,7 +853,7 @@ class QualityScorer:
         # Score practical examples
         self._score_practical_examples(dimension)
         
-        dimension.calculate_final_score
+        dimension.calculate_final_score()
         self.report.add_dimension(dimension)
         
     def _score_installation(self, dimension: QualityDimension):
@@ -860,11 +862,11 @@ class QualityScorer:
         score = 25  # Start with full points for standard library only approach
         
         # Check for requirements.txt or setup.py (would reduce score)
-        if (self.skill_path / "requirements.txt").exists:
+        if (self.skill_path / "requirements.txt").exists():
             score -= 5  # Minor penalty for external dependencies
             dimension.add_suggestion("Consider removing external dependencies for easier installation")
             
-        if (self.skill_path / "setup.py").exists:
+        if (self.skill_path / "setup.py").exists():
             score -= 3  # Minor penalty for complex setup
             
         dimension.add_score("installation_simplicity", max(score, 15), 25,
@@ -876,9 +878,9 @@ class QualityScorer:
         
         # Check README for usage instructions
         readme_path = self.skill_path / "README.md"
-        if readme_path.exists:
+        if readme_path.exists():
             try:
-                content = readme_path.read_text(encoding='utf-8').lower
+                content = readme_path.read_text(encoding='utf-8').lower()
                 if 'usage' in content or 'how to' in content:
                     score += 10
                 if 'example' in content:
@@ -888,7 +890,7 @@ class QualityScorer:
                 
         # Check scripts for help text quality
         scripts_dir = self.skill_path / "scripts"
-        if scripts_dir.exists:
+        if scripts_dir.exists():
             python_files = list(scripts_dir.glob("*.py"))
             help_quality = 0
             
@@ -913,7 +915,7 @@ class QualityScorer:
         
         # Check for comprehensive help in scripts
         scripts_dir = self.skill_path / "scripts"
-        if scripts_dir.exists:
+        if scripts_dir.exists():
             python_files = list(scripts_dir.glob("*.py"))
             
             for script_path in python_files:
@@ -925,7 +927,7 @@ class QualityScorer:
                         score += 5  # Detailed help
                         
                     # Check for examples in help
-                    if 'examples:' in content.lower or 'example:' in content.lower:
+                    if 'examples:' in content.lower() or 'example:' in content.lower():
                         score += 3  # Examples in help
                         
                 except:
@@ -985,14 +987,14 @@ class QualityScorer:
         if not python_files:
             dimension.add_score("scripts_existence", 25, 25, 
                                "No scripts directory - no script security concerns")
-            dimension.calculate_final_score
+            dimension.calculate_final_score()
             self.report.add_dimension(dimension)
             return
         
         # Use SecurityScorer module
         try:
             scorer = SecurityScorer(python_files, verbose=self.verbose)
-            result = scorer.get_overall_score
+            result = scorer.get_overall_score()
             
             # Extract scores from SecurityScorer result
             sensitive_data_score = result.get("sensitive_data_exposure", {}).get("score", 0)
@@ -1018,7 +1020,7 @@ class QualityScorer:
             dimension.add_score("security_error", 0, 100, f"Security scoring failed: {str(e)}")
             dimension.add_suggestion("Fix security scoring module integration")
         
-        dimension.calculate_final_score
+        dimension.calculate_final_score()
         self.report.add_dimension(dimension)
 
 
@@ -1044,7 +1046,7 @@ class QualityReportFormatter:
                     "details": dim.details,
                     "suggestions": dim.suggestions
                 }
-                for name, dim in report.dimensions.items
+                for name, dim in report.dimensions.items()
             },
             "improvement_roadmap": report.improvement_roadmap
         }, indent=2)
@@ -1064,10 +1066,10 @@ class QualityReportFormatter:
         
         # Dimension scores
         lines.append("QUALITY DIMENSIONS:")
-        for name, dimension in report.dimensions.items:
+        for name, dimension in report.dimensions.items():
             lines.append(f"  {name}: {dimension.score:.1f}/100 ({dimension.weight * 100:.0f}% weight)")
             if detailed and dimension.details:
-                for component, details in dimension.details.items:
+                for component, details in dimension.details.items():
                     lines.append(f"    • {component}: {details['score']:.1f}/{details['max_score']} - {details['details']}")
             lines.append("")
             
@@ -1091,7 +1093,7 @@ class QualityReportFormatter:
         return "\n".join(lines)
 
 
-def main:
+def main():
     """Main entry point"""
     parser = argparse.ArgumentParser(
         description="Score skill quality across multiple dimensions",
@@ -1135,12 +1137,12 @@ Letter Grades: A+ (95+), A (90+), A- (85+), B+ (80+), B (75+), B- (70+), C+ (65+
                        action="store_true",
                        help="Include Security dimension (switches to 5 dimensions × 20%% each)")
                        
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Create scorer and assess quality
         scorer = QualityScorer(args.skill_path, args.detailed, args.verbose, args.include_security)
-        report = scorer.assess_quality
+        report = scorer.assess_quality()
         
         # Format and output report
         if args.json:
@@ -1172,9 +1174,9 @@ Letter Grades: A+ (95+), A (90+), A- (85+), B+ (80+), B (75+), B- (70+), C+ (65+
         print(f"Quality assessment failed: {str(e)}", file=sys.stderr)
         if args.verbose:
             import traceback
-            traceback.print_exc
+            traceback.print_exc()
         sys.exit(1)
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -119,13 +119,13 @@ def scan_log(text: str) -> Dict[str, Any]:
     findings: List[Dict[str, Any]] = []
     draft_count = 0
 
-    for line_no, line in enumerate(text.splitlines, start=1):
+    for line_no, line in enumerate(text.splitlines(), start=1):
         for pattern in SEND_PATTERNS:
             if pattern.search(line):
                 findings.append({
                     "line": line_no,
                     "pattern": pattern.pattern,
-                    "text": line.strip[:200],
+                    "text": line.strip()[:200],
                 })
         for pattern in DRAFT_INDICATORS:
             if pattern.search(line):
@@ -179,11 +179,11 @@ def main(argv: List[str]) -> int:
         text = SAMPLE_FAIL_LOG
     elif args.action_log:
         p = Path(args.action_log)
-        if not p.exists:
+        if not p.exists():
             print(f"error: {args.action_log} not found", file=sys.stderr); return 2
         text = p.read_text(encoding="utf-8")
     else:
-        parser.print_help; return 0
+        parser.print_help(); return 0
 
     result = scan_log(text)
     if args.output == "json":

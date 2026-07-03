@@ -32,11 +32,11 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 
 ## Security
 
-- Flag `gets` — no bounds checking, always a buffer overflow; replace with `fgets`
-- Flag `strcpy` / `strcat` — use `strncpy` / `strncat` with explicit size, or `strlcpy` / `strlcat`
-- Flag `sprintf` — use `snprintf` with explicit buffer size
+- Flag `gets()` — no bounds checking, always a buffer overflow; replace with `fgets()`
+- Flag `strcpy()` / `strcat()` — use `strncpy()` / `strncat()` with explicit size, or `strlcpy()` / `strlcat()`
+- Flag `sprintf()` — use `snprintf()` with explicit buffer size
 - Flag `scanf("%s", buf)` without a width specifier — unbounded read
-- Flag `strlen` result used as a signed integer — potential truncation on 64-bit
+- Flag `strlen()` result used as a signed integer — potential truncation on 64-bit
 - Flag user-controlled data used as a format string (`printf(user_input)`) — format string attack
 - Flag integer arithmetic used as array index without bounds check
 - Flag signed integer overflow — undefined behavior in C
@@ -69,13 +69,13 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 - Flag `errno` checked after a function that doesn't set it, or not checked immediately after one that does
 - Flag `perror` / `strerror` as the sole error handling in library code — propagate errors to callers
 - Flag functions that return `-1` on error without documenting which `errno` values are possible
-- Flag `assert` used for runtime error handling — disabled by `NDEBUG` in production builds
+- Flag `assert()` used for runtime error handling — disabled by `NDEBUG` in production builds
 
 ---
 
 ## Performance
 
-- Flag `strlen` called repeatedly on the same string in a loop — cache the result
+- Flag `strlen()` called repeatedly on the same string in a loop — cache the result
 - Flag unnecessary copies of large structs passed by value — pass by pointer
 - Flag `memcpy` / `memset` on overlapping regions — use `memmove` for overlapping
 - Flag repeated heap allocations in a tight loop — consider a pool or stack allocation

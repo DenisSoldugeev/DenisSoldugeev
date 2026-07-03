@@ -44,7 +44,7 @@
   role="button"
   tabIndex={0}
   onClick={handleClick}
-  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick; }}
+  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
 >
   Click me
 </div>
@@ -57,11 +57,11 @@
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-export function RouteAnnouncer {
-  const pathname = usePathname;
+export function RouteAnnouncer() {
+  const pathname = usePathname();
   const [announcement, setAnnouncement] = useState('');
 
-  useEffect( => {
+  useEffect(() => {
     const title = document.title;
     setAnnouncement(`Navigated to ${title}`);
   }, [pathname]);
@@ -121,8 +121,8 @@ import { ref } from 'vue';
 const results = ref([]);
 const announcement = ref('');
 
-async function search {
-  results.value = await fetchResults;
+async function search() {
+  results.value = await fetchResults();
   announcement.value = `${results.value.length} results found`;
 }
 </script>
@@ -145,8 +145,8 @@ const nameInput = ref(null);
 
 watch(showForm, async (val) => {
   if (val) {
-    await nextTick;
-    nameInput.value?.focus;
+    await nextTick();
+    nameInput.value?.focus();
   }
 });
 </script>
@@ -180,7 +180,7 @@ export class MyComponent {
 
   openDialog(element: HTMLElement) {
     const focusTrap = this.focusTrapFactory.create(element);
-    focusTrap.focusInitialElement;
+    focusTrap.focusInitialElement();
   }
 }
 ```
@@ -217,7 +217,7 @@ export class MyComponent {
 
 <!-- ✅ Accessible toggle -->
 <button
-  on:click={ => isOpen = !isOpen}
+  on:click={() => isOpen = !isOpen}
   aria-expanded={isOpen}
   aria-controls="panel"
 >
@@ -368,19 +368,19 @@ function Modal({ isOpen, onClose, children, title }) {
   const modalRef = useRef(null);
   const previousFocus = useRef(null);
 
-  useEffect( => {
+  useEffect(() => {
     if (isOpen) {
       previousFocus.current = document.activeElement;
-      modalRef.current?.focus;
+      modalRef.current?.focus();
     } else {
-      previousFocus.current?.focus;
+      previousFocus.current?.focus();
     }
   }, [isOpen]);
 
-  useEffect( => {
+  useEffect(() => {
     if (!isOpen) return;
     const handleKeydown = (e) => {
-      if (e.key === 'Escape') onClose;
+      if (e.key === 'Escape') onClose();
       if (e.key === 'Tab') {
         const focusable = modalRef.current?.querySelectorAll(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -389,16 +389,16 @@ function Modal({ isOpen, onClose, children, title }) {
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
         if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault;
-          last.focus;
+          e.preventDefault();
+          last.focus();
         } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault;
-          first.focus;
+          e.preventDefault();
+          first.focus();
         }
       }
     };
     document.addEventListener('keydown', handleKeydown);
-    return  => document.removeEventListener('keydown', handleKeydown);
+    return () => document.removeEventListener('keydown', handleKeydown);
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
@@ -411,7 +411,7 @@ function Modal({ isOpen, onClose, children, title }) {
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        onClick={(e) => e.stopPropagation}
+        onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
@@ -510,7 +510,7 @@ router.afterEach((to) => {
 @Component({
   selector: 'app-dropdown',
   template: `
-    <div (click)="toggle">{{ selected }}</div>
+    <div (click)="toggle()">{{ selected }}</div>
     <div *ngIf="isOpen">
       <div *ngFor="let opt of options" (click)="select(opt)">{{ opt }}</div>
     </div>
@@ -526,7 +526,7 @@ router.afterEach((to) => {
       [attr.aria-expanded]="isOpen"
       aria-haspopup="listbox"
       [attr.aria-label]="label"
-      (click)="toggle"
+      (click)="toggle()"
       (keydown)="handleKeydown($event)"
     >
       {{ selected }}

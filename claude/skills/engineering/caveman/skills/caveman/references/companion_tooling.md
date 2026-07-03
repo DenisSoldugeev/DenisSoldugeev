@@ -20,7 +20,7 @@ All three tools:
 
 The estimator uses character-per-token approximations:
 - **4.0 chars/token** for English prose
-- **3.5 chars/token** for technical text (detected by presence of `{`, `}`, ``, `->`, `==`, `//`, etc.)
+- **3.5 chars/token** for technical text (detected by presence of `{`, `}`, `()`, `->`, `==`, `//`, etc.)
 
 This is within 10-15% of cl100k_base / o200k_base tokenizers for English. For exact token counts use the model's actual tokenizer (e.g., `tiktoken`).
 

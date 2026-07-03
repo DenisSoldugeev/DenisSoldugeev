@@ -163,7 +163,7 @@ CONTROL_TO_THEME: Dict[str, str] = {
 }
 
 
-def _severity_rotation -> List[str]:
+def _severity_rotation() -> List[str]:
     return [
         "observation", "observation", "observation", "minor", "major",
         "observation", "minor", "observation", "major", "critical",
@@ -179,7 +179,7 @@ def generate_findings(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
 
     # Rotate severities to hit IIA-target distribution
     # Target: >= 40% observation, ~25% minor, ~20% major, <= 15% critical
-    severity_order = _severity_rotation
+    severity_order = _severity_rotation()
     # Pad if scope is large
     while len(severity_order) < len(scope) + 5:
         severity_order += severity_order
@@ -336,13 +336,13 @@ def render_text(r: Dict[str, Any], source: str) -> str:
     lines.append("")
     for f in r["findings"]:
         marker = "🔥 FOLLOW-UP" if f["follow_up_from_prior"] else ""
-        lines.append(f"  [{f['id']}] [{f['severity'].upper:12s}] control={f['control']:12s}  theme={f['theme']:20s}  {marker}")
+        lines.append(f"  [{f['id']}] [{f['severity'].upper():12s}] control={f['control']:12s}  theme={f['theme']:20s}  {marker}")
         lines.append(f"        {f['description']}")
         lines.append("")
 
     lines.append("-" * 72)
     lines.append("INTERVIEW QUESTIONS PER CONTROL:")
-    for ctrl, qs in r["interview_questions_per_control"].items:
+    for ctrl, qs in r["interview_questions_per_control"].items():
         lines.append(f"  {ctrl}:")
         for q in qs:
             lines.append(f"    - {q}")
@@ -359,7 +359,7 @@ def render_text(r: Dict[str, Any], source: str) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Mock internal audit generator per ISO 19011 + IIA IPPF + AICPA AT-C.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -367,7 +367,7 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to audit scope JSON (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
@@ -393,4 +393,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

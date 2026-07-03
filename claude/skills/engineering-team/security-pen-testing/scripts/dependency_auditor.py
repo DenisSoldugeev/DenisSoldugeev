@@ -5,15 +5,15 @@ Dependency Auditor - Analyze package manifests for known vulnerable patterns.
 Table of Contents:
     DependencyAuditor - Main class for dependency vulnerability analysis
         __init__              - Initialize with manifest path and severity filter
-        audit               - Run full audit on the manifest
-        _parse_manifest     - Detect and parse the manifest file
-        _parse_package_json - Parse npm package.json
-        _parse_requirements - Parse pip requirements.txt
-        _parse_go_mod       - Parse Go go.mod
-        _parse_gemfile      - Parse Ruby Gemfile
-        _check_vulnerabilities - Check packages against known CVE patterns
-        _check_risky_patterns  - Detect risky dependency patterns
-    main - CLI entry point
+        audit()               - Run full audit on the manifest
+        _parse_manifest()     - Detect and parse the manifest file
+        _parse_package_json() - Parse npm package.json
+        _parse_requirements() - Parse pip requirements.txt
+        _parse_go_mod()       - Parse Go go.mod
+        _parse_gemfile()      - Parse Ruby Gemfile
+        _check_vulnerabilities() - Check packages against known CVE patterns
+        _check_risky_patterns()  - Detect risky dependency patterns
+    main() - CLI entry point
 
 Usage:
     python dependency_auditor.py --file package.json
@@ -129,8 +129,8 @@ class DependencyAuditor:
         {"ecosystem": "pypi", "package": "pyyaml", "below": "6.0.1",
          "cve": "CVE-2020-14343", "severity": "critical", "cvss": 9.8,
          "title": "Arbitrary code execution in PyYAML",
-         "description": "PyYAML before 6.0.1 allows arbitrary code execution via yaml.load.",
-         "remediation": "Upgrade PyYAML to >=6.0.1 and use yaml.safe_load"},
+         "description": "PyYAML before 6.0.1 allows arbitrary code execution via yaml.load().",
+         "remediation": "Upgrade PyYAML to >=6.0.1 and use yaml.safe_load()"},
         {"ecosystem": "go", "package": "golang.org/x/crypto", "below": "0.17.0",
          "cve": "CVE-2023-48795", "severity": "medium", "cvss": 5.9,
          "title": "Terrapin SSH prefix truncation attack",
@@ -164,7 +164,7 @@ class DependencyAuditor:
 
     def audit(self) -> Dict:
         """Run full audit on the manifest file."""
-        deps = self._parse_manifest
+        deps = self._parse_manifest()
         vuln_findings = self._check_vulnerabilities(deps)
         risky_patterns = self._check_risky_patterns(deps)
 
@@ -192,7 +192,7 @@ class DependencyAuditor:
 
     def _parse_manifest(self) -> List[Dependency]:
         """Detect manifest type and parse dependencies."""
-        name = self.manifest_path.name.lower
+        name = self.manifest_path.name.lower()
         try:
             content = self.manifest_path.read_text(encoding="utf-8")
         except (OSError, PermissionError) as e:
@@ -221,10 +221,10 @@ class DependencyAuditor:
             print(f"Invalid JSON in package.json: {e}", file=sys.stderr)
             sys.exit(1)
 
-        for name, version in data.get("dependencies", {}).items:
+        for name, version in data.get("dependencies", {}).items():
             clean_ver = re.sub(r"[^0-9.]", "", version).strip(".")
             deps.append(Dependency(name=name, version=clean_ver or version, ecosystem="npm", is_dev=False))
-        for name, version in data.get("devDependencies", {}).items:
+        for name, version in data.get("devDependencies", {}).items():
             clean_ver = re.sub(r"[^0-9.]", "", version).strip(".")
             deps.append(Dependency(name=name, version=clean_ver or version, ecosystem="npm", is_dev=True))
         return deps
@@ -232,22 +232,22 @@ class DependencyAuditor:
     def _parse_requirements(self, content: str) -> List[Dependency]:
         """Parse pip requirements.txt."""
         deps = []
-        for line in content.strip.split("\n"):
-            line = line.strip
+        for line in content.strip().split("\n"):
+            line = line.strip()
             if not line or line.startswith("#") or line.startswith("-"):
                 continue
             match = re.match(r"^([a-zA-Z0-9_.-]+)\s*(?:[=<>!~]+\s*)?([\d.]*)", line)
             if match:
                 name, version = match.group(1), match.group(2) or "unknown"
-                deps.append(Dependency(name=name.lower, version=version, ecosystem="pypi"))
+                deps.append(Dependency(name=name.lower(), version=version, ecosystem="pypi"))
         return deps
 
     def _parse_go_mod(self, content: str) -> List[Dependency]:
         """Parse Go go.mod."""
         deps = []
         in_require = False
-        for line in content.strip.split("\n"):
-            line = line.strip
+        for line in content.strip().split("\n"):
+            line = line.strip()
             if line.startswith("require ("):
                 in_require = True
                 continue
@@ -255,8 +255,8 @@ class DependencyAuditor:
                 in_require = False
                 continue
             if in_require or line.startswith("require "):
-                cleaned = line.replace("require ", "").strip
-                parts = cleaned.split
+                cleaned = line.replace("require ", "").strip()
+                parts = cleaned.split()
                 if len(parts) >= 2:
                     name = parts[0]
                     version = parts[1].lstrip("v")
@@ -267,8 +267,8 @@ class DependencyAuditor:
     def _parse_gemfile(self, content: str) -> List[Dependency]:
         """Parse Ruby Gemfile."""
         deps = []
-        for line in content.strip.split("\n"):
-            line = line.strip
+        for line in content.strip().split("\n"):
+            line = line.strip()
             if not line or line.startswith("#"):
                 continue
             match = re.match(r'''gem\s+['"]([\w-]+)['"](?:\s*,\s*['"]([^'"]*)['"'])?''', line)
@@ -283,8 +283,8 @@ class DependencyAuditor:
     def _version_below(installed: str, threshold: str) -> bool:
         """Check if installed version is below threshold (simple numeric comparison)."""
         try:
-            inst_parts = [int(x) for x in installed.split(".") if x.isdigit]
-            thresh_parts = [int(x) for x in threshold.split(".") if x.isdigit]
+            inst_parts = [int(x) for x in installed.split(".") if x.isdigit()]
+            thresh_parts = [int(x) for x in threshold.split(".") if x.isdigit()]
             # Pad shorter list
             max_len = max(len(inst_parts), len(thresh_parts))
             inst_parts.extend([0] * (max_len - len(inst_parts)))
@@ -299,7 +299,7 @@ class DependencyAuditor:
         for dep in deps:
             for vuln in self.KNOWN_VULNS:
                 if (dep.ecosystem == vuln["ecosystem"] and
-                        dep.name.lower == vuln["package"].lower and
+                        dep.name.lower() == vuln["package"].lower() and
                         self._version_below(dep.version, vuln["below"])):
                     findings.append(VulnerabilityFinding(
                         package=dep.name,
@@ -323,7 +323,7 @@ class DependencyAuditor:
         # Check for typosquat packages
         typosquats = self.TYPOSQUAT_PACKAGES.get(ecosystem, [])
         for dep in deps:
-            if dep.name.lower in [t.lower for t in typosquats]:
+            if dep.name.lower() in [t.lower() for t in typosquats]:
                 patterns.append(RiskyPattern(
                     package=dep.name,
                     pattern_type="typosquat",
@@ -366,7 +366,7 @@ def format_report_text(result: Dict) -> str:
     lines.append(f"Manifest: {result['manifest']}")
     lines.append(f"Ecosystem: {result['ecosystem']}")
     lines.append(f"Total dependencies: {result['total_dependencies']} ({result['dev_dependencies']} dev)")
-    lines.append(f"Generated: {datetime.now.strftime('%Y-%m-%d %H:%M:%S')}")
+    lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     lines.append("=" * 70)
 
     summary = result["summary"]
@@ -378,7 +378,7 @@ def format_report_text(result: Dict) -> str:
     if vulns:
         lines.append(f"\n--- VULNERABILITY FINDINGS ({len(vulns)}) ---\n")
         for v in vulns:
-            lines.append(f"  [{v.severity.upper}] {v.package} {v.installed_version}")
+            lines.append(f"  [{v.severity.upper()}] {v.package} {v.installed_version}")
             lines.append(f"    CVE: {v.cve_id} (CVSS: {v.cvss_score})")
             lines.append(f"    {v.title}")
             lines.append(f"    Vulnerable: {v.vulnerable_range}")
@@ -391,7 +391,7 @@ def format_report_text(result: Dict) -> str:
     if risky:
         lines.append(f"\n--- RISKY PATTERNS ({len(risky)}) ---\n")
         for r in risky:
-            lines.append(f"  [{r.severity.upper}] {r.package} — {r.pattern_type}")
+            lines.append(f"  [{r.severity.upper()}] {r.package} — {r.pattern_type}")
             lines.append(f"    {r.description}")
             lines.append(f"    Fix: {r.recommendation}")
             lines.append("")
@@ -399,7 +399,7 @@ def format_report_text(result: Dict) -> str:
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Dependency Auditor — Analyze package manifests for known vulnerabilities and risky patterns.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -422,14 +422,14 @@ Examples:
                         help="Minimum severity to report (default: low)")
     parser.add_argument("--json", action="store_true", dest="json_output",
                         help="Output results as JSON")
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    if not Path(args.file).exists:
+    if not Path(args.file).exists():
         print(f"Error: File not found: {args.file}", file=sys.stderr)
         sys.exit(1)
 
     auditor = DependencyAuditor(manifest_path=args.file, severity_filter=args.severity)
-    result = auditor.audit
+    result = auditor.audit()
 
     if args.json_output:
         json_result = {
@@ -440,7 +440,7 @@ Examples:
             "summary": result["summary"],
             "vulnerability_findings": [asdict(f) for f in result["vulnerability_findings"]],
             "risky_patterns": [asdict(r) for r in result["risky_patterns"]],
-            "generated_at": datetime.now.isoformat,
+            "generated_at": datetime.now().isoformat(),
         }
         print(json.dumps(json_result, indent=2))
     else:
@@ -452,4 +452,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -23,10 +23,10 @@ Any functionality that uses dragging must have a single-pointer alternative (cli
 // Sortable list: support both drag and button-based reorder
 <li draggable onDragStart={handleDrag}>
   {item.name}
-  <button onClick={ => moveUp(index)} aria-label={`Move ${item.name} up`}>
+  <button onClick={() => moveUp(index)} aria-label={`Move ${item.name} up`}>
     Move Up
   </button>
-  <button onClick={ => moveDown(index)} aria-label={`Move ${item.name} down`}>
+  <button onClick={() => moveDown(index)} aria-label={`Move ${item.name} down`}>
     Move Down
   </button>
 </li>

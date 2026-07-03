@@ -104,7 +104,7 @@ LEVEL_RANK = {"Elite": 0, "High": 1, "Medium": 2, "Low": 3}
 def overall_level(levels: List[str]) -> str:
     # Overall = worst metric (DORA-aligned: a team is only as good as its slowest dimension)
     worst = max(LEVEL_RANK.get(l, 3) for l in levels)
-    for name, rank in LEVEL_RANK.items:
+    for name, rank in LEVEL_RANK.items():
         if rank == worst:
             return name
     return "Low"
@@ -113,8 +113,8 @@ def overall_level(levels: List[str]) -> str:
 def identify_bottleneck(stages: Dict[str, float]) -> Dict[str, Any]:
     if not stages:
         return {"bottleneck_stage": None, "wait_hours": 0, "pct_of_cycle": 0}
-    total = sum(stages.values)
-    sorted_stages = sorted(stages.items, key=lambda x: -x[1])
+    total = sum(stages.values())
+    sorted_stages = sorted(stages.items(), key=lambda x: -x[1])
     top_stage, top_hours = sorted_stages[0]
     return {
         "bottleneck_stage": top_stage,
@@ -238,7 +238,7 @@ def render_text(result: Dict[str, Any], source: str) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="DORA 4 metrics + bottleneck identification.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -246,7 +246,7 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to metrics JSON (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
@@ -274,4 +274,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

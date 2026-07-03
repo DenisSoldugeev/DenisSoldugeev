@@ -33,7 +33,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 
 - Flag raw string interpolation in SQL queries — require parameterized queries (`SqlCommand`) or EF Core
 - Flag missing `[ValidateAntiForgeryToken]` on state-changing controller actions
-- Flag user-controlled data passed to `Process.Start` or `File` APIs without validation
+- Flag user-controlled data passed to `Process.Start()` or `File` APIs without validation
 - Flag hardcoded connection strings — require `appsettings.json` + secrets management
 - Flag `[AllowAnonymous]` on endpoints that should be protected
 
@@ -42,9 +42,9 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 ## Async / Await
 
 - Flag `async void` methods outside of event handlers — cannot be awaited and swallow exceptions
-- Flag `.Result`, `.Wait`, or `.GetAwaiter.GetResult` on `Task` — causes deadlocks in ASP.NET contexts
+- Flag `.Result`, `.Wait()`, or `.GetAwaiter().GetResult()` on `Task` — causes deadlocks in ASP.NET contexts
 - Flag missing `ConfigureAwait(false)` in library (non-application) code
-- Flag `Task.Run` wrapping synchronous code inside ASP.NET request handlers unnecessarily
+- Flag `Task.Run()` wrapping synchronous code inside ASP.NET request handlers unnecessarily
 - Flag `CancellationToken` not threaded through to downstream async calls
 
 ---
@@ -70,10 +70,10 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 
 ## Performance
 
-- Flag `.ToList` / `.ToArray` on `IQueryable` before filtering — forces all rows into memory; filter server-side first
+- Flag `.ToList()` / `.ToArray()` on `IQueryable` before filtering — forces all rows into memory; filter server-side first
 - Flag `string` concatenation in loops — use `StringBuilder`
-- Flag `Enumerable.Count` on `IQueryable` when only an existence check is needed — use `Any`
-- Flag `await` in a loop where `Task.WhenAll` would parallelize the work
+- Flag `Enumerable.Count()` on `IQueryable` when only an existence check is needed — use `Any()`
+- Flag `await` in a loop where `Task.WhenAll()` would parallelize the work
 - Flag synchronous file or network I/O in an `async` method — use the async overload
 
 ---
@@ -86,7 +86,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 - Prefer `is null` / `is not null` over `== null` for null checks
 
 ### LINQ
-- Flag `First` where `FirstOrDefault` is safer
+- Flag `First()` where `FirstOrDefault()` is safer
 - Flag complex LINQ chains that would be clearer as explicit loops
 
 ### Modern C# (10+)

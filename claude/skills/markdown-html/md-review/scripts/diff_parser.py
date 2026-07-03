@@ -75,7 +75,7 @@ def _parse_hunk_body(lines: list[str], old_start: int, new_start: int) -> list[d
             old_num += 1
             new_num += 1
         elif prefix == "\\":
-            body.append({"kind": "meta", "text": text.strip, "old": None, "new": None})
+            body.append({"kind": "meta", "text": text.strip(), "old": None, "new": None})
         else:
             # Unknown line — preserve as context with the raw prefix
             body.append({"kind": "context", "text": ln, "old": old_num, "new": new_num})
@@ -103,7 +103,7 @@ def _parse_single_diff(block_lines: list[str]) -> list[dict[str, Any]]:
     hunk_body: list[str] = []
     hunk_index_in_block = 0
 
-    def flush_hunk -> None:
+    def flush_hunk() -> None:
         nonlocal current_hunk, hunk_body, hunk_index_in_block
         if current_hunk is None or current_file is None:
             current_hunk = None
@@ -118,9 +118,9 @@ def _parse_single_diff(block_lines: list[str]) -> list[dict[str, Any]]:
         current_hunk = None
         hunk_body = []
 
-    def flush_file -> None:
+    def flush_file() -> None:
         nonlocal current_file
-        flush_hunk
+        flush_hunk()
         if current_file:
             files.append(current_file)
             current_file = None
@@ -132,7 +132,7 @@ def _parse_single_diff(block_lines: list[str]) -> list[dict[str, Any]]:
 
         if m_old:
             # New file boundary; flush previous
-            flush_file
+            flush_file()
             current_file = {"path_old": m_old.group(1), "path_new": None, "hunks": []}
             continue
         if m_new:
@@ -142,20 +142,20 @@ def _parse_single_diff(block_lines: list[str]) -> list[dict[str, Any]]:
                 current_file["path_new"] = m_new.group(1)
             continue
         if m_hunk:
-            flush_hunk
+            flush_hunk()
             current_hunk = {
                 "old_start": int(m_hunk.group(1)),
                 "old_count": int(m_hunk.group(2) or 1),
                 "new_start": int(m_hunk.group(3)),
                 "new_count": int(m_hunk.group(4) or 1),
-                "header_context": m_hunk.group(5).strip,
+                "header_context": m_hunk.group(5).strip(),
                 "lines": [],
             }
             continue
         if current_hunk is not None:
             hunk_body.append(raw)
 
-    flush_file
+    flush_file()
     return files
 
 
@@ -171,7 +171,7 @@ def parse_markdown_for_diffs(text: str, infer_unfenced: bool = False) -> dict[st
             "summary": {"total_files": int, "total_hunks": int, "total_blocks": int}
         }
     """
-    lines = text.splitlines
+    lines = text.splitlines()
     in_block = False
     is_diff_block = False
     block_buf: list[str] = []
@@ -251,14 +251,14 @@ Two changes worth flagging.
 ```
 
 > [!MAJOR]
-> This `random.uniform` call is not seeded. In test runs it'll produce
+> This `random.uniform()` call is not seeded. In test runs it'll produce
 > non-deterministic retry delays — make tests flaky.
 
 ```diff
 --- a/payments/queue.py
 +++ b/payments/queue.py
 @@ -40,3 +40,7 @@ def _enqueue(payment_id, delay):
-     redis.zadd("retries", {payment_id: time.time + delay})
+     redis.zadd("retries", {payment_id: time.time() + delay})
      log.info("scheduled", payment_id=payment_id, delay=delay)
 +
 +def cancel_retries(payment_id):
@@ -284,9 +284,9 @@ def main(argv: list[str]) -> int:
     if args.sample:
         text = SAMPLE_MARKDOWN
     elif args.input:
-        text = sys.stdin.read if args.input == "-" else Path(args.input).read_text(encoding="utf-8")
+        text = sys.stdin.read() if args.input == "-" else Path(args.input).read_text(encoding="utf-8")
     else:
-        p.print_help
+        p.print_help()
         return 0
 
     result = parse_markdown_for_diffs(text, infer_unfenced=args.infer_diff)

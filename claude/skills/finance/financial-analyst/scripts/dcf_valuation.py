@@ -28,6 +28,24 @@ def safe_divide(numerator: float, denominator: float, default: float = 0.0) -> f
     return numerator / denominator
 
 
+def resolve_input_section(
+    data: Dict[str, Any], section_key: str, flat_keys: Tuple[str, ...]
+) -> Dict[str, Any]:
+    """
+    Accept both supported input shapes:
+    1. Flat: the expected keys live at the top level of the JSON file.
+    2. Nested: the data lives under a per-tool section key, as in
+       assets/sample_financial_data.json (which bundles inputs for all
+       four financial-analyst scripts in one file).
+    """
+    if any(key in data for key in flat_keys):
+        return data
+    section = data.get(section_key)
+    if isinstance(section, dict):
+        return section
+    return data
+
+
 class DCFModel:
     """Discounted Cash Flow valuation model."""
 
@@ -261,12 +279,12 @@ class DCFModel:
 
     def run_full_valuation(self) -> Dict[str, Any]:
         """Run the complete DCF valuation."""
-        self.calculate_wacc
-        self.project_cash_flows
-        self.calculate_terminal_value
-        self.calculate_enterprise_value
-        self.calculate_equity_value
-        sensitivity = self.sensitivity_analysis
+        self.calculate_wacc()
+        self.project_cash_flows()
+        self.calculate_terminal_value()
+        self.calculate_enterprise_value()
+        self.calculate_equity_value()
+        sensitivity = self.sensitivity_analysis()
 
         return {
             "wacc": self.wacc,
@@ -381,7 +399,7 @@ class DCFModel:
         return "\n".join(lines)
 
 
-def main -> None:
+def main() -> None:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="DCF Valuation Model - Enterprise and equity valuation"
@@ -403,7 +421,7 @@ def main -> None:
         help="Number of projection years (overrides input file)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         with open(args.input_file, "r") as f:
@@ -415,7 +433,16 @@ def main -> None:
         print(f"Error: Invalid JSON in '{args.input_file}': {e}", file=sys.stderr)
         sys.exit(1)
 
-    model = DCFModel
+    data = resolve_input_section(data, "dcf_valuation", ("historical", "assumptions"))
+    if "historical" not in data:
+        print(
+            "Error: No valuation data found. Expected 'historical' and "
+            "'assumptions' at the top level or nested under 'dcf_valuation'.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    model = DCFModel()
     model.set_historical_financials(data.get("historical", {}))
 
     assumptions = data.get("assumptions", {})
@@ -424,7 +451,7 @@ def main -> None:
     model.set_assumptions(assumptions)
 
     try:
-        results = model.run_full_valuation
+        results = model.run_full_valuation()
     except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
@@ -435,7 +462,7 @@ def main -> None:
             if isinstance(obj, float) and math.isinf(obj):
                 return None
             if isinstance(obj, dict):
-                return {k: sanitize(v) for k, v in obj.items}
+                return {k: sanitize(v) for k, v in obj.items()}
             if isinstance(obj, list):
                 return [sanitize(v) for v in obj]
             return obj
@@ -446,4 +473,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

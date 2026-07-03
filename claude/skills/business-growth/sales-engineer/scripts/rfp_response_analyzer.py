@@ -83,8 +83,8 @@ def analyze_requirement(req: dict[str, Any]) -> dict[str, Any]:
     Returns:
         Enriched requirement with computed score and weight.
     """
-    coverage_status = req.get("coverage_status", "gap").lower
-    priority = req.get("priority", "nice-to-have").lower
+    coverage_status = req.get("coverage_status", "gap").lower()
+    priority = req.get("priority", "nice-to-have").lower()
 
     coverage_score = COVERAGE_SCORES.get(coverage_status, 0.0)
     weight = PRIORITY_WEIGHTS.get(priority, 1.0)
@@ -189,7 +189,7 @@ def compute_category_scores(analyzed_reqs: list[dict[str, Any]]) -> dict[str, di
             categories[cat][status_key] += 1
 
     result = {}
-    for cat, scores in categories.items:
+    for cat, scores in categories.items():
         coverage_pct = safe_divide(scores["weighted_score"], scores["max_weighted"]) * 100
         result[cat] = {
             "coverage_percentage": round(coverage_pct, 1),
@@ -243,9 +243,9 @@ def determine_bid_recommendation(
             reasons.append(f"{must_have_gaps} must-have gaps exceed maximum of {MAX_MUST_HAVE_GAPS_FOR_BID}")
 
     # Strategic value adjustment
-    if strategic_value.lower == "high" and decision == "CONDITIONAL BID":
+    if strategic_value.lower() == "high" and decision == "CONDITIONAL BID":
         reasons.append("High strategic value supports pursuing despite coverage gaps")
-    elif strategic_value.lower == "low" and decision == "CONDITIONAL BID":
+    elif strategic_value.lower() == "low" and decision == "CONDITIONAL BID":
         decision = "NO-BID"
         reasons.append("Low strategic value does not justify investment for conditional coverage")
 
@@ -432,7 +432,7 @@ def format_text(result: dict[str, Any]) -> str:
     lines.append(f"Customer:       {info['customer']}")
     lines.append(f"Due Date:       {info['due_date']}")
     lines.append(f"Deal Value:     {info['deal_value']}")
-    lines.append(f"Strategic Value: {info['strategic_value'].upper}")
+    lines.append(f"Strategic Value: {info['strategic_value'].upper()}")
     lines.append("")
 
     # Coverage summary
@@ -450,7 +450,7 @@ def format_text(result: dict[str, Any]) -> str:
     bid = result["bid_recommendation"]
     lines.append("-" * 70)
     lines.append(f"BID RECOMMENDATION: {bid['decision']}")
-    lines.append(f"Confidence: {bid['confidence'].upper}")
+    lines.append(f"Confidence: {bid['confidence'].upper()}")
     lines.append("-" * 70)
     for reason in bid["reasons"]:
         lines.append(f"  - {reason}")
@@ -462,7 +462,7 @@ def format_text(result: dict[str, Any]) -> str:
     lines.append("-" * 70)
     lines.append(f"{'Category':<25} {'Coverage':>8} {'Full':>5} {'Part':>5} {'Plan':>5} {'Gap':>5} {'Effort':>7}")
     lines.append("-" * 70)
-    for cat, scores in result["category_scores"].items:
+    for cat, scores in result["category_scores"].items():
         lines.append(
             f"{cat:<25} {scores['coverage_percentage']:>7.1f}% "
             f"{scores['full']:>5} {scores['partial']:>5} "
@@ -492,7 +492,7 @@ def format_text(result: dict[str, Any]) -> str:
     lines.append("RISK ASSESSMENT")
     lines.append("-" * 70)
     for risk in risks:
-        lines.append(f"  [{risk['impact'].upper}] {risk['risk']}")
+        lines.append(f"  [{risk['impact'].upper()}] {risk['risk']}")
         lines.append(f"       {risk['description']}")
         lines.append(f"       Mitigation: {risk['mitigation']}")
         lines.append("")
@@ -511,7 +511,7 @@ def format_text(result: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def main -> None:
+def main() -> None:
     """Main entry point for the RFP Response Analyzer."""
     parser = argparse.ArgumentParser(
         description="Analyze RFP/RFI requirements for coverage, gaps, and bid recommendation.",
@@ -542,7 +542,7 @@ def main -> None:
         help="Output format: json or text (default: text)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     data = load_rfp_data(args.input_file)
     result = analyze_rfp(data)
@@ -554,4 +554,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

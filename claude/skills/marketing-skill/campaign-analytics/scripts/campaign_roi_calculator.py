@@ -266,7 +266,7 @@ def calculate_portfolio_summary(campaign_results: List[Dict[str, Any]]) -> Dict[
         channel_totals[ch]["customers"] += c["metrics"]["customers"]
 
     channel_summary = {}
-    for ch, totals in channel_totals.items:
+    for ch, totals in channel_totals.items():
         channel_summary[ch] = {
             "spend": round(totals["spend"], 2),
             "revenue": round(totals["revenue"], 2),
@@ -331,7 +331,7 @@ def format_text(results: Dict[str, Any]) -> str:
         lines.append("CHANNEL SUMMARY")
         lines.append(f"  {'Channel':<20} {'Spend':>12} {'Revenue':>12} {'ROI':>10} {'ROAS':>8}")
         lines.append(f"  {'-'*20} {'-'*12} {'-'*12} {'-'*10} {'-'*8}")
-        for ch, cs in sorted(summary["channel_summary"].items):
+        for ch, cs in sorted(summary["channel_summary"].items()):
             lines.append(
                 f"  {ch:<20} ${cs['spend']:>10,.2f} ${cs['revenue']:>10,.2f} "
                 f"{cs['roi_pct']:>8.1f}% {cs['roas']:>6.2f}x"
@@ -375,11 +375,11 @@ def format_text(results: Dict[str, Any]) -> str:
         if campaign["assessments"]:
             lines.append("")
             lines.append("  BENCHMARK ASSESSMENT")
-            for metric_name, a in campaign["assessments"].items:
+            for metric_name, a in campaign["assessments"].items():
                 br = a["benchmark_range"]
-                status = a["assessment"].upper.replace("_", " ")
+                status = a["assessment"].upper().replace("_", " ")
                 lines.append(
-                    f"    {metric_name.upper}: {a['value']} "
+                    f"    {metric_name.upper()}: {a['value']} "
                     f"[low={br['low']}, target={br['target']}, high={br['high']}] "
                     f"-> {status}"
                 )
@@ -402,7 +402,7 @@ def format_text(results: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def main -> None:
+def main() -> None:
     """Main entry point for the campaign ROI calculator."""
     parser = argparse.ArgumentParser(
         description="Calculate campaign ROI, ROAS, CPA, CPL, CAC with industry benchmarking.",
@@ -420,7 +420,7 @@ def main -> None:
         help="Output format (default: text)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Load input data
     try:
@@ -456,4 +456,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

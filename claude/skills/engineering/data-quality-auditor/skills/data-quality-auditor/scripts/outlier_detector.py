@@ -35,12 +35,12 @@ def load_csv(filepath: str) -> tuple[list[str], list[dict]]:
 
 
 def is_null(val: str) -> bool:
-    return val.strip.lower in NULL_STRINGS
+    return val.strip().lower() in NULL_STRINGS
 
 
 def to_float(val: str) -> float | None:
     try:
-        return float(val.strip)
+        return float(val.strip())
     except (ValueError, AttributeError):
         return None
 
@@ -213,7 +213,7 @@ def print_report(results: list[dict]):
     print("\n" + "=" * 64)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Detect outliers in numeric columns of a CSV dataset.")
     parser.add_argument("--file", required=True, help="Path to CSV file")
     parser.add_argument("--method", choices=["iqr", "zscore", "mzscore"], default="iqr",
@@ -222,7 +222,7 @@ def main:
                         help="Method threshold (IQR multiplier default 1.5; Z-score default 3.0; mzscore default 3.5)")
     parser.add_argument("--columns", help="Comma-separated columns to check (default: all numeric)")
     parser.add_argument("--format", choices=["text", "json"], default="text")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Set default thresholds per method
     if args.threshold is None:
@@ -260,4 +260,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

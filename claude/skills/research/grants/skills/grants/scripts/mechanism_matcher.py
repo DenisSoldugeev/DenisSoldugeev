@@ -161,7 +161,7 @@ def match(career_stage: str, prelim_data: str, environment: str, scope: str) -> 
 def render_human(result: Dict[str, Any]) -> str:
     out: List[str] = []
     out.append("Inputs:")
-    for k, v in result["inputs"].items:
+    for k, v in result["inputs"].items():
         out.append(f"  {k}: {v}")
     out.append("")
     if result["recommendations"]:
@@ -203,7 +203,7 @@ def main(argv: List[str]) -> int:
         except ValueError as e:
             print(f"error: {e}", file=sys.stderr); return 2
     else:
-        parser.print_help; return 0
+        parser.print_help(); return 0
 
     if args.output == "json":
         print(json.dumps(result, indent=2))

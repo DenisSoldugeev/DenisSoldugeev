@@ -42,13 +42,13 @@ Modern frontend development standards for accessibility, testing, TypeScript, an
 function Modal({ isOpen, onClose, children }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
-  useEffect( => {
+  useEffect(() => {
     if (isOpen) {
       // Focus first focusable element
       const focusable = modalRef.current?.querySelectorAll(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
-      (focusable?.[0] as HTMLElement)?.focus;
+      (focusable?.[0] as HTMLElement)?.focus();
 
       // Trap focus within modal
       const handleTab = (e: KeyboardEvent) => {
@@ -57,21 +57,21 @@ function Modal({ isOpen, onClose, children }: ModalProps) {
           const last = focusable[focusable.length - 1] as HTMLElement;
 
           if (e.shiftKey && document.activeElement === first) {
-            e.preventDefault;
-            last.focus;
+            e.preventDefault();
+            last.focus();
           } else if (!e.shiftKey && document.activeElement === last) {
-            e.preventDefault;
-            first.focus;
+            e.preventDefault();
+            first.focus();
           }
         }
 
         if (e.key === 'Escape') {
-          onClose;
+          onClose();
         }
       };
 
       document.addEventListener('keydown', handleTab);
-      return  => document.removeEventListener('keydown', handleTab);
+      return () => document.removeEventListener('keydown', handleTab);
     }
   }, [isOpen, onClose]);
 
@@ -129,7 +129,7 @@ function Modal({ isOpen, onClose, children }: ModalProps) {
 // Toggle buttons
 <button
   aria-pressed={isEnabled}
-  onClick={ => setIsEnabled(!isEnabled)}
+  onClick={() => setIsEnabled(!isEnabled)}
 >
   {isEnabled ? 'Enabled' : 'Disabled'}
 </button>
@@ -138,7 +138,7 @@ function Modal({ isOpen, onClose, children }: ModalProps) {
 <button
   aria-expanded={isOpen}
   aria-controls="content-panel"
-  onClick={ => setIsOpen(!isOpen)}
+  onClick={() => setIsOpen(!isOpen)}
 >
   Show details
 </button>
@@ -216,15 +216,15 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Button } from './Button';
 
-describe('Button',  => {
-  it('renders with correct text',  => {
+describe('Button', () => {
+  it('renders with correct text', () => {
     render(<Button>Click me</Button>);
-    expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument;
+    expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument();
   });
 
-  it('calls onClick when clicked', async  => {
-    const user = userEvent.setup;
-    const handleClick = jest.fn;
+  it('calls onClick when clicked', async () => {
+    const user = userEvent.setup();
+    const handleClick = jest.fn();
 
     render(<Button onClick={handleClick}>Click me</Button>);
     await user.click(screen.getByRole('button'));
@@ -232,15 +232,15 @@ describe('Button',  => {
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('is disabled when loading',  => {
+  it('is disabled when loading', () => {
     render(<Button isLoading>Submit</Button>);
-    expect(screen.getByRole('button')).toBeDisabled;
+    expect(screen.getByRole('button')).toBeDisabled();
     expect(screen.getByRole('button')).toHaveAttribute('aria-busy', 'true');
   });
 
-  it('shows loading text when loading',  => {
+  it('shows loading text when loading', () => {
     render(<Button isLoading loadingText="Submitting...">Submit</Button>);
-    expect(screen.getByText('Submitting...')).toBeInTheDocument;
+    expect(screen.getByText('Submitting...')).toBeInTheDocument();
   });
 });
 ```
@@ -252,34 +252,34 @@ describe('Button',  => {
 import { renderHook, act } from '@testing-library/react';
 import { useCounter } from './useCounter';
 
-describe('useCounter',  => {
-  it('initializes with default value',  => {
-    const { result } = renderHook( => useCounter);
+describe('useCounter', () => {
+  it('initializes with default value', () => {
+    const { result } = renderHook(() => useCounter());
     expect(result.current.count).toBe(0);
   });
 
-  it('initializes with custom value',  => {
-    const { result } = renderHook( => useCounter(10));
+  it('initializes with custom value', () => {
+    const { result } = renderHook(() => useCounter(10));
     expect(result.current.count).toBe(10);
   });
 
-  it('increments count',  => {
-    const { result } = renderHook( => useCounter);
+  it('increments count', () => {
+    const { result } = renderHook(() => useCounter());
 
-    act( => {
-      result.current.increment;
+    act(() => {
+      result.current.increment();
     });
 
     expect(result.current.count).toBe(1);
   });
 
-  it('resets to initial value',  => {
-    const { result } = renderHook( => useCounter(5));
+  it('resets to initial value', () => {
+    const { result } = renderHook(() => useCounter(5));
 
-    act( => {
-      result.current.increment;
-      result.current.increment;
-      result.current.reset;
+    act(() => {
+      result.current.increment();
+      result.current.increment();
+      result.current.reset();
     });
 
     expect(result.current.count).toBe(5);
@@ -296,19 +296,19 @@ import userEvent from '@testing-library/user-event';
 import { LoginForm } from './LoginForm';
 import { AuthProvider } from '@/contexts/AuthContext';
 
-const mockLogin = jest.fn;
+const mockLogin = jest.fn();
 
-jest.mock('@/lib/auth',  => ({
+jest.mock('@/lib/auth', () => ({
   login: (...args: unknown[]) => mockLogin(...args),
 }));
 
-describe('LoginForm',  => {
-  beforeEach( => {
-    mockLogin.mockReset;
+describe('LoginForm', () => {
+  beforeEach(() => {
+    mockLogin.mockReset();
   });
 
-  it('submits form with valid credentials', async  => {
-    const user = userEvent.setup;
+  it('submits form with valid credentials', async () => {
+    const user = userEvent.setup();
     mockLogin.mockResolvedValueOnce({ user: { id: '1', name: 'Test' } });
 
     render(
@@ -321,13 +321,13 @@ describe('LoginForm',  => {
     await user.type(screen.getByLabelText(/password/i), 'password123');
     await user.click(screen.getByRole('button', { name: /sign in/i }));
 
-    await waitFor( => {
+    await waitFor(() => {
       expect(mockLogin).toHaveBeenCalledWith('test@example.com', 'password123');
     });
   });
 
-  it('shows validation errors for empty fields', async  => {
-    const user = userEvent.setup;
+  it('shows validation errors for empty fields', async () => {
+    const user = userEvent.setup();
 
     render(
       <AuthProvider>
@@ -337,9 +337,9 @@ describe('LoginForm',  => {
 
     await user.click(screen.getByRole('button', { name: /sign in/i }));
 
-    expect(await screen.findByText(/email is required/i)).toBeInTheDocument;
-    expect(await screen.findByText(/password is required/i)).toBeInTheDocument;
-    expect(mockLogin).not.toHaveBeenCalled;
+    expect(await screen.findByText(/email is required/i)).toBeInTheDocument();
+    expect(await screen.findByText(/password is required/i)).toBeInTheDocument();
+    expect(mockLogin).not.toHaveBeenCalled();
   });
 });
 ```
@@ -350,7 +350,7 @@ describe('LoginForm',  => {
 // e2e/checkout.spec.ts
 import { test, expect } from '@playwright/test';
 
-test.describe('Checkout flow',  => {
+test.describe('Checkout flow', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.click('[data-testid="product-1"] button');
@@ -390,7 +390,7 @@ interface ButtonProps {
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   children: React.ReactNode;
-  onClick?:  => void;
+  onClick?: () => void;
 }
 
 // Extend HTML attributes
@@ -757,12 +757,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 const schema = z.object({
-  email: z.string.email('Invalid email address'),
-  password: z.string
+  email: z.string().email('Invalid email address'),
+  password: z.string()
     .min(8, 'Password must be at least 8 characters')
     .regex(/[A-Z]/, 'Password must contain uppercase letter')
     .regex(/[0-9]/, 'Password must contain number'),
-  confirmPassword: z.string,
+  confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Passwords do not match',
   path: ['confirmPassword'],
@@ -770,7 +770,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-function RegisterForm {
+function RegisterForm() {
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
@@ -794,13 +794,13 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Never include secrets in client code - use server-side API routes
 // app/api/data/route.ts
-export async function GET {
+export async function GET() {
   const response = await fetch('https://api.example.com/data', {
     headers: {
       'Authorization': `Bearer ${process.env.API_SECRET}`, // Server-side only
     },
   });
 
-  return Response.json(await response.json);
+  return Response.json(await response.json());
 }
 ```

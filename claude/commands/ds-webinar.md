@@ -32,7 +32,7 @@ The `ds-webinar` command is the **entry point for webinar workflows**: plan → 
 
 Walks the intake, locks the promise + format, sizes the funnel backward from the business goal,
 builds the promotion runway, and designs show-up + live-to-close + follow-up. Delivers a full plan
-using `templates/webinar-plan-template.md`.
+using `marketing-skill/skills/webinar-marketing/templates/webinar-plan-template.md`.
 
 ### `rescue` — Diagnose and fix an underperforming webinar
 
@@ -138,7 +138,7 @@ The scorer calibrates per audience temperature (warmer audiences convert better 
 ## Related
 
 - Agent: [`ds-webinar-marketer`](../agents/marketing/ds-webinar-marketer.md)
-- Skill: [`webinar-marketing`](../skills/marketing-skill/webinar-marketing/SKILL.md)
+- Skill: [`webinar-marketing`](../marketing-skill/skills/webinar-marketing/SKILL.md)
 - Companion: `/ds:aeo` (get supporting content cited by AI search), launch-strategy (full launches)
 
 ---

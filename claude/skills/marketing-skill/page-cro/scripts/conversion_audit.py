@@ -22,7 +22,7 @@ from html.parser import HTMLParser
 
 class CROParser(HTMLParser):
     def __init__(self):
-        super.__init__
+        super().__init__()
         self._depth = 0
         self._above_fold_depth = 3  # approximate first screenful
         self._above_fold_elements = 0
@@ -61,7 +61,7 @@ class CROParser(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         attrs_dict = dict(attrs)
-        tag_lower = tag.lower
+        tag_lower = tag.lower()
 
         if tag_lower == "script":
             self._in_script = True
@@ -75,7 +75,7 @@ class CROParser(HTMLParser):
             return
 
         if tag_lower == "meta":
-            if attrs_dict.get("name", "").lower == "viewport":
+            if attrs_dict.get("name", "").lower() == "viewport":
                 self.viewport_meta = True
 
         if not self._in_body:
@@ -88,7 +88,7 @@ class CROParser(HTMLParser):
             self._current_tag = "button"
             self._current_text = []
         elif tag_lower == "input":
-            input_type = attrs_dict.get("type", "text").lower
+            input_type = attrs_dict.get("type", "text").lower()
             if input_type == "submit":
                 val = attrs_dict.get("value", "Submit")
                 self.buttons.append({"text": val, "position": self._element_position})
@@ -99,33 +99,33 @@ class CROParser(HTMLParser):
         elif tag_lower == "form":
             self.forms += 1
         elif tag_lower == "a":
-            cls = attrs_dict.get("class", "").lower
+            cls = attrs_dict.get("class", "").lower()
             href = attrs_dict.get("href", "")
             cta_classes = {"btn", "button", "cta", "call-to-action", "signup", "register"}
             if any(c in cls for c in cta_classes):
                 self._current_tag = "a_cta"
                 self._current_text = []
         elif tag_lower == "img":
-            src = attrs_dict.get("src", "").lower
-            alt = attrs_dict.get("alt", "").lower
-            cls = attrs_dict.get("class", "").lower
+            src = attrs_dict.get("src", "").lower()
+            alt = attrs_dict.get("alt", "").lower()
+            cls = attrs_dict.get("class", "").lower()
             if any(kw in src or kw in alt or kw in cls
                    for kw in ("logo", "partner", "client", "badge", "seal", "award", "cert")):
                 self.logo_images += 1
 
     def handle_endtag(self, tag):
-        tag_lower = tag.lower
+        tag_lower = tag.lower()
         if tag_lower == "script":
             self._in_script = False
         elif tag_lower == "style":
             self._in_style = False
         elif tag_lower == "button" and self._current_tag == "button":
-            text = " ".join(self._current_text).strip
+            text = " ".join(self._current_text).strip()
             self.buttons.append({"text": text, "position": self._element_position})
             self._current_tag = None
             self._current_text = []
         elif tag_lower == "a" and self._current_tag == "a_cta":
-            text = " ".join(self._current_text).strip
+            text = " ".join(self._current_text).strip()
             self.links_as_cta.append({"text": text, "position": self._element_position})
             self._current_tag = None
             self._current_text = []
@@ -133,7 +133,7 @@ class CROParser(HTMLParser):
     def handle_data(self, data):
         if self._in_script or self._in_style:
             return
-        text = data.strip
+        text = data.strip()
         if not text:
             return
         if self._current_tag in ("button", "a_cta"):
@@ -168,13 +168,13 @@ CTA_TEXT_PATTERNS = [
 
 
 def scan_text_signals(full_text: str) -> dict:
-    text_lower = full_text.lower
+    text_lower = full_text.lower()
     testimonials = sum(
         len(re.findall(p, text_lower, re.IGNORECASE))
         for p in TESTIMONIAL_PATTERNS
     )
     trust = {}
-    for key, patterns in TRUST_PATTERNS.items:
+    for key, patterns in TRUST_PATTERNS.items():
         trust[key] = sum(len(re.findall(p, text_lower, re.IGNORECASE)) for p in patterns)
 
     cta_text_count = sum(
@@ -202,7 +202,7 @@ def score_category(value, thresholds: list) -> int:
 
 
 def audit(html: str) -> dict:
-    parser = CROParser
+    parser = CROParser()
     parser.feed(html)
 
     full_text = " ".join(parser.full_text)
@@ -237,7 +237,7 @@ def audit(html: str) -> dict:
 
     # --- Trust signals ---
     trust = text_signals["trust"]
-    trust_total = sum(min(1, v) for v in trust.values)  # 0-3
+    trust_total = sum(min(1, v) for v in trust.values())  # 0-3
     trust_score = score_category(trust_total, [(0, 20), (1, 60), (2, 80), (3, 100)])
 
     # --- Viewport meta ---
@@ -349,21 +349,21 @@ DEMO_HTML = """<!DOCTYPE html>
 # Main
 # ---------------------------------------------------------------------------
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="CRO audit — analyzes an HTML page for conversion signals."
     )
     parser.add_argument("--file", help="Path to HTML file")
     parser.add_argument("--url", help="URL to fetch and analyze")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.file:
         with open(args.file, "r", encoding="utf-8", errors="replace") as f:
-            html = f.read
+            html = f.read()
     elif args.url:
         with urllib.request.urlopen(args.url, timeout=10) as resp:
-            html = resp.read.decode("utf-8", errors="replace")
+            html = resp.read().decode("utf-8", errors="replace")
     else:
         html = DEMO_HTML
         if not args.json:
@@ -399,7 +399,7 @@ def main:
         icon = "✅" if score >= 70 else ("⚠️ " if score >= 40 else "❌")
         print(f"  {icon} {label:<18} [{bar}] {score:>3}/100  (weight {weight})")
 
-    print
+    print()
     # Detail callouts
     cta = cats["cta_buttons"]
     print(f"  CTAs: {cta['button_count']} buttons, {cta['cta_link_count']} CTA links, "
@@ -416,7 +416,7 @@ def main:
     fm = cats["forms"]
     print(f"  Forms: {fm['form_count']} form(s), {fm['field_count']} field(s) — {fm['note']}")
 
-    print
+    print()
     grade = "A" if overall >= 85 else "B" if overall >= 70 else "C" if overall >= 55 else "D" if overall >= 40 else "F"
     print("=" * 62)
     print(f"  Grade: {grade}   Score: {overall}/100")
@@ -424,4 +424,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

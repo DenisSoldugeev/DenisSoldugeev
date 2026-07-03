@@ -19,30 +19,30 @@ Table of Contents:
 ==================
 
 CLASS: DesignTokenGenerator
-    __init__                      - Initialize base unit (8pt), type scale (1.25x)
-    generate_complete_system      - Main entry: generates all token categories
-    generate_color_palette        - Primary, secondary, neutral, semantic colors
-    generate_typography_system    - Font families, sizes, weights, line heights
-    generate_spacing_system       - 8pt grid-based spacing scale
-    generate_sizing_tokens        - Container and component sizing
-    generate_border_tokens        - Border radius and width values
-    generate_shadow_tokens        - Shadow definitions per style
-    generate_animation_tokens     - Durations, easing, keyframes
-    generate_breakpoints          - Responsive breakpoints (xs-2xl)
-    generate_z_index_scale        - Z-index layering system
-    export_tokens                 - Export to JSON/CSS/SCSS
+    __init__()                      - Initialize base unit (8pt), type scale (1.25x)
+    generate_complete_system()      - Main entry: generates all token categories
+    generate_color_palette()        - Primary, secondary, neutral, semantic colors
+    generate_typography_system()    - Font families, sizes, weights, line heights
+    generate_spacing_system()       - 8pt grid-based spacing scale
+    generate_sizing_tokens()        - Container and component sizing
+    generate_border_tokens()        - Border radius and width values
+    generate_shadow_tokens()        - Shadow definitions per style
+    generate_animation_tokens()     - Durations, easing, keyframes
+    generate_breakpoints()          - Responsive breakpoints (xs-2xl)
+    generate_z_index_scale()        - Z-index layering system
+    export_tokens()                 - Export to JSON/CSS/SCSS
 
 PRIVATE METHODS:
-    _generate_color_scale         - Generate 10-step color scale (50-900)
-    _generate_neutral_scale       - Fixed neutral gray palette
-    _generate_type_scale          - Modular type scale using ratio
-    _generate_text_styles         - Pre-composed h1-h6, body, caption
-    _export_as_css                - CSS custom properties exporter
-    _hex_to_rgb                   - Hex to RGB conversion
-    _rgb_to_hex                   - RGB to Hex conversion
-    _adjust_hue                   - HSV hue rotation utility
+    _generate_color_scale()         - Generate 10-step color scale (50-900)
+    _generate_neutral_scale()       - Fixed neutral gray palette
+    _generate_type_scale()          - Modular type scale using ratio
+    _generate_text_styles()         - Pre-composed h1-h6, body, caption
+    _export_as_css()                - CSS custom properties exporter
+    _hex_to_rgb()                   - Hex to RGB conversion
+    _rgb_to_hex()                   - RGB to Hex conversion
+    _adjust_hue()                   - HSV hue rotation utility
 
-FUNCTION: main                    - CLI entry point with argument parsing
+FUNCTION: main()                    - CLI entry point with argument parsing
 
 Token Categories Generated:
     - colors: primary, secondary, neutral, semantic, surface
@@ -80,13 +80,13 @@ class DesignTokenGenerator:
             },
             'colors': self.generate_color_palette(brand_color),
             'typography': self.generate_typography_system(style),
-            'spacing': self.generate_spacing_system,
-            'sizing': self.generate_sizing_tokens,
+            'spacing': self.generate_spacing_system(),
+            'sizing': self.generate_sizing_tokens(),
             'borders': self.generate_border_tokens(style),
             'shadows': self.generate_shadow_tokens(style),
-            'animation': self.generate_animation_tokens,
-            'breakpoints': self.generate_breakpoints,
-            'z-index': self.generate_z_index_scale
+            'animation': self.generate_animation_tokens(),
+            'breakpoints': self.generate_breakpoints(),
+            'z-index': self.generate_z_index_scale()
         }
         
         return tokens
@@ -103,7 +103,7 @@ class DesignTokenGenerator:
             'secondary': self._generate_color_scale(
                 self._adjust_hue(brand_color, 180), 'secondary'
             ),
-            'neutral': self._generate_neutral_scale,
+            'neutral': self._generate_neutral_scale(),
             'semantic': {
                 'success': {
                     'base': '#10B981',
@@ -204,7 +204,7 @@ class DesignTokenGenerator:
         
         typography = {
             'fontFamily': font_families.get(style, font_families['modern']),
-            'fontSize': self._generate_type_scale,
+            'fontSize': self._generate_type_scale(),
             'fontWeight': {
                 'thin': 100,
                 'light': 300,
@@ -231,7 +231,7 @@ class DesignTokenGenerator:
                 'wider': '0.05em',
                 'widest': '0.1em'
             },
-            'textStyles': self._generate_text_styles
+            'textStyles': self._generate_text_styles()
         }
         
         return typography
@@ -517,7 +517,7 @@ class DesignTokenGenerator:
         css = [':root {']
         
         def flatten_dict(obj, prefix=''):
-            for key, value in obj.items:
+            for key, value in obj.items():
                 if isinstance(value, dict):
                     flatten_dict(value, f'{prefix}-{key}' if prefix else key)
                 else:
@@ -545,7 +545,7 @@ class DesignTokenGenerator:
         new_rgb = colorsys.hsv_to_rgb(h, s, v)
         return self._rgb_to_hex([int(c * 255) for c in new_rgb])
 
-def main:
+def main():
     import sys
     import argparse
 
@@ -565,9 +565,9 @@ def main:
         dest="output_format",
         help="Output format (default: json)"
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    generator = DesignTokenGenerator
+    generator = DesignTokenGenerator()
     tokens = generator.generate_complete_system(args.brand_color, args.style)
 
     if args.output_format == 'summary':
@@ -587,4 +587,4 @@ def main:
         print(generator.export_tokens(tokens, args.output_format))
 
 if __name__ == "__main__":
-    main
+    main()

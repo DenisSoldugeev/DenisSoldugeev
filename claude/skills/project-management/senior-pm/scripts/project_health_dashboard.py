@@ -99,8 +99,8 @@ class ProjectMetrics:
     def __init__(self, data: Dict[str, Any]):
         self.project_id: str = data.get("project_id", "")
         self.project_name: str = data.get("project_name", "")
-        self.priority: str = data.get("priority", "medium").lower
-        self.status: str = data.get("status", "planning").lower
+        self.priority: str = data.get("priority", "medium").lower()
+        self.status: str = data.get("status", "planning").lower()
         self.phase: str = data.get("phase", "planning")
         
         # Timeline metrics
@@ -142,22 +142,22 @@ class ProjectMetrics:
         self.last_status_update: str = data.get("last_status_update", "")
         
         # Calculate derived metrics
-        self._calculate_health_metrics
-        self._normalize_status
+        self._calculate_health_metrics()
+        self._normalize_status()
     
     def _calculate_health_metrics(self):
         """Calculate normalized health metrics for each dimension."""
         # Timeline health (0 = on time, 1 = severely delayed)
-        self.timeline_health = self._calculate_timeline_variance
+        self.timeline_health = self._calculate_timeline_variance()
         
         # Budget health (0 = on budget, 1 = severely over budget)
-        self.budget_health = self._calculate_budget_variance
+        self.budget_health = self._calculate_budget_variance()
         
         # Scope health (0 = no scope delivered, 1 = full scope delivered)
-        self.scope_health = self._calculate_scope_completion
+        self.scope_health = self._calculate_scope_completion()
         
         # Quality health (0 = poor quality, 1 = excellent quality)
-        self.quality_health = self._calculate_quality_score
+        self.quality_health = self._calculate_quality_score()
         
         # Risk health (normalized risk score)
         self.risk_health = min(self.risk_score, 100)  # Cap at 100
@@ -181,7 +181,7 @@ class ProjectMetrics:
             elif self.status in ["completed", "cancelled"]:
                 return 0.0  # Project is done
             else:
-                forecast_date = datetime.now
+                forecast_date = datetime.now()
             
             actual_duration = (forecast_date - planned_start).days
             variance = max(0, actual_duration - planned_duration) / planned_duration
@@ -230,9 +230,9 @@ class ProjectMetrics:
     
     def _normalize_status(self):
         """Normalize project status to standard categories."""
-        status_lower = self.status.lower
+        status_lower = self.status.lower()
         
-        for category, statuses in PROJECT_STATUS_MAPPING.items:
+        for category, statuses in PROJECT_STATUS_MAPPING.items():
             if status_lower in statuses:
                 self.normalized_status = category
                 return
@@ -245,7 +245,7 @@ class ProjectMetrics:
     
     @property
     def requires_intervention(self) -> bool:
-        health_score = self.calculate_composite_health_score
+        health_score = self.calculate_composite_health_score()
         return health_score <= INTERVENTION_THRESHOLDS["urgent"] and self.is_active
 
 
@@ -322,7 +322,7 @@ def calculate_project_health_score(project: ProjectMetrics) -> Dict[str, Any]:
     
     composite_score = sum(
         dim_data["score"] * dim_data["weight"] 
-        for dim_data in dimensions.values
+        for dim_data in dimensions.values()
     )
     
     # Apply priority weighting
@@ -365,7 +365,7 @@ def analyze_portfolio_dimensions(project_scores: List[Dict[str, Any]]) -> Dict[s
     """Analyze portfolio performance across health dimensions."""
     dimension_analysis = {}
     
-    for dimension in HEALTH_DIMENSIONS.keys:
+    for dimension in HEALTH_DIMENSIONS.keys():
         scores = [
             project["dimension_scores"][dimension]["score"] 
             for project in project_scores
@@ -383,15 +383,15 @@ def analyze_portfolio_dimensions(project_scores: List[Dict[str, Any]]) -> Dict[s
             }
     
     # Identify weakest and strongest dimensions
-    avg_scores = {dim: data["average_score"] for dim, data in dimension_analysis.items}
-    weakest_dimension = min(avg_scores.keys, key=lambda k: avg_scores[k])
-    strongest_dimension = max(avg_scores.keys, key=lambda k: avg_scores[k])
+    avg_scores = {dim: data["average_score"] for dim, data in dimension_analysis.items()}
+    weakest_dimension = min(avg_scores.keys(), key=lambda k: avg_scores[k])
+    strongest_dimension = max(avg_scores.keys(), key=lambda k: avg_scores[k])
     
     return {
         "dimension_statistics": dimension_analysis,
         "weakest_dimension": weakest_dimension,
         "strongest_dimension": strongest_dimension,
-        "dimension_rankings": sorted(avg_scores.items, key=lambda x: x[1], reverse=True)
+        "dimension_rankings": sorted(avg_scores.items(), key=lambda x: x[1], reverse=True)
     }
 
 
@@ -409,7 +409,7 @@ def generate_rag_status_summary(project_scores: List[Dict[str, Any]]) -> Dict[st
     # Calculate percentages
     rag_percentages = {
         status: (count / max(total_projects, 1)) * 100 
-        for status, count in rag_counts.items
+        for status, count in rag_counts.items()
     }
     
     # Categorize projects by status
@@ -507,7 +507,7 @@ def _identify_risk_factors(project: Dict[str, Any]) -> List[str]:
     
     dimension_scores = project["dimension_scores"]
     poor_dimensions = [
-        dim for dim, data in dimension_scores.items 
+        dim for dim, data in dimension_scores.items() 
         if data["score"] < 50
     ]
     
@@ -568,7 +568,7 @@ def generate_portfolio_recommendations(analysis_results: Dict[str, Any]) -> List
 
 def analyze_portfolio_health(data: Dict[str, Any]) -> PortfolioHealthResult:
     """Perform comprehensive portfolio health analysis."""
-    result = PortfolioHealthResult
+    result = PortfolioHealthResult()
     
     try:
         # Parse project data
@@ -671,7 +671,7 @@ def format_text_output(result: PortfolioHealthResult) -> str:
         lines.append(f"🟢 Green: {rag_counts.get('green', 0)} ({rag_percentages.get('green', 0):.1f}%)")
         lines.append(f"🟡 Amber: {rag_counts.get('amber', 0)} ({rag_percentages.get('amber', 0):.1f}%)")
         lines.append(f"🔴 Red: {rag_counts.get('red', 0)} ({rag_percentages.get('red', 0):.1f}%)")
-        lines.append(f"Portfolio Grade: {rag_status.get('portfolio_grade', 'N/A').title}")
+        lines.append(f"Portfolio Grade: {rag_status.get('portfolio_grade', 'N/A').title()}")
         lines.append("")
     
     # Dimension Analysis
@@ -681,12 +681,12 @@ def format_text_output(result: PortfolioHealthResult) -> str:
         lines.append("-"*30)
         
         dimension_stats = dimension_analysis.get("dimension_statistics", {})
-        for dimension, stats in dimension_stats.items:
-            lines.append(f"{dimension.title}: {stats['average_score']:.1f} avg "
+        for dimension, stats in dimension_stats.items():
+            lines.append(f"{dimension.title()}: {stats['average_score']:.1f} avg "
                         f"({stats['projects_below_60']} below 60, {stats['projects_above_80']} above 80)")
         
-        lines.append(f"Strongest: {dimension_analysis.get('strongest_dimension', '').title}")
-        lines.append(f"Weakest: {dimension_analysis.get('weakest_dimension', '').title}")
+        lines.append(f"Strongest: {dimension_analysis.get('strongest_dimension', '').title()}")
+        lines.append(f"Weakest: {dimension_analysis.get('weakest_dimension', '').title()}")
         lines.append("")
     
     # Critical Projects Needing Intervention
@@ -763,7 +763,7 @@ ProjectMetrics.calculate_composite_health_score = lambda self: calculate_project
 # CLI Interface
 # ---------------------------------------------------------------------------
 
-def main -> int:
+def main() -> int:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Analyze project portfolio health across multiple dimensions"
@@ -779,7 +779,7 @@ def main -> int:
         help="Output format (default: text)"
     )
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Load and validate data
@@ -811,4 +811,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -219,21 +219,21 @@ session = Session.builder.configs({
     "warehouse": "my_wh",
     "database": "my_db",
     "schema": "my_schema"
-}).create
+}).create()
 ```
 
 ### DataFrame Operations
 
 ```python
-# Lazy operations -- nothing executes until collect/show
+# Lazy operations -- nothing executes until collect()/show()
 df = session.table("events")
 result = (
     df.filter(df["event_type"] == "purchase")
       .group_by("user_id")
       .agg(F.sum("amount").alias("total_spent"))
-      .sort(F.col("total_spent").desc)
+      .sort(F.col("total_spent").desc())
 )
-result.show  # Execution happens here
+result.show()  # Execution happens here
 ```
 
 ### Vectorized UDFs (10-100x Faster)
@@ -250,7 +250,7 @@ import pandas as pd
     replace=True
 )
 def normalize_email(emails: pd.Series) -> pd.Series:
-    return emails.str.lower.str.strip
+    return emails.str.lower().str.strip()
 ```
 
 ### Stored Procedures in Python
@@ -261,7 +261,7 @@ from snowflake.snowpark import Session
 def process_batch(session: Session, batch_date: str) -> str:
     df = session.table("raw_events").filter(F.col("event_date") == batch_date)
     df.write.mode("overwrite").save_as_table("processed_events")
-    return f"Processed {df.count} rows for {batch_date}"
+    return f"Processed {df.count()} rows for {batch_date}"
 
 session.sproc.register(
     func=process_batch,
@@ -275,6 +275,6 @@ session.sproc.register(
 ### Key Rules
 
 - Never hardcode credentials. Use environment variables, key pair auth, or Snowflake's built-in connection config.
-- DataFrames are lazy. Calling `.collect` pulls all data to the client -- avoid on large datasets.
+- DataFrames are lazy. Calling `.collect()` pulls all data to the client -- avoid on large datasets.
 - Use vectorized UDFs over scalar UDFs for batch processing (10-100x performance improvement).
-- Close sessions when done: `session.close`.
+- Close sessions when done: `session.close()`.

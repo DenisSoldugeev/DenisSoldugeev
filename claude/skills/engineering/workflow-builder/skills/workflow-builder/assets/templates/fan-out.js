@@ -32,7 +32,7 @@ const ITEMS = args?.items ?? ['item one', 'item two', 'item three']
 
 phase('Fan out')
 const results = await parallel(
-  ITEMS.map((item, i) =>  =>
+  ITEMS.map((item, i) => () =>
     agent(`Do the unit of work for:\n${item}`,
           { label: `unit:${i + 1}`, model: 'haiku', schema: FINDINGS_SCHEMA }))
 )

@@ -96,7 +96,7 @@ def plan(method: str, segments: int, p: float, target: float, stakes_high: bool,
 
 def _render_human(r: dict) -> str:
     lines = [f"Saturation / Sample Plan  (method: {r['method']})", ""]
-    for k, v in r.items:
+    for k, v in r.items():
         if k in ("method",):
             continue
         lines.append(f"  {k:32s} : {v}")
@@ -115,7 +115,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--sample", action="store_true", help="use the embedded sample")
     args = p.parse_args(argv)
 
-    conf = _cfg.load_config if _cfg else {}
+    conf = _cfg.load_config() if _cfg else {}
     method = args.method or conf.get("default_method", "usability")
     stakes_high = args.stakes_high or bool(conf.get("stakes_high", False))
 
@@ -141,4 +141,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

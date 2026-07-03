@@ -25,6 +25,24 @@ def safe_divide(numerator: float, denominator: float, default: float = 0.0) -> f
     return numerator / denominator
 
 
+def resolve_input_section(
+    data: Dict[str, Any], section_key: str, flat_keys: Tuple[str, ...]
+) -> Dict[str, Any]:
+    """
+    Accept both supported input shapes:
+    1. Flat: the expected keys live at the top level of the JSON file.
+    2. Nested: the data lives under a per-tool section key, as in
+       assets/sample_financial_data.json (which bundles inputs for all
+       four financial-analyst scripts in one file).
+    """
+    if any(key in data for key in flat_keys):
+        return data
+    section = data.get(section_key)
+    if isinstance(section, dict):
+        return section
+    return data
+
+
 class BudgetVarianceAnalyzer:
     """Analyze budget variances with materiality filtering and classification."""
 
@@ -60,7 +78,7 @@ class BudgetVarianceAnalyzer:
         Revenue: over budget = favorable
         Expense: under budget = favorable
         """
-        if line_type.lower in ("revenue", "income", "sales"):
+        if line_type.lower() in ("revenue", "income", "sales"):
             return "Favorable" if variance_amount > 0 else "Unfavorable"
         else:
             # For expenses, under budget (negative variance) is favorable
@@ -149,7 +167,7 @@ class BudgetVarianceAnalyzer:
                 departments[dept]["unfavorable_count"] += 1
 
         # Add variance percentage
-        for dept_data in departments.values:
+        for dept_data in departments.values():
             dept_data["variance_pct"] = round(
                 safe_divide(
                     dept_data["total_variance"], dept_data["total_budget"]
@@ -179,7 +197,7 @@ class BudgetVarianceAnalyzer:
             categories[cat]["total_variance"] += v["budget_variance_amount"]
             categories[cat]["line_count"] += 1
 
-        for cat_data in categories.values:
+        for cat_data in categories.values():
             cat_data["variance_pct"] = round(
                 safe_divide(
                     cat_data["total_variance"], cat_data["total_budget"]
@@ -193,16 +211,16 @@ class BudgetVarianceAnalyzer:
     def generate_executive_summary(self) -> Dict[str, Any]:
         """Generate an executive summary of the variance analysis."""
         total_actual = sum(
-            v["actual"] for v in self.variances if v["type"].lower in ("revenue", "income", "sales")
+            v["actual"] for v in self.variances if v["type"].lower() in ("revenue", "income", "sales")
         )
         total_budget = sum(
-            v["budget"] for v in self.variances if v["type"].lower in ("revenue", "income", "sales")
+            v["budget"] for v in self.variances if v["type"].lower() in ("revenue", "income", "sales")
         )
         total_expense_actual = sum(
-            v["actual"] for v in self.variances if v["type"].lower not in ("revenue", "income", "sales")
+            v["actual"] for v in self.variances if v["type"].lower() not in ("revenue", "income", "sales")
         )
         total_expense_budget = sum(
-            v["budget"] for v in self.variances if v["type"].lower not in ("revenue", "income", "sales")
+            v["budget"] for v in self.variances if v["type"].lower() not in ("revenue", "income", "sales")
         )
 
         revenue_variance = total_actual - total_budget
@@ -249,10 +267,10 @@ class BudgetVarianceAnalyzer:
 
     def run_analysis(self) -> Dict[str, Any]:
         """Run the complete variance analysis."""
-        self.calculate_variances
-        dept_summary = self.department_summary
-        cat_summary = self.category_summary
-        exec_summary = self.generate_executive_summary
+        self.calculate_variances()
+        dept_summary = self.department_summary()
+        cat_summary = self.category_summary()
+        exec_summary = self.generate_executive_summary()
 
         return {
             "executive_summary": exec_summary,
@@ -327,7 +345,7 @@ class BudgetVarianceAnalyzer:
         dept = results["department_summary"]
         if dept:
             lines.append(f"\n--- DEPARTMENT SUMMARY ---")
-            for dept_name, d in dept.items:
+            for dept_name, d in dept.items():
                 lines.append(
                     f"  {dept_name}: Variance {fmt_money(d['total_variance'])} "
                     f"({d['variance_pct']:+.1f}%) | "
@@ -338,7 +356,7 @@ class BudgetVarianceAnalyzer:
         cat = results["category_summary"]
         if cat:
             lines.append(f"\n--- CATEGORY SUMMARY ---")
-            for cat_name, c in cat.items:
+            for cat_name, c in cat.items():
                 lines.append(
                     f"  {cat_name}: Variance {fmt_money(c['total_variance'])} "
                     f"({c['variance_pct']:+.1f}%)"
@@ -348,7 +366,7 @@ class BudgetVarianceAnalyzer:
         return "\n".join(lines)
 
 
-def main -> None:
+def main() -> None:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Analyze budget variances with materiality filtering"
@@ -376,7 +394,7 @@ def main -> None:
         help="Materiality threshold dollar amount (default: 50000)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         with open(args.input_file, "r") as f:
@@ -388,13 +406,23 @@ def main -> None:
         print(f"Error: Invalid JSON in '{args.input_file}': {e}", file=sys.stderr)
         sys.exit(1)
 
+    data = resolve_input_section(data, "budget_variance", ("line_items",))
+    if not data.get("line_items"):
+        print(
+            "Error: No budget line items found. Expected a non-empty "
+            "'line_items' array at the top level or nested under "
+            "'budget_variance'.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     analyzer = BudgetVarianceAnalyzer(
         data,
         threshold_pct=args.threshold_pct,
         threshold_amt=args.threshold_amt,
     )
 
-    results = analyzer.run_analysis
+    results = analyzer.run_analysis()
 
     if args.format == "json":
         print(json.dumps(results, indent=2))
@@ -403,4 +431,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

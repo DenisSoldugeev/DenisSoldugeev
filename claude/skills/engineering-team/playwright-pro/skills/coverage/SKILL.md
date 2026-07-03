@@ -36,7 +36,7 @@ Use the `Explore` subagent to catalog:
 
 Scan all `*.spec.ts` / `*.spec.js` files:
 
-- Extract which pages/routes are covered (by `page.goto` calls)
+- Extract which pages/routes are covered (by `page.goto()` calls)
 - Extract which components are tested (by locator usage)
 - Extract which API endpoints are mocked or hit
 - Count tests per area

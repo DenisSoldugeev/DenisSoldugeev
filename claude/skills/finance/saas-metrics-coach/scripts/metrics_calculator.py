@@ -142,7 +142,7 @@ def report(r):
 
 def _ask(prompt, required=False):
     while True:
-        v = input(f"  {prompt}: ").strip
+        v = input(f"  {prompt}: ").strip()
         if not v:
             if required:
                 print("    Required — please enter a value.")
@@ -171,7 +171,7 @@ if __name__ == "__main__":
     parser.add_argument("--profit-margin", type=float, help="Net profit margin %%")
     parser.add_argument("--json", action="store_true", help="Output JSON format")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     # CLI mode
     if args.mrr is not None:

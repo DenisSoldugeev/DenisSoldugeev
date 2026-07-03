@@ -10,6 +10,8 @@ Usage:
     python text_processor.py analyze <file> [options]
     python text_processor.py transform <file> --mode <mode> [options]
     python text_processor.py batch <directory> [options]
+
+Author: Claude Skills Engineering Team
 Version: 1.0.0
 Dependencies: Python Standard Library Only
 """
@@ -32,7 +34,7 @@ class TextProcessor:
     def analyze_text(self, text: str) -> Dict[str, Any]:
         """Analyze text and return statistics"""
         lines = text.split('\n')
-        words = text.lower.split
+        words = text.lower().split()
         
         # Calculate basic statistics
         stats = {
@@ -59,11 +61,11 @@ class TextProcessor:
     def transform_text(self, text: str, mode: str) -> str:
         """Transform text according to specified mode"""
         if mode == 'upper':
-            return text.upper
+            return text.upper()
         elif mode == 'lower':
-            return text.lower
+            return text.lower()
         elif mode == 'title':
-            return text.title
+            return text.title()
         elif mode == 'reverse':
             return text[::-1]
         else:
@@ -73,7 +75,7 @@ class TextProcessor:
         """Process a single text file"""
         try:
             with open(file_path, 'r', encoding=self.encoding) as file:
-                content = file.read
+                content = file.read()
                 
             stats = self.analyze_text(content)
             stats['file'] = file_path
@@ -134,7 +136,7 @@ class FileManager:
         
         try:
             for file_path in Path(directory).rglob('*'):
-                if file_path.is_file and file_path.suffix.lower in text_extensions:
+                if file_path.is_file() and file_path.suffix.lower() in text_extensions:
                     text_files.append(str(file_path))
                     
         except PermissionError:
@@ -206,7 +208,7 @@ def transform_command(args: argparse.Namespace) -> int:
         
         # Read and transform the file
         with open(args.file, 'r', encoding=args.encoding) as file:
-            content = file.read
+            content = file.read()
             
         transformed = processor.transform_text(content, args.mode)
         
@@ -293,7 +295,7 @@ def batch_command(args: argparse.Namespace) -> int:
         return 1
 
 
-def main:
+def main():
     """Main entry point with argument parsing"""
     parser = argparse.ArgumentParser(
         description="Sample Text Processor - Basic text analysis and transformation",
@@ -351,10 +353,10 @@ Transformation modes:
     batch_parser = subparsers.add_parser('batch', help='Process multiple files')
     batch_parser.add_argument('directory', help='Directory containing text files')
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     if not args.command:
-        parser.print_help
+        parser.print_help()
         return 1
     
     try:
@@ -377,4 +379,4 @@ Transformation modes:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

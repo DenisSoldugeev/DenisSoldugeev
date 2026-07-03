@@ -75,9 +75,9 @@ CONTENT_SIGNALS: dict[str, list[tuple[str, str, int]]] = {
 
 
 def _score_filename(path: Path) -> dict[str, int]:
-    name = path.name.lower
+    name = path.name.lower()
     out: dict[str, int] = {"document": 0, "review": 0, "slides": 0}
-    for cls, patterns in FILENAME_HINTS.items:
+    for cls, patterns in FILENAME_HINTS.items():
         for p in patterns:
             if re.search(p, name):
                 out[cls] += 2
@@ -89,8 +89,8 @@ def _score_content(text: str) -> tuple[dict[str, int], dict[str, list[str]]]:
     scores: dict[str, int] = {"document": 0, "review": 0, "slides": 0}
     evidence: dict[str, list[str]] = {"document": [], "review": [], "slides": []}
 
-    lines = text.splitlines
-    for cls, sigs in CONTENT_SIGNALS.items:
+    lines = text.splitlines()
+    for cls, sigs in CONTENT_SIGNALS.items():
         for pattern, label, weight in sigs:
             compiled = re.compile(pattern, re.MULTILINE)
             matches = compiled.findall(text)
@@ -128,11 +128,11 @@ def classify(input_path: Path | None, text: str | None) -> dict[str, Any]:
     content_scores, evidence = _score_content(text)
     total = {k: fn_scores[k] + content_scores[k] for k in fn_scores}
 
-    line_count = len(text.splitlines)
+    line_count = len(text.splitlines())
     below_min = line_count < MIN_LINES
 
     # Ranking
-    ranked = sorted(total.items, key=lambda kv: kv[1], reverse=True)
+    ranked = sorted(total.items(), key=lambda kv: kv[1], reverse=True)
     winner_cls, winner_score = ranked[0]
     runner_cls, runner_score = ranked[1]
 
@@ -197,7 +197,7 @@ def render_human(result: dict[str, Any]) -> str:
         lines.append(f"  md-{cls:<10s} total={total:<3d} (filename={fn}, content={ct})")
     lines.append("")
     lines.append("Evidence:")
-    for cls, sigs in result["evidence"].items:
+    for cls, sigs in result["evidence"].items():
         if sigs:
             lines.append(f"  md-{cls}: {', '.join(sigs)}")
     return "\n".join(lines)
@@ -216,16 +216,16 @@ def main(argv: list[str]) -> int:
         result = classify(None, sample_text)
     elif args.input:
         if args.input == "-":
-            text = sys.stdin.read
+            text = sys.stdin.read()
             result = classify(None, text)
         else:
             path = Path(args.input)
-            if not path.exists:
+            if not path.exists():
                 print(f"error: input not found: {path}", file=sys.stderr)
                 return 2
             result = classify(path, None)
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     if args.output == "json":

@@ -33,7 +33,7 @@ def generate_urls(config):
     variables = config["variables"]
     base_url = config.get("base_url", "https://example.com")
 
-    var_names = list(variables.keys)
+    var_names = list(variables.keys())
     var_values = [variables[name] for name in var_names]
 
     urls = []
@@ -41,13 +41,13 @@ def generate_urls(config):
         mapping = dict(zip(var_names, combo))
 
         # Skip self-comparisons
-        values = list(mapping.values)
+        values = list(mapping.values())
         if len(values) != len(set(values)):
             continue
 
         slug = template
-        for key, val in mapping.items:
-            slug = slug.replace("{" + key + "}", str(val).lower.replace(" ", "-"))
+        for key, val in mapping.items():
+            slug = slug.replace("{" + key + "}", str(val).lower().replace(" ", "-"))
 
         url = f"{base_url}/{slug}"
         urls.append({
@@ -78,14 +78,14 @@ def analyze_patterns(urls, config):
 
     # Check for potential duplicate intent
     template = config["template"]
-    var_names = list(config["variables"].keys)
+    var_names = list(config["variables"].keys())
     if len(var_names) >= 2:
         # Check if swapped variables create duplicate intent
         # e.g., "slack-vs-zoom" and "zoom-vs-slack"
-        seen_pairs = set
+        seen_pairs = set()
         dupes = 0
         for u in urls:
-            vals = tuple(sorted(u["variables"].values))
+            vals = tuple(sorted(u["variables"].values()))
             if vals in seen_pairs:
                 dupes += 1
             seen_pairs.add(vals)
@@ -118,7 +118,7 @@ def format_report(urls, analysis, config):
     lines.append("")
     lines.append(f"  Template:    {config['template']}")
     lines.append(f"  Base URL:    {config.get('base_url', 'https://example.com')}")
-    lines.append(f"  Variables:   {len(config['variables'])} ({', '.join(config['variables'].keys)})")
+    lines.append(f"  Variables:   {len(config['variables'])} ({', '.join(config['variables'].keys())})")
     lines.append(f"  Total Pages: {analysis['total_pages']:,}")
     lines.append(f"  Avg URL Len: {analysis['avg_url_length']} chars")
     lines.append("")
@@ -165,7 +165,7 @@ SAMPLE_CONFIG = {
 }
 
 
-def main:
+def main():
     use_json = "--json" in sys.argv
     args = [a for a in sys.argv[1:] if a != "--json"]
 
@@ -191,4 +191,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -74,7 +74,7 @@ Write-Host "Starting Security Audit..." -ForegroundColor Cyan
 Write-Host "[1/5] Checking MFA status..." -ForegroundColor Yellow
 
 $users = Get-MgUser -All -Property Id,DisplayName,UserPrincipalName,AccountEnabled
-$mfaReport = @
+$mfaReport = @()
 
 foreach ($user in $users) {
     $authMethods = Get-MgUserAuthenticationMethod -UserId $user.Id -ErrorAction SilentlyContinue
@@ -97,7 +97,7 @@ Write-Host "  Users without MFA: $usersWithoutMFA" -ForegroundColor $(if($usersW
 Write-Host "[2/5] Auditing admin roles..." -ForegroundColor Yellow
 
 $adminRoles = Get-MgDirectoryRole -All
-$adminReport = @
+$adminReport = @()
 
 foreach ($role in $adminRoles) {
     $members = Get-MgDirectoryRoleMember -DirectoryRoleId $role.Id -All
@@ -324,7 +324,7 @@ if (-not $license) {
     exit 1
 }
 
-$results = @
+$results = @()
 $successCount = 0
 $errorCount = 0
 
@@ -364,7 +364,7 @@ foreach ($user in $users) {
         # Assign license
         $licenseParams = @{
             AddLicenses = @(@{ SkuId = $license.SkuId })
-            RemoveLicenses = @
+            RemoveLicenses = @()
         }
         Set-MgUserLicense -UserId $newUser.Id -BodyParameter $licenseParams
         Write-Host "  License assigned: $LicenseSku" -ForegroundColor Cyan
@@ -456,7 +456,7 @@ if (-not $user) {
     exit 1
 }
 
-$actions = @
+$actions = @()
 
 # 1. Disable account
 if (-not $WhatIf) {
@@ -522,7 +522,7 @@ if ($RetainMailbox) {
 $licenses = Get-MgUserLicenseDetail -UserId $user.Id
 if ($licenses -and -not $WhatIf) {
     $licenseParams = @{
-        AddLicenses    = @
+        AddLicenses    = @()
         RemoveLicenses = $licenses.SkuId
     }
     Set-MgUserLicense -UserId $user.Id -BodyParameter $licenseParams

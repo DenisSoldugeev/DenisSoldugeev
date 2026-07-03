@@ -624,7 +624,7 @@ from torchvision.ops import FeaturePyramidNetwork
 
 class DetectionBackbone(nn.Module):
     def __init__(self):
-        super.__init__
+        super().__init__()
         backbone = resnet50(pretrained=True)
 
         self.layer1 = nn.Sequential(backbone.conv1, backbone.bn1,

@@ -44,26 +44,26 @@ class DependencyAnalyzer:
 
     def analyze(self) -> Dict:
         """Run full dependency analysis."""
-        self._detect_package_manager
-        self._parse_dependencies
-        self._scan_internal_modules
-        self._detect_circular_dependencies
-        self._calculate_coupling_score
-        self._generate_recommendations
+        self._detect_package_manager()
+        self._parse_dependencies()
+        self._scan_internal_modules()
+        self._detect_circular_dependencies()
+        self._calculate_coupling_score()
+        self._generate_recommendations()
 
-        return self._build_report
+        return self._build_report()
 
     def _detect_package_manager(self):
         """Detect which package manager is used."""
-        if (self.project_path / 'package.json').exists:
+        if (self.project_path / 'package.json').exists():
             self.package_manager = 'npm'
-        elif (self.project_path / 'requirements.txt').exists:
+        elif (self.project_path / 'requirements.txt').exists():
             self.package_manager = 'pip'
-        elif (self.project_path / 'pyproject.toml').exists:
+        elif (self.project_path / 'pyproject.toml').exists():
             self.package_manager = 'poetry'
-        elif (self.project_path / 'go.mod').exists:
+        elif (self.project_path / 'go.mod').exists():
             self.package_manager = 'go'
-        elif (self.project_path / 'Cargo.toml').exists:
+        elif (self.project_path / 'Cargo.toml').exists():
             self.package_manager = 'cargo'
         else:
             self.package_manager = 'unknown'
@@ -83,20 +83,20 @@ class DependencyAnalyzer:
 
         parser = parsers.get(self.package_manager)
         if parser:
-            parser
+            parser()
 
     def _parse_npm(self):
         """Parse package.json for npm dependencies."""
         pkg_path = self.project_path / 'package.json'
         try:
-            data = json.loads(pkg_path.read_text)
+            data = json.loads(pkg_path.read_text())
 
             # Direct dependencies
-            for name, version in data.get('dependencies', {}).items:
+            for name, version in data.get('dependencies', {}).items():
                 self.direct_deps[name] = self._clean_version(version)
 
             # Dev dependencies
-            for name, version in data.get('devDependencies', {}).items:
+            for name, version in data.get('devDependencies', {}).items():
                 self.dev_deps[name] = self._clean_version(version)
 
             if self.verbose:
@@ -114,9 +114,9 @@ class DependencyAnalyzer:
         """Parse requirements.txt for Python dependencies."""
         req_path = self.project_path / 'requirements.txt'
         try:
-            content = req_path.read_text
-            for line in content.strip.split('\n'):
-                line = line.strip
+            content = req_path.read_text()
+            for line in content.strip().split('\n'):
+                line = line.strip()
                 if not line or line.startswith('#') or line.startswith('-'):
                     continue
 
@@ -141,14 +141,14 @@ class DependencyAnalyzer:
         """Parse pyproject.toml for Poetry dependencies."""
         toml_path = self.project_path / 'pyproject.toml'
         try:
-            content = toml_path.read_text
+            content = toml_path.read_text()
 
             # Simple TOML parsing for dependencies section
             in_deps = False
             in_dev_deps = False
 
             for line in content.split('\n'):
-                line = line.strip
+                line = line.strip()
 
                 if line == '[tool.poetry.dependencies]':
                     in_deps = True
@@ -190,12 +190,12 @@ class DependencyAnalyzer:
         """Parse go.mod for Go dependencies."""
         mod_path = self.project_path / 'go.mod'
         try:
-            content = mod_path.read_text
+            content = mod_path.read_text()
 
             # Find require block
             in_require = False
             for line in content.split('\n'):
-                line = line.strip
+                line = line.strip()
 
                 if line.startswith('require ('):
                     in_require = True
@@ -229,13 +229,13 @@ class DependencyAnalyzer:
         """Parse Cargo.toml for Rust dependencies."""
         cargo_path = self.project_path / 'Cargo.toml'
         try:
-            content = cargo_path.read_text
+            content = cargo_path.read_text()
 
             in_deps = False
             in_dev_deps = False
 
             for line in content.split('\n'):
-                line = line.strip
+                line = line.strip()
 
                 if line == '[dependencies]':
                     in_deps = True
@@ -306,7 +306,7 @@ class DependencyAnalyzer:
 
     def _extract_imports(self, file_path: Path) -> Set[str]:
         """Extract import statements from a file."""
-        imports = set
+        imports = set()
         try:
             content = file_path.read_text(encoding='utf-8', errors='ignore')
 
@@ -332,18 +332,18 @@ class DependencyAnalyzer:
         """Detect circular dependencies between internal modules."""
         # Build dependency graph
         graph = defaultdict(set)
-        modules = set(self.internal_modules.keys)
+        modules = set(self.internal_modules.keys())
 
-        for module, imports in self.internal_modules.items:
+        for module, imports in self.internal_modules.items():
             for imp in imports:
                 # Check if import is an internal module
                 for internal_module in modules:
-                    if internal_module.lower in imp.lower and internal_module != module:
+                    if internal_module.lower() in imp.lower() and internal_module != module:
                         graph[module].add(internal_module)
 
         # Find cycles using DFS
-        visited = set
-        rec_stack = set
+        visited = set()
+        rec_stack = set()
         cycles = []
 
         def find_cycles(node: str, path: List[str]):
@@ -361,7 +361,7 @@ class DependencyAnalyzer:
                     if cycle not in cycles:
                         cycles.append(cycle)
 
-            path.pop
+            path.pop()
             rec_stack.remove(node)
 
         for module in modules:
@@ -390,12 +390,12 @@ class DependencyAnalyzer:
         # Count connections between modules
         total_modules = len(self.internal_modules)
         total_connections = 0
-        modules = set(self.internal_modules.keys)
+        modules = set(self.internal_modules.keys())
 
-        for module, imports in self.internal_modules.items:
+        for module, imports in self.internal_modules.items():
             for imp in imports:
                 for internal_module in modules:
-                    if internal_module.lower in imp.lower and internal_module != module:
+                    if internal_module.lower() in imp.lower() and internal_module != module:
                         total_connections += 1
 
         # Max possible connections (complete graph)
@@ -439,7 +439,7 @@ class DependencyAnalyzer:
             'request': 'Deprecated. Use axios, node-fetch, or native fetch',
         }
 
-        for pkg, suggestion in problematic.items:
+        for pkg, suggestion in problematic.items():
             if pkg in self.direct_deps:
                 self.recommendations.append(f"{pkg}: {suggestion}")
 
@@ -460,7 +460,7 @@ class DependencyAnalyzer:
                 'direct': self.direct_deps,
                 'dev': self.dev_deps,
             },
-            'internal_modules': {k: list(v) for k, v in self.internal_modules.items},
+            'internal_modules': {k: list(v) for k, v in self.internal_modules.items()},
             'circular_dependencies': self.circular_deps,
             'issues': self.issues,
             'recommendations': self.recommendations,
@@ -497,7 +497,7 @@ def print_human_report(report: Dict):
     if report['issues']:
         print(f"\n--- Issues ({len(report['issues'])}) ---")
         for issue in report['issues']:
-            severity = issue['severity'].upper
+            severity = issue['severity'].upper()
             print(f"  [{severity}] {issue['message']}")
 
     if report['recommendations']:
@@ -509,7 +509,7 @@ def print_human_report(report: Dict):
     deps = report['dependencies']['direct']
     if deps:
         print(f"\n--- Top Dependencies (of {len(deps)}) ---")
-        for name, version in list(deps.items)[:10]:
+        for name, version in list(deps.items())[:10]:
             print(f"  {name}: {version}")
         if len(deps) > 10:
             print(f"  ... and {len(deps) - 10} more")
@@ -517,7 +517,7 @@ def print_human_report(report: Dict):
     print("\n" + "=" * 60)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description='Analyze project dependencies and module coupling',
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -563,20 +563,20 @@ Supported package managers:
         help='Save report to file'
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    project_path = Path(args.project_path).resolve
-    if not project_path.exists:
+    project_path = Path(args.project_path).resolve()
+    if not project_path.exists():
         print(f"Error: Project path does not exist: {project_path}", file=sys.stderr)
         sys.exit(1)
 
-    if not project_path.is_dir:
+    if not project_path.is_dir():
         print(f"Error: Project path is not a directory: {project_path}", file=sys.stderr)
         sys.exit(1)
 
     # Run analysis
     analyzer = DependencyAnalyzer(project_path, verbose=args.verbose)
-    report = analyzer.analyze
+    report = analyzer.analyze()
 
     # Filter report based on --check option
     if args.check == 'circular':
@@ -612,4 +612,4 @@ Supported package managers:
 
 
 if __name__ == '__main__':
-    main
+    main()

@@ -30,10 +30,10 @@ class IncidentClassifier:
     
     def __init__(self):
         """Initialize the classifier with rules and templates."""
-        self.severity_rules = self._load_severity_rules
-        self.team_mappings = self._load_team_mappings
-        self.communication_templates = self._load_communication_templates
-        self.action_templates = self._load_action_templates
+        self.severity_rules = self._load_severity_rules()
+        self.team_mappings = self._load_team_mappings()
+        self.communication_templates = self._load_communication_templates()
+        self.action_templates = self._load_action_templates()
     
     def _load_severity_rules(self) -> Dict[str, Dict]:
         """Load severity classification rules and keywords."""
@@ -367,7 +367,7 @@ Target Resolution: {target_date}
             Dictionary with classification results and recommendations
         """
         # Extract key information from incident data
-        description = incident_data.get('description', '').lower
+        description = incident_data.get('description', '').lower()
         affected_users = incident_data.get('affected_users', '0%')
         business_impact = incident_data.get('business_impact', 'unknown')
         service = incident_data.get('service', 'unknown service')
@@ -393,10 +393,10 @@ Target Resolution: {target_date}
         
         return {
             "classification": {
-                "severity": severity.upper,
+                "severity": severity.upper(),
                 "confidence": self._calculate_confidence(description, affected_users, business_impact),
                 "reasoning": self._explain_classification(severity, description, affected_users),
-                "timestamp": datetime.now(timezone.utc).isoformat
+                "timestamp": datetime.now(timezone.utc).isoformat()
             },
             "response": {
                 "primary_team": response_teams[0] if response_teams else "General Engineering",
@@ -423,23 +423,23 @@ Target Resolution: {target_date}
         scores = {"sev1": 0, "sev2": 0, "sev3": 0, "sev4": 0}
         
         # Keyword analysis
-        for severity, rules in self.severity_rules.items:
+        for severity, rules in self.severity_rules.items():
             for keyword in rules["keywords"]:
                 if keyword in description:
                     scores[severity] += 2
             
             for indicator in rules["impact_indicators"]:
-                if indicator.lower in description or indicator.lower in affected_users.lower:
+                if indicator.lower() in description or indicator.lower() in affected_users.lower():
                     scores[severity] += 3
         
         # Business impact weighting
-        if business_impact.lower in ['critical', 'high', 'severe']:
+        if business_impact.lower() in ['critical', 'high', 'severe']:
             scores["sev1"] += 5
             scores["sev2"] += 3
-        elif business_impact.lower in ['medium', 'moderate']:
+        elif business_impact.lower() in ['medium', 'moderate']:
             scores["sev2"] += 3
             scores["sev3"] += 2
-        elif business_impact.lower in ['low', 'minimal']:
+        elif business_impact.lower() in ['low', 'minimal']:
             scores["sev3"] += 2
             scores["sev4"] += 3
         
@@ -472,10 +472,10 @@ Target Resolution: {target_date}
     
     def _determine_teams(self, description: str, service: str) -> List[str]:
         """Determine which teams should respond based on affected systems."""
-        teams = set
-        text_to_analyze = f"{description} {service}".lower
+        teams = set()
+        text_to_analyze = f"{description} {service}".lower()
         
-        for component, team_list in self.team_mappings.items:
+        for component, team_list in self.team_mappings.items():
             if component in text_to_analyze:
                 teams.update(team_list)
         
@@ -487,7 +487,7 @@ Target Resolution: {target_date}
     
     def _generate_initial_actions(self, severity: str, incident_data: Dict) -> List[Dict]:
         """Generate prioritized initial actions based on severity."""
-        base_actions = self.action_templates[severity].copy
+        base_actions = self.action_templates[severity].copy()
         
         # Customize actions based on incident details
         for action in base_actions:
@@ -619,13 +619,13 @@ Target Resolution: {target_date}
         confidence = 0.5  # Base confidence
         
         # Higher confidence with more specific information
-        if '%' in affected_users and any(char.isdigit for char in affected_users):
+        if '%' in affected_users and any(char.isdigit() for char in affected_users):
             confidence += 0.2
         
-        if business_impact.lower in ['critical', 'high', 'medium', 'low']:
+        if business_impact.lower() in ['critical', 'high', 'medium', 'low']:
             confidence += 0.15
         
-        if len(description.split) > 5:  # Detailed description
+        if len(description.split()) > 5:  # Detailed description
             confidence += 0.15
         
         return min(confidence, 1.0)
@@ -636,10 +636,10 @@ Target Resolution: {target_date}
         
         matched_keywords = []
         for keyword in rules["keywords"]:
-            if keyword in description.lower:
+            if keyword in description.lower():
                 matched_keywords.append(keyword)
         
-        explanation = f"Classified as {severity.upper} based on: "
+        explanation = f"Classified as {severity.upper()} based on: "
         reasons = []
         
         if matched_keywords:
@@ -699,7 +699,7 @@ def format_text_output(result: Dict) -> str:
     # Communication section
     output.append("COMMUNICATION:")
     output.append(f"  Subject: {communication['subject']}")
-    output.append(f"  Urgency: {communication['urgency'].upper}")
+    output.append(f"  Urgency: {communication['urgency'].upper()}")
     output.append(f"  Recipients: {', '.join(communication['recipients'])}")
     output.append(f"  Channels: {', '.join(communication['channels'])}")
     if communication['frequency_minutes'] > 0:
@@ -715,7 +715,7 @@ def parse_input_text(text: str) -> Dict[str, Any]:
     """Parse free-form text input into structured incident data."""
     # Basic parsing - in a real system, this would be more sophisticated
     incident_data = {
-        "description": text.strip,
+        "description": text.strip(),
         "service": "unknown service",
         "affected_users": "unknown",
         "business_impact": "unknown"
@@ -729,7 +729,7 @@ def parse_input_text(text: str) -> Dict[str, Any]:
     ]
     
     for pattern in service_patterns:
-        match = re.search(pattern, text.lower)
+        match = re.search(pattern, text.lower())
         if match:
             incident_data["service"] = match.group(1)
             break
@@ -742,44 +742,44 @@ def parse_input_text(text: str) -> Dict[str, Any]:
     ]
     
     for pattern in impact_patterns:
-        match = re.search(pattern, text.lower)
+        match = re.search(pattern, text.lower())
         if match:
             incident_data["affected_users"] = match.group(1) if match.group(1) else match.group(0)
             break
     
     # Try to infer business impact
-    if any(word in text.lower for word in ['critical', 'urgent', 'emergency', 'down', 'outage']):
+    if any(word in text.lower() for word in ['critical', 'urgent', 'emergency', 'down', 'outage']):
         incident_data["business_impact"] = "high"
-    elif any(word in text.lower for word in ['slow', 'degraded', 'performance']):
+    elif any(word in text.lower() for word in ['slow', 'degraded', 'performance']):
         incident_data["business_impact"] = "medium"
-    elif any(word in text.lower for word in ['minor', 'cosmetic', 'small']):
+    elif any(word in text.lower() for word in ['minor', 'cosmetic', 'small']):
         incident_data["business_impact"] = "low"
     
     return incident_data
 
 
-def interactive_mode:
+def interactive_mode():
     """Run in interactive mode, prompting user for input."""
-    classifier = IncidentClassifier
+    classifier = IncidentClassifier()
     
     print("🚨 Incident Classifier - Interactive Mode")
     print("=" * 50)
     print("Enter incident details (or 'quit' to exit):")
-    print
+    print()
     
     while True:
         try:
-            description = input("Incident description: ").strip
-            if description.lower in ['quit', 'exit', 'q']:
+            description = input("Incident description: ").strip()
+            if description.lower() in ['quit', 'exit', 'q']:
                 break
             
             if not description:
                 print("Please provide an incident description.")
                 continue
             
-            service = input("Affected service (optional): ").strip or "unknown"
-            affected_users = input("Affected users (e.g., '50%', 'all users'): ").strip or "unknown"
-            business_impact = input("Business impact (high/medium/low): ").strip or "unknown"
+            service = input("Affected service (optional): ").strip() or "unknown"
+            affected_users = input("Affected users (e.g., '50%', 'all users'): ").strip() or "unknown"
+            business_impact = input("Business impact (high/medium/low): ").strip() or "unknown"
             
             incident_data = {
                 "description": description,
@@ -792,7 +792,7 @@ def interactive_mode:
             print("\n" + "=" * 50)
             print(format_text_output(result))
             print("=" * 50)
-            print
+            print()
             
         except KeyboardInterrupt:
             print("\n\nExiting...")
@@ -801,7 +801,7 @@ def interactive_mode:
             print(f"Error: {e}")
 
 
-def main:
+def main():
     """Main function with argument parsing and execution."""
     parser = argparse.ArgumentParser(
         description="Classify incidents and provide response recommendations",
@@ -845,20 +845,20 @@ Input JSON format:
         help="Output file path (default: stdout)"
     )
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     # Interactive mode
     if args.interactive:
-        interactive_mode
+        interactive_mode()
         return
     
-    classifier = IncidentClassifier
+    classifier = IncidentClassifier()
     
     try:
         # Read input
-        if args.input == "-" or (not args.input and not sys.stdin.isatty):
+        if args.input == "-" or (not args.input and not sys.stdin.isatty()):
             # Read from stdin
-            input_text = sys.stdin.read.strip
+            input_text = sys.stdin.read().strip()
             if not input_text:
                 parser.error("No input provided")
             
@@ -911,4 +911,4 @@ Input JSON format:
 
 
 if __name__ == "__main__":
-    main
+    main()

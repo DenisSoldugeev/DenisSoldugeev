@@ -54,32 +54,32 @@ DEMO_CHECKS = [
 ]
 
 SERVICE_TEST_COMMANDS = {
-    "gmail": ["gws", "gmail", "users", "getProfile", "me", "--json"],
-    "drive": ["gws", "drive", "files", "list", "--limit", "1", "--json"],
-    "calendar": ["gws", "calendar", "calendarList", "list", "--limit", "1", "--json"],
-    "sheets": ["gws", "sheets", "spreadsheets", "get", "test", "--json"],
-    "tasks": ["gws", "tasks", "tasklists", "list", "--limit", "1", "--json"],
-    "chat": ["gws", "chat", "spaces", "list", "--limit", "1", "--json"],
-    "docs": ["gws", "docs", "documents", "get", "test", "--json"],
+    "gmail": ["gws", "gmail", "users", "getProfile", "--params", '{"userId": "me"}'],
+    "drive": ["gws", "drive", "files", "list", "--params", '{"pageSize": 1}'],
+    "calendar": ["gws", "calendar", "calendarList", "list", "--params", '{"maxResults": 1}'],
+    "sheets": ["gws", "schema", "sheets.spreadsheets.get"],
+    "tasks": ["gws", "tasks", "tasklists", "list", "--params", '{"maxResults": 1}'],
+    "chat": ["gws", "chat", "spaces", "list", "--params", '{"pageSize": 1}'],
+    "docs": ["gws", "schema", "docs.documents.get"],
 }
 
 
-def check_installation -> Check:
+def check_installation() -> Check:
     """Check if gws is installed and on PATH."""
     path = shutil.which("gws")
     if path:
         return Check("gws-installed", "PASS", f"gws found at {path}")
     return Check("gws-installed", "FAIL", "gws not found on PATH",
-                 "Install via: cargo install gws-cli  OR  download from https://github.com/googleworkspace/cli/releases")
+                 "Install via: npm install -g @googleworkspace/cli  OR  download from https://github.com/googleworkspace/cli/releases")
 
 
-def check_version -> Check:
+def check_version() -> Check:
     """Get gws version."""
     try:
         result = subprocess.run(
             ["gws", "--version"], capture_output=True, text=True, timeout=10
         )
-        version = result.stdout.strip
+        version = result.stdout.strip()
         if version:
             return Check("gws-version", "PASS", f"Version: {version}")
         return Check("gws-version", "WARN", "Could not parse version output")
@@ -87,7 +87,7 @@ def check_version -> Check:
         return Check("gws-version", "FAIL", f"Version check failed: {e}")
 
 
-def check_auth -> Check:
+def check_auth() -> Check:
     """Check authentication status."""
     try:
         result = subprocess.run(
@@ -101,11 +101,13 @@ def check_auth -> Check:
                 return Check("auth-status", "PASS", f"Authenticated as {user}")
             except json.JSONDecodeError:
                 return Check("auth-status", "PASS", "Authenticated (could not parse details)")
-        return Check("auth-status", "FAIL", "Not authenticated",
-                     "Run 'gws auth setup' to configure authentication")
+        return Check("auth-status", "WARN",
+                     "Could not confirm authentication ('gws auth status' may not exist "
+                     "in your version; check 'gws auth --help')",
+                     "Run 'gws auth setup' then 'gws auth login' to configure authentication")
     except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as e:
         return Check("auth-status", "FAIL", f"Auth check failed: {e}",
-                     "Run 'gws auth setup' to configure authentication")
+                     "Run 'gws auth setup' then 'gws auth login' to configure authentication")
 
 
 def check_service(service: str) -> Check:
@@ -116,26 +118,26 @@ def check_service(service: str) -> Check:
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
         if result.returncode == 0:
-            return Check(f"{service}-access", "PASS", f"{service.title} API accessible")
-        stderr = result.stderr.strip[:100]
-        if "403" in stderr or "permission" in stderr.lower:
+            return Check(f"{service}-access", "PASS", f"{service.title()} API accessible")
+        stderr = result.stderr.strip()[:100]
+        if "403" in stderr or "permission" in stderr.lower():
             return Check(f"{service}-access", "FAIL",
-                         f"{service.title} API permission denied",
+                         f"{service.title()} API permission denied",
                          f"Add '{service}' scope: gws auth setup --scopes {service}")
         return Check(f"{service}-access", "FAIL",
-                     f"{service.title} API error: {stderr}",
+                     f"{service.title()} API error: {stderr}",
                      f"Check scope and permissions for {service}")
     except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as e:
-        return Check(f"{service}-access", "FAIL", f"{service.title} test failed: {e}")
+        return Check(f"{service}-access", "FAIL", f"{service.title()} test failed: {e}")
 
 
 def run_diagnostics(services: List[str]) -> DiagnosticReport:
     """Run all diagnostic checks."""
-    report = DiagnosticReport
+    report = DiagnosticReport()
     checks = []
 
     # Installation check
-    install_check = check_installation
+    install_check = check_installation()
     checks.append(install_check)
     report.gws_installed = install_check.status == "PASS"
 
@@ -145,13 +147,13 @@ def run_diagnostics(services: List[str]) -> DiagnosticReport:
         return report
 
     # Version check
-    version_check = check_version
+    version_check = check_version()
     checks.append(version_check)
     if version_check.status == "PASS":
         report.gws_version = version_check.message.replace("Version: ", "")
 
     # Auth check
-    auth_check = check_auth
+    auth_check = check_auth()
     checks.append(auth_check)
     report.auth_status = auth_check.status
 
@@ -180,7 +182,7 @@ def run_diagnostics(services: List[str]) -> DiagnosticReport:
     return report
 
 
-def run_demo -> DiagnosticReport:
+def run_demo() -> DiagnosticReport:
     """Return demo report with embedded sample data."""
     report = DiagnosticReport(
         gws_installed=True,
@@ -193,7 +195,7 @@ def run_demo -> DiagnosticReport:
     return report
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Pre-flight diagnostics for Google Workspace CLI (gws)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -211,13 +213,13 @@ Examples:
         help="Comma-separated services to check (default: gmail,drive,calendar,sheets,tasks)"
     )
     parser.add_argument("--demo", action="store_true", help="Run with demo data")
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    services = [s.strip for s in args.services.split(",") if s.strip]
+    services = [s.strip() for s in args.services.split(",") if s.strip()]
 
     # Use demo mode if requested or gws not installed
     if args.demo or not shutil.which("gws"):
-        report = run_demo
+        report = run_demo()
     else:
         report = run_diagnostics(services)
 
@@ -242,4 +244,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

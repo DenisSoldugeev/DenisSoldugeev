@@ -38,10 +38,10 @@ def extract_title(text: str) -> str:
     """Extract H1 or first non-empty line."""
     h1_match = re.search(r"^#\s+(.+)$", text, flags=re.MULTILINE)
     if h1_match:
-        return h1_match.group(1).strip
-    for line in text.splitlines:
-        if line.strip:
-            return line.strip[:120]
+        return h1_match.group(1).strip()
+    for line in text.splitlines():
+        if line.strip():
+            return line.strip()[:120]
     return "Untitled"
 
 
@@ -49,7 +49,7 @@ def extract_headings(text: str) -> list:
     """Return list of (level, text) for H2-H6."""
     headings = []
     for m in re.finditer(r"^(#{2,6})\s+(.+)$", text, flags=re.MULTILINE):
-        headings.append((len(m.group(1)), m.group(2).strip))
+        headings.append((len(m.group(1)), m.group(2).strip()))
     return headings
 
 
@@ -59,7 +59,7 @@ def generate_jsonld(title: str, headings: list, industry: str, url: str | None =
         "@context": "https://schema.org",
         "@type": "Article",
         "headline": title,
-        "datePublished": datetime.utcnow.strftime("%Y-%m-%d"),
+        "datePublished": datetime.utcnow().strftime("%Y-%m-%d"),
         "author": {"@type": "Person", "name": "{{AUTHOR_NAME}}"},
         "publisher": {"@type": "Organization", "name": "{{PUBLISHER}}"},
     }
@@ -96,7 +96,7 @@ def add_citation_markers(text: str, density: int = 3) -> tuple[str, int]:
     Heuristic: a sentence with a number/percentage/year is likely a fact.
     Density caps insertions per 1000 words.
     """
-    word_count = len(text.split)
+    word_count = len(text.split())
     max_insertions = max(density, word_count // 250)
     insertions = 0
 
@@ -120,15 +120,15 @@ def add_corrections_footer(text: str, industry: str) -> str:
     footer = "\n\n---\n\n## Editorial Notes\n\n"
     footer += "- **Corrections:** This article will be updated as new information becomes available. Email corrections@example.com.\n"
     if industry in ("healthcare", "finance", "legal"):
-        footer += f"- **{industry.title} Disclaimer:** This article is for informational purposes only and does not constitute professional {industry} advice. Consult a licensed professional for your specific situation.\n"
+        footer += f"- **{industry.title()} Disclaimer:** This article is for informational purposes only and does not constitute professional {industry} advice. Consult a licensed professional for your specific situation.\n"
     footer += "- **Disclosure:** {{INSERT_DISCLOSURE: affiliations, sponsorships, conflicts of interest}}\n"
-    return text.rstrip + footer
+    return text.rstrip() + footer
 
 
 def fact_first_lede(text: str, title: str) -> str:
     """Move the first verifiable fact into the lede position (after H1)."""
     # Find first paragraph with a number/year/percentage
-    lines = text.splitlines
+    lines = text.splitlines()
     h1_idx = -1
     for i, line in enumerate(lines):
         if line.startswith("# "):
@@ -177,7 +177,7 @@ def optimize(text: str, mode: str, industry: str, url: str | None = None) -> dic
     if mode == "conservative":
         # Schema + corrections footer only — no body changes
         result_text = add_corrections_footer(result_text, industry)
-        result_text = result_text.rstrip + schema_block
+        result_text = result_text.rstrip() + schema_block
         changelog.append("Added schema.org JSON-LD (Article + FAQPage if applicable)")
         changelog.append("Added editorial notes / corrections / disclosure footer")
 
@@ -186,7 +186,7 @@ def optimize(text: str, mode: str, industry: str, url: str | None = None) -> dic
         result_text = restructure_headings(result_text)
         result_text, insertions = add_citation_markers(result_text, density=5)
         result_text = add_corrections_footer(result_text, industry)
-        result_text = result_text.rstrip + schema_block
+        result_text = result_text.rstrip() + schema_block
         changelog.append("Promoted bold-paragraph patterns to H3 for LLM parsability")
         changelog.append(f"Added {insertions} citation markers at factual claims")
         changelog.append("Added schema.org JSON-LD")
@@ -198,7 +198,7 @@ def optimize(text: str, mode: str, industry: str, url: str | None = None) -> dic
         result_text = restructure_headings(result_text)
         result_text, insertions = add_citation_markers(result_text, density=10)
         result_text = add_corrections_footer(result_text, industry)
-        result_text = result_text.rstrip + schema_block
+        result_text = result_text.rstrip() + schema_block
         changelog.append("Moved first factual claim to fact-first lede position")
         changelog.append("Promoted bold-paragraph patterns to H3")
         changelog.append(f"Added {insertions} citation markers at factual claims")
@@ -209,9 +209,9 @@ def optimize(text: str, mode: str, industry: str, url: str | None = None) -> dic
         "mode": mode,
         "industry": industry,
         "title": title,
-        "optimized_at": datetime.utcnow.isoformat + "Z",
-        "original_word_count": len(text.split),
-        "optimized_word_count": len(result_text.split),
+        "optimized_at": datetime.utcnow().isoformat() + "Z",
+        "original_word_count": len(text.split()),
+        "optimized_word_count": len(result_text.split()),
         "changelog": changelog,
         "optimized_content": result_text,
     }
@@ -231,7 +231,7 @@ Add schema, dated examples, and author credentials.
 """
 
 
-def main:
+def main():
     p = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -247,7 +247,7 @@ def main:
     p.add_argument("--output-format", choices=["markdown", "json"], default="markdown",
                    help="Output format (default: markdown — emits the optimized content directly)")
     p.add_argument("--sample", action="store_true", help="Run with built-in sample content")
-    args = p.parse_args
+    args = p.parse_args()
 
     if args.sample:
         text = SAMPLE_CONTENT
@@ -278,4 +278,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -502,7 +502,7 @@ def _format_text(result: Dict[str, Any]) -> str:
         lines.append(f"  - {svc}")
     lines.append("")
     lines.append("Cost Breakdown:")
-    for k, v in result.get("cost_breakdown", {}).items:
+    for k, v in result.get("cost_breakdown", {}).items():
         lines.append(f"  {k}: {v}")
     lines.append("")
     lines.append("Pros:")
@@ -519,12 +519,12 @@ def _format_text(result: Dict[str, Any]) -> str:
             lines.append(f"  * {note}")
     lines.append("")
     lines.append("Scaling:")
-    for k, v in result.get("scaling", {}).items:
+    for k, v in result.get("scaling", {}).items():
         lines.append(f"  {k}: {v}")
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Azure Architecture Designer — recommend Azure architecture patterns based on application requirements.",
         epilog="Examples:\n"
@@ -563,7 +563,7 @@ def main:
         help="Output as JSON instead of human-readable text",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         reqs = json.loads(args.requirements)
@@ -589,4 +589,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

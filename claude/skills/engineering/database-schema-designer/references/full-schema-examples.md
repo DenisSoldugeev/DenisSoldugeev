@@ -18,11 +18,11 @@ datasource db {
 // ── Multi-tenancy ─────────────────────────────────────────────────────────────
 
 model Organization {
-  id        String   @id @default(cuid)
+  id        String   @id @default(cuid())
   name      String
   slug      String   @unique
   plan      Plan     @default(FREE)
-  createdAt DateTime @default(now) @map("created_at")
+  createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
@@ -34,11 +34,11 @@ model Organization {
 }
 
 model OrganizationMember {
-  id             String   @id @default(cuid)
+  id             String   @id @default(cuid())
   organizationId String   @map("organization_id")
   userId         String   @map("user_id")
   role           OrgRole  @default(MEMBER)
-  joinedAt       DateTime @default(now) @map("joined_at")
+  joinedAt       DateTime @default(now()) @map("joined_at")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -49,14 +49,14 @@ model OrganizationMember {
 }
 
 model User {
-  id           String    @id @default(cuid)
+  id           String    @id @default(cuid())
   email        String    @unique
   name         String?
   avatarUrl    String?   @map("avatar_url")
   passwordHash String?   @map("password_hash")
   emailVerifiedAt DateTime? @map("email_verified_at")
   lastLoginAt  DateTime? @map("last_login_at")
-  createdAt    DateTime  @default(now) @map("created_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
   deletedAt    DateTime? @map("deleted_at")
 
@@ -72,14 +72,14 @@ model User {
 // ── Core entities ─────────────────────────────────────────────────────────────
 
 model Project {
-  id             String   @id @default(cuid)
+  id             String   @id @default(cuid())
   organizationId String   @map("organization_id")
   ownerId        String   @map("owner_id")
   name           String
   description    String?
   status         ProjectStatus @default(ACTIVE)
   settings       Json     @default("{}")
-  createdAt      DateTime @default(now) @map("created_at")
+  createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
   deletedAt      DateTime? @map("deleted_at")
 
@@ -95,7 +95,7 @@ model Project {
 }
 
 model Task {
-  id          String     @id @default(cuid)
+  id          String     @id @default(cuid())
   projectId   String     @map("project_id")
   title       String
   description String?
@@ -106,7 +106,7 @@ model Task {
   version     Int        @default(1)           // Optimistic locking
   createdById String     @map("created_by_id")
   updatedById String     @map("updated_by_id")
-  createdAt   DateTime   @default(now) @map("created_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @updatedAt @map("updated_at")
   deletedAt   DateTime?  @map("deleted_at")
 
@@ -126,7 +126,7 @@ model Task {
 // ── Polymorphic attachments ───────────────────────────────────────────────────
 
 model Attachment {
-  id           String   @id @default(cuid)
+  id           String   @id @default(cuid())
   // Polymorphic association
   entityType   String   @map("entity_type")   // "task" | "comment"
   entityId     String   @map("entity_id")
@@ -135,7 +135,7 @@ model Attachment {
   sizeBytes    Int      @map("size_bytes")
   storageKey   String   @map("storage_key")   // S3 key
   uploadedById String   @map("uploaded_by_id")
-  createdAt    DateTime @default(now) @map("created_at")
+  createdAt    DateTime @default(now()) @map("created_at")
 
   // Only one concrete relation (task) — polymorphic handled at app level
   task      Task? @relation(fields: [entityId], references: [id], map: "attachment_task_fk")
@@ -147,7 +147,7 @@ model Attachment {
 // ── Audit trail ───────────────────────────────────────────────────────────────
 
 model AuditLog {
-  id             String   @id @default(cuid)
+  id             String   @id @default(cuid())
   organizationId String   @map("organization_id")
   userId         String?  @map("user_id")
   action         String                           // "task.created", "task.status_changed"
@@ -157,7 +157,7 @@ model AuditLog {
   after          Json?                            // New state
   ipAddress      String?  @map("ip_address")
   userAgent      String?  @map("user_agent")
-  createdAt      DateTime @default(now) @map("created_at")
+  createdAt      DateTime @default(now()) @map("created_at")
 
   organization Organization @relation(fields: [organizationId], references: [id])
   user         User?        @relation(fields: [userId], references: [id])
@@ -193,19 +193,19 @@ export const taskStatusEnum = pgEnum('task_status', [
 export const priorityEnum = pgEnum('priority', ['low', 'medium', 'high', 'critical'])
 
 export const tasks = pgTable('tasks', {
-  id:          text('id').primaryKey.$defaultFn( => createId),
-  projectId:   text('project_id').notNull.references( => projects.id),
-  title:       varchar('title', { length: 500 }).notNull,
+  id:          text('id').primaryKey().$defaultFn(() => createId()),
+  projectId:   text('project_id').notNull().references(() => projects.id),
+  title:       varchar('title', { length: 500 }).notNull(),
   description: text('description'),
-  status:      taskStatusEnum('status').notNull.default('todo'),
-  priority:    priorityEnum('priority').notNull.default('medium'),
+  status:      taskStatusEnum('status').notNull().default('todo'),
+  priority:    priorityEnum('priority').notNull().default('medium'),
   dueDate:     timestamp('due_date', { withTimezone: true }),
-  position:    real('position').notNull.default(0),
-  version:     integer('version').notNull.default(1),
-  createdById: text('created_by_id').notNull.references( => users.id),
-  updatedById: text('updated_by_id').notNull.references( => users.id),
-  createdAt:   timestamp('created_at', { withTimezone: true }).notNull.defaultNow,
-  updatedAt:   timestamp('updated_at', { withTimezone: true }).notNull.defaultNow,
+  position:    real('position').notNull().default(0),
+  version:     integer('version').notNull().default(1),
+  createdById: text('created_by_id').notNull().references(() => users.id),
+  updatedById: text('updated_by_id').notNull().references(() => users.id),
+  createdAt:   timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt:   timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   deletedAt:   timestamp('deleted_at', { withTimezone: true }),
 }, (table) => ({
   projectIdx:       index('tasks_project_id_idx').on(table.projectId),
@@ -238,29 +238,29 @@ revision = 'a1b2c3d4e5f6'
 down_revision = 'previous_revision'
 
 
-def upgrade -> None:
+def upgrade() -> None:
     # Create enums
     task_status = postgresql.ENUM(
         'todo', 'in_progress', 'in_review', 'done', 'cancelled',
         name='task_status'
     )
-    task_status.create(op.get_bind)
+    task_status.create(op.get_bind())
     
     op.create_table(
         'tasks',
-        sa.Column('id', sa.Text, primary_key=True),
-        sa.Column('project_id', sa.Text, sa.ForeignKey('projects.id'), nullable=False),
+        sa.Column('id', sa.Text(), primary_key=True),
+        sa.Column('project_id', sa.Text(), sa.ForeignKey('projects.id'), nullable=False),
         sa.Column('title', sa.VARCHAR(500), nullable=False),
-        sa.Column('description', sa.Text),
+        sa.Column('description', sa.Text()),
         sa.Column('status', postgresql.ENUM('todo', 'in_progress', 'in_review', 'done', 'cancelled', name='task_status', create_type=False), nullable=False, server_default='todo'),
-        sa.Column('priority', sa.Text, nullable=False, server_default='medium'),
+        sa.Column('priority', sa.Text(), nullable=False, server_default='medium'),
         sa.Column('due_date', sa.TIMESTAMP(timezone=True)),
-        sa.Column('position', sa.Float, nullable=False, server_default='0'),
-        sa.Column('version', sa.Integer, nullable=False, server_default='1'),
-        sa.Column('created_by_id', sa.Text, sa.ForeignKey('users.id'), nullable=False),
-        sa.Column('updated_by_id', sa.Text, sa.ForeignKey('users.id'), nullable=False),
-        sa.Column('created_at', sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text('NOW')),
-        sa.Column('updated_at', sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text('NOW')),
+        sa.Column('position', sa.Float(), nullable=False, server_default='0'),
+        sa.Column('version', sa.Integer(), nullable=False, server_default='1'),
+        sa.Column('created_by_id', sa.Text(), sa.ForeignKey('users.id'), nullable=False),
+        sa.Column('updated_by_id', sa.Text(), sa.ForeignKey('users.id'), nullable=False),
+        sa.Column('created_at', sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text('NOW()')),
+        sa.Column('updated_at', sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text('NOW()')),
         sa.Column('deleted_at', sa.TIMESTAMP(timezone=True)),
     )
     
@@ -275,7 +275,7 @@ def upgrade -> None:
     )
 
 
-def downgrade -> None:
+def downgrade() -> None:
     op.drop_table('tasks')
     op.execute("DROP TYPE IF EXISTS task_status")
 ```

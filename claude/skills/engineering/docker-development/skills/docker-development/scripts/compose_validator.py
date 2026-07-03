@@ -72,16 +72,16 @@ def parse_yaml_simple(content):
     current_key = None
     indent_stack = []
 
-    for line in content.splitlines:
-        stripped = line.strip
+    for line in content.splitlines():
+        stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
 
-        indent = len(line) - len(line.lstrip)
+        indent = len(line) - len(line.lstrip())
 
         # Top-level keys
         if indent == 0 and ":" in stripped:
-            key = stripped.split(":")[0].strip
+            key = stripped.split(":")[0].strip()
             if key == "services":
                 current_section = "services"
             elif key == "volumes":
@@ -89,7 +89,7 @@ def parse_yaml_simple(content):
             elif key == "networks":
                 current_section = "networks"
             elif key == "version":
-                val = stripped.split(":", 1)[1].strip.strip("'\"")
+                val = stripped.split(":", 1)[1].strip().strip("'\"")
                 result["version"] = val
             current_service = None
             current_key = None
@@ -98,8 +98,8 @@ def parse_yaml_simple(content):
         if current_section == "services":
             # Service name (indent level 2)
             if indent == 2 and ":" in stripped and not stripped.startswith("-"):
-                key = stripped.split(":")[0].strip
-                val = stripped.split(":", 1)[1].strip if ":" in stripped else ""
+                key = stripped.split(":")[0].strip()
+                val = stripped.split(":", 1)[1].strip() if ":" in stripped else ""
                 if val and not val.startswith("{"):
                     # Simple key:value inside a service
                     if current_service and current_service in result["services"]:
@@ -119,8 +119,8 @@ def parse_yaml_simple(content):
 
                 # Service-level keys (indent 4)
                 if indent == 4 and ":" in stripped and not stripped.startswith("-"):
-                    key = stripped.split(":")[0].strip
-                    val = stripped.split(":", 1)[1].strip
+                    key = stripped.split(":")[0].strip()
+                    val = stripped.split(":", 1)[1].strip()
                     current_key = key
                     if val:
                         svc[key] = val.strip("'\"")
@@ -130,7 +130,7 @@ def parse_yaml_simple(content):
 
                 # List items (indent 6 or 8)
                 if stripped.startswith("-") and current_key:
-                    item = stripped[1:].strip.strip("'\"")
+                    item = stripped[1:].strip().strip("'\"")
                     if current_key in svc:
                         if isinstance(svc[current_key], list):
                             svc[current_key].append(item)
@@ -142,8 +142,8 @@ def parse_yaml_simple(content):
 
                 # Nested key:value under current_key (e.g., healthcheck test)
                 if indent >= 6 and ":" in stripped and not stripped.startswith("-"):
-                    key = stripped.split(":")[0].strip
-                    val = stripped.split(":", 1)[1].strip
+                    key = stripped.split(":")[0].strip()
+                    val = stripped.split(":", 1)[1].strip()
                     if current_key and current_key in svc:
                         if isinstance(svc[current_key], list):
                             svc[current_key] = {}
@@ -171,7 +171,7 @@ def validate_compose(parsed, strict=False):
     # --- Per-service checks ---
     all_ports = []
 
-    for name, svc in services.items:
+    for name, svc in services.items():
         # Healthcheck
         if "healthcheck" not in svc:
             findings.append({
@@ -224,7 +224,7 @@ def validate_compose(parsed, strict=False):
                             "service": name,
                         })
         elif isinstance(env, dict):
-            for k, v in env.items:
+            for k, v in env.items():
                 if re.search(r"(?:PASSWORD|SECRET|TOKEN|KEY)", k, re.IGNORECASE) and v:
                     findings.append({
                         "severity": "critical",
@@ -323,7 +323,7 @@ def generate_report(content, output_format="text", strict=False):
 
     result = {
         "score": score,
-        "services": list(services.keys),
+        "services": list(services.keys()),
         "service_count": len(services),
         "findings": findings,
         "finding_counts": counts,
@@ -338,14 +338,14 @@ def generate_report(content, output_format="text", strict=False):
     print(f"  Docker Compose Validation Report")
     print(f"{'=' * 60}")
     print(f"  Score: {score}/100")
-    print(f"  Services: {', '.join(services.keys) if services else 'none'}")
-    print
+    print(f"  Services: {', '.join(services.keys()) if services else 'none'}")
+    print()
     print(f"  Findings: {counts['critical']} critical | {counts['high']} high | {counts['medium']} medium | {counts['low']} low")
     print(f"{'─' * 60}")
 
     for f in findings:
         icon = {"critical": "!!!", "high": "!!", "medium": "!", "low": "~"}.get(f["severity"], "?")
-        print(f"\n  {icon} {f['severity'].upper} [{f['category']}] — {f['service']}")
+        print(f"\n  {icon} {f['severity'].upper()} [{f['category']}] — {f['service']}")
         print(f"  {f['message']}")
 
     if not findings:
@@ -355,7 +355,7 @@ def generate_report(content, output_format="text", strict=False):
     return result
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="docker-development: Docker Compose validator"
     )
@@ -371,11 +371,11 @@ def main:
         action="store_true",
         help="Strict mode — elevate warnings to higher severity",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.composefile:
         path = Path(args.composefile)
-        if not path.exists:
+        if not path.exists():
             print(f"Error: File not found: {args.composefile}", file=sys.stderr)
             sys.exit(1)
         content = path.read_text(encoding="utf-8")
@@ -387,4 +387,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

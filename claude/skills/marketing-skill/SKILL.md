@@ -7,7 +7,7 @@ description: "Marketing skills across content, SEO/AEO, CRO, growth, channels, p
 
 Marketing skills across content, SEO/AEO, CRO, growth, channels, paid ads, social and sales enablement.
 
-49 skills. Load the specific sub-skill SKILL.md you need on demand.
+50 skills. Load the specific sub-skill SKILL.md you need on demand.
 
 | Skill | Path | Focus |
 |-------|------|-------|
@@ -33,12 +33,13 @@ Marketing skills across content, SEO/AEO, CRO, growth, channels, paid ads, socia
 | free-tool-strategy | `free-tool-strategy/SKILL.md` | When the user wants to build a free tool for marketing — lead generation, SEO value, or brand awareness. Use w… |
 | landing | `landing/skills/landing/SKILL.md` | Generates a premium single-page HTML landing page with 3D CSS animations, GSAP scroll effects, and mouse-paral… |
 | launch-strategy | `launch-strategy/SKILL.md` | When the user wants to plan a product launch, feature announcement, or release strategy. Also use when the use… |
+| local-seo-manager | `local-seo-manager/SKILL.md` | Manage local SEO for service-area businesses — appliance repair, HVAC, plumbing, cleaning, and any business th… |
 | marketing-context | `marketing-context/SKILL.md` | Create and maintain the marketing context document that all marketing skills read before starting. Use when th… |
 | marketing-demand-acquisition | `marketing-demand-acquisition/SKILL.md` | Creates demand generation campaigns, optimizes paid ad spend across LinkedIn, Google, and Meta, develops SEO s… |
 | marketing-ideas | `marketing-ideas/SKILL.md` | When the user needs marketing ideas, inspiration, or strategies for their SaaS or software product. Also use w… |
 | marketing-ops | `marketing-ops/SKILL.md` | Central router for the marketing skill ecosystem. Use when unsure which marketing skill to use, when orchestra… |
 | marketing-psychology | `marketing-psychology/SKILL.md` | When the user wants to apply psychological principles, mental models, or behavioral science to marketing. Also… |
-| marketing-skills | `marketing-skills/SKILL.md` | 42 marketing agent skills and plugins for Claude Code, Codex, Gemini CLI, Cursor, OpenClaw, and 6 more coding … |
+| marketing-skills | `marketing-skills/SKILL.md` | Directory and router for the marketing skills library. Use when you need to find the right marketing skill for… |
 | marketing-strategy-pmm | `marketing-strategy-pmm/SKILL.md` | Product marketing skill for positioning, GTM strategy, competitive intelligence, and product launches. Use whe… |
 | onboarding-cro | `onboarding-cro/SKILL.md` | When the user wants to optimize post-signup onboarding, user activation, first-run experience, or time-to-valu… |
 | page-cro | `page-cro/SKILL.md` | When the user wants to optimize, improve, or increase conversions on any marketing page — including homepage, … |
@@ -47,7 +48,7 @@ Marketing skills across content, SEO/AEO, CRO, growth, channels, paid ads, socia
 | popup-cro | `popup-cro/SKILL.md` | When the user wants to create or optimize popups, modals, overlays, slide-ins, or banners for conversion purpo… |
 | pricing-strategy | `pricing-strategy/SKILL.md` | Design, optimize, and communicate SaaS pricing — tier structure, value metrics, pricing pages, and price incre… |
 | programmatic-seo | `programmatic-seo/SKILL.md` | When the user wants to create SEO-driven pages at scale using templates and data. Also use when the user menti… |
-| prompt-engineer-toolkit | `prompt-engineer-toolkit/SKILL.md` | Analyzes and rewrites prompts for better AI output, creates reusable prompt templates for marketing use cases … |
+| prompt-engineer-toolkit | `prompt-engineer-toolkit/SKILL.md` | Turns marketing prompts into tested, versioned production assets: A/B prompt evaluation against structured tes… |
 | referral-program | `referral-program/SKILL.md` | When the user wants to design, launch, or optimize a referral or affiliate program. Use when they mention 'ref… |
 | schema-markup | `schema-markup/SKILL.md` | When the user wants to implement, audit, or validate structured data (schema markup) on their website. Use whe… |
 | seo-audit | `seo-audit/SKILL.md` | When the user wants to audit, review, or diagnose SEO issues on their site. Also use when the user mentions "S… |

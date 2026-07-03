@@ -314,7 +314,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--input", type=Path, help="Path to JSON input file.")
     p.add_argument(
         "--profile",
-        choices=list(PROFILES.keys),
+        choices=list(PROFILES.keys()),
         default=None,
         help="Industry profile (defaults for ramp + attrition).",
     )
@@ -329,7 +329,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.sample:
         raw = SAMPLE_INPUT
     elif args.input:
-        raw = json.loads(args.input.read_text)
+        raw = json.loads(args.input.read_text())
     else:
         p.error("Provide --input or --sample.")
         return 2
@@ -349,4 +349,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

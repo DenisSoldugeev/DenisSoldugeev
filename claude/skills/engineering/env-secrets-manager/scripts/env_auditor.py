@@ -54,26 +54,26 @@ def iter_files(root: Path) -> Iterable[Path]:
         dirnames[:] = [d for d in dirnames if d not in IGNORED_DIRS]
         for name in filenames:
             p = Path(dirpath) / name
-            if p.is_file:
+            if p.is_file():
                 yield p
 
 
 def is_candidate(path: Path) -> bool:
     if path.name.startswith(".env"):
         return True
-    return path.suffix.lower in SOURCE_EXTS
+    return path.suffix.lower() in SOURCE_EXTS
 
 
 def scan_file(path: Path, max_bytes: int, root: Path) -> List[Dict[str, object]]:
     findings: List[Dict[str, object]] = []
     try:
-        if path.stat.st_size > max_bytes:
+        if path.stat().st_size > max_bytes:
             return findings
         text = path.read_text(encoding="utf-8", errors="ignore")
     except Exception:
         return findings
 
-    for lineno, line in enumerate(text.splitlines, start=1):
+    for lineno, line in enumerate(text.splitlines(), start=1):
         for severity, kind, pattern in PATTERNS:
             if pattern.search(line):
                 findings.append(
@@ -82,7 +82,7 @@ def scan_file(path: Path, max_bytes: int, root: Path) -> List[Dict[str, object]]
                         "pattern": kind,
                         "file": str(path.relative_to(root)),
                         "line": lineno,
-                        "snippet": line.strip[:180],
+                        "snippet": line.strip()[:180],
                     }
                 )
     return findings
@@ -96,18 +96,18 @@ def severity_counts(findings: List[Dict[str, object]]) -> Dict[str, int]:
     return counts
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Audit a repository for likely secret leaks in env files and source.")
     parser.add_argument("path", help="Path to repository root")
     parser.add_argument("--max-file-size-kb", type=int, default=512, help="Skip files larger than this size (default: 512)")
     parser.add_argument("--json", action="store_true", help="Output JSON")
-    return parser.parse_args
+    return parser.parse_args()
 
 
-def main -> int:
-    args = parse_args
-    root = Path(args.path).expanduser.resolve
-    if not root.exists or not root.is_dir:
+def main() -> int:
+    args = parse_args()
+    root = Path(args.path).expanduser().resolve()
+    if not root.exists() or not root.is_dir():
         raise SystemExit(f"Path is not a directory: {root}")
 
     max_bytes = max(1, args.max_file_size_kb) * 1024
@@ -131,15 +131,15 @@ def main -> int:
         print(f"Root: {report['root']}")
         print(f"Total findings: {report['total_findings']}")
         print("Severity:")
-        for sev, count in report["severity_counts"].items:
+        for sev, count in report["severity_counts"].items():
             print(f"- {sev}: {count}")
         print("")
         for item in findings[:200]:
-            print(f"[{item['severity'].upper}] {item['file']}:{item['line']} ({item['pattern']})")
+            print(f"[{item['severity'].upper()}] {item['file']}:{item['line']} ({item['pattern']})")
             print(f"  {item['snippet']}")
 
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main)
+    raise SystemExit(main())

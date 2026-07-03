@@ -24,6 +24,24 @@ def safe_divide(numerator: float, denominator: float, default: float = 0.0) -> f
     return numerator / denominator
 
 
+def resolve_input_section(
+    data: Dict[str, Any], section_key: str, flat_keys: Tuple[str, ...]
+) -> Dict[str, Any]:
+    """
+    Accept both supported input shapes:
+    1. Flat: the expected keys live at the top level of the JSON file.
+    2. Nested: the data lives under a per-tool section key, as in
+       assets/sample_financial_data.json (which bundles inputs for all
+       four financial-analyst scripts in one file).
+    """
+    if any(key in data for key in flat_keys):
+        return data
+    section = data.get(section_key)
+    if isinstance(section, dict):
+        return section
+    return data
+
+
 class FinancialRatioCalculator:
     """Calculate and interpret financial ratios from statement data."""
 
@@ -98,7 +116,7 @@ class FinancialRatioCalculator:
             },
         }
 
-        for key, ratio in ratios.items:
+        for key, ratio in ratios.items():
             ratio["interpretation"] = self.interpret_ratio(key, ratio["value"])
 
         self.results["profitability"] = ratios
@@ -131,7 +149,7 @@ class FinancialRatioCalculator:
             },
         }
 
-        for key, ratio in ratios.items:
+        for key, ratio in ratios.items():
             ratio["interpretation"] = self.interpret_ratio(key, ratio["value"])
 
         self.results["liquidity"] = ratios
@@ -166,7 +184,7 @@ class FinancialRatioCalculator:
             },
         }
 
-        for key, ratio in ratios.items:
+        for key, ratio in ratios.items():
             ratio["interpretation"] = self.interpret_ratio(key, ratio["value"])
 
         self.results["leverage"] = ratios
@@ -207,7 +225,7 @@ class FinancialRatioCalculator:
             },
         }
 
-        for key, ratio in ratios.items:
+        for key, ratio in ratios.items():
             ratio["interpretation"] = self.interpret_ratio(key, ratio["value"])
 
         self.results["efficiency"] = ratios
@@ -267,7 +285,7 @@ class FinancialRatioCalculator:
             },
         }
 
-        for key, ratio in ratios.items:
+        for key, ratio in ratios.items():
             ratio["interpretation"] = self.interpret_ratio(key, ratio["value"])
 
         self.results["valuation"] = ratios
@@ -275,11 +293,11 @@ class FinancialRatioCalculator:
 
     def calculate_all(self) -> Dict[str, Dict[str, Any]]:
         """Calculate all ratio categories."""
-        self.calculate_profitability
-        self.calculate_liquidity
-        self.calculate_leverage
-        self.calculate_efficiency
-        self.calculate_valuation
+        self.calculate_profitability()
+        self.calculate_liquidity()
+        self.calculate_leverage()
+        self.calculate_efficiency()
+        self.calculate_valuation()
         return self.results
 
     def interpret_ratio(self, ratio_key: str, value: float) -> str:
@@ -349,9 +367,9 @@ class FinancialRatioCalculator:
             "roe", "roa", "gross_margin", "operating_margin", "net_margin"
         }
 
-        for cat_name, ratios in categories.items:
-            lines.append(f"\n--- {cat_name.upper} ---")
-            for key, ratio in ratios.items:
+        for cat_name, ratios in categories.items():
+            lines.append(f"\n--- {cat_name.upper()} ---")
+            for key, ratio in ratios.items():
                 is_pct = key in percentage_ratios
                 formatted = self.format_ratio(ratio["value"], is_pct)
                 lines.append(f"  {ratio['name']}: {formatted}")
@@ -368,7 +386,7 @@ class FinancialRatioCalculator:
         return {"categories": self.results}
 
 
-def main -> None:
+def main() -> None:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Calculate and interpret financial ratios"
@@ -396,7 +414,7 @@ def main -> None:
         help="Calculate only a specific ratio category",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         with open(args.input_file, "r") as f:
@@ -406,6 +424,17 @@ def main -> None:
         sys.exit(1)
     except json.JSONDecodeError as e:
         print(f"Error: Invalid JSON in '{args.input_file}': {e}", file=sys.stderr)
+        sys.exit(1)
+
+    flat_keys = ("income_statement", "balance_sheet", "cash_flow", "market_data")
+    data = resolve_input_section(data, "ratio_analysis", flat_keys)
+    if not any(key in data for key in flat_keys):
+        print(
+            "Error: No financial statement data found. Expected "
+            f"{', '.join(flat_keys)} at the top level or nested under "
+            "'ratio_analysis'.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     calculator = FinancialRatioCalculator(data)
@@ -418,9 +447,9 @@ def main -> None:
             "efficiency": calculator.calculate_efficiency,
             "valuation": calculator.calculate_valuation,
         }
-        method_mapargs.category
+        method_map[args.category]()
     else:
-        calculator.calculate_all
+        calculator.calculate_all()
 
     if args.format == "json":
         print(json.dumps(calculator.to_json(args.category), indent=2))
@@ -429,4 +458,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

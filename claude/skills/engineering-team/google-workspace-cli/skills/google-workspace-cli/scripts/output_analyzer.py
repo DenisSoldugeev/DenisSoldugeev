@@ -6,9 +6,9 @@ Reads JSON arrays or NDJSON streams from stdin or file, applies filters,
 projections, sorting, grouping, and outputs in table/csv/json format.
 
 Usage:
-    gws drive files list --json | python3 output_analyzer.py --count
-    gws drive files list --json | python3 output_analyzer.py --filter "mimeType=application/pdf"
-    gws drive files list --json | python3 output_analyzer.py --select "name,size" --format table
+    gws drive files list | python3 output_analyzer.py --count
+    gws drive files list | python3 output_analyzer.py --filter "mimeType=application/pdf"
+    gws drive files list | python3 output_analyzer.py --select "name,size" --format table
     python3 output_analyzer.py --input results.json --group-by "mimeType"
     python3 output_analyzer.py --demo --select "name,mimeType,size" --format table
 """
@@ -53,11 +53,11 @@ def read_input(input_file: Optional[str]) -> List[Dict[str, Any]]:
     """Read JSON array or NDJSON from file or stdin."""
     if input_file:
         with open(input_file, "r") as f:
-            text = f.read.strip
+            text = f.read().strip()
     else:
-        if sys.stdin.isatty:
+        if sys.stdin.isatty():
             return []
-        text = sys.stdin.read.strip
+        text = sys.stdin.read().strip()
 
     if not text:
         return []
@@ -80,7 +80,7 @@ def read_input(input_file: Optional[str]) -> List[Dict[str, Any]]:
     # Try NDJSON
     records = []
     for line in text.split("\n"):
-        line = line.strip
+        line = line.strip()
         if line:
             try:
                 records.append(json.loads(line))
@@ -96,7 +96,7 @@ def get_nested(obj: Dict, path: str) -> Any:
     for part in parts:
         if isinstance(current, dict):
             current = current.get(part)
-        elif isinstance(current, list) and part.isdigit:
+        elif isinstance(current, list) and part.isdigit():
             idx = int(part)
             current = current[idx] if idx < len(current) else None
         else:
@@ -116,15 +116,15 @@ def apply_filter(records: List[Dict], filter_expr: str) -> List[Dict]:
         rec_val = get_nested(rec, field_path)
         if rec_val is None:
             continue
-        rec_str = str(rec_val).lower
-        if rec_str == value.lower or value.lower in rec_str:
+        rec_str = str(rec_val).lower()
+        if rec_str == value.lower() or value.lower() in rec_str:
             result.append(rec)
     return result
 
 
 def apply_select(records: List[Dict], fields: str) -> List[Dict]:
     """Project specific fields from records."""
-    field_list = [f.strip for f in fields.split(",")]
+    field_list = [f.strip() for f in fields.split(",")]
     result = []
     for rec in records:
         projected = {}
@@ -145,7 +145,7 @@ def apply_sort(records: List[Dict], sort_field: str, reverse: bool = False) -> L
         try:
             return float(val)
         except (ValueError, TypeError):
-            return str(val).lower
+            return str(val).lower()
     return sorted(records, key=sort_key, reverse=reverse)
 
 
@@ -156,7 +156,7 @@ def apply_group_by(records: List[Dict], field: str) -> Dict[str, int]:
         val = get_nested(rec, field)
         key = str(val) if val is not None else "(null)"
         groups[key] = groups.get(key, 0) + 1
-    return dict(sorted(groups.items, key=lambda x: x[1], reverse=True))
+    return dict(sorted(groups.items(), key=lambda x: x[1], reverse=True))
 
 
 def compute_stats(records: List[Dict], field: str) -> Dict[str, Any]:
@@ -186,7 +186,7 @@ def format_table(records: List[Dict]) -> str:
     if not records:
         return "(no records)"
 
-    headers = list(records[0].keys)
+    headers = list(records[0].keys())
     # Calculate column widths
     widths = {h: len(h) for h in headers}
     for rec in records:
@@ -218,24 +218,24 @@ def format_csv_output(records: List[Dict]) -> str:
     """Format records as CSV."""
     if not records:
         return ""
-    output = io.StringIO
-    writer = csv.DictWriter(output, fieldnames=records[0].keys)
-    writer.writeheader
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=records[0].keys())
+    writer.writeheader()
     writer.writerows(records)
-    return output.getvalue
+    return output.getvalue()
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Parse, filter, and aggregate JSON/NDJSON from gws CLI output",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  gws drive files list --json | %(prog)s --count
-  gws drive files list --json | %(prog)s --filter "mimeType=pdf" --select "name,size"
-  gws drive files list --json | %(prog)s --group-by "mimeType" --format table
-  gws drive files list --json | %(prog)s --sort "size" --reverse --format table
-  gws drive files list --json | %(prog)s --stats "size"
+  gws drive files list | %(prog)s --count
+  gws drive files list | %(prog)s --filter "mimeType=pdf" --select "name,size"
+  gws drive files list | %(prog)s --group-by "mimeType" --format table
+  gws drive files list | %(prog)s --sort "size" --reverse --format table
+  gws drive files list | %(prog)s --stats "size"
   %(prog)s --input results.json --select "name,mimeType" --format csv
   %(prog)s --demo --select "name,mimeType,size" --format table
         """,
@@ -253,7 +253,7 @@ Examples:
                         help="Output format (default: json)")
     parser.add_argument("--json", action="store_true",
                         help="Shorthand for --format json")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.json:
         args.format = "json"
@@ -291,11 +291,11 @@ Examples:
             print(json.dumps(groups, indent=2))
         elif args.format == "csv":
             print(f"{args.group_by},count")
-            for k, v in groups.items:
+            for k, v in groups.items():
                 print(f"{k},{v}")
         else:
             print(f"\n  Group by: {args.group_by}\n")
-            for k, v in groups.items:
+            for k, v in groups.items():
                 print(f"  {k:<50} {v}")
             print(f"\n  Total groups: {len(groups)}")
         return
@@ -307,7 +307,7 @@ Examples:
             print(json.dumps(stats, indent=2))
         else:
             print(f"\n  Stats for '{args.stats}':")
-            for k, v in stats.items:
+            for k, v in stats.items():
                 if isinstance(v, float):
                     print(f"    {k}: {v:,.2f}")
                 else:
@@ -329,4 +329,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

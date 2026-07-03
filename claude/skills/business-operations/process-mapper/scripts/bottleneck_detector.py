@@ -183,7 +183,7 @@ def detect(normalized: dict, profile: str) -> list[Finding]:
             )
         )
 
-    findings.sort(key=lambda f: (f.severity_rank, -f.impact_minutes_p50))
+    findings.sort(key=lambda f: (f.severity_rank(), -f.impact_minutes_p50))
     return findings
 
 
@@ -210,7 +210,7 @@ def render_markdown(normalized: dict, findings: list[Finding], profile: str) -> 
     return "\n".join(lines)
 
 
-def sample_process -> dict:
+def sample_process() -> dict:
     # Reuses procurement-intake shape from process_documenter
     return {
         "process_name": "Procurement Intake (Sample)",
@@ -232,14 +232,14 @@ def sample_process -> dict:
     }
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Detect bottlenecks in a documented business process."
     )
     parser.add_argument("--input", type=Path, help="Path to process JSON file.")
     parser.add_argument(
         "--profile",
-        choices=sorted(PROFILES.keys),
+        choices=sorted(PROFILES.keys()),
         default="saas",
         help="Industry profile for threshold calibration (default: saas).",
     )
@@ -254,14 +254,14 @@ def main -> int:
         action="store_true",
         help="Use a built-in sample process and exit.",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.sample:
-        raw = sample_process
+        raw = sample_process()
     else:
         if not args.input:
             parser.error("--input is required unless --sample is given")
-        if not args.input.exists:
+        if not args.input.exists():
             parser.error(f"input file not found: {args.input}")
         raw = load(args.input)
 
@@ -302,4 +302,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

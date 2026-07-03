@@ -27,7 +27,7 @@ def load_csv(filepath: str) -> tuple[list[str], list[dict]]:
 
 
 def is_null(val: str) -> bool:
-    return val.strip.lower in NULL_STRINGS
+    return val.strip().lower() in NULL_STRINGS
 
 
 def compute_null_mask(headers: list[str], rows: list[dict]) -> dict[str, list[bool]]:
@@ -59,7 +59,7 @@ def classify_mechanism(col: str, mask: list[bool], all_masks: dict[str, list[boo
 
     # Check correlation with other columns' nulls
     correlated_cols = []
-    for other_col, other_mask in all_masks.items:
+    for other_col, other_mask in all_masks.items():
         if other_col == col:
             continue
         other_null_indices = {i for i, v in enumerate(other_mask) if v}
@@ -110,8 +110,8 @@ def infer_type(values: list[str]) -> str:
     non_null = [v for v in values if not is_null(v)]
     counts = {"int": 0, "float": 0, "bool": 0, "string": 0}
     for v in non_null[:200]:  # sample for speed
-        v = v.strip
-        if v.lower in ("true", "false"):
+        v = v.strip()
+        if v.lower() in ("true", "false"):
             counts["bool"] += 1
         else:
             try:
@@ -123,7 +123,7 @@ def infer_type(values: list[str]) -> str:
                     counts["float"] += 1
                 except ValueError:
                     counts["string"] += 1
-    return max(counts, key=lambda k: counts[k]) if any(counts.values) else "string"
+    return max(counts, key=lambda k: counts[k]) if any(counts.values()) else "string"
 
 
 def compute_cooccurrence(headers: list[str], masks: dict[str, list[bool]], top_n: int = 5) -> list[dict]:
@@ -180,7 +180,7 @@ def print_report(headers: list[str], rows: list[dict], masks: dict, threshold: f
             print(f"     Nulls: {r['null_count']} ({r['null_pct']}%)  |  Type: {r['col_type']}")
             print(f"     Mechanism: {r['mechanism']}")
             print(f"     Strategy:  {r['strategy']}")
-            print
+            print()
 
     cooccur = compute_cooccurrence(headers, masks)
     if cooccur:
@@ -193,13 +193,13 @@ def print_report(headers: list[str], rows: list[dict], masks: dict, threshold: f
     print("\n" + "=" * 64)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Analyze missing values in a CSV dataset.")
     parser.add_argument("--file", required=True, help="Path to CSV file")
     parser.add_argument("--threshold", type=float, default=0.0,
                         help="Only show columns with null fraction above this (e.g. 0.05 = 5%%)")
     parser.add_argument("--format", choices=["text", "json"], default="text")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         headers, rows = load_csv(args.file)
@@ -239,4 +239,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

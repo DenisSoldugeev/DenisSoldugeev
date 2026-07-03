@@ -1,6 +1,6 @@
 ---
 name: "gc-review"
-description: "/ds:gc-review <plan> — General Counsel interrogation of contracts, IP, regulatory, term sheets, and employment-law surface."
+description: "/ds:gc-review <plan> — General Counsel interrogation of contracts, IP, regulatory, term sheets, and employment-law surface. Use when reviewing a term sheet before signing, redlining a customer MSA, or checking IP assignment and regulatory exposure on a new product."
 ---
 
 # /ds:gc-review — General Counsel Forcing Questions
@@ -108,14 +108,14 @@ The General Counsel lens. Six questions before any contract, term sheet, IP move
 
 ## Workflow Integration with `general-counsel-advisor` skill
 
-Since v2.5.1, this command is backed by a full skill at `../../../skills/general-counsel-advisor/` with two Python tools:
+Since v2.5.1, this command is backed by a full skill at `../../../general-counsel-advisor/` with two Python tools:
 
 ```bash
 # Automated contract scan (12 founder-killer patterns)
-python ../../../skills/general-counsel-advisor/scripts/contract_risk_scanner.py path/to/contract.txt
+python ../../../general-counsel-advisor/scripts/contract_risk_scanner.py path/to/contract.txt
 
 # Term sheet scoring (0-100 founder-friendliness)
-python ../../../skills/general-counsel-advisor/scripts/term_sheet_analyzer.py path/to/term_sheet.json
+python ../../../general-counsel-advisor/scripts/term_sheet_analyzer.py path/to/term_sheet.json
 ```
 
 The `ds-general-counsel-advisor` agent orchestrates both tools plus 3 references (contracts playbook, IP + regulatory, term sheet decoder).
@@ -125,7 +125,7 @@ The `ds-general-counsel-advisor` agent orchestrates both tools plus 3 references
 - Skill: [`general-counsel-advisor`](../../../general-counsel-advisor/SKILL.md) — full skill with Python tools + references
 - Agent: [`ds-general-counsel-advisor`](../../agents/ds-general-counsel-advisor.md)
 - Compliance execution: `../../../../ra-qm-team/`
-- Adjacent: `../../../skills/ma-playbook/`
+- Adjacent: `../../../ma-playbook/`
 
 ---
 

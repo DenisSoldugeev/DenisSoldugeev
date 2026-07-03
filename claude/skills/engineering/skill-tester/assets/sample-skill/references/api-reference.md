@@ -25,7 +25,7 @@ Analyze text and return comprehensive statistics.
 
 **Example:**
 ```python
-processor = TextProcessor
+processor = TextProcessor()
 stats = processor.analyze_text("Hello world")
 # Returns: {'total_words': 2, 'unique_words': 2, ...}
 ```

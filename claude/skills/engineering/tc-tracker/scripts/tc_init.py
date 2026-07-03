@@ -28,52 +28,52 @@ VALID_SCOPES = ("feature", "bugfix", "refactor", "infrastructure", "documentatio
 VALID_PRIORITIES = ("critical", "high", "medium", "low")
 
 
-def now_iso -> str:
+def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
 def detect_project_name(root: Path) -> str:
     """Try CLAUDE.md heading, package.json name, pyproject.toml name, then directory basename."""
     claude_md = root / "CLAUDE.md"
-    if claude_md.exists:
+    if claude_md.exists():
         try:
-            for line in claude_md.read_text(encoding="utf-8").splitlines:
-                line = line.strip
+            for line in claude_md.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
                 if line.startswith("# "):
-                    return line[2:].strip
+                    return line[2:].strip()
         except OSError:
             pass
 
     pkg = root / "package.json"
-    if pkg.exists:
+    if pkg.exists():
         try:
             data = json.loads(pkg.read_text(encoding="utf-8"))
             name = data.get("name")
-            if isinstance(name, str) and name.strip:
-                return name.strip
+            if isinstance(name, str) and name.strip():
+                return name.strip()
         except (OSError, json.JSONDecodeError):
             pass
 
     pyproject = root / "pyproject.toml"
-    if pyproject.exists:
+    if pyproject.exists():
         try:
-            for line in pyproject.read_text(encoding="utf-8").splitlines:
-                stripped = line.strip
+            for line in pyproject.read_text(encoding="utf-8").splitlines():
+                stripped = line.strip()
                 if stripped.startswith("name") and "=" in stripped:
-                    value = stripped.split("=", 1)[1].strip.strip('"').strip("'")
+                    value = stripped.split("=", 1)[1].strip().strip('"').strip("'")
                     if value:
                         return value
         except OSError:
             pass
 
-    return root.resolve.name
+    return root.resolve().name
 
 
 def build_config(project_name: str) -> dict:
     return {
         "project_name": project_name,
         "tc_root": "docs/TC",
-        "created": now_iso,
+        "created": now_iso(),
         "auto_track": True,
         "default_author": "Claude",
         "categories": list(VALID_SCOPES),
@@ -83,8 +83,8 @@ def build_config(project_name: str) -> dict:
 def build_registry(project_name: str) -> dict:
     return {
         "project_name": project_name,
-        "created": now_iso,
-        "updated": now_iso,
+        "created": now_iso(),
+        "updated": now_iso(),
         "next_tc_number": 1,
         "records": [],
         "statistics": {
@@ -103,16 +103,16 @@ def write_json_atomic(path: Path, data: dict) -> None:
     tmp.replace(path)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(description="Initialize TC tracking in a project.")
     parser.add_argument("--root", default=".", help="Project root directory (default: current directory)")
     parser.add_argument("--project", help="Project name (auto-detected if omitted)")
     parser.add_argument("--force", action="store_true", help="Re-initialize even if config exists (preserves registry)")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    root = Path(args.root).resolve
-    if not root.exists or not root.is_dir:
+    root = Path(args.root).resolve()
+    if not root.exists() or not root.is_dir():
         msg = f"Project root does not exist or is not a directory: {root}"
         print(json.dumps({"status": "error", "error": msg}) if args.json else f"ERROR: {msg}")
         return 2
@@ -121,7 +121,7 @@ def main -> int:
     config_path = tc_dir / "tc_config.json"
     registry_path = tc_dir / "tc_registry.json"
 
-    if config_path.exists and not args.force:
+    if config_path.exists() and not args.force:
         try:
             cfg = json.loads(config_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as e:
@@ -130,7 +130,7 @@ def main -> int:
             return 2
 
         stats = {}
-        if registry_path.exists:
+        if registry_path.exists():
             try:
                 reg = json.loads(registry_path.read_text(encoding="utf-8"))
                 stats = reg.get("statistics", {})
@@ -159,7 +159,7 @@ def main -> int:
         (tc_dir / "records").mkdir(exist_ok=True)
         (tc_dir / "evidence").mkdir(exist_ok=True)
         write_json_atomic(config_path, build_config(project_name))
-        if not registry_path.exists or args.force:
+        if not registry_path.exists() or args.force:
             write_json_atomic(registry_path, build_registry(project_name))
     except OSError as e:
         msg = f"Failed to create TC directories or files: {e}"
@@ -186,11 +186,11 @@ def main -> int:
         print(f"  Registry:  {registry_path}")
         print(f"  Records:   {tc_dir / 'records'}")
         print(f"  Evidence:  {tc_dir / 'evidence'}")
-        print
+        print()
         print("Next: python3 tc_create.py --root . --name <slug> --title <title> --scope <scope> ...")
 
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

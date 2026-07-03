@@ -47,7 +47,7 @@ SHARED_WORD_THRESHOLD = 2
 
 def tokenize(topic: str) -> Set[str]:
     """Extract significant words from a topic string."""
-    words = re.findall(r"\b[a-z]{3,}\b", topic.lower)
+    words = re.findall(r"\b[a-z]{3,}\b", topic.lower())
     return {w for w in words if w not in STOP_WORDS}
 
 
@@ -55,7 +55,7 @@ def cluster_topics(topics: List[str]) -> List[Dict[str, Any]]:
     """Cluster topics by shared significant words."""
     topic_tokens = [(i, t, tokenize(t)) for i, t in enumerate(topics)]
     clusters: List[List[int]] = []  # list of topic-index lists
-    assigned: Set[int] = set
+    assigned: Set[int] = set()
 
     for i, _, tokens_i in topic_tokens:
         if i in assigned:
@@ -103,7 +103,7 @@ def _normalize_to_size(clusters: List[List[int]], topic_tokens: List[tuple]) -> 
     sections: List[Dict[str, Any]] = []
     topic_lookup = {i: (t, tokens) for i, t, tokens in topic_tokens}
     for cluster_indices in clusters:
-        all_tokens: Counter = Counter
+        all_tokens: Counter = Counter()
         cluster_topics: List[str] = []
         for idx in cluster_indices:
             topic, tokens = topic_lookup[idx]
@@ -111,7 +111,7 @@ def _normalize_to_size(clusters: List[List[int]], topic_tokens: List[tuple]) -> 
             all_tokens.update(tokens)
         # Heading = top 1-3 most common tokens, capitalized
         top_words = [w for w, _ in all_tokens.most_common(2)]
-        heading = " + ".join(w.capitalize for w in top_words) if top_words else f"Section {len(sections) + 1}"
+        heading = " + ".join(w.capitalize() for w in top_words) if top_words else f"Section {len(sections) + 1}"
         sections.append({
             "heading": heading,
             "topic_count": len(cluster_indices),
@@ -155,15 +155,15 @@ def main(argv: List[str]) -> int:
     if args.sample:
         topics = SAMPLE_TOPICS
     elif args.topics:
-        topics = [t.strip for t in args.topics.split(",") if t.strip]
+        topics = [t.strip() for t in args.topics.split(",") if t.strip()]
     elif args.topics_file:
         from pathlib import Path
         p = Path(args.topics_file)
-        if not p.exists:
+        if not p.exists():
             print(f"error: {args.topics_file} not found", file=sys.stderr); return 2
         topics = json.loads(p.read_text(encoding="utf-8"))
     else:
-        parser.print_help; return 0
+        parser.print_help(); return 0
 
     sections = cluster_topics(topics)
     result = {
@@ -177,14 +177,14 @@ def main(argv: List[str]) -> int:
     else:
         print(f"Input topics:    {len(topics)}")
         print(f"Output sections: {len(sections)}  (target: {MIN_SECTIONS}-{MAX_SECTIONS})")
-        print
+        print()
         print("Proposed sections (present this at Phase 2 checkpoint):")
         for i, s in enumerate(sections, 1):
             print(f"")
             print(f"  Section {i}: {s['heading']}  ({s['topic_count']} topics)")
             for t in s["topics"]:
                 print(f"    - {t}")
-        print
+        print()
         print("Group-and-confirm checkpoint forcing options:")
         print("  1. Looks good — proceed with these sections")
         print("  2. Merge sections [X] and [Y]")

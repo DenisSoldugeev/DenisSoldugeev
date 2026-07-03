@@ -23,7 +23,7 @@ from pathlib import Path
 
 # Reuse the skill's config loader.
 SKILL_SCRIPTS = (
-    Path(__file__).resolve.parent.parent / "skills" / "handoff" / "scripts"
+    Path(__file__).resolve().parent.parent / "skills" / "handoff" / "scripts"
 )
 sys.path.insert(0, str(SKILL_SCRIPTS))
 
@@ -38,7 +38,7 @@ HANDOFF_TOKENS = ("handoff-", "handoff_", "handoff.md")
 MAX_BODY_CHARS = 12000  # Hard cap so a huge handoff cannot blow the context.
 
 
-def _disabled -> bool:
+def _disabled() -> bool:
     return os.environ.get("HANDOFF_SESSIONSTART", "1") == "0"
 
 
@@ -48,18 +48,18 @@ def _candidate_dirs(config: dict) -> list[Path]:
     raw_path = save.get("path")
     dirs: list[Path] = []
     if mode == "temp":
-        dirs.append(Path(tempfile.gettempdir))
+        dirs.append(Path(tempfile.gettempdir()))
     elif raw_path:
         dirs.append(Path(raw_path))
     # Always also peek at the project-local .handoff/ if present.
-    proj = Path.cwd / ".handoff"
-    if proj.exists and proj not in dirs:
+    proj = Path.cwd() / ".handoff"
+    if proj.exists() and proj not in dirs:
         dirs.append(proj)
-    return [d for d in dirs if d.exists]
+    return [d for d in dirs if d.exists()]
 
 
 def _looks_like_handoff(p: Path) -> bool:
-    name = p.name.lower
+    name = p.name.lower()
     return name.endswith(".md") and any(t in name for t in HANDOFF_TOKENS)
 
 
@@ -68,15 +68,15 @@ def _find_latest(config: dict) -> Path | None:
     # retention 0 = forever; -1 = manual; both mean "no cutoff for surfacing"
     cutoff = None
     if retention > 0:
-        cutoff = dt.datetime.utcnow - dt.timedelta(days=retention)
+        cutoff = dt.datetime.utcnow() - dt.timedelta(days=retention)
     latest: tuple[float, Path] | None = None
     for d in _candidate_dirs(config):
         try:
-            for entry in d.iterdir:
-                if not entry.is_file or not _looks_like_handoff(entry):
+            for entry in d.iterdir():
+                if not entry.is_file() or not _looks_like_handoff(entry):
                     continue
                 try:
-                    stat = entry.stat
+                    stat = entry.stat()
                 except OSError:
                     continue
                 if cutoff is not None:
@@ -99,11 +99,11 @@ def _emit(path: Path, body: str) -> None:
     print("</handoff_from_previous_session>")
 
 
-def main -> int:
-    if _disabled:
+def main() -> int:
+    if _disabled():
         return 0
     try:
-        config = config_loader.load_config
+        config = config_loader.load_config()
     except Exception:
         return 0
     try:
@@ -124,4 +124,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

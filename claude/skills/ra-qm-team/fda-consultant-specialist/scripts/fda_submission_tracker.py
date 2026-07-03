@@ -111,7 +111,7 @@ def find_submission_config(project_dir: Path) -> Optional[Dict]:
     ]
 
     for config_path in config_paths:
-        if config_path.exists:
+        if config_path.exists():
             try:
                 with open(config_path) as f:
                     return json.load(f)
@@ -139,7 +139,7 @@ def calculate_timeline_status(submission_type: str, milestones: Dict[str, str]) 
     if "submission_sent" in milestones:
         try:
             submission_date = datetime.strptime(milestones["submission_sent"], "%Y-%m-%d")
-            today = datetime.now
+            today = datetime.now()
             result["days_elapsed"] = (today - submission_date).days
 
             # Check for AI hold
@@ -247,12 +247,12 @@ def calculate_submission_readiness(project_dir: Path, submission_type: str) -> D
         found_path = None
 
         for doc_dir in doc_dirs:
-            if not doc_dir.exists:
+            if not doc_dir.exists():
                 continue
 
             for pattern in doc["patterns"]:
                 matches = list(doc_dir.glob(f"**/{pattern}"))
-                matches.extend(list(doc_dir.glob(f"**/{pattern.upper}")))
+                matches.extend(list(doc_dir.glob(f"**/{pattern.upper()}")))
                 if matches:
                     found = True
                     found_path = str(matches[0].relative_to(project_dir))
@@ -279,7 +279,7 @@ def calculate_submission_readiness(project_dir: Path, submission_type: str) -> D
     }
 
 
-def generate_sample_config -> Dict:
+def generate_sample_config() -> Dict:
     """Generate sample submission configuration."""
     return {
         "submission_type": "510k_traditional",
@@ -321,7 +321,7 @@ def print_text_report(result: Dict) -> None:
     # Timeline status
     timeline = result["timeline_status"]
     print(f"\n--- Timeline Status ---")
-    print(f"Status: {timeline['status'].upper}")
+    print(f"Status: {timeline['status'].upper()}")
     print(f"Days Elapsed: {timeline['days_elapsed']}")
     if timeline["days_remaining"] is not None:
         print(f"Days Remaining (FDA goal): {timeline['days_remaining']}")
@@ -374,7 +374,7 @@ def generate_recommendations(result: Dict) -> List[str]:
         recommendations.append("Warning: Submission is behind FDA review schedule - consider contacting FDA")
 
     # Milestone recommendations
-    completed_phases = set
+    completed_phases = set()
     for ms in result["milestones"]:
         if ms["completed"]:
             completed_phases.add(ms["phase"])
@@ -430,7 +430,7 @@ def analyze_submission(project_dir: Path, submission_type: Optional[str] = None)
     return result
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="FDA Submission Tracker - Monitor 510(k), De Novo, and PMA submissions"
     )
@@ -457,20 +457,20 @@ def main:
         help="Create sample configuration file"
     )
 
-    args = parser.parse_args
-    project_dir = Path(args.project_dir).resolve
+    args = parser.parse_args()
+    project_dir = Path(args.project_dir).resolve()
 
-    if not project_dir.exists:
+    if not project_dir.exists():
         print(f"Error: Directory not found: {project_dir}", file=sys.stderr)
         sys.exit(1)
 
     if args.init:
         config_path = project_dir / "fda_submission.json"
-        if config_path.exists:
+        if config_path.exists():
             print(f"Configuration file already exists: {config_path}")
             sys.exit(1)
 
-        sample = generate_sample_config
+        sample = generate_sample_config()
         if args.type:
             sample["submission_type"] = args.type
 
@@ -490,4 +490,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -58,7 +58,7 @@ class CoverageAnalyzer:
         file_data = {}
 
         for line in content.split('\n'):
-            line = line.strip
+            line = line.strip()
 
             if line.startswith('SF:'):
                 # Source file
@@ -105,7 +105,7 @@ class CoverageAnalyzer:
             data = json.loads(content)
             files = {}
 
-            for file_path, file_data in data.items:
+            for file_path, file_data in data.items():
                 lines = {}
                 functions = {}
                 branches = {}
@@ -113,7 +113,7 @@ class CoverageAnalyzer:
                 # Line coverage
                 if 's' in file_data:  # Statement map
                     statement_map = file_data['s']
-                    for stmt_id, hit_count in statement_map.items:
+                    for stmt_id, hit_count in statement_map.items():
                         # Map statement to line number
                         if 'statementMap' in file_data:
                             stmt_info = file_data['statementMap'].get(stmt_id, {})
@@ -125,7 +125,7 @@ class CoverageAnalyzer:
                 if 'f' in file_data:
                     func_map = file_data['f']
                     func_names = file_data.get('fnMap', {})
-                    for func_id, hit_count in func_map.items:
+                    for func_id, hit_count in func_map.items():
                         func_info = func_names.get(func_id, {})
                         func_name = func_info.get('name', f'func_{func_id}')
                         functions[func_name] = hit_count
@@ -133,7 +133,7 @@ class CoverageAnalyzer:
                 # Branch coverage
                 if 'b' in file_data:
                     branch_map = file_data['b']
-                    for branch_id, locations in branch_map.items:
+                    for branch_id, locations in branch_map.items():
                         for idx, hit_count in enumerate(locations):
                             branch_key = f"{branch_id}:{idx}"
                             branches[branch_key] = hit_count
@@ -205,21 +205,21 @@ class CoverageAnalyzer:
         total_functions = 0
         covered_functions = 0
 
-        for file_path, file_data in self.coverage_data.items:
+        for file_path, file_data in self.coverage_data.items():
             # Lines
-            for line_num, hit_count in file_data.get('lines', {}).items:
+            for line_num, hit_count in file_data.get('lines', {}).items():
                 total_lines += 1
                 if hit_count > 0:
                     covered_lines += 1
 
             # Branches
-            for branch_id, hit_count in file_data.get('branches', {}).items:
+            for branch_id, hit_count in file_data.get('branches', {}).items():
                 total_branches += 1
                 if hit_count > 0:
                     covered_branches += 1
 
             # Functions
-            for func_name, hit_count in file_data.get('functions', {}).items:
+            for func_name, hit_count in file_data.get('functions', {}).items():
                 total_functions += 1
                 if hit_count > 0:
                     covered_functions += 1
@@ -257,7 +257,7 @@ class CoverageAnalyzer:
         """
         gaps = []
 
-        for file_path, file_data in self.coverage_data.items:
+        for file_path, file_data in self.coverage_data.items():
             file_gaps = self._analyze_file_gaps(file_path, file_data, threshold)
             if file_gaps:
                 gaps.append(file_gaps)
@@ -278,16 +278,16 @@ class CoverageAnalyzer:
 
         # Calculate file coverage
         total_lines = len(lines)
-        covered_lines = sum(1 for hit in lines.values if hit > 0)
+        covered_lines = sum(1 for hit in lines.values() if hit > 0)
         line_coverage = self._safe_percentage(covered_lines, total_lines)
 
         total_branches = len(branches)
-        covered_branches = sum(1 for hit in branches.values if hit > 0)
+        covered_branches = sum(1 for hit in branches.values() if hit > 0)
         branch_coverage = self._safe_percentage(covered_branches, total_branches)
 
         # Find uncovered lines
-        uncovered_lines = [line_num for line_num, hit in lines.items if hit == 0]
-        uncovered_branches = [branch_id for branch_id, hit in branches.items if hit == 0]
+        uncovered_lines = [line_num for line_num, hit in lines.items() if hit == 0]
+        uncovered_branches = [branch_id for branch_id, hit in branches.items() if hit == 0]
 
         # Only report if below threshold
         if line_coverage < threshold or branch_coverage < threshold:
@@ -337,13 +337,13 @@ class CoverageAnalyzer:
         functions = file_data.get('functions', {})
 
         total_lines = len(lines)
-        covered_lines = sum(1 for hit in lines.values if hit > 0)
+        covered_lines = sum(1 for hit in lines.values() if hit > 0)
 
         total_branches = len(branches)
-        covered_branches = sum(1 for hit in branches.values if hit > 0)
+        covered_branches = sum(1 for hit in branches.values() if hit > 0)
 
         total_functions = len(functions)
-        covered_functions = sum(1 for hit in functions.values if hit > 0)
+        covered_functions = sum(1 for hit in functions.values() if hit > 0)
 
         return {
             'file': file_path,
@@ -365,7 +365,7 @@ class CoverageAnalyzer:
         recommendations = []
 
         # Check overall coverage
-        summary = self.summary or self.calculate_summary
+        summary = self.summary or self.calculate_summary()
 
         if summary['line_coverage'] < 80:
             recommendations.append({
@@ -413,7 +413,7 @@ class CoverageAnalyzer:
         Returns:
             Detected format (lcov, json, xml)
         """
-        content_stripped = content.strip
+        content_stripped = content.strip()
 
         # Check for LCOV format
         if content_stripped.startswith('TN:') or 'SF:' in content_stripped[:100]:

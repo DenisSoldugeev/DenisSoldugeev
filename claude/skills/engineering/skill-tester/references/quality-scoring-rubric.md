@@ -298,7 +298,7 @@ def calculate_dimension_score(components):
     total_weighted_score = 0
     total_weight = 0
     
-    for component_name, component_data in components.items:
+    for component_name, component_data in components.items():
         score = component_data['score']
         weight = component_data['weight']
         total_weighted_score += score * weight
@@ -312,7 +312,7 @@ The overall score combines all dimensions with equal weighting:
 
 ```python
 def calculate_overall_score(dimensions):
-    return sum(dimension.score * 0.25 for dimension in dimensions.values)
+    return sum(dimension.score * 0.25 for dimension in dimensions.values())
 ```
 
 ### Letter Grade Assignment
@@ -449,8 +449,8 @@ This dimension is critical for ensuring that skills do not introduce security ri
 
 #### Command Injection Prevention (25% of Security Score)
 **Component Breakdown:**
-- **Dangerous Functions**: `os.system`, `eval`, `exec`, `subprocess` with `shell=True`
-- **Safe Alternatives**: `subprocess.run(args, shell=False)`, `shlex.quote`, `shlex.split`
+- **Dangerous Functions**: `os.system()`, `eval()`, `exec()`, `subprocess` with `shell=True`
+- **Safe Alternatives**: `subprocess.run(args, shell=False)`, `shlex.quote()`, `shlex.split()`
 
 **Scoring Criteria:**
 
@@ -465,7 +465,7 @@ This dimension is critical for ensuring that skills do not introduce security ri
 #### Input Validation Quality (25% of Security Score)
 **Component Breakdown:**
 - **Argparse Usage**: CLI argument validation
-- **Type Checking**: `isinstance`, type hints
+- **Type Checking**: `isinstance()`, type hints
 - **Error Handling**: `try/except` blocks
 - **Input Sanitization**: Regex validation, input cleaning
 

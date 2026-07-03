@@ -44,11 +44,11 @@ MAX_FOLDER_DEPTH = 2
 
 
 SAMPLE_TREE: Dict[str, str] = {
-    "src/auth/login.ts": "// auth login flow handler\nexport function login {}\n",
-    "src/auth/2fa.ts": "// 2fa stub\nexport function setup2FA {}\n",
-    "src/users/profile.ts": "// user profile\nexport function getProfile {}\n",
+    "src/auth/login.ts": "// auth login flow handler\nexport function login() {}\n",
+    "src/auth/2fa.ts": "// 2fa stub\nexport function setup2FA() {}\n",
+    "src/users/profile.ts": "// user profile\nexport function getProfile() {}\n",
     "docs/auth-bugs.md": "# Auth bugs\n\n- The login race condition is back.\n",
-    "tests/auth.test.ts": "// auth tests\ndescribe('auth',  => {});\n",
+    "tests/auth.test.ts": "// auth tests\ndescribe('auth', () => {});\n",
     "README.md": "# project\n\nAuth + login + users.\n",
 }
 
@@ -56,20 +56,20 @@ SAMPLE_TREE: Dict[str, str] = {
 def collect_files(root: Path, source_extensions: Set[str], exclude_dirs: Set[str]) -> List[Path]:
     found: List[Path] = []
     for p in root.rglob("*"):
-        if p.is_dir:
+        if p.is_dir():
             continue
         if any(part in exclude_dirs for part in p.parts):
             continue
-        if p.suffix.lower in source_extensions:
+        if p.suffix.lower() in source_extensions:
             found.append(p)
     return found
 
 
 def filename_matches(files: List[Path], keyword: str) -> List[str]:
-    kw = keyword.lower
+    kw = keyword.lower()
     out: List[str] = []
     for p in files:
-        if kw in p.name.lower:
+        if kw in p.name.lower():
             out.append(str(p))
         if len(out) >= MAX_FILENAME_MATCHES_PER_KEYWORD:
             break
@@ -84,12 +84,12 @@ def content_matches(files: List[Path], keyword: str) -> List[Dict[str, Any]]:
             text = p.read_text(encoding="utf-8", errors="ignore")
         except OSError:
             continue
-        for line_no, line in enumerate(text.splitlines, start=1):
+        for line_no, line in enumerate(text.splitlines(), start=1):
             if pattern.search(line):
                 out.append({
                     "file": str(p),
                     "line": line_no,
-                    "snippet": line.strip[:120],
+                    "snippet": line.strip()[:120],
                 })
                 if len(out) >= MAX_CONTENT_MATCHES_PER_KEYWORD:
                     return out
@@ -98,9 +98,9 @@ def content_matches(files: List[Path], keyword: str) -> List[Dict[str, Any]]:
 
 def folder_structure(root: Path, max_depth: int, exclude_dirs: Set[str]) -> List[str]:
     out: List[str] = []
-    root = root.resolve
+    root = root.resolve()
     for p in root.rglob("*"):
-        if not p.is_dir:
+        if not p.is_dir():
             continue
         if any(part in exclude_dirs for part in p.parts):
             continue
@@ -128,7 +128,7 @@ def inventory(
             "content_matches": content_matches(files, kw),
         }
     return {
-        "root": str(root.resolve),
+        "root": str(root.resolve()),
         "files_scanned": len(files),
         "folder_structure": folder_structure(root, MAX_FOLDER_DEPTH, exclude_dirs),
         "per_keyword": per_keyword,
@@ -146,7 +146,7 @@ def render_human(result: Dict[str, Any]) -> str:
     if len(result["folder_structure"]) > 30:
         out.append(f"  ... + {len(result['folder_structure']) - 30} more")
     out.append("")
-    for kw, hits in result["per_keyword"].items:
+    for kw, hits in result["per_keyword"].items():
         out.append(f"Keyword: '{kw}'")
         if hits["filename_matches"]:
             out.append(f"  Filename matches ({len(hits['filename_matches'])}):")
@@ -166,9 +166,9 @@ def render_human(result: Dict[str, Any]) -> str:
 
 def run_sample(keywords: List[str]) -> Dict[str, Any]:
     import tempfile
-    with tempfile.TemporaryDirectory as td:
+    with tempfile.TemporaryDirectory() as td:
         root = Path(td)
-        for rel, content in SAMPLE_TREE.items:
+        for rel, content in SAMPLE_TREE.items():
             p = root / rel
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content, encoding="utf-8")
@@ -185,24 +185,24 @@ def main(argv: List[str]) -> int:
     args = parser.parse_args(argv)
 
     if args.sample:
-        sample_keywords = ["auth", "login", "2fa"] if not args.keywords else [k.strip for k in args.keywords.split(",") if k.strip]
+        sample_keywords = ["auth", "login", "2fa"] if not args.keywords else [k.strip() for k in args.keywords.split(",") if k.strip()]
         result = run_sample(sample_keywords)
     elif args.root and args.keywords:
         root = Path(args.root)
-        if not root.exists:
+        if not root.exists():
             print(f"error: {args.root} not found", file=sys.stderr)
             return 2
-        kws = [k.strip for k in args.keywords.split(",") if k.strip]
+        kws = [k.strip() for k in args.keywords.split(",") if k.strip()]
         if not kws:
             print("error: --keywords must list at least one keyword", file=sys.stderr)
             return 2
         if args.extensions:
-            exts = {e.strip if e.strip.startswith(".") else "." + e.strip for e in args.extensions.split(",")}
+            exts = {e.strip() if e.strip().startswith(".") else "." + e.strip() for e in args.extensions.split(",")}
         else:
             exts = DEFAULT_SOURCE_EXTENSIONS
         result = inventory(root, kws, exts, DEFAULT_EXCLUDE_DIRS)
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     if args.output == "json":

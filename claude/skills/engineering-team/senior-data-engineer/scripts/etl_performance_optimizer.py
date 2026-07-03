@@ -220,12 +220,12 @@ class SQLParser:
         sql = re.sub(r'--.*$', '', sql, flags=re.MULTILINE)
         sql = re.sub(r'/\*.*?\*/', '', sql, flags=re.DOTALL)
         # Normalize whitespace
-        sql = ' '.join(sql.split)
+        sql = ' '.join(sql.split())
         return sql
 
     def _detect_query_type(self, sql: str) -> str:
         """Detect the type of SQL query"""
-        sql_upper = sql.upper.strip
+        sql_upper = sql.upper().strip()
 
         if sql_upper.startswith('WITH') or sql_upper.startswith('SELECT'):
             return 'SELECT'
@@ -286,13 +286,13 @@ class SQLParser:
         select_clause = match.group(1)
 
         # Handle SELECT *
-        if '*' in select_clause and 'COUNT(*)' not in select_clause.upper:
+        if '*' in select_clause and 'COUNT(*)' not in select_clause.upper():
             return ['*']
 
         # Extract column names (simplified)
         columns = []
         for part in select_clause.split(','):
-            part = part.strip
+            part = part.strip()
             # Handle aliases
             alias_match = re.search(r'\bAS\s+(\w+)\s*$', part, re.IGNORECASE)
             if alias_match:
@@ -323,10 +323,10 @@ class SQLParser:
             condition = match.group(4)
 
             joins.append({
-                'type': join_type.strip.upper,
+                'type': join_type.strip().upper(),
                 'table': table,
                 'alias': alias,
-                'condition': condition.strip if condition else None
+                'condition': condition.strip() if condition else None
             })
 
         return joins
@@ -341,11 +341,11 @@ class SQLParser:
         if not match:
             return []
 
-        where_clause = match.group(1).strip
+        where_clause = match.group(1).strip()
 
         # Split by AND/OR (simplified)
         conditions = re.split(r'\s+AND\s+|\s+OR\s+', where_clause, flags=re.IGNORECASE)
-        return [c.strip for c in conditions if c.strip]
+        return [c.strip() for c in conditions if c.strip()]
 
     def _extract_group_by(self, sql: str) -> List[str]:
         """Extract GROUP BY columns"""
@@ -356,8 +356,8 @@ class SQLParser:
         if not match:
             return []
 
-        group_clause = match.group(1).strip
-        columns = [c.strip for c in group_clause.split(',')]
+        group_clause = match.group(1).strip()
+        columns = [c.strip() for c in group_clause.split(',')]
         return columns
 
     def _extract_order_by(self, sql: str) -> List[str]:
@@ -369,8 +369,8 @@ class SQLParser:
         if not match:
             return []
 
-        order_clause = match.group(1).strip
-        columns = [c.strip for c in order_clause.split(',')]
+        order_clause = match.group(1).strip()
+        columns = [c.strip() for c in order_clause.split(',')]
         return columns
 
     def _extract_aggregations(self, sql: str) -> List[str]:
@@ -379,7 +379,7 @@ class SQLParser:
             r'\b(COUNT|SUM|AVG|MIN|MAX|STDDEV|VARIANCE|MEDIAN|PERCENTILE_CONT|PERCENTILE_DISC)\s*\(',
             re.IGNORECASE
         )
-        return list(set(m.upper for m in agg_pattern.findall(sql)))
+        return list(set(m.upper() for m in agg_pattern.findall(sql)))
 
     def _extract_ctes(self, sql: str) -> List[str]:
         """Extract CTE names"""
@@ -400,7 +400,7 @@ class SQLParser:
             r'\b(\w+)\s*\([^)]*\)\s+OVER\s*\(',
             re.IGNORECASE
         )
-        return list(set(m.upper for m in window_pattern.findall(sql)))
+        return list(set(m.upper() for m in window_pattern.findall(sql)))
 
     def _estimate_complexity(self, tables: List[str], joins: List[Dict],
                             subqueries: int, aggregations: List[str],
@@ -452,11 +452,11 @@ class SQLOptimizer:
 
         # Check for SELECT *
         if '*' in query_info.columns:
-            recommendations.append(self._recommend_explicit_columns)
+            recommendations.append(self._recommend_explicit_columns())
 
         # Check for missing WHERE clause on large tables
         if not query_info.where_conditions and query_info.tables:
-            recommendations.append(self._recommend_add_filters)
+            recommendations.append(self._recommend_add_filters())
 
         # Check for inefficient joins
         join_recs = self._analyze_joins(query_info)
@@ -464,15 +464,15 @@ class SQLOptimizer:
 
         # Check for DISTINCT usage
         if query_info.distinct:
-            recommendations.append(self._recommend_distinct_alternative)
+            recommendations.append(self._recommend_distinct_alternative())
 
         # Check for ORDER BY without LIMIT
         if query_info.order_by and not query_info.limit:
-            recommendations.append(self._recommend_add_limit)
+            recommendations.append(self._recommend_add_limit())
 
         # Check for subquery optimization
         if query_info.subqueries > 0:
-            recommendations.append(self._recommend_cte_conversion)
+            recommendations.append(self._recommend_cte_conversion())
 
         # Check for index opportunities
         index_recs = self._analyze_index_opportunities(query_info)
@@ -611,7 +611,7 @@ class SQLOptimizer:
         recommendations = []
 
         # Columns in WHERE clause are index candidates
-        where_columns = set
+        where_columns = set()
         for condition in query_info.where_conditions:
             # Extract column names from conditions
             col_pattern = re.compile(r'\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:=|>|<|>=|<=|<>|!=|LIKE|IN|BETWEEN)', re.IGNORECASE)
@@ -631,7 +631,7 @@ class SQLOptimizer:
             ))
 
         # JOIN columns are index candidates
-        join_columns = set
+        join_columns = set()
         for join in query_info.joins:
             if join.get('condition'):
                 col_pattern = re.compile(r'\.([a-zA-Z_][a-zA-Z0-9_]*)\s*=', re.IGNORECASE)
@@ -705,7 +705,7 @@ class SQLOptimizer:
                 current_issue="COUNT DISTINCT pattern detected",
                 recommendation="Consider HyperLogLog approximation for very large datasets",
                 expected_improvement="Massive speedup with ~2% error tolerance",
-                implementation="Use APPROX_COUNT_DISTINCT if available in your warehouse",
+                implementation="Use APPROX_COUNT_DISTINCT() if available in your warehouse",
                 priority=3
             ))
 
@@ -765,7 +765,7 @@ class SparkJobAnalyzer:
             expected_improvement="Up to 80% reduction in job time by eliminating stragglers",
             implementation="""Options:
 1. Salting: Add random prefix to skewed keys
-   df.withColumn("salted_key", concat(col("key"), lit("_"), (rand * 10).cast("int")))
+   df.withColumn("salted_key", concat(col("key"), lit("_"), (rand() * 10).cast("int")))
 2. Broadcast join for small tables:
    df1.join(broadcast(df2), "key")
 3. Adaptive Query Execution (Spark 3.0+):
@@ -814,7 +814,7 @@ class SparkJobAnalyzer:
    spark.memory.offHeap.enabled=true
    spark.memory.offHeap.size=4g
 4. Reduce cached data:
-   df.unpersist when no longer needed
+   df.unpersist() when no longer needed
 5. Use Kryo serialization:
    spark.serializer=org.apache.spark.serializer.KryoSerializer""",
             priority=2
@@ -833,11 +833,11 @@ class SparkJobAnalyzer:
 1. Check executor logs for OOM:
    spark.executor.memoryOverhead=2g
 2. Handle data issues:
-   df.filter(col("value").isNotNull)
+   df.filter(col("value").isNotNull())
 3. Increase task retries:
    spark.task.maxFailures=4
 4. Add checkpointing for long jobs:
-   df.checkpoint
+   df.checkpoint()
 5. Check for network timeouts:
    spark.network.timeout=300s""",
             priority=1
@@ -917,7 +917,7 @@ class PartitionAdvisor:
         total_size_bytes = data_stats.get('total_size_bytes', 0)
         row_count = data_stats.get('row_count', 0)
 
-        for col_name, col_stats in columns.items:
+        for col_name, col_stats in columns.items():
             strategy = self._evaluate_column(col_name, col_stats, total_size_bytes, row_count)
             if strategy:
                 recommendations.append(strategy)
@@ -1074,10 +1074,10 @@ class CostEstimator:
     def estimate(self, query_info: SQLQueryInfo, warehouse: str,
                 data_stats: Optional[Dict] = None) -> CostEstimate:
         """Estimate query cost"""
-        warehouse = warehouse.lower
+        warehouse = warehouse.lower()
 
         if warehouse not in self.PRICING:
-            raise ValueError(f"Unknown warehouse: {warehouse}. Supported: {list(self.PRICING.keys)}")
+            raise ValueError(f"Unknown warehouse: {warehouse}. Supported: {list(self.PRICING.keys())}")
 
         # Estimate data scanned
         data_scanned_bytes = self._estimate_data_scanned(query_info, data_stats)
@@ -1245,7 +1245,7 @@ class ReportGenerator:
         lines.append("=" * 80)
         lines.append("ETL PERFORMANCE OPTIMIZATION REPORT")
         lines.append("=" * 80)
-        lines.append(f"\nGenerated: {datetime.now.isoformat}")
+        lines.append(f"\nGenerated: {datetime.now().isoformat()}")
 
         # Query summary
         lines.append("\n" + "-" * 40)
@@ -1257,7 +1257,7 @@ class ReportGenerator:
         lines.append(f"Subqueries: {query_info.subqueries}")
         lines.append(f"Aggregations: {', '.join(query_info.aggregations) or 'None'}")
         lines.append(f"Window Functions: {', '.join(query_info.window_functions) or 'None'}")
-        lines.append(f"Complexity: {query_info.estimated_complexity.upper}")
+        lines.append(f"Complexity: {query_info.estimated_complexity.upper()}")
 
         # Cost estimate
         if cost_estimate:
@@ -1284,13 +1284,13 @@ class ReportGenerator:
                     'low': '🟢'
                 }.get(rec.severity, '⚪')
 
-                lines.append(f"\n{i}. {severity_icon} [{rec.severity.upper}] {rec.title}")
+                lines.append(f"\n{i}. {severity_icon} [{rec.severity.upper()}] {rec.title}")
                 lines.append(f"   Category: {rec.category}")
                 lines.append(f"   Issue: {rec.current_issue}")
                 lines.append(f"   Recommendation: {rec.recommendation}")
                 lines.append(f"   Expected Improvement: {rec.expected_improvement}")
                 lines.append(f"\n   Implementation:")
-                for impl_line in rec.implementation.strip.split('\n'):
+                for impl_line in rec.implementation.strip().split('\n'):
                     lines.append(f"   {impl_line}")
         else:
             lines.append("\n✅ No optimization issues detected")
@@ -1305,7 +1305,7 @@ class ReportGenerator:
         """Generate a JSON report"""
         return {
             "report_type": "etl_performance_optimization",
-            "generated_at": datetime.now.isoformat,
+            "generated_at": datetime.now().isoformat(),
             "query_analysis": {
                 "query_type": query_info.query_type,
                 "tables": query_info.tables,
@@ -1335,23 +1335,23 @@ def cmd_analyze_sql(args):
     """Analyze SQL query for optimization opportunities"""
     # Load SQL
     sql_path = Path(args.input)
-    if sql_path.exists:
+    if sql_path.exists():
         with open(sql_path, 'r') as f:
-            sql = f.read
+            sql = f.read()
     else:
         sql = args.input  # Treat as inline SQL
 
     # Parse and analyze
-    parser = SQLParser
+    parser = SQLParser()
     query_info = parser.parse(sql)
 
-    optimizer = SQLOptimizer
+    optimizer = SQLOptimizer()
     recommendations = optimizer.analyze(query_info, sql)
 
     # Cost estimate if warehouse specified
     cost_estimate = None
     if args.warehouse:
-        estimator = CostEstimator
+        estimator = CostEstimator()
         data_stats = None
         if args.stats:
             with open(args.stats, 'r') as f:
@@ -1359,7 +1359,7 @@ def cmd_analyze_sql(args):
         cost_estimate = estimator.estimate(query_info, args.warehouse, data_stats)
 
     # Generate report
-    reporter = ReportGenerator
+    reporter = ReportGenerator()
 
     if args.json:
         report = reporter.generate_json_report(query_info, recommendations, cost_estimate)
@@ -1387,7 +1387,7 @@ def cmd_analyze_spark(args):
         jobs = [metrics_data]
 
     all_recommendations = []
-    analyzer = SparkJobAnalyzer
+    analyzer = SparkJobAnalyzer()
 
     for job_data in jobs:
         metrics = SparkJobMetrics(
@@ -1411,7 +1411,7 @@ def cmd_analyze_spark(args):
 
     # Deduplicate similar recommendations
     unique_recs = []
-    seen_titles = set
+    seen_titles = set()
     for rec in all_recommendations:
         if rec.title not in seen_titles:
             unique_recs.append(rec)
@@ -1429,7 +1429,7 @@ def cmd_analyze_spark(args):
         lines.append(f"Recommendations: {len(unique_recs)}")
 
         for i, rec in enumerate(unique_recs, 1):
-            lines.append(f"\n{i}. [{rec.severity.upper}] {rec.title}")
+            lines.append(f"\n{i}. [{rec.severity.upper()}] {rec.title}")
             lines.append(f"   {rec.description}")
             lines.append(f"   Implementation: {rec.implementation[:200]}...")
 
@@ -1447,7 +1447,7 @@ def cmd_optimize_partition(args):
     with open(args.input, 'r') as f:
         data_stats = json.load(f)
 
-    advisor = PartitionAdvisor
+    advisor = PartitionAdvisor()
     strategies = advisor.recommend(data_stats)
 
     if args.json:
@@ -1469,7 +1469,7 @@ def cmd_optimize_partition(args):
                 lines.append(f"   Estimated size: {strategy.partition_size_mb:.1f} MB per partition")
                 lines.append(f"   Reasoning: {strategy.reasoning}")
                 lines.append(f"\n   Implementation:")
-                for impl_line in strategy.implementation.strip.split('\n'):
+                for impl_line in strategy.implementation.strip().split('\n'):
                     lines.append(f"   {impl_line}")
 
         output = "\n".join(lines)
@@ -1485,14 +1485,14 @@ def cmd_estimate_cost(args):
     """Estimate query cost"""
     # Load SQL
     sql_path = Path(args.input)
-    if sql_path.exists:
+    if sql_path.exists():
         with open(sql_path, 'r') as f:
-            sql = f.read
+            sql = f.read()
     else:
         sql = args.input
 
     # Parse
-    parser = SQLParser
+    parser = SQLParser()
     query_info = parser.parse(sql)
 
     # Load data stats if provided
@@ -1502,7 +1502,7 @@ def cmd_estimate_cost(args):
             data_stats = json.load(f)
 
     # Estimate cost
-    estimator = CostEstimator
+    estimator = CostEstimator()
     cost = estimator.estimate(query_info, args.warehouse, data_stats)
 
     if args.json:
@@ -1576,7 +1576,7 @@ def cmd_generate_template(args):
     }
 
     if args.template not in templates:
-        logger.error(f"Unknown template: {args.template}. Available: {list(templates.keys)}")
+        logger.error(f"Unknown template: {args.template}. Available: {list(templates.keys())}")
         sys.exit(1)
 
     output = json.dumps(templates[args.template], indent=2)
@@ -1589,7 +1589,7 @@ def cmd_generate_template(args):
         print(output)
 
 
-def main:
+def main():
     """Main entry point"""
     parser = argparse.ArgumentParser(
         description="ETL Performance Optimizer - Analyze and optimize data pipelines",
@@ -1662,13 +1662,13 @@ Examples:
     template_parser.add_argument('--output', '-o', help='Output file')
     template_parser.set_defaults(func=cmd_generate_template)
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.verbose:
-        logging.getLogger.setLevel(logging.DEBUG)
+        logging.getLogger().setLevel(logging.DEBUG)
 
     if not args.command:
-        parser.print_help
+        parser.print_help()
         sys.exit(1)
 
     try:
@@ -1677,9 +1677,9 @@ Examples:
         logger.error(f"Error: {e}")
         if args.verbose:
             import traceback
-            traceback.print_exc
+            traceback.print_exc()
         sys.exit(1)
 
 
 if __name__ == '__main__':
-    main
+    main()

@@ -154,7 +154,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--sample", action="store_true", help="use the embedded sample")
     args = p.parse_args(argv)
 
-    conf = _cfg.load_config if _cfg else {}
+    conf = _cfg.load_config() if _cfg else {}
     confidence = args.confidence if args.confidence is not None else conf.get("default_confidence", 0.95)
     moe = args.moe if args.moe is not None else conf.get("default_moe", 0.05)
 
@@ -180,4 +180,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

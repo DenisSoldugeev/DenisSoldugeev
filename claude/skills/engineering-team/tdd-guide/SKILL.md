@@ -92,15 +92,15 @@ python scripts/coverage_analyzer.py --report lcov.info --threshold 80
 Coverage Report — Overall: 63% (threshold: 80%)
 
 P0 — Critical gaps (uncovered error paths):
-  auth/login.py:42-58   handle_expired_token       0% covered
-  payments/process.py:91-110  handle_payment_failure   0% covered
+  auth/login.py:42-58   handle_expired_token()       0% covered
+  payments/process.py:91-110  handle_payment_failure()   0% covered
 
 P1 — High-value gaps (core logic branches):
-  users/service.py:77   update_profile — else branch  0% covered
-  orders/cart.py:134    apply_discount — zero-qty guard  0% covered
+  users/service.py:77   update_profile() — else branch  0% covered
+  orders/cart.py:134    apply_discount() — zero-qty guard  0% covered
 
 P2 — Low-risk gaps (utility / helper functions):
-  utils/formatting.py:12  format_currency            0% covered
+  utils/formatting.py:12  format_currency()            0% covered
 
 Recommended: Generate tests for P0 items first to reach 80% threshold.
 ```
@@ -186,18 +186,18 @@ Each acceptance criterion in a spec maps to at least one test:
 
 ```typescript
 // test/cart.test.ts
-describe("Cart",  => {
-  describe("addItem",  => {
-    it("should add a new item to an empty cart",  => {
-      const cart = new Cart;
+describe("Cart", () => {
+  describe("addItem", () => {
+    it("should add a new item to an empty cart", () => {
+      const cart = new Cart();
       cart.addItem({ id: "sku-1", name: "Widget", price: 9.99, qty: 1 });
 
       expect(cart.items).toHaveLength(1);
       expect(cart.items[0].id).toBe("sku-1");
     });
 
-    it("should increment quantity when adding an existing item",  => {
-      const cart = new Cart;
+    it("should increment quantity when adding an existing item", () => {
+      const cart = new Cart();
       cart.addItem({ id: "sku-1", name: "Widget", price: 9.99, qty: 1 });
       cart.addItem({ id: "sku-1", name: "Widget", price: 9.99, qty: 2 });
 
@@ -205,9 +205,9 @@ describe("Cart",  => {
       expect(cart.items[0].qty).toBe(3);
     });
 
-    it("should throw when quantity is zero or negative",  => {
-      const cart = new Cart;
-      expect( =>
+    it("should throw when quantity is zero or negative", () => {
+      const cart = new Cart();
+      expect(() =>
         cart.addItem({ id: "sku-1", name: "Widget", price: 9.99, qty: 0 })
       ).toThrow("Quantity must be positive");
     });
@@ -223,17 +223,17 @@ import pytest
 from app.db import create_engine, Session
 
 @pytest.fixture(scope="session")
-def db_engine:
+def db_engine():
     engine = create_engine("sqlite:///:memory:")
     yield engine
-    engine.dispose
+    engine.dispose()
 
 @pytest.fixture
 def db_session(db_engine):
     session = Session(bind=db_engine)
     yield session
-    session.rollback
-    session.close
+    session.rollback()
+    session.close()
 
 # tests/test_pricing.py — parametrize for multiple cases
 import pytest
@@ -315,12 +315,12 @@ Property-based testing generates random inputs to verify invariants instead of r
 from hypothesis import given, strategies as st
 from app.serializers import serialize, deserialize
 
-@given(st.text)
+@given(st.text())
 def test_roundtrip_serialization(data):
     """Serialization followed by deserialization returns the original."""
     assert deserialize(serialize(data)) == data
 
-@given(st.integers, st.integers)
+@given(st.integers(), st.integers())
 def test_addition_is_commutative(a, b):
     assert a + b == b + a
 ```
@@ -331,9 +331,9 @@ def test_addition_is_commutative(a, b):
 import fc from "fast-check";
 import { encode, decode } from "./codec";
 
-test("encode/decode roundtrip",  => {
+test("encode/decode roundtrip", () => {
   fc.assert(
-    fc.property(fc.string, (input) => {
+    fc.property(fc.string(), (input) => {
       expect(decode(encode(input))).toBe(input);
     })
   );

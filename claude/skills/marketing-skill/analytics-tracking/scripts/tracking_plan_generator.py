@@ -198,7 +198,7 @@ def generate_tracking_plan(inputs):
 
     # Build event taxonomy
     all_events = []
-    for category, events in templates.items:
+    for category, events in templates.items():
         for ev in events:
             all_events.append({**ev, "category": category})
 
@@ -301,7 +301,7 @@ def print_report(result, inputs):
     print("  TRACKING PLAN GENERATOR")
     print("="*65)
 
-    print(f"\n📋 BUSINESS TYPE: {inputs.get('business_type', 'saas').upper}")
+    print(f"\n📋 BUSINESS TYPE: {inputs.get('business_type', 'saas').upper()}")
 
     events = result["event_taxonomy"]
     by_priority = defaultdict(list)
@@ -313,7 +313,7 @@ def print_report(result, inputs):
         evs = by_priority.get(priority, [])
         if evs:
             marker = "🔴" if priority == "critical" else "🟡" if priority == "high" else "⚪"
-            print(f"\n  {marker} {priority.upper} ({len(evs)} events)")
+            print(f"\n  {marker} {priority.upper()} ({len(evs)} events)")
             for ev in evs:
                 conv = " ← CONVERSION" if ev["is_conversion"] else ""
                 print(f"     {ev['event']}{conv}")
@@ -351,7 +351,7 @@ def print_report(result, inputs):
     print("="*65 + "\n")
 
 
-def main:
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -365,7 +365,7 @@ def main:
         "--json", action="store_true",
         help="Output full config as JSON"
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.input_file:
         with open(args.input_file) as f:
@@ -383,4 +383,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

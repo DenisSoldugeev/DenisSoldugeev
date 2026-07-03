@@ -39,7 +39,7 @@ from pathlib import Path
 from typing import Any
 
 _DESIGN_SYSTEM_SCRIPTS = (
-    Path(__file__).resolve.parent.parent.parent / "design-system" / "scripts"
+    Path(__file__).resolve().parent.parent.parent / "design-system" / "scripts"
 )
 sys.path.insert(0, str(_DESIGN_SYSTEM_SCRIPTS))
 try:
@@ -48,7 +48,7 @@ except ImportError:
     _cfg = None
 
 # Re-export from markdown_parser so html_renderer can self-sample
-sys.path.insert(0, str(Path(__file__).resolve.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 try:
     import markdown_parser as _mp
 except ImportError:
@@ -349,7 +349,7 @@ def _palette_to_css(palette: dict[str, str]) -> str:
             "--md-link": "#00D4AA", "--md-link-hover": "#08FECE",
             "--md-success": "#10A85C", "--md-warn": "#C87C10",
         }
-    return "\n".join(f"    {k}: {v};" for k, v in palette.items)
+    return "\n".join(f"    {k}: {v};" for k, v in palette.items())
 
 
 def _font_url(heading: str, body: str) -> str:
@@ -359,7 +359,7 @@ def _font_url(heading: str, body: str) -> str:
 
 
 def _font_stack(name: str, kind: str) -> str:
-    fallback = ("Georgia, serif" if "serif" in name.lower or name in
+    fallback = ("Georgia, serif" if "serif" in name.lower() or name in
                 ("Playfair Display", "Merriweather", "Lora", "Source Serif 4")
                 else "system-ui, -apple-system, sans-serif")
     if "Mono" in name or "Code" in name:
@@ -390,10 +390,10 @@ def _embed_logo(logo_url: str) -> str:
         return ""
     if logo_url.startswith(("data:", "http://", "https://")):
         return logo_url
-    p = Path(logo_url).expanduser
-    if p.exists and p.is_file:
-        ext = p.suffix.lstrip(".").lower or "png"
-        data = base64.b64encode(p.read_bytes).decode("ascii")
+    p = Path(logo_url).expanduser()
+    if p.exists() and p.is_file():
+        ext = p.suffix.lstrip(".").lower() or "png"
+        data = base64.b64encode(p.read_bytes()).decode("ascii")
         mime = {"png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg",
                 "svg": "image/svg+xml", "gif": "image/gif", "webp": "image/webp"}.get(
             ext, f"image/{ext}")
@@ -442,13 +442,13 @@ def _render_block(block: dict[str, Any]) -> str:
         ) + "</tbody>"
         return f"<table>{thead}{tbody}</table>"
     if t == "callout":
-        kind = (block.get("kind") or "NOTE").upper
+        kind = (block.get("kind") or "NOTE").upper()
         icon = CALLOUT_ICONS.get(kind, "i")
         body = "<br>".join(
             _mp.render_inline_html(ln) if _mp else html.escape(ln)
             for ln in (block.get("body_lines") or []) if ln
         )
-        klass = kind.lower
+        klass = kind.lower()
         return (
             f'<aside class="callout callout-{klass}" role="note">'
             f'<div class="callout-label"><span class="callout-icon" aria-hidden="true">{icon}</span>'
@@ -582,16 +582,16 @@ def main(argv: list[str]) -> int:
             return 2
         sections = _mp.parse_markdown(_mp.SAMPLE_MARKDOWN)
     elif args.sections:
-        raw = sys.stdin.read if args.sections == "-" else Path(args.sections).read_text(encoding="utf-8")
+        raw = sys.stdin.read() if args.sections == "-" else Path(args.sections).read_text(encoding="utf-8")
         sections = json.loads(raw)
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     if args.no_config or os.environ.get("MARKDOWN_HTML_NO_CONFIG") == "1":
         config = _cfg.DEFAULTS if _cfg else {}
     else:
-        config = _cfg.load_config if _cfg else {}
+        config = _cfg.load_config() if _cfg else {}
 
     output = render(sections, config)
 

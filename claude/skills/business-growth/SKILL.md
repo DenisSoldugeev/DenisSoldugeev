@@ -11,7 +11,7 @@ Business & growth skills: customer success, sales engineering, revenue operation
 
 | Skill | Path | Focus |
 |-------|------|-------|
-| business-growth-skills | `business-growth-skills/SKILL.md` | 4 business growth agent skills and plugins for Claude Code, Codex, Gemini CLI, Cursor, OpenClaw. Customer succ… |
+| business-growth-skills | `business-growth-skills/SKILL.md` | Router/index for the 4 business & growth skills bundled in this plugin: customer-success-manager (health scori… |
 | contract-and-proposal-writer | `contract-and-proposal-writer/SKILL.md` | Generate professional, jurisdiction-aware business documents: freelance contracts, project proposals, SOWs, ND… |
 | customer-success-manager | `customer-success-manager/SKILL.md` | Monitors customer health, predicts churn risk, and identifies expansion opportunities using weighted scoring m… |
 | revenue-operations | `revenue-operations/SKILL.md` | Analyzes sales pipeline health, revenue forecasting accuracy, and go-to-market efficiency metrics for SaaS rev… |

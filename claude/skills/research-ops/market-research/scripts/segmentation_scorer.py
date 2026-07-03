@@ -101,7 +101,7 @@ def _render_human(r: dict) -> str:
     lines = [f"Segmentation Scoring (profile: {r['profile']})", ""]
     for s in r["segments"]:
         lines.append(f"[{s['verdict']}] {s['name']}  — composite {s['composite']}/100")
-        for c, v in s["breakdown"].items:
+        for c, v in s["breakdown"].items():
             lines.append(f"      {c:16s} {v}")
         for f in s["flags"]:
             lines.append(f"      ! {f}")
@@ -119,7 +119,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--sample", action="store_true", help="use the embedded sample")
     args = p.parse_args(argv)
 
-    conf = _cfg.load_config if _cfg else {}
+    conf = _cfg.load_config() if _cfg else {}
     profile = args.profile or conf.get("default_profile", "b2b-saas")
     data = SAMPLE if (args.sample or not args.input) else json.load(open(args.input))
     try:
@@ -136,4 +136,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

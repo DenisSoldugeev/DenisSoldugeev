@@ -6,14 +6,14 @@
         "type": "happy_path",
         "priority": "P0",
         "framework": "jest",
-        "code": "it('should validate password with sufficient length',  => {\n  const validator = new PasswordValidator;\n  const result = validator.validate('Test@123');\n  expect(result).toBe(true);\n});"
+        "code": "it('should validate password with sufficient length', () => {\n  const validator = new PasswordValidator();\n  const result = validator.validate('Test@123');\n  expect(result).toBe(true);\n});"
       },
       {
         "name": "should_handle_too_short_password",
         "type": "error_case",
         "priority": "P0",
         "framework": "jest",
-        "code": "it('should reject password shorter than 8 characters',  => {\n  const validator = new PasswordValidator;\n  const result = validator.validate('Test@1');\n  expect(result).toBe(false);\n});"
+        "code": "it('should reject password shorter than 8 characters', () => {\n  const validator = new PasswordValidator();\n  const result = validator.validate('Test@1');\n  expect(result).toBe(false);\n});"
       }
     ],
     "test_file": "password-validator.test.ts",

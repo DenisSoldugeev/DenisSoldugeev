@@ -49,31 +49,31 @@ def run_cmd(cmd, cwd=None, timeout=None):
         cmd, shell=True, capture_output=True, text=True,
         cwd=cwd, timeout=timeout
     )
-    return result.returncode, result.stdout.strip, result.stderr.strip
+    return result.returncode, result.stdout.strip(), result.stderr.strip()
 
 
 def get_autoresearch_root(scope, project_root=None):
     """Get the .autoresearch root directory based on scope."""
     if scope == "user":
-        return Path.home / ".autoresearch"
+        return Path.home() / ".autoresearch"
     return Path(project_root or ".") / ".autoresearch"
 
 
 def init_root(root):
     """Initialize .autoresearch root if it doesn't exist."""
     created = False
-    if not root.exists:
+    if not root.exists():
         root.mkdir(parents=True)
         created = True
         print(f"  Created {root}/")
 
     config_file = root / "config.yaml"
-    if not config_file.exists:
+    if not config_file.exists():
         config_file.write_text(DEFAULT_CONFIG)
         print(f"  Created {config_file}")
 
     gitignore = root / ".gitignore"
-    if not gitignore.exists:
+    if not gitignore.exists():
         gitignore.write_text(GITIGNORE_CONTENT)
         print(f"  Created {gitignore}")
 
@@ -126,7 +126,7 @@ metric: {metric}
 metric_direction: {direction}
 metric_grep: ^{metric}:
 time_budget_minutes: {time_budget}
-created: {datetime.now.strftime('%Y-%m-%d %H:%M')}
+created: {datetime.now().strftime('%Y-%m-%d %H:%M')}
 """
     (experiment_dir / "config.cfg").write_text(content)
 
@@ -134,8 +134,8 @@ created: {datetime.now.strftime('%Y-%m-%d %H:%M')}
 def init_results_tsv(experiment_dir):
     """Create results.tsv with header."""
     tsv = experiment_dir / "results.tsv"
-    if tsv.exists:
-        print(f"  results.tsv already exists ({tsv.stat.st_size} bytes)")
+    if tsv.exists():
+        print(f"  results.tsv already exists ({tsv.stat().st_size} bytes)")
         return
     tsv.write_text("commit\tmetric\tstatus\tdescription\n")
     print("  Created results.tsv")
@@ -144,7 +144,7 @@ def init_results_tsv(experiment_dir):
 def copy_evaluator(experiment_dir, evaluator_name):
     """Copy a built-in evaluator to the experiment directory."""
     source = EVALUATOR_DIR / f"{evaluator_name}.py"
-    if not source.exists:
+    if not source.exists():
         print(f"  Warning: evaluator '{evaluator_name}' not found in {EVALUATOR_DIR}")
         print(f"  Available: {', '.join(f.stem for f in EVALUATOR_DIR.glob('*.py'))}")
         return False
@@ -177,31 +177,31 @@ def create_branch(path, domain, name):
 
 def list_experiments(root):
     """List all experiments across all domains."""
-    if not root.exists:
+    if not root.exists():
         print("No experiments found. Run setup to create your first experiment.")
         return
 
     experiments = []
-    for domain_dir in sorted(root.iterdir):
-        if not domain_dir.is_dir or domain_dir.name.startswith("."):
+    for domain_dir in sorted(root.iterdir()):
+        if not domain_dir.is_dir() or domain_dir.name.startswith("."):
             continue
-        for exp_dir in sorted(domain_dir.iterdir):
-            if not exp_dir.is_dir:
+        for exp_dir in sorted(domain_dir.iterdir()):
+            if not exp_dir.is_dir():
                 continue
             cfg_file = exp_dir / "config.cfg"
-            if not cfg_file.exists:
+            if not cfg_file.exists():
                 continue
             config = {}
-            for line in cfg_file.read_text.splitlines:
+            for line in cfg_file.read_text().splitlines():
                 if ":" in line:
                     k, v = line.split(":", 1)
-                    config[k.strip] = v.strip
+                    config[k.strip()] = v.strip()
 
             # Count results
             tsv = exp_dir / "results.tsv"
             runs = 0
-            if tsv.exists:
-                runs = max(0, len(tsv.read_text.splitlines) - 1)
+            if tsv.exists():
+                runs = max(0, len(tsv.read_text().splitlines()) - 1)
 
             experiments.append({
                 "domain": domain_dir.name,
@@ -222,9 +222,9 @@ def list_experiments(root):
     print(f"\nTotal: {len(experiments)} experiments")
 
 
-def list_evaluators:
+def list_evaluators():
     """List available built-in evaluators."""
-    if not EVALUATOR_DIR.exists:
+    if not EVALUATOR_DIR.exists():
         print("No evaluators directory found.")
         return
 
@@ -232,14 +232,14 @@ def list_evaluators:
     for f in sorted(EVALUATOR_DIR.glob("*.py")):
         # Read first docstring line
         desc = ""
-        for line in f.read_text.splitlines:
-            stripped = line.strip
+        for line in f.read_text().splitlines():
+            stripped = line.strip()
             if stripped.startswith('"""') or stripped.startswith("'''"):
                 quote = stripped[:3]
                 # Single-line docstring: """Description."""
                 after_quote = stripped[3:]
-                if after_quote and after_quote.rstrip(quote[0]).strip:
-                    desc = after_quote.rstrip('"').rstrip("'").strip
+                if after_quote and after_quote.rstrip(quote[0]).strip():
+                    desc = after_quote.rstrip('"').rstrip("'").strip()
                     break
                 continue
             if stripped and not line.startswith("#!"):
@@ -248,7 +248,7 @@ def list_evaluators:
         print(f"  {f.stem:<25} {desc}")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="autoresearch-agent setup")
     parser.add_argument("--domain", choices=DOMAINS, help="Experiment domain")
     parser.add_argument("--name", help="Experiment name (e.g. api-speed, medium-ctr)")
@@ -266,22 +266,22 @@ def main:
     parser.add_argument("--skip-branch", action="store_true", help="Don't create git branch")
     parser.add_argument("--list", action="store_true", help="List all experiments")
     parser.add_argument("--list-evaluators", action="store_true", help="List available evaluators")
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    project_root = Path(args.path).resolve
+    project_root = Path(args.path).resolve()
 
     # List mode
     if args.list:
         root = get_autoresearch_root("project", project_root)
         list_experiments(root)
         user_root = get_autoresearch_root("user")
-        if user_root.exists and user_root != root:
+        if user_root.exists() and user_root != root:
             print(f"\n--- User-level experiments ({user_root}) ---")
             list_experiments(user_root)
         return
 
     if args.list_evaluators:
-        list_evaluators
+        list_evaluators()
         return
 
     # Validate required args for setup
@@ -295,7 +295,7 @@ def main:
     print(f"  Scope: {args.scope}")
     print(f"  Domain: {args.domain}")
     print(f"  Experiment: {args.name}")
-    print(f"  Time: {datetime.now.strftime('%Y-%m-%d %H:%M')}\n")
+    print(f"  Time: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n")
 
     # Check git
     result = subprocess.run(
@@ -310,7 +310,7 @@ def main:
 
     # Check target file
     target_path = project_root / args.target
-    if not target_path.exists:
+    if not target_path.exists():
         print(f"  Error: target file not found: {args.target}")
         sys.exit(1)
     print(f"  Target file found: {args.target}")
@@ -320,7 +320,7 @@ def main:
 
     # Create experiment directory
     experiment_dir = root / args.domain / args.name
-    if experiment_dir.exists:
+    if experiment_dir.exists():
         print(f"  Warning: experiment '{args.domain}/{args.name}' already exists.")
         print(f"  Use --name with a different name, or delete {experiment_dir}")
         sys.exit(1)
@@ -358,10 +358,10 @@ def main:
         # Check metric is parseable
         full_output = out + "\n" + err
         metric_found = False
-        for line in full_output.splitlines:
-            if line.strip.startswith(f"{args.metric}:"):
+        for line in full_output.splitlines():
+            if line.strip().startswith(f"{args.metric}:"):
                 metric_found = True
-                print(f"  Eval works. Baseline: {line.strip}")
+                print(f"  Eval works. Baseline: {line.strip()}")
                 break
         if not metric_found:
             print(f"  Warning: eval ran but '{args.metric}:' not found in output.")
@@ -380,4 +380,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

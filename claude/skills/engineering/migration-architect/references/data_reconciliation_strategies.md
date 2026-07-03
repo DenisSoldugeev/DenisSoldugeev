@@ -104,14 +104,14 @@ class RecordChecksum:
         """Calculate MD5 checksum for a database record"""
         # Remove excluded fields and sort for consistency
         filtered_record = {
-            k: v for k, v in record.items 
+            k: v for k, v in record.items() 
             if k not in self.exclude_fields
         }
         
         # Convert to sorted JSON string for consistent hashing
         normalized = json.dumps(filtered_record, sort_keys=True, default=str)
         
-        return hashlib.md5(normalized.encode('utf-8')).hexdigest
+        return hashlib.md5(normalized.encode('utf-8')).hexdigest()
     
     def compare_records(self, source_record, target_record):
         """Compare two records using checksums"""
@@ -127,11 +127,11 @@ class RecordChecksum:
 # Usage example
 checksum_calculator = RecordChecksum(exclude_fields=['updated_at', 'migration_flag'])
 
-source_records = fetch_records_from_source
-target_records = fetch_records_from_target
+source_records = fetch_records_from_source()
+target_records = fetch_records_from_target()
 
 mismatches = []
-for source_id, source_record in source_records.items:
+for source_id, source_record in source_records.items():
     if source_id in target_records:
         comparison = checksum_calculator.compare_records(
             source_record, target_records[source_id]
@@ -191,7 +191,7 @@ class CDCReconciler:
     def __init__(self, kafka_client, database_client):
         self.kafka = kafka_client
         self.db = database_client
-        self.processed_changes = set
+        self.processed_changes = set()
     
     def process_cdc_stream(self, topic_name):
         """Process CDC events and track changes for reconciliation"""
@@ -211,7 +211,7 @@ class CDCReconciler:
                 self.processed_changes.add(change_id)
                 
                 # Commit offset only after successful processing
-                consumer.commit
+                consumer.commit()
                 
             except Exception as e:
                 # Log failure and continue - will be caught by reconciliation
@@ -337,7 +337,7 @@ class BusinessLogicValidator:
         differences = []
         
         # Check for missing records and value differences
-        for key, source_value in source_dict.items:
+        for key, source_value in source_dict.items():
             if key not in target_dict:
                 differences.append({
                     'key': key,
@@ -357,7 +357,7 @@ class BusinessLogicValidator:
                     })
         
         # Check for extra records in target
-        for key, target_value in target_dict.items:
+        for key, target_value in target_dict.items():
             if key not in source_dict:
                 differences.append({
                     'key': key,
@@ -401,7 +401,7 @@ class AutoCorrector:
                 'operation': 'INSERT',
                 'key': record[key_field],
                 'data': record,
-                'timestamp': datetime.utcnow
+                'timestamp': datetime.utcnow()
             }
             
             if not self.dry_run:
@@ -447,7 +447,7 @@ class AutoCorrector:
                     'operation': 'UPDATE',
                     'key': key_value,
                     'updates': updates,
-                    'timestamp': datetime.utcnow
+                    'timestamp': datetime.utcnow()
                 }
                 
                 if not self.dry_run:
@@ -478,7 +478,7 @@ class ManualReviewSystem:
         """Add discrepancy to manual review queue"""
         
         review_item = {
-            'id': str(uuid.uuid4),
+            'id': str(uuid.uuid4()),
             'discrepancy_type': discrepancy['type'],
             'table': discrepancy['table'],
             'record_key': discrepancy['key'],
@@ -487,7 +487,7 @@ class ManualReviewSystem:
             'description': discrepancy['description'],
             'severity': discrepancy.get('severity', 'medium'),
             'status': 'PENDING',
-            'created_at': datetime.utcnow,
+            'created_at': datetime.utcnow(),
             'reviewed_by': None,
             'reviewed_at': None,
             'resolution': None
@@ -511,7 +511,7 @@ class ManualReviewSystem:
         review_item.update({
             'status': 'REVIEWED',
             'reviewed_by': reviewer,
-            'reviewed_at': datetime.utcnow,
+            'reviewed_at': datetime.utcnow(),
             'resolution': {
                 'action': action,  # 'APPLY_SOURCE', 'KEEP_TARGET', 'CUSTOM_FIX'
                 'notes': notes
@@ -576,15 +576,15 @@ class ReconciliationScheduler:
         schedule.every(4).hours.do(self.comprehensive_reconciliation)
         
         # Deep validation daily
-        schedule.every.day.at("02:00").do(self.deep_validation)
+        schedule.every().day.at("02:00").do(self.deep_validation)
         
         # Weekly business logic validation
-        schedule.every.sunday.at("03:00").do(self.business_logic_validation)
+        schedule.every().sunday.at("03:00").do(self.business_logic_validation)
     
     def quick_reconciliation(self):
         """Quick count-based reconciliation"""
         
-        job_start = datetime.utcnow
+        job_start = datetime.utcnow()
         
         try:
             # Check critical tables only
@@ -605,7 +605,7 @@ class ReconciliationScheduler:
             job_result = {
                 'job_type': 'quick_reconciliation',
                 'start_time': job_start,
-                'end_time': datetime.utcnow,
+                'end_time': datetime.utcnow(),
                 'status': 'completed',
                 'issues_found': len(results),
                 'details': results
@@ -619,7 +619,7 @@ class ReconciliationScheduler:
             job_result = {
                 'job_type': 'quick_reconciliation',
                 'start_time': job_start,
-                'end_time': datetime.utcnow,
+                'end_time': datetime.utcnow(),
                 'status': 'failed',
                 'error': str(e)
             }
@@ -629,10 +629,10 @@ class ReconciliationScheduler:
     def comprehensive_reconciliation(self):
         """Comprehensive checksum-based reconciliation"""
         
-        job_start = datetime.utcnow
+        job_start = datetime.utcnow()
         
         try:
-            tables_to_check = self.get_migration_tables
+            tables_to_check = self.get_migration_tables()
             issues = []
             
             for table in tables_to_check:
@@ -655,7 +655,7 @@ class ReconciliationScheduler:
             job_result = {
                 'job_type': 'comprehensive_reconciliation',
                 'start_time': job_start,
-                'end_time': datetime.utcnow,
+                'end_time': datetime.utcnow(),
                 'status': 'completed',
                 'total_issues': len(issues),
                 'auto_corrections': auto_corrections,
@@ -666,7 +666,7 @@ class ReconciliationScheduler:
             job_result = {
                 'job_type': 'comprehensive_reconciliation',
                 'start_time': job_start,
-                'end_time': datetime.utcnow,
+                'end_time': datetime.utcnow(),
                 'status': 'failed',
                 'error': str(e)
             }
@@ -679,7 +679,7 @@ class ReconciliationScheduler:
         print("Starting reconciliation scheduler...")
         
         while True:
-            schedule.run_pending
+            schedule.run_pending()
             time.sleep(60)  # Check every minute
 ```
 
@@ -723,14 +723,14 @@ class ReconciliationMetrics:
             table=table,
             type=inconsistency_type,
             severity=severity
-        ).inc
+        ).inc()
     
     def record_auto_correction(self, table, correction_type):
         """Record an automatic correction"""
         self.auto_corrections.labels(
             table=table,
             correction_type=correction_type
-        ).inc
+        ).inc()
     
     def update_data_drift(self, table, drift_percentage):
         """Update data drift gauge"""
@@ -797,7 +797,7 @@ class ReconciliationDashboard:
         """Generate daily reconciliation report"""
         
         if not date:
-            date = datetime.utcnow.date
+            date = datetime.utcnow().date()
         
         # Query reconciliation results for the day
         daily_stats = self.db.query("""
@@ -813,7 +813,7 @@ class ReconciliationDashboard:
         
         # Generate summary
         summary = {
-            'date': date.isoformat,
+            'date': date.isoformat(),
             'total_inconsistencies': sum(row['count'] for row in daily_stats),
             'auto_correction_rate': sum(row['auto_correction_rate'] * row['count'] for row in daily_stats) / max(sum(row['count'] for row in daily_stats), 1),
             'tables_affected': len(set(row['table_name'] for row in daily_stats)),
@@ -837,7 +837,7 @@ class ReconciliationDashboard:
     def generate_trend_analysis(self, days=7):
         """Generate trend analysis for reconciliation metrics"""
         
-        end_date = datetime.utcnow.date
+        end_date = datetime.utcnow().date()
         start_date = end_date - timedelta(days=days)
         
         trends = self.db.query("""
@@ -904,7 +904,7 @@ class MLAnomalyDetector:
         features = self.extract_features(training_data)
         
         # Scale features
-        scaler = StandardScaler
+        scaler = StandardScaler()
         scaled_features = scaler.fit_transform(features)
         
         # Train isolation forest
@@ -952,7 +952,7 @@ class MLAnomalyDetector:
         for record in data:
             record_features = []
             
-            for key, value in record.items:
+            for key, value in record.items():
                 if isinstance(value, (int, float)):
                     record_features.append(value)
                 elif isinstance(value, str):
@@ -960,7 +960,7 @@ class MLAnomalyDetector:
                     record_features.append(hash(value) % 10000)
                 elif isinstance(value, datetime):
                     # Convert datetime to timestamp
-                    record_features.append(value.timestamp)
+                    record_features.append(value.timestamp())
                 else:
                     # Default value for other types
                     record_features.append(0)
@@ -1107,7 +1107,7 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 class ParallelReconciler:
     def __init__(self, max_workers=None):
-        self.max_workers = max_workers or mp.cpu_count
+        self.max_workers = max_workers or mp.cpu_count()
     
     async def parallel_table_reconciliation(self, tables: List[str]):
         """Reconcile multiple tables in parallel"""
@@ -1186,8 +1186,8 @@ class ParallelReconciler:
         end_id = chunk_spec['end_id']
         
         # Initialize database connections for this process
-        local_source_db = SourceDatabase
-        local_target_db = TargetDatabase
+        local_source_db = SourceDatabase()
+        local_target_db = TargetDatabase()
         
         # Get records in chunk
         source_records = local_source_db.get_records_range(table, start_id, end_id)
@@ -1256,7 +1256,7 @@ class IncrementalReconciler:
         target_dict = {r['id']: r for r in modified_target}
         
         # Find all record IDs to check
-        all_ids = set(source_dict.keys) | set(target_dict.keys)
+        all_ids = set(source_dict.keys()) | set(target_dict.keys())
         
         inconsistencies = []
         
@@ -1290,11 +1290,11 @@ class IncrementalReconciler:
                     })
         
         # Update last reconciliation time
-        self.update_last_reconciliation_time(table_name, datetime.utcnow)
+        self.update_last_reconciliation_time(table_name, datetime.utcnow())
         
         return {
             'table': table_name,
-            'reconciliation_time': datetime.utcnow,
+            'reconciliation_time': datetime.utcnow(),
             'records_checked': len(all_ids),
             'inconsistencies_found': len(inconsistencies),
             'inconsistencies': inconsistencies
@@ -1313,7 +1313,7 @@ class IncrementalReconciler:
             return result[0]['last_reconciled_at']
         else:
             # First time reconciliation - start from beginning of migration
-            return self.get_migration_start_time
+            return self.get_migration_start_time()
     
     def update_last_reconciliation_time(self, table_name: str, timestamp: datetime):
         """Update the last reconciliation timestamp"""

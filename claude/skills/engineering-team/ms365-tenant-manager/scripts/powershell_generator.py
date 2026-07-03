@@ -136,7 +136,7 @@ Write-Host ""
 # 1. Check MFA Status
 Write-Host "[1/7] Checking MFA status for all users..." -ForegroundColor Yellow
 
-$mfaReport = @
+$mfaReport = @()
 $users = Get-MgUser -All -Property Id,DisplayName,UserPrincipalName,AccountEnabled
 
 foreach ($user in $users) {
@@ -160,7 +160,7 @@ Write-Host "  Users without MFA: $usersWithoutMFA" -ForegroundColor $(if($usersW
 Write-Host "[2/7] Auditing admin role assignments..." -ForegroundColor Yellow
 
 $adminRoles = Get-MgDirectoryRole -All
-$adminReport = @
+$adminReport = @()
 
 foreach ($role in $adminRoles) {
     $members = Get-MgDirectoryRoleMember -DirectoryRoleId $role.Id
@@ -184,7 +184,7 @@ Write-Host "  Total admin assignments: $($adminReport.Count)" -ForegroundColor C
 Write-Host "[3/7] Identifying inactive users (90+ days)..." -ForegroundColor Yellow
 
 $inactiveDate = (Get-Date).AddDays(-90)
-$inactiveUsers = @
+$inactiveUsers = @()
 
 foreach ($user in $users) {
     $signIns = Get-MgAuditLogSignIn -Filter "userId eq '$($user.Id)'" -Top 1
@@ -216,7 +216,7 @@ Write-Host "  Guest users: $($guestUsers.Count)" -ForegroundColor Cyan
 Write-Host "[5/7] Analyzing license allocation..." -ForegroundColor Yellow
 
 $licenses = Get-MgSubscribedSku
-$licenseReport = @
+$licenseReport = @()
 
 foreach ($license in $licenses) {
     $licenseReport += [PSCustomObject]@{
@@ -235,7 +235,7 @@ Write-Host "  License SKUs analyzed: $($licenses.Count)" -ForegroundColor Cyan
 Write-Host "[6/7] Auditing mailbox delegations..." -ForegroundColor Yellow
 
 $mailboxes = Get-Mailbox -ResultSize Unlimited
-$delegationReport = @
+$delegationReport = @()
 
 foreach ($mailbox in $mailboxes) {
     $permissions = Get-MailboxPermission -Identity $mailbox.Identity |
@@ -360,7 +360,7 @@ Write-Host ""
 # Process each user
 $successCount = 0
 $errorCount = 0
-$results = @
+$results = @()
 
 foreach ($user in $users) {{
     $userEmail = $user.UserPrincipalName
@@ -428,3 +428,47 @@ Write-Host "Results saved to: $resultsPath" -ForegroundColor Cyan
 Disconnect-MgGraph
 """
         return script
+
+
+def main():
+    """CLI entry point."""
+    import argparse
+    import json
+
+    parser = argparse.ArgumentParser(
+        description="Generate ready-to-run M365 admin PowerShell scripts (Graph SDK based)"
+    )
+    parser.add_argument("--tenant-domain", required=True, help="Primary tenant domain (e.g. acme.com)")
+    parser.add_argument("--task", required=True,
+                        choices=["conditional-access", "security-audit", "bulk-license"],
+                        help="Which script to generate")
+    parser.add_argument("--policy-config", help="Policy config JSON file (conditional-access)")
+    parser.add_argument("--users-csv", help="Users CSV path baked into the script (bulk-license)")
+    parser.add_argument("--license-sku", help="License SKU (bulk-license)")
+    parser.add_argument("--output", "-o", help="Output file (default: stdout)")
+    args = parser.parse_args()
+
+    generator = PowerShellScriptGenerator(args.tenant_domain)
+
+    if args.task == "conditional-access":
+        policy = {}
+        if args.policy_config:
+            with open(args.policy_config, "r", encoding="utf-8") as f:
+                policy = json.load(f)
+        result = generator.generate_conditional_access_policy_script(policy)
+    elif args.task == "security-audit":
+        result = generator.generate_security_audit_script()
+    else:  # bulk-license
+        if not (args.users_csv and args.license_sku):
+            parser.error("--users-csv and --license-sku are required for --task bulk-license")
+        result = generator.generate_bulk_license_assignment_script(args.users_csv, args.license_sku)
+
+    if args.output:
+        with open(args.output, "w", encoding="utf-8") as f:
+            f.write(result)
+    else:
+        print(result)
+
+
+if __name__ == "__main__":
+    main()

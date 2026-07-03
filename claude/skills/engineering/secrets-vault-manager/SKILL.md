@@ -154,7 +154,7 @@ def get_secret(secret_name, region="us-east-1"):
 from google.cloud import secretmanager
 
 def get_secret(project_id, secret_id, version="latest"):
-    client = secretmanager.SecretManagerServiceClient
+    client = secretmanager.SecretManagerServiceClient()
     name = f"projects/{project_id}/secrets/{secret_id}/versions/{version}"
     response = client.access_secret_version(request={"name": name})
     return response.payload.data.decode("UTF-8")
@@ -166,7 +166,7 @@ from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 
 def get_secret(vault_url, secret_name):
-    credential = DefaultAzureCredential
+    credential = DefaultAzureCredential()
     client = SecretClient(vault_url=vault_url, credential=credential)
     return client.get_secret(secret_name).value
 ```

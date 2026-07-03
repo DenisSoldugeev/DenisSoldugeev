@@ -143,7 +143,7 @@ def render_markdown(normalized: dict) -> str:
         "| " + "OWNER".ljust(lane_width) + " | " + "STAGES (in process order)".ljust(70) + " |"
     )
     lines.append(sep)
-    for owner, owned in lanes.items:
+    for owner, owned in lanes.items():
         owner_cell = owner.ljust(lane_width)
         cells = []
         for idx, s in owned:
@@ -161,7 +161,7 @@ def render_markdown(normalized: dict) -> str:
                 wrapped.append(cur)
                 cur = token
             else:
-                cur = (cur + " " + token).strip
+                cur = (cur + " " + token).strip()
         if cur:
             wrapped.append(cur)
         for i, line in enumerate(wrapped):
@@ -186,7 +186,7 @@ def render_markdown(normalized: dict) -> str:
     return "\n".join(lines)
 
 
-def sample_process -> dict:
+def sample_process() -> dict:
     return {
         "process_name": "Procurement Intake (Sample)",
         "wip": 12,
@@ -237,7 +237,7 @@ def sample_process -> dict:
     }
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Document a business process as a BPMN-style swim-lane diagram."
     )
@@ -256,14 +256,14 @@ def main -> int:
         action="store_true",
         help="Print a 6-stage procurement-intake sample and exit.",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.sample:
-        raw = sample_process
+        raw = sample_process()
     else:
         if not args.input:
             parser.error("--input is required unless --sample is given")
-        if not args.input.exists:
+        if not args.input.exists():
             parser.error(f"input file not found: {args.input}")
         raw = load_process(args.input)
 
@@ -287,4 +287,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

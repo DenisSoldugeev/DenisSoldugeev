@@ -37,7 +37,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 
-SESSIONS_DIR = Path.home / ".grants_sessions"
+SESSIONS_DIR = Path.home() / ".grants_sessions"
 MIN_CONSENSUS_GAP_SECONDS = 1.0
 
 
@@ -47,7 +47,7 @@ def session_path(name: str) -> Path:
 
 def load_session(name: str) -> Dict[str, Any]:
     p = session_path(name)
-    if not p.exists:
+    if not p.exists():
         raise FileNotFoundError(f"Session not found: {name}")
     return json.loads(p.read_text(encoding="utf-8"))
 
@@ -57,21 +57,21 @@ def save_session(name: str, data: Dict[str, Any]) -> None:
     session_path(name).write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
-def now_iso -> str:
-    return datetime.now(timezone.utc).isoformat
+def now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
-def now_ts -> float:
-    return datetime.now(timezone.utc).timestamp
+def now_ts() -> float:
+    return datetime.now(timezone.utc).timestamp()
 
 
 def action_start(name: str, topic: Optional[str]) -> Dict[str, Any]:
-    if session_path(name).exists:
+    if session_path(name).exists():
         raise FileExistsError(f"Session already exists: {name}")
     data: Dict[str, Any] = {
         "session": name,
         "topic": topic or "",
-        "started_at": now_iso,
+        "started_at": now_iso(),
         "ended_at": None,
         "consensus_tier": None,
         "consensus_searches": [],
@@ -99,7 +99,7 @@ def action_record_consensus_search(name: str, facet: str, query: str, tier: Opti
     data = load_session(name)
     if data["consensus_searches"]:
         last_ts = data["consensus_searches"][-1].get("ts", 0)
-        gap = now_ts - last_ts
+        gap = now_ts() - last_ts
         if gap < MIN_CONSENSUS_GAP_SECONDS:
             raise RuntimeError(
                 f"Consensus sequential discipline violated: {gap:.2f}s gap (need >= {MIN_CONSENSUS_GAP_SECONDS}s). "
@@ -107,7 +107,7 @@ def action_record_consensus_search(name: str, facet: str, query: str, tier: Opti
             )
     if tier and not data["consensus_tier"]:
         data["consensus_tier"] = tier
-    data["consensus_searches"].append({"facet": facet, "query": query, "tier": tier, "at": now_iso, "ts": now_ts})
+    data["consensus_searches"].append({"facet": facet, "query": query, "tier": tier, "at": now_iso(), "ts": now_ts()})
     data["counts"]["consensus_searches"] += 1
     save_session(name, data)
     return data
@@ -115,7 +115,7 @@ def action_record_consensus_search(name: str, facet: str, query: str, tier: Opti
 
 def action_record_consensus_received(name: str, count: int) -> Dict[str, Any]:
     data = load_session(name)
-    data["consensus_received_log"].append({"count": count, "at": now_iso})
+    data["consensus_received_log"].append({"count": count, "at": now_iso()})
     data["counts"]["consensus_received"] += count
     save_session(name, data)
     return data
@@ -125,7 +125,7 @@ def action_record_consensus_cited(name: str, url: str) -> Dict[str, Any]:
     data = load_session(name)
     if any(p["url"] == url for p in data["consensus_cited"]):
         return data
-    data["consensus_cited"].append({"url": url, "at": now_iso})
+    data["consensus_cited"].append({"url": url, "at": now_iso()})
     data["counts"]["consensus_cited"] += 1
     save_session(name, data)
     return data
@@ -133,7 +133,7 @@ def action_record_consensus_cited(name: str, url: str) -> Dict[str, Any]:
 
 def action_record_reporter_search(name: str, search_type: str, query: str, projects: int) -> Dict[str, Any]:
     data = load_session(name)
-    data["reporter_searches"].append({"type": search_type, "query": query, "projects_returned": projects, "at": now_iso})
+    data["reporter_searches"].append({"type": search_type, "query": query, "projects_returned": projects, "at": now_iso()})
     data["counts"]["reporter_searches"] += 1
     data["counts"]["reporter_projects"] += projects
     save_session(name, data)
@@ -144,7 +144,7 @@ def action_record_reporter_cited(name: str, project_num: str) -> Dict[str, Any]:
     data = load_session(name)
     if any(p["project_num"] == project_num for p in data["reporter_cited"]):
         return data
-    data["reporter_cited"].append({"project_num": project_num, "at": now_iso})
+    data["reporter_cited"].append({"project_num": project_num, "at": now_iso()})
     data["counts"]["reporter_cited"] += 1
     save_session(name, data)
     return data
@@ -152,7 +152,7 @@ def action_record_reporter_cited(name: str, project_num: str) -> Dict[str, Any]:
 
 def action_record_nosi(name: str, nosi: str, status: str) -> Dict[str, Any]:
     data = load_session(name)
-    data["nosi_fetches"].append({"nosi": nosi, "status": status, "at": now_iso})
+    data["nosi_fetches"].append({"nosi": nosi, "status": status, "at": now_iso()})
     data["counts"]["nosi_fetches"] += 1
     if status == "fetched" or status == "succeeded":
         data["counts"]["nosi_succeeded"] += 1
@@ -167,12 +167,12 @@ def action_status(name: str) -> Dict[str, Any]:
 def action_close(name: str) -> Dict[str, Any]:
     data = load_session(name)
     if data.get("ended_at") is None:
-        data["ended_at"] = now_iso
+        data["ended_at"] = now_iso()
         save_session(name, data)
     return data
 
 
-def action_list -> List[Dict[str, Any]]:
+def action_list() -> List[Dict[str, Any]]:
     SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
     out: List[Dict[str, Any]] = []
     for p in sorted(SESSIONS_DIR.glob("*.json")):
@@ -285,7 +285,7 @@ def main(argv: List[str]) -> int:
         elif args.action == "close":
             result = action_close(args.session)
         else:
-            result = action_list
+            result = action_list()
     except (FileNotFoundError, FileExistsError, RuntimeError) as e:
         print(f"error: {e}", file=sys.stderr); return 2
 

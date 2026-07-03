@@ -89,7 +89,7 @@ def compute_cost_to_serve(payload: dict) -> dict:
 
     # Hidden-cost surfacing — flag any HIDDEN_COST_KEYS that are $0
     hidden_flags = []
-    for k, label in HIDDEN_COST_KEYS.items:
+    for k, label in HIDDEN_COST_KEYS.items():
         if direct_breakdown.get(k, 0) == 0:
             hidden_flags.append(
                 f"'{k}' is $0 — likely understated. {label} is the most-forgotten "
@@ -112,7 +112,7 @@ def compute_cost_to_serve(payload: dict) -> dict:
             f"Overhead allocation of {overhead_pct:.1f}% is unusually high. "
             "Verify denominator (revenue vs. gross profit) is consistent across channels."
         )
-    if overhead_pct < 5 and "partner" in channel_name.lower:
+    if overhead_pct < 5 and "partner" in channel_name.lower():
         warnings.append(
             f"Partner channel overhead allocation of {overhead_pct:.1f}% is unusually low. "
             "Channel manager, partner program, certification all live in YOUR P&L. "
@@ -152,7 +152,7 @@ def render_markdown(r: dict) -> str:
         "| Line item | $ |",
         "|---|---:|",
     ]
-    for k, v in r["direct_breakdown"].items:
+    for k, v in r["direct_breakdown"].items():
         lines.append(f"| {k} | {v:,.0f} |")
     lines += [
         f"| **Direct total** | **{r['direct_total']:,.0f}** |",
@@ -201,12 +201,12 @@ SAMPLE = {
 }
 
 
-def main -> int:
+def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--input", help="Path to JSON input file")
     ap.add_argument("--output", choices=["json", "markdown"], default="markdown")
     ap.add_argument("--sample", action="store_true", help="Run with embedded sample")
-    args = ap.parse_args
+    args = ap.parse_args()
 
     if args.sample:
         payload = SAMPLE
@@ -214,7 +214,7 @@ def main -> int:
         with open(args.input) as f:
             payload = json.load(f)
     else:
-        ap.print_help
+        ap.print_help()
         return 0
 
     result = compute_cost_to_serve(payload)
@@ -226,4 +226,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

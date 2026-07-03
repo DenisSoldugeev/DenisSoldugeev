@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "",
+  "$id": "/claude-skills/blob/main/markdown-html/skills/design-system/assets/design_system_schema.json",
   "title": "markdown-html design-system customization config",
   "description": "JSON schema for the design-system config written by onboard.py and consumed by every markdown-html converter via config_loader.py. Lives at ~/.config/markdown-html/design-system.json (global) or ./.markdown-html/design-system.json (project).",
   "type": "object",
@@ -54,7 +54,7 @@
     "logo_url": {"type": "string", "description": "Optional. Base64-embedded at render time by default; pass --logo-mode link to inline the URL instead."},
     "derived_palette": {
       "type": "object",
-      "description": "12 CSS custom properties derived from the brand input by brand_palette_validator.derive_palette. Stored here so every converter has identical tokens without re-deriving. Keys are CSS variable names; values are HEX or rgba strings.",
+      "description": "12 CSS custom properties derived from the brand input by brand_palette_validator.derive_palette(). Stored here so every converter has identical tokens without re-deriving. Keys are CSS variable names; values are HEX or rgba() strings.",
       "properties": {
         "--md-bg": {"type": "string"},
         "--md-surface": {"type": "string"},

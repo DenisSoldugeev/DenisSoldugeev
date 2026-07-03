@@ -144,7 +144,7 @@ import { Button } from '@design-system/components'
 | variant | 'primary' \| 'secondary' \| 'ghost' | 'primary' | Visual style |
 | size | 'sm' \| 'md' \| 'lg' | 'md' | Component size |
 | disabled | boolean | false | Disabled state |
-| onClick |  => void | - | Click handler |
+| onClick | () => void | - | Click handler |
 
 ## Variants
 
@@ -194,7 +194,7 @@ interface ButtonProps {
   rightIcon?: React.ReactNode;
 
   /** Click handler */
-  onClick?:  => void;
+  onClick?: () => void;
 
   /** Button content */
   children: React.ReactNode;

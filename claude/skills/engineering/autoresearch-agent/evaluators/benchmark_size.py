@@ -22,26 +22,26 @@ TARGET_FILE = "dist/main.js"
 # --- END CONFIG ---
 
 # Build if needed
-if "BUILD_CMD" in dir or "BUILD_CMD" in globals:
+if "BUILD_CMD" in dir() or "BUILD_CMD" in globals():
     result = subprocess.run(BUILD_CMD, shell=True, capture_output=True)
     if result.returncode != 0:
-        print(f"Build failed: {result.stderr.decode[:200]}", file=sys.stderr)
+        print(f"Build failed: {result.stderr.decode()[:200]}", file=sys.stderr)
         sys.exit(1)
 
 # Measure
-if "DOCKER_IMAGE" in dir or "DOCKER_IMAGE" in globals:
-    if "DOCKER_BUILD_CMD" in dir:
+if "DOCKER_IMAGE" in dir() or "DOCKER_IMAGE" in globals():
+    if "DOCKER_BUILD_CMD" in dir():
         subprocess.run(DOCKER_BUILD_CMD, shell=True, capture_output=True)
     result = subprocess.run(
         f"docker image inspect {DOCKER_IMAGE} --format '{{{{.Size}}}}'",
         shell=True, capture_output=True, text=True
     )
     try:
-        size_bytes = int(result.stdout.strip)
+        size_bytes = int(result.stdout.strip())
     except ValueError:
         print(f"Could not parse size from: {result.stdout[:100]}", file=sys.stderr)
         sys.exit(1)
-elif "TARGET_DIR" in dir or "TARGET_DIR" in globals:
+elif "TARGET_DIR" in dir() or "TARGET_DIR" in globals():
     size_bytes = sum(
         os.path.getsize(os.path.join(dp, f))
         for dp, _, fns in os.walk(TARGET_DIR) for f in fns

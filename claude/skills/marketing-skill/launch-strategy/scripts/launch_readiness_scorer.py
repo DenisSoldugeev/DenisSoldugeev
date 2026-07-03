@@ -102,7 +102,7 @@ def score_category(items: list) -> dict:
     scored_items  = []
 
     for it in items:
-        raw_status = it.get("status", "not_started").strip.lower
+        raw_status = it.get("status", "not_started").strip().lower()
         status     = raw_status if raw_status in STATUS_WEIGHTS else "not_started"
         weight     = it.get("weight", 1)
         sw         = STATUS_WEIGHTS[status]
@@ -141,7 +141,7 @@ def score_readiness(checklist: dict) -> dict:
     all_scores    = []
     all_blockers  = []
 
-    for cat, items in checklist.items:
+    for cat, items in checklist.items():
         result            = score_category(items)
         categories[cat]   = result
         all_scores.append(result["score"])
@@ -158,9 +158,9 @@ def score_readiness(checklist: dict) -> dict:
             "generated_at":    datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         },
         "categories": {
-            cat: {**CATEGORY_META.get(cat, {"emoji": "📋", "label": cat.title}),
+            cat: {**CATEGORY_META.get(cat, {"emoji": "📋", "label": cat.title()}),
                   **res}
-            for cat, res in categories.items
+            for cat, res in categories.items()
         },
         "action_plan": _action_plan(categories),
     }
@@ -181,16 +181,16 @@ def _launch_decision(score: int, blockers: list) -> str:
 def _action_plan(categories: dict) -> list:
     """Build a prioritised action list: blockers first, then by score ascending."""
     actions = []
-    for cat, res in categories.items:
-        label = CATEGORY_META.get(cat, {}).get("label", cat.title)
+    for cat, res in categories.items():
+        label = CATEGORY_META.get(cat, {}).get("label", cat.title())
         for bl in res.get("blockers", []):
             actions.append({
                 "priority":  "🚨 BLOCKER",
                 "category":  label,
                 "action":    bl,
             })
-    for cat, res in sorted(categories.items, key=lambda x: x[1]["score"]):
-        label = CATEGORY_META.get(cat, {}).get("label", cat.title)
+    for cat, res in sorted(categories.items(), key=lambda x: x[1]["score"]):
+        label = CATEGORY_META.get(cat, {}).get("label", cat.title())
         for it in res.get("items", []):
             if it["status"] == "partial":
                 actions.append({
@@ -231,7 +231,7 @@ def pretty_print(result: dict) -> None:
     print(f"  {'CATEGORY':<30}  {'SCORE':>6}  {'DONE':>5}  {'PARTIAL':>7}  {'PENDING':>7}")
     print(f"{'─'*65}")
 
-    for cat, res in result["categories"].items:
+    for cat, res in result["categories"].items():
         bar = "█" * (res["score"] // 10) + "░" * (10 - res["score"] // 10)
         print(f"  {res['emoji']} {res['label']:<27}  {res['score']:>5}/100  "
               f"{res['items_done']:>5}  {res['items_partial']:>7}  {res['items_pending']:>7}  {bar}")
@@ -239,12 +239,12 @@ def pretty_print(result: dict) -> None:
     print(f"\n{'─'*65}")
     print(f"  🗂   CATEGORY DETAILS\n")
 
-    for cat, res in result["categories"].items:
+    for cat, res in result["categories"].items():
         print(f"  {res['emoji']} {res['label']}  — {res['score']}/100  ({res['score_label']})")
         for it in res["items"]:
             icon = {"done": "✅", "partial": "🔶", "not_started": "⬜"}.get(it["status"], "⬜")
             print(f"    {icon} [{it['status']:<11}] (w={it['weight']}) {it['item']}")
-        print
+        print()
 
     ap = result["action_plan"]
     if ap:
@@ -253,14 +253,14 @@ def pretty_print(result: dict) -> None:
             print(f"  {i:>2}. {a['priority']}  [{a['category']}]  {a['action']}")
 
     print(f"\n  Generated: {ov['generated_at']}")
-    print
+    print()
 
 
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
-def parse_args:
+def parse_args():
     parser = argparse.ArgumentParser(
         description="Score product launch readiness across categories (stdlib only).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -272,11 +272,11 @@ def parse_args:
                         help="Output results as JSON")
     parser.add_argument("--export-template", action="store_true",
                         help="Print the default checklist template as JSON and exit")
-    return parser.parse_args
+    return parser.parse_args()
 
 
-def main:
-    args = parse_args
+def main():
+    args = parse_args()
 
     if args.export_template:
         print(json.dumps(DEFAULT_CHECKLIST, indent=2))
@@ -298,4 +298,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

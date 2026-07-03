@@ -41,7 +41,7 @@ def slugify(topic: str) -> str:
     - Trim leading/trailing hyphens
     - Truncate to SLUG_MAX_LEN (preferring to break at hyphen boundaries)
     """
-    s = topic.lower
+    s = topic.lower()
     s = re.sub(r"[^a-z0-9]+", "-", s)
     s = re.sub(r"-+", "-", s)
     s = s.strip("-")
@@ -58,11 +58,11 @@ def slugify(topic: str) -> str:
 
 def resolve_research_dir(override: str = None) -> Path:
     if override:
-        return Path(override).expanduser.resolve
+        return Path(override).expanduser().resolve()
     env = os.environ.get("RESEARCH_DIR")
     if env:
-        return Path(env).expanduser.resolve
-    return (Path.home / DEFAULT_RESEARCH_DIR_NAME).resolve
+        return Path(env).expanduser().resolve()
+    return (Path.home() / DEFAULT_RESEARCH_DIR_NAME).resolve()
 
 
 def generate(topic: str, when: date_type, research_dir: Path) -> Dict[str, Any]:
@@ -72,13 +72,13 @@ def generate(topic: str, when: date_type, research_dir: Path) -> Dict[str, Any]:
     output_dir = research_dir / "pulse"
     output_path = output_dir / filename
 
-    duplicate = output_path.exists
+    duplicate = output_path.exists()
     suggested_alt = None
     if duplicate:
         # Find the lowest -vN suffix that doesn't already exist
         for n in range(2, 100):
             alt = output_dir / f"{slug}-{date_str}-v{n}.md"
-            if not alt.exists:
+            if not alt.exists():
                 suggested_alt = str(alt)
                 break
 
@@ -119,17 +119,17 @@ def main(argv: List[str]) -> int:
     args = parser.parse_args(argv)
 
     if not args.topic:
-        parser.print_help
+        parser.print_help()
         return 0
 
     if args.date:
         try:
-            when = datetime.strptime(args.date, "%Y-%m-%d").date
+            when = datetime.strptime(args.date, "%Y-%m-%d").date()
         except ValueError:
             print(f"error: --date must be YYYY-MM-DD, got '{args.date}'", file=sys.stderr)
             return 2
     else:
-        when = date_type.today
+        when = date_type.today()
 
     research_dir = resolve_research_dir(args.research_dir)
     result = generate(args.topic, when, research_dir)

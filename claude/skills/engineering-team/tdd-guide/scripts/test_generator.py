@@ -131,7 +131,7 @@ class TestGenerator:
 
         # Success case
         test_cases.append({
-            'name': f"should_{method.lower}_{path.replace('/', '_')}_successfully",
+            'name': f"should_{method.lower()}_{path.replace('/', '_')}_successfully",
             'type': 'api_success',
             'method': method,
             'path': path,
@@ -190,8 +190,8 @@ class TestGenerator:
         description = test_case.get('description', '')
 
         stub = f"""
-describe('{{Feature Name}}',  => {{
-  it('{name}',  => {{
+describe('{{Feature Name}}', () => {{
+  it('{name}', () => {{
     // {description}
 
     // Arrange
@@ -206,7 +206,7 @@ describe('{{Feature Name}}',  => {{
   }});
 }});
 """
-        return stub.strip
+        return stub.strip()
 
     def _generate_pytest_stub(self, test_case: Dict[str, Any]) -> str:
         """Generate Pytest test stub."""
@@ -214,7 +214,7 @@ describe('{{Feature Name}}',  => {{
         description = test_case.get('description', '')
 
         stub = f"""
-def test_{name}:
+def test_{name}():
     \"\"\"
     {description}
     \"\"\"
@@ -228,7 +228,7 @@ def test_{name}:
     # TODO: Verify expected behavior
     assert True  # Replace with actual assertion
 """
-        return stub.strip
+        return stub.strip()
 
     def _generate_junit_stub(self, test_case: Dict[str, Any]) -> str:
         """Generate JUnit test stub."""
@@ -236,12 +236,12 @@ def test_{name}:
         description = test_case.get('description', '')
 
         # Convert snake_case to camelCase for Java
-        method_name = ''.join(word.capitalize if i > 0 else word
+        method_name = ''.join(word.capitalize() if i > 0 else word
                              for i, word in enumerate(name.split('_')))
 
         stub = f"""
 @Test
-public void {method_name} {{
+public void {method_name}() {{
     // {description}
 
     // Arrange
@@ -255,7 +255,7 @@ public void {method_name} {{
     assertTrue(true); // Replace with actual assertion
 }}
 """
-        return stub.strip
+        return stub.strip()
 
     def _generate_vitest_stub(self, test_case: Dict[str, Any]) -> str:
         """Generate Vitest test stub (similar to Jest)."""
@@ -263,8 +263,8 @@ public void {method_name} {{
         description = test_case.get('description', '')
 
         stub = f"""
-describe('{{Feature Name}}',  => {{
-  it('{name}',  => {{
+describe('{{Feature Name}}', () => {{
+  it('{name}', () => {{
     // {description}
 
     // Arrange
@@ -279,7 +279,7 @@ describe('{{Feature Name}}',  => {{
   }});
 }});
 """
-        return stub.strip
+        return stub.strip()
 
     def _generate_generic_stub(self, test_case: Dict[str, Any]) -> str:
         """Generate generic test stub."""
@@ -346,7 +346,7 @@ describe('{{Feature Name}}',  => {{
 
     def _generate_junit_file(self, module_name: str, test_cases: List[Dict[str, Any]]) -> str:
         """Generate complete JUnit test file."""
-        class_name = ''.join(word.capitalize for word in module_name.split('_'))
+        class_name = ''.join(word.capitalize() for word in module_name.split('_'))
 
         imports = """import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -430,9 +430,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
     def _has_test_for(self, existing_tests: List[str], keyword: str) -> bool:
         """Check if existing tests cover a keyword/scenario."""
-        keyword_lower = keyword.lower.replace('_', '').replace('-', '')
+        keyword_lower = keyword.lower().replace('_', '').replace('-', '')
         for test in existing_tests:
-            test_lower = test.lower.replace('_', '').replace('-', '')
+            test_lower = test.lower().replace('_', '').replace('-', '')
             if keyword_lower in test_lower:
                 return True
         return False

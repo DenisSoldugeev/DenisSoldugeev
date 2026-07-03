@@ -158,8 +158,8 @@ STRATEGIES = {
 
 def route(sub_use_case: str, jurisdictions: List[str], risk: Optional[str], known_art: Optional[str]) -> Dict[str, Any]:
     if sub_use_case not in STRATEGIES:
-        raise ValueError(f"Invalid sub-use-case '{sub_use_case}'. Pick from: {list(STRATEGIES.keys)}")
-    strategy = STRATEGIES[sub_use_case].copy
+        raise ValueError(f"Invalid sub-use-case '{sub_use_case}'. Pick from: {list(STRATEGIES.keys())}")
+    strategy = STRATEGIES[sub_use_case].copy()
     strategy["sub_use_case"] = sub_use_case
     strategy["jurisdictions_input"] = jurisdictions
     strategy["risk_input"] = risk
@@ -180,7 +180,7 @@ def route(sub_use_case: str, jurisdictions: List[str], risk: Optional[str], know
         notes.append("Signal-gathering risk: prioritize breadth + visualization over verdict")
 
     # Known art enables anchored search
-    if known_art and known_art.lower != "none":
+    if known_art and known_art.lower() != "none":
         notes.append(f"Known art anchor: {known_art} — adjacent searches will reference this hit")
 
     # Lens.org availability check (not asked here; flag in audit only)
@@ -213,7 +213,7 @@ def render_human(result: Dict[str, Any]) -> str:
     out.append(f"Legal disclaimer mandatory: {result['legal_disclaimer_mandatory']}")
     out.append("")
     out.append("DOCX section emphasis:")
-    for section, emphasis in result["docx_emphasis"].items:
+    for section, emphasis in result["docx_emphasis"].items():
         out.append(f"  {section:<30s} {emphasis}")
     out.append("")
     if result.get("operational_notes"):
@@ -236,13 +236,13 @@ def main(argv: List[str]) -> int:
     if args.sample:
         result = route("fto", ["US", "EP"], "strict", "US10000000B2")
     elif args.sub_use_case:
-        jurisdictions = [j.strip for j in args.jurisdictions.split(",") if j.strip] if args.jurisdictions else []
+        jurisdictions = [j.strip() for j in args.jurisdictions.split(",") if j.strip()] if args.jurisdictions else []
         try:
             result = route(args.sub_use_case, jurisdictions, args.risk, args.known_art)
         except ValueError as e:
             print(f"error: {e}", file=sys.stderr); return 2
     else:
-        parser.print_help; return 0
+        parser.print_help(); return 0
 
     if args.output == "json":
         print(json.dumps(result, indent=2, default=str))

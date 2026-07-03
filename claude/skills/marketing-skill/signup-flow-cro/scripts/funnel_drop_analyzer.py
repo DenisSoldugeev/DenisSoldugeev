@@ -78,7 +78,7 @@ RECOMMENDATIONS = {
 
 def classify_step_name(name: str) -> str:
     """Map step name to a known category for targeted recommendations."""
-    n = name.lower
+    n = name.lower()
     if any(k in n for k in ["land", "visit", "page", "home"]):
         return "landing_page"
     if any(k in n for k in ["cta", "click", "signup", "sign up", "register", "start"]):
@@ -263,7 +263,7 @@ def pretty_print(result: dict) -> None:
             for r in m["recommendations"]:
                 print(f"    • {r}")
 
-    print
+    print()
 
 
 # ---------------------------------------------------------------------------
@@ -280,7 +280,7 @@ DEMO_STEPS = [
 ]
 
 
-def parse_args:
+def parse_args():
     parser = argparse.ArgumentParser(
         description="Analyse signup funnel drop-off by step (stdlib only).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -292,11 +292,11 @@ def parse_args:
                         help="Read steps JSON from stdin")
     parser.add_argument("--json",   action="store_true",
                         help="Output results as JSON")
-    return parser.parse_args
+    return parser.parse_args()
 
 
-def main:
-    args  = parse_args
+def main():
+    args  = parse_args()
     steps = None
 
     if args.stdin:
@@ -317,4 +317,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

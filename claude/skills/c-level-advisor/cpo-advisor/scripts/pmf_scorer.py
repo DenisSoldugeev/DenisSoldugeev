@@ -12,7 +12,7 @@ Usage:
     python pmf_scorer.py                    # Run with built-in sample data
     python pmf_scorer.py --input data.json  # Run with your data
 
-JSON input format: see sample_data function below.
+JSON input format: see sample_data() function below.
 """
 
 import json
@@ -26,7 +26,7 @@ from typing import Optional
 # Data structures
 # ---------------------------------------------------------------------------
 
-def sample_data -> dict:
+def sample_data() -> dict:
     """
     Sample input data. Replace with your own values.
 
@@ -387,7 +387,7 @@ def top_recommendations(dim_scores: dict, data: dict) -> list[str]:
     recs = []
     model = data.get("business_model", "b2b_saas")
 
-    ranked = sorted(dim_scores.items, key=lambda x: x[1])
+    ranked = sorted(dim_scores.items(), key=lambda x: x[1])
 
     for dim, score in ranked:
         if score < 0.40:
@@ -441,7 +441,7 @@ def render_report(data: dict, dim_scores: dict, dim_findings: dict, overall: flo
     lines = []
     lines.append("=" * 60)
     lines.append(f"  PMF SCORER — {data.get('product_name', 'Product')}")
-    lines.append(f"  Model: {data.get('business_model', 'unknown').upper}")
+    lines.append(f"  Model: {data.get('business_model', 'unknown').upper()}")
     lines.append("=" * 60)
     lines.append("")
 
@@ -458,12 +458,12 @@ def render_report(data: dict, dim_scores: dict, dim_findings: dict, overall: flo
     # Dimension breakdown
     lines.append("  DIMENSION SCORES")
     lines.append("  " + "-" * 50)
-    for dim, weight in DIMENSION_WEIGHTS.items:
+    for dim, weight in DIMENSION_WEIGHTS.items():
         score = dim_scores.get(dim, 0.0)
         dim_bar_len = 20
         dim_filled = round(score * dim_bar_len)
         dim_bar = "█" * dim_filled + "░" * (dim_bar_len - dim_filled)
-        label = dim.capitalize.ljust(12)
+        label = dim.capitalize().ljust(12)
         lines.append(f"  {label} [{dim_bar}] {score:.0%}  (weight: {weight:.0%})")
     lines.append("")
 
@@ -471,7 +471,7 @@ def render_report(data: dict, dim_scores: dict, dim_findings: dict, overall: flo
     for dim in ["retention", "engagement", "satisfaction", "growth"]:
         findings = dim_findings.get(dim, [])
         if findings:
-            lines.append(f"  {dim.upper} FINDINGS")
+            lines.append(f"  {dim.upper()} FINDINGS")
             for f in findings:
                 lines.append(f"    {f}")
             lines.append("")
@@ -481,7 +481,7 @@ def render_report(data: dict, dim_scores: dict, dim_findings: dict, overall: flo
     lines.append("  " + "-" * 50)
     for i, rec in enumerate(recs, 1):
         # Wrap at 70 chars
-        words = rec.split
+        words = rec.split()
         line = f"  {i}. "
         for word in words:
             if len(line) + len(word) + 1 > 72:
@@ -489,7 +489,7 @@ def render_report(data: dict, dim_scores: dict, dim_findings: dict, overall: flo
                 line = "     " + word + " "
             else:
                 line += word + " "
-        lines.append(line.rstrip)
+        lines.append(line.rstrip())
     lines.append("")
     lines.append("=" * 60)
 
@@ -529,7 +529,7 @@ def run(data: dict) -> dict:
 
     overall = sum(
         dim_scores[dim] * weight
-        for dim, weight in DIMENSION_WEIGHTS.items
+        for dim, weight in DIMENSION_WEIGHTS.items()
     )
 
     return {
@@ -540,7 +540,7 @@ def run(data: dict) -> dict:
     }
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="PMF Scorer — Multi-dimensional Product-Market Fit analysis",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -556,9 +556,19 @@ def main:
         action="store_true",
         help="Output raw JSON instead of formatted report",
     )
-    args = parser.parse_args
+    parser.add_argument(
+        "--sample",
+        action="store_true",
+        help="Run with the built-in sample data (no notice line — safe for JSON piping)",
+    )
+    args = parser.parse_args()
 
-    if args.input:
+    if args.sample:
+        # --sample wins over --input, consistent with the other sample-pattern tools.
+        if args.input:
+            print("Warning: --sample specified; ignoring --input", file=sys.stderr)
+        data = sample_data()
+    elif args.input:
         try:
             with open(args.input) as f:
                 data = json.load(f)
@@ -569,8 +579,9 @@ def main:
             print(f"Error: invalid JSON: {e}", file=sys.stderr)
             sys.exit(1)
     else:
-        print("No input file provided — running with sample data.\n")
-        data = sample_data
+        # Notice goes to stderr so `--json` output stays parseable when piped.
+        print("No input file provided — running with sample data.\n", file=sys.stderr)
+        data = sample_data()
 
     result = run(data)
 
@@ -597,4 +608,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -28,7 +28,7 @@ class DebtScanner:
     """Main scanner class for detecting technical debt in codebases."""
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
-        self.config = self._load_default_config
+        self.config = self._load_default_config()
         if config:
             self.config.update(config)
         
@@ -37,7 +37,7 @@ class DebtScanner:
         self.file_stats = {}
         
         # Compile regex patterns for performance
-        self._compile_patterns
+        self._compile_patterns()
     
     def _load_default_config(self) -> Dict[str, Any]:
         """Load default configuration for debt detection."""
@@ -65,7 +65,7 @@ class DebtScanner:
             },
             "comment_patterns": {
                 "todo": r"(?i)(TODO|FIXME|HACK|XXX|BUG)[\s:]*(.+)",
-                "commented_code": r"^\s*#.*[={}\[\];].*",
+                "commented_code": r"^\s*#.*[=(){}\[\];].*",
                 "magic_numbers": r"\b\d{2,}\b",
                 "long_strings": r'["\'](.{100,})["\']'
             },
@@ -81,7 +81,7 @@ class DebtScanner:
     def _compile_patterns(self):
         """Compile regex patterns for better performance."""
         self.comment_regexes = {}
-        for name, pattern in self.config["comment_patterns"].items:
+        for name, pattern in self.config["comment_patterns"].items():
             self.comment_regexes[name] = re.compile(pattern)
         
         # Common code smells patterns
@@ -103,7 +103,7 @@ class DebtScanner:
             Dictionary containing debt inventory and statistics
         """
         directory_path = Path(directory)
-        if not directory_path.exists:
+        if not directory_path.exists():
             raise ValueError(f"Directory does not exist: {directory}")
         
         print(f"Scanning directory: {directory}")
@@ -134,7 +134,7 @@ class DebtScanner:
         
         # Post-process results
         self._detect_duplicates(directory)
-        self._calculate_priorities
+        self._calculate_priorities()
         
         return self._generate_report(directory)
     
@@ -152,13 +152,13 @@ class DebtScanner:
         """Scan a single file for tech debt."""
         try:
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                content = f.read
-                lines = content.splitlines
+                content = f.read()
+                lines = content.splitlines()
         except Exception as e:
             print(f"Cannot read {relative_path}: {e}")
             return
         
-        file_ext = Path(file_path).suffix.lower
+        file_ext = Path(file_path).suffix.lower()
         file_info = {
             "path": relative_path,
             "lines": len(lines),
@@ -194,7 +194,7 @@ class DebtScanner:
     
     def _detect_language(self, file_ext: str) -> str:
         """Detect programming language from file extension."""
-        for lang, extensions in self.config["file_extensions"].items:
+        for lang, extensions in self.config["file_extensions"].items():
             if file_ext in extensions:
                 return lang
         return "unknown"
@@ -231,7 +231,7 @@ class DebtScanner:
         
         # Detect deep nesting (approximate)
         for i, line in enumerate(lines):
-            indent_level = len(line) - len(line.lstrip)
+            indent_level = len(line) - len(line.lstrip())
             if language in ["python"]:
                 indent_level = indent_level // 4  # Python uses 4-space indents
             elif language in ["javascript", "java", "csharp", "cpp"]:
@@ -250,7 +250,7 @@ class DebtScanner:
         """Scan for common patterns across all file types."""
         # TODO/FIXME comments
         for i, line in enumerate(lines):
-            for pattern_name, regex in self.comment_regexes.items:
+            for pattern_name, regex in self.comment_regexes.items():
                 match = regex.search(line)
                 if match:
                     if pattern_name == "todo":
@@ -259,14 +259,14 @@ class DebtScanner:
                             f"TODO/FIXME comment: {match.group(0)}",
                             file_path,
                             "low",
-                            {"line_number": i + 1, "comment": match.group(0).strip}
+                            {"line_number": i + 1, "comment": match.group(0).strip()}
                         )
         
         # Code smells
-        for smell_name, pattern in self.smell_patterns.items:
+        for smell_name, pattern in self.smell_patterns.items():
             matches = pattern.finditer(content)
             for match in matches:
-                line_num = content[:match.start].count('\n') + 1
+                line_num = content[:match.start()].count('\n') + 1
                 self._add_debt_item(
                     smell_name,
                     f"Code smell detected: {smell_name}",
@@ -280,22 +280,22 @@ class DebtScanner:
         # Simple duplicate detection based on exact line matches
         line_hashes = defaultdict(list)
         
-        for file_path, file_info in self.file_stats.items:
+        for file_path, file_info in self.file_stats.items():
             try:
                 full_path = os.path.join(directory, file_path)
                 with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    lines = f.readlines
+                    lines = f.readlines()
                 
                 for i in range(len(lines) - self.config["min_duplicate_lines"] + 1):
                     block = ''.join(lines[i:i + self.config["min_duplicate_lines"]])
-                    block_hash = hash(block.strip)
-                    if len(block.strip) > 50:  # Only consider substantial blocks
+                    block_hash = hash(block.strip())
+                    if len(block.strip()) > 50:  # Only consider substantial blocks
                         line_hashes[block_hash].append((file_path, i + 1, block))
             except Exception:
                 continue
         
         # Report duplicates
-        for block_hash, occurrences in line_hashes.items:
+        for block_hash, occurrences in line_hashes.items():
             if len(occurrences) > 1:
                 for file_path, line_num, block in occurrences:
                     self._add_debt_item(
@@ -350,7 +350,7 @@ class DebtScanner:
             "file_path": file_path,
             "severity": severity,
             "metadata": metadata,
-            "detected_date": datetime.now.isoformat,
+            "detected_date": datetime.now().isoformat(),
             "status": "identified"
         }
         
@@ -378,7 +378,7 @@ class DebtScanner:
         report = {
             "scan_metadata": {
                 "directory": directory,
-                "scan_date": datetime.now.isoformat,
+                "scan_date": datetime.now().isoformat(),
                 "scanner_version": "1.0.0",
                 "config": self.config
             },
@@ -393,7 +393,7 @@ class DebtScanner:
             },
             "debt_items": self.debt_items,
             "file_statistics": self.file_stats,
-            "recommendations": self._generate_recommendations
+            "recommendations": self._generate_recommendations()
         }
         
         return report
@@ -515,7 +515,7 @@ class PythonASTAnalyzer(ast.NodeVisitor):
             )
         
         self.generic_visit(node)
-        self.function_stack.pop
+        self.function_stack.pop()
     
     def visit_ClassDef(self, node: ast.ClassDef):
         """Analyze class definitions."""
@@ -567,7 +567,7 @@ class PythonASTAnalyzer(ast.NodeVisitor):
             "line_number": line_number,
             "severity": severity,
             "metadata": metadata,
-            "detected_date": datetime.now.isoformat,
+            "detected_date": datetime.now().isoformat(),
             "status": "identified"
         }
         self.debt_items.append(item)
@@ -600,8 +600,8 @@ def format_human_readable_report(report: Dict[str, Any]) -> str:
     # Priority breakdown
     output.append("PRIORITY BREAKDOWN")
     output.append("-" * 30)
-    for priority, count in summary["priority_breakdown"].items:
-        output.append(f"{priority.capitalize}: {count}")
+    for priority, count in summary["priority_breakdown"].items():
+        output.append(f"{priority.capitalize()}: {count}")
     output.append("")
     
     # Top debt items
@@ -609,7 +609,7 @@ def format_human_readable_report(report: Dict[str, Any]) -> str:
     output.append("-" * 30)
     top_items = report["debt_items"][:10]
     for i, item in enumerate(top_items, 1):
-        output.append(f"{i}. [{item['priority'].upper}] {item['description']}")
+        output.append(f"{i}. [{item['priority'].upper()}] {item['description']}")
         output.append(f"   File: {item['file_path']}")
         if 'line_number' in item:
             output.append(f"   Line: {item['line_number']}")
@@ -625,7 +625,7 @@ def format_human_readable_report(report: Dict[str, Any]) -> str:
     return "\n".join(output)
 
 
-def main:
+def main():
     """Main entry point for the debt scanner."""
     parser = argparse.ArgumentParser(description="Scan codebase for technical debt")
     parser.add_argument("directory", help="Directory to scan")
@@ -634,7 +634,7 @@ def main:
     parser.add_argument("--format", choices=["json", "text", "both"], 
                        default="both", help="Output format")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     # Load configuration
     config = None
@@ -681,4 +681,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

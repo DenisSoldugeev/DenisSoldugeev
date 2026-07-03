@@ -70,7 +70,7 @@ Use sparingly — the hook is most useful exactly when you're tempted to disable
 
 ## Per-File Override Pattern
 
-If a specific file legitimately needs `eval` or `pickle` (e.g., a sandboxed REPL, a deliberately unsafe parser for a fuzzer), document it in the file with a comment:
+If a specific file legitimately needs `eval()` or `pickle` (e.g., a sandboxed REPL, a deliberately unsafe parser for a fuzzer), document it in the file with a comment:
 
 ```python
 # SAFETY: pickle is the required serialization format for this internal tool.

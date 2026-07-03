@@ -81,7 +81,7 @@ Examples per output type:
 
 - **Step 0 environment check** — verify browser automation; fail fast if not
 - **Screenshot-first** — every UI action preceded by screenshot
-- **find-before-click** — semantic finders over pixel coordinates
+- **find()-before-click** — semantic finders over pixel coordinates
 - **Never auto-handle login** — detect login wall, stop, tell user to log in manually
 - **Studio custom prompts always** — open customization menu, write detailed prompt
 - **Fire-and-notify for slow ops** — Studio generation doesn't block this session
@@ -127,14 +127,14 @@ python ../skills/notebooklm/scripts/async_action_classifier.py --action audio_ov
 - Q1 action commitment refused → halt, re-ask
 - Login wall detected → halt, ask user to log in manually
 - Page layout changed unexpectedly → screenshot, ask user for guidance
-- 3 consecutive UI find failures → halt, alert user
+- 3 consecutive UI find() failures → halt, alert user
 
 ## Anti-Patterns Rejected
 
 - Tool-specific names without abstraction (e.g., hardcoding "Claude Chrome Extension")
 - Synchronous waiting on Studio generations (especially Audio Overview)
 - Skipping screenshots between actions
-- Using pixel coordinates when semantic find is available
+- Using pixel coordinates when semantic find() is available
 - Attempting to handle login flows automatically
 - Generating Studio outputs without opening customization menu
 - Using default Studio prompts (always write custom)

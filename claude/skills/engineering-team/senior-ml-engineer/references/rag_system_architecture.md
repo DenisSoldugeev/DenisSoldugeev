@@ -243,13 +243,13 @@ from functools import lru_cache
 
 class CachedEmbedder:
     def __init__(self, model_name: str = "text-embedding-3-small"):
-        self.client = OpenAI
+        self.client = OpenAI()
         self.model = model_name
         self._cache = {}
 
     def embed(self, text: str) -> List[float]:
         """Embed text with caching."""
-        cache_key = hashlib.md5(text.encode).hexdigest
+        cache_key = hashlib.md5(text.encode()).hexdigest()
 
         if cache_key in self._cache:
             return self._cache[cache_key]
@@ -296,7 +296,7 @@ class HybridRetriever:
         self.alpha = alpha  # Weight for vector search
 
         # Build BM25 index
-        tokenized = [doc.content.lower.split for doc in documents]
+        tokenized = [doc.content.lower().split() for doc in documents]
         self.bm25 = BM25Okapi(tokenized)
         self.documents = documents
 
@@ -305,7 +305,7 @@ class HybridRetriever:
         vector_results = self.vector_store.search(query_embedding, top_k=top_k * 2)
 
         # BM25 search
-        tokenized_query = query.lower.split
+        tokenized_query = query.lower().split()
         bm25_scores = self.bm25.get_scores(tokenized_query)
 
         # Combine scores
@@ -322,7 +322,7 @@ class HybridRetriever:
                 combined[doc_id] = (1 - self.alpha) * score
 
         # Sort and return top_k
-        sorted_ids = sorted(combined.keys, key=lambda x: combined[x], reverse=True)
+        sorted_ids = sorted(combined.keys(), key=lambda x: combined[x], reverse=True)
         return sorted_ids[:top_k]
 ```
 
@@ -365,7 +365,7 @@ Original: {query}
 Alternatives:"""
 
     response = llm.complete(prompt, max_tokens=150)
-    alternatives = [q.strip for q in response.strip.split("\n") if q.strip]
+    alternatives = [q.strip() for q in response.strip().split("\n") if q.strip()]
 
     return [query] + alternatives[:3]
 ```

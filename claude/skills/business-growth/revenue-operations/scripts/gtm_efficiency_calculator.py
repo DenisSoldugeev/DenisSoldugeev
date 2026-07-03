@@ -426,7 +426,7 @@ def generate_recommendations(metrics: dict) -> list[str]:
 
     # Positive summary if everything is green
     green_count = sum(
-        1 for m in metrics.values
+        1 for m in metrics.values()
         if isinstance(m, dict) and m.get("rating") == "Green"
     )
     total_metrics = 6
@@ -609,7 +609,7 @@ def format_text_report(results: dict) -> str:
     return "\n".join(lines)
 
 
-def main -> None:
+def main() -> None:
     """Main entry point for GTM efficiency calculator CLI."""
     parser = argparse.ArgumentParser(
         description="Calculate GTM efficiency metrics for SaaS revenue teams."
@@ -625,7 +625,7 @@ def main -> None:
         help="Output format: json or text (default: text)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         with open(args.input, "r") as f:
@@ -655,4 +655,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

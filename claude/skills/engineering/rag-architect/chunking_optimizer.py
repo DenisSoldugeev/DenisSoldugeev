@@ -37,19 +37,19 @@ class DocumentCorpus:
         self.directory = Path(directory)
         self.extensions = extensions or ['.txt', '.md', '.markdown']
         self.documents = []
-        self._load_documents
+        self._load_documents()
     
     def _load_documents(self):
         """Load all text documents from directory."""
-        if not self.directory.exists:
+        if not self.directory.exists():
             raise FileNotFoundError(f"Directory not found: {self.directory}")
         
         for file_path in self.directory.rglob('*'):
-            if file_path.is_file and file_path.suffix.lower in self.extensions:
+            if file_path.is_file() and file_path.suffix.lower() in self.extensions:
                 try:
                     with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                        content = f.read
-                    if content.strip:  # Only include non-empty files
+                        content = f.read()
+                    if content.strip():  # Only include non-empty files
                         self.documents.append({
                             'path': str(file_path),
                             'content': content,
@@ -81,7 +81,7 @@ class FixedSizeChunker(ChunkingStrategy):
     
     def __init__(self, chunk_size: int = 1000, overlap: int = 100, unit: str = 'char'):
         config = {'chunk_size': chunk_size, 'overlap': overlap, 'unit': unit}
-        super.__init__(f'fixed_size_{unit}', config)
+        super().__init__(f'fixed_size_{unit}', config)
         self.chunk_size = chunk_size
         self.overlap = overlap
         self.unit = unit
@@ -91,7 +91,7 @@ class FixedSizeChunker(ChunkingStrategy):
         if self.unit == 'char':
             return self._chunk_by_chars(text)
         else:  # word-based approximation
-            words = text.split
+            words = text.split()
             return self._chunk_by_words(words)
     
     def _chunk_by_chars(self, text: str) -> List[Dict[str, Any]]:
@@ -151,7 +151,7 @@ class SentenceChunker(ChunkingStrategy):
     
     def __init__(self, max_size: int = 1000):
         config = {'max_size': max_size}
-        super.__init__('sentence_based', config)
+        super().__init__('sentence_based', config)
         self.max_size = max_size
         # Simple sentence boundary detection
         self.sentence_endings = re.compile(r'[.!?]+\s+')
@@ -208,18 +208,18 @@ class SentenceChunker(ChunkingStrategy):
             # Add the sentence ending back
             ending_match = list(self.sentence_endings.finditer(text))
             if i < len(ending_match):
-                sentence = part + ending_match[i].group.strip
+                sentence = part + ending_match[i].group().strip()
             else:
                 sentence = part
             
-            if sentence.strip:
-                sentences.append(sentence.strip)
+            if sentence.strip():
+                sentences.append(sentence.strip())
         
         # Add final part if it exists
-        if parts[-1].strip:
-            sentences.append(parts[-1].strip)
+        if parts[-1].strip():
+            sentences.append(parts[-1].strip())
         
-        return [s for s in sentences if len(s.strip) > 0]
+        return [s for s in sentences if len(s.strip()) > 0]
 
 
 class ParagraphChunker(ChunkingStrategy):
@@ -227,13 +227,13 @@ class ParagraphChunker(ChunkingStrategy):
     
     def __init__(self, max_size: int = 2000, min_paragraph_size: int = 50):
         config = {'max_size': max_size, 'min_paragraph_size': min_paragraph_size}
-        super.__init__('paragraph_based', config)
+        super().__init__('paragraph_based', config)
         self.max_size = max_size
         self.min_paragraph_size = min_paragraph_size
     
     def chunk(self, text: str) -> List[Dict[str, Any]]:
         # Split by double newlines (paragraph boundaries)
-        paragraphs = [p.strip for p in re.split(r'\n\s*\n', text) if p.strip]
+        paragraphs = [p.strip() for p in re.split(r'\n\s*\n', text) if p.strip()]
         chunks = []
         current_chunk = []
         current_size = 0
@@ -284,7 +284,7 @@ class SemanticChunker(ChunkingStrategy):
     
     def __init__(self, max_size: int = 1500, heading_weight: float = 2.0):
         config = {'max_size': max_size, 'heading_weight': heading_weight}
-        super.__init__('semantic_heading', config)
+        super().__init__('semantic_heading', config)
         self.max_size = max_size
         self.heading_weight = heading_weight
         
@@ -316,23 +316,23 @@ class SemanticChunker(ChunkingStrategy):
         for line in lines:
             is_heading = False
             heading_level = 0
-            heading_text = line.strip
+            heading_text = line.strip()
             
             # Check for markdown headers
-            if line.strip.startswith('#'):
+            if line.strip().startswith('#'):
                 level = len(line) - len(line.lstrip('#'))
                 if level <= 6:
-                    heading_text = line.strip('#').strip
+                    heading_text = line.strip('#').strip()
                     heading_level = level
                     is_heading = True
             
             # Check for underlined headers  
-            elif len(sections) > 0 and line.strip and all(c in '=-' for c in line.strip):
+            elif len(sections) > 0 and line.strip() and all(c in '=-' for c in line.strip()):
                 # Previous line might be heading
                 if current_section['content']:
-                    content_lines = current_section['content'].strip.split('\n')
+                    content_lines = current_section['content'].strip().split('\n')
                     if content_lines:
-                        potential_heading = content_lines[-1].strip
+                        potential_heading = content_lines[-1].strip()
                         if len(potential_heading) > 0 and len(potential_heading) < 100:
                             # Treat as heading
                             current_section['content'] = '\n'.join(content_lines[:-1])
@@ -345,7 +345,7 @@ class SemanticChunker(ChunkingStrategy):
                             continue
             
             if is_heading:
-                if current_section['content'].strip:
+                if current_section['content'].strip():
                     sections.append(current_section)
                 current_section = {
                     'heading': heading_text,
@@ -356,14 +356,14 @@ class SemanticChunker(ChunkingStrategy):
                 current_section['content'] += line + '\n'
         
         # Add final section
-        if current_section['content'].strip:
+        if current_section['content'].strip():
             sections.append(current_section)
         
         return sections
     
     def _chunk_section(self, section: Dict[str, Any], start_id: int) -> List[Dict[str, Any]]:
         """Chunk a single section."""
-        content = section['content'].strip
+        content = section['content'].strip()
         if not content:
             return []
         
@@ -384,7 +384,7 @@ class SemanticChunker(ChunkingStrategy):
             return chunks
         
         # Split large sections by paragraphs
-        paragraphs = [p.strip for p in content.split('\n\n') if p.strip]
+        paragraphs = [p.strip() for p in content.split('\n\n') if p.strip()]
         current_chunk = []
         current_size = len(heading) + 2 if heading else 0  # Account for heading
         chunk_id = start_id
@@ -439,8 +439,8 @@ class ChunkAnalyzer:
     """Analyzes chunks and provides quality metrics."""
     
     def __init__(self):
-        self.vocabulary = set
-        self.word_freq = Counter
+        self.vocabulary = set()
+        self.word_freq = Counter()
     
     def analyze_chunks(self, chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Comprehensive chunk analysis."""
@@ -485,7 +485,7 @@ class ChunkAnalyzer:
         sentence_endings = re.compile(r'[.!?]\s*$')
         
         for chunk in chunks:
-            text = chunk['text'].strip
+            text = chunk['text'].strip()
             if not text:
                 continue
             
@@ -494,7 +494,7 @@ class ChunkAnalyzer:
                 sentence_breaks += 1
             
             # Check if chunk ends with word boundary
-            if text[-1].isalnum or text[-1] in '.!?':
+            if text[-1].isalnum() or text[-1] in '.!?':
                 word_breaks += 1
         
         return {
@@ -512,8 +512,8 @@ class ChunkAnalyzer:
         coherence_scores = []
         
         for i in range(len(chunks) - 1):
-            chunk1_words = set(re.findall(r'\b\w+\b', chunks[i]['text'].lower))
-            chunk2_words = set(re.findall(r'\b\w+\b', chunks[i+1]['text'].lower))
+            chunk1_words = set(re.findall(r'\b\w+\b', chunks[i]['text'].lower()))
+            chunk2_words = set(re.findall(r'\b\w+\b', chunks[i+1]['text'].lower()))
             
             if not chunk1_words or not chunk2_words:
                 continue
@@ -533,7 +533,7 @@ class ChunkAnalyzer:
         chunk_vocab_sizes = []
         
         for chunk in chunks:
-            words = re.findall(r'\b\w+\b', chunk['text'].lower)
+            words = re.findall(r'\b\w+\b', chunk['text'].lower())
             all_words.extend(words)
             chunk_vocab_sizes.append(len(set(words)))
         
@@ -552,7 +552,7 @@ class ChunkingOptimizer:
     """Main optimizer that tests different chunking strategies."""
     
     def __init__(self):
-        self.analyzer = ChunkAnalyzer
+        self.analyzer = ChunkAnalyzer()
     
     def optimize(self, corpus: DocumentCorpus, config: Dict[str, Any] = None) -> Dict[str, Any]:
         """Test all chunking strategies and recommend the best one."""
@@ -660,7 +660,7 @@ class ChunkingOptimizer:
         
         strategy_scores = {}
         
-        for strategy_name, result in results.items:
+        for strategy_name, result in results.items():
             score = result['performance_score']
             strategy_scores[strategy_name] = score
             
@@ -700,13 +700,13 @@ class ChunkingOptimizer:
         # Create strategy instance
         strategy = None
         if 'fixed_size' in strategy_name:
-            strategy = FixedSizeChunker
+            strategy = FixedSizeChunker()
         elif 'sentence' in strategy_name:
-            strategy = SentenceChunker
+            strategy = SentenceChunker()
         elif 'paragraph' in strategy_name:
-            strategy = ParagraphChunker
+            strategy = ParagraphChunker()
         elif 'semantic' in strategy_name:
-            strategy = SemanticChunker
+            strategy = SemanticChunker()
         
         if not strategy:
             return []
@@ -719,7 +719,7 @@ class ChunkingOptimizer:
         return chunks[:3]
 
 
-def main:
+def main():
     """Main function with command-line interface."""
     parser = argparse.ArgumentParser(description='Analyze documents and recommend optimal chunking strategy')
     parser.add_argument('directory', help='Directory containing text/markdown documents')
@@ -729,7 +729,7 @@ def main:
                        help='File extensions to process')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     # Load configuration
     config = {}
@@ -743,7 +743,7 @@ def main:
         corpus = DocumentCorpus(args.directory, args.extensions)
         
         # Run optimization
-        optimizer = ChunkingOptimizer
+        optimizer = ChunkingOptimizer()
         results = optimizer.optimize(corpus, config)
         
         # Save results
@@ -767,7 +767,7 @@ def main:
         
         if args.verbose:
             print("\nAll Strategy Scores:")
-            for strategy, score in recommendation['all_scores'].items:
+            for strategy, score in recommendation['all_scores'].items():
                 print(f"  {strategy}: {score:.3f}")
         
         print("\nSample Chunks:")
@@ -784,4 +784,4 @@ def main:
 
 
 if __name__ == '__main__':
-    exit(main)
+    exit(main())

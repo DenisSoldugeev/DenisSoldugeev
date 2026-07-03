@@ -42,12 +42,12 @@ class MigrationAnalyzer:
             Dictionary with complexity scores by factor
         """
         scores = {
-            'code_volume': self._score_code_volume,
-            'architecture_changes': self._score_architecture_changes,
-            'data_migration': self._score_data_migration,
-            'api_compatibility': self._score_api_compatibility,
-            'dependency_changes': self._score_dependency_changes,
-            'testing_requirements': self._score_testing_requirements
+            'code_volume': self._score_code_volume(),
+            'architecture_changes': self._score_architecture_changes(),
+            'data_migration': self._score_data_migration(),
+            'api_compatibility': self._score_api_compatibility(),
+            'dependency_changes': self._score_dependency_changes(),
+            'testing_requirements': self._score_testing_requirements()
         }
 
         # Calculate weighted average
@@ -60,7 +60,7 @@ class MigrationAnalyzer:
             'testing_requirements': 0.10
         }
 
-        overall = sum(scores[k] * weights[k] for k in scores.keys)
+        overall = sum(scores[k] * weights[k] for k in scores.keys())
         scores['overall_complexity'] = overall
 
         return scores
@@ -235,7 +235,7 @@ class MigrationAnalyzer:
         Returns:
             Dictionary with effort estimates
         """
-        complexity = self.calculate_complexity_score
+        complexity = self.calculate_complexity_score()
         overall_complexity = complexity['overall_complexity']
 
         # Base hours estimation
@@ -291,7 +291,7 @@ class MigrationAnalyzer:
         }
 
         phases = {}
-        for phase, percentage in phase_percentages.items:
+        for phase, percentage in phase_percentages.items():
             hours = total_hours * percentage
             phases[phase] = {
                 'hours': hours,
@@ -308,12 +308,12 @@ class MigrationAnalyzer:
         Returns:
             Categorized risks with mitigation strategies
         """
-        complexity = self.calculate_complexity_score
+        complexity = self.calculate_complexity_score()
 
         risks = {
             'technical_risks': self._identify_technical_risks(complexity),
-            'business_risks': self._identify_business_risks,
-            'team_risks': self._identify_team_risks
+            'business_risks': self._identify_business_risks(),
+            'team_risks': self._identify_team_risks()
         }
 
         return risks
@@ -448,9 +448,9 @@ class MigrationAnalyzer:
         Returns:
             Complete migration plan with timeline and recommendations
         """
-        complexity = self.calculate_complexity_score
-        effort = self.estimate_effort
-        risks = self.assess_risks
+        complexity = self.calculate_complexity_score()
+        effort = self.estimate_effort()
+        risks = self.assess_risks()
 
         # Generate phased approach
         approach = self._recommend_migration_approach(complexity['overall_complexity'])
@@ -466,7 +466,7 @@ class MigrationAnalyzer:
             'risk_assessment': risks,
             'recommended_approach': approach,
             'overall_recommendation': recommendation,
-            'success_criteria': self._define_success_criteria
+            'success_criteria': self._define_success_criteria()
         }
 
     def _recommend_migration_approach(self, complexity_score: float) -> Dict[str, Any]:
@@ -557,7 +557,7 @@ class MigrationAnalyzer:
 
         # Count high/critical severity risks
         high_risk_count = sum(
-            1 for risk_list in risks.values
+            1 for risk_list in risks.values()
             for risk in risk_list
             if risk['severity'] in ['High', 'Critical']
         )

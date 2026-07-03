@@ -21,13 +21,13 @@ for _ in range(WARMUP):
 
 # Benchmark
 for i in range(RUNS):
-    t0 = time.perf_counter
+    t0 = time.perf_counter()
     result = subprocess.run(COMMAND, shell=True, capture_output=True, timeout=120)
-    elapsed = (time.perf_counter - t0) * 1000  # ms
+    elapsed = (time.perf_counter() - t0) * 1000  # ms
 
     if result.returncode != 0:
         print(f"Run {i+1} failed (exit {result.returncode})", file=sys.stderr)
-        print(f"stderr: {result.stderr.decode[:200]}", file=sys.stderr)
+        print(f"stderr: {result.stderr.decode()[:200]}", file=sys.stderr)
         sys.exit(1)
 
     times.append(elapsed)

@@ -59,7 +59,7 @@ class Redline:
     approver: str
 
 
-def _rules -> list[dict]:
+def _rules() -> list[dict]:
     """Each rule: id, severity, title, predicate(terms), why, counter, approver."""
     return [
         {
@@ -220,7 +220,7 @@ def _rules -> list[dict]:
 
 def scan_terms(terms: dict) -> list[Redline]:
     findings: list[Redline] = []
-    for rule in _rules:
+    for rule in _rules():
         try:
             if rule["predicate"](terms):
                 findings.append(
@@ -289,4 +289,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

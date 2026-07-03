@@ -110,7 +110,7 @@ export default function RootLayout({{
   );
 }}
 ''',
-        "page.tsx": f'''export default function Home {{
+        "page.tsx": f'''export default function Home() {{
   return (
     <main className="min-h-screen p-8">
       <h1 className="text-4xl font-bold">{project_name}</h1>
@@ -125,10 +125,10 @@ export default function RootLayout({{
 ''',
         "route.ts": '''import { NextResponse } from "next/server";
 
-export async function GET {
+export async function GET() {
   return NextResponse.json({
     status: "healthy",
-    timestamp: new Date.toISOString,
+    timestamp: new Date().toISOString(),
   });
 }
 ''',
@@ -187,7 +187,7 @@ Input.displayName = "Input";
 ''',
         "Header.tsx": f'''import Link from "next/link";
 
-export function Header {{
+export function Header() {{
   return (
     <header className="border-b">
       <nav className="mx-auto flex max-w-7xl items-center justify-between p-4">
@@ -200,10 +200,10 @@ export function Header {{
   );
 }}
 ''',
-        "Footer.tsx": '''export function Footer {
+        "Footer.tsx": '''export function Footer() {
   return (
     <footer className="border-t py-8 text-center text-sm text-gray-500">
-      <p>&copy; {new Date.getFullYear} All rights reserved.</p>
+      <p>&copy; {new Date().getFullYear()} All rights reserved.</p>
     </footer>
   );
 }
@@ -224,7 +224,7 @@ export function sleep(ms: number): Promise<void> {
 ''',
         "db.ts": '''// Database connection (Prisma example)
 // import { PrismaClient } from "@prisma/client";
-// export const db = new PrismaClient;
+// export const db = new PrismaClient();
 
 export const db = {
   // Placeholder - configure your database
@@ -262,7 +262,7 @@ app.add_middleware(
 app.include_router(router, prefix="/api")
 
 @app.get("/health")
-async def health_check:
+async def health_check():
     return {{"status": "healthy"}}
 ''',
         "config.py": '''from pydantic_settings import BaseSettings
@@ -276,7 +276,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
 
-settings = Settings
+settings = Settings()
 ''',
         "database.py": '''from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -285,20 +285,20 @@ from app.config import settings
 
 engine = create_engine(settings.DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base
+Base = declarative_base()
 
-def get_db:
-    db = SessionLocal
+def get_db():
+    db = SessionLocal()
     try:
         yield db
     finally:
-        db.close
+        db.close()
 ''',
         "routes.py": '''from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 
-router = APIRouter
+router = APIRouter()
 
 @router.get("/users")
 async def get_users(db: Session = Depends(get_db)):
@@ -313,7 +313,7 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
 
-def get_current_user:
+def get_current_user():
     # Implement authentication
     pass
 ''',
@@ -326,7 +326,7 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     email = Column(String, unique=True, nullable=False)
     name = Column(String)
-    created_at = Column(DateTime(timezone=True), server_default=func.now)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 ''',
         "requirements.txt": '''fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
@@ -348,17 +348,17 @@ import cors from "cors";
 import helmet from "helmet";
 import routes from "./routes";
 
-const app = express;
+const app = express();
 const PORT = process.env.PORT || 8000;
 
-app.use(helmet);
-app.use(cors);
-app.use(express.json);
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
 app.use("/api", routes);
 
 app.get("/health", (_, res) => res.json({ status: "healthy" }));
 
-app.listen(PORT,  => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 ''',
         "config.ts": '''export const config = {
   PORT: parseInt(process.env.PORT || "8000"),
@@ -369,13 +369,13 @@ app.listen(PORT,  => console.log(`Server running on port ${PORT}`));
         "database.ts": '''import mongoose from "mongoose";
 import { config } from "./config";
 
-export async function connectDatabase: Promise<void> {
+export async function connectDatabase(): Promise<void> {
   await mongoose.connect(config.MONGODB_URI);
   console.log("Connected to MongoDB");
 }
 ''',
         "users.ts": '''import { Router } from "express";
-const router = Router;
+const router = Router();
 
 router.get("/", async (req, res) => {
   res.json({ users: [] });
@@ -408,7 +408,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
   const token = req.headers.authorization?.replace("Bearer ", "");
   if (!token) return res.status(401).json({ error: "Authentication required" });
   // Verify token
-  next;
+  next();
 }
 ''',
         "error.ts": '''import { Request, Response, NextFunction } from "express";
@@ -419,7 +419,7 @@ export function errorHandler(err: Error, req: Request, res: Response, next: Next
 }
 ''',
         # React/Vite files
-        "App.tsx": f'''function App {{
+        "App.tsx": f'''function App() {{
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="container mx-auto p-4">
@@ -473,7 +473,7 @@ export function useApi<T>(baseUrl = "/api") {
         ...options,
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json;
+      const json = await res.json();
       setData(json);
       return json;
     } catch (e) {
@@ -495,7 +495,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     ...options,
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json;
+  return res.json();
 }
 
 export const api = {
@@ -509,7 +509,7 @@ export const api = {
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
-  plugins: [react],
+  plugins: [react()],
   server: {
     port: 5173,
     proxy: { "/api": { target: "http://localhost:8000", changeOrigin: true } },
@@ -520,7 +520,7 @@ export default defineConfig({
         "settings.py": f'''from pathlib import Path
 import os
 
-BASE_DIR = Path(__file__).resolve.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "change-me")
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
@@ -574,7 +574,7 @@ urlpatterns = [
         "wsgi.py": '''import os
 from django.core.wsgi import get_wsgi_application
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-application = get_wsgi_application
+application = get_wsgi_application()
 ''',
         "models.py": '''from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -597,20 +597,20 @@ from .models import User
 from .serializers import UserSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all
+    queryset = User.objects.all()
     serializer_class = UserSerializer
 ''',
         "manage.py": '''#!/usr/bin/env python
 import os
 import sys
 
-def main:
+def main():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
     from django.core.management import execute_from_command_line
     execute_from_command_line(sys.argv)
 
 if __name__ == "__main__":
-    main
+    main()
 ''',
         # Config files
         "package.json": f'''{{"name": "{project_name}", "version": "0.1.0", "private": true,
@@ -684,7 +684,7 @@ Open http://localhost:3000.
         return '''import { Router } from "express";
 import usersRouter from "./users";
 
-const router = Router;
+const router = Router();
 router.use("/users", usersRouter);
 export default router;
 '''
@@ -713,7 +713,7 @@ class UserResponse(UserBase):
 from rest_framework.routers import DefaultRouter
 from .views import UserViewSet
 
-router = DefaultRouter
+router = DefaultRouter()
 router.register("users", UserViewSet)
 urlpatterns = [path("", include(router.urls))]
 '''
@@ -727,19 +727,19 @@ def create_project(template_name: str, project_name: str, output_dir: Path) -> D
         return {
             "success": False,
             "error": f"Unknown template: {template_name}",
-            "available": list(TEMPLATES.keys)
+            "available": list(TEMPLATES.keys())
         }
 
     template = TEMPLATES[template_name]
     project_dir = output_dir / project_name
 
-    if project_dir.exists:
+    if project_dir.exists():
         return {"success": False, "error": f"Directory exists: {project_dir}"}
 
     created_files = []
     created_dirs = []
 
-    for dir_path, files in template["structure"].items:
+    for dir_path, files in template["structure"].items():
         if dir_path:
             full_dir = project_dir / dir_path
         else:
@@ -793,12 +793,12 @@ def get_next_steps(template: str, name: str) -> List[str]:
     return steps.get(template, [f"cd {name}"])
 
 
-def list_templates -> Dict:
+def list_templates() -> Dict:
     """List available templates."""
     return {
         "templates": [
             {"name": k, "display_name": v["name"], "description": v["description"]}
-            for k, v in TEMPLATES.items
+            for k, v in TEMPLATES.items()
         ]
     }
 
@@ -831,10 +831,10 @@ def print_result(result: Dict, as_json: bool = False) -> None:
     print("\nNext Steps:")
     for i, step in enumerate(result["next_steps"], 1):
         print(f"  {i}. {step}")
-    print
+    print()
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Generate fullstack project scaffolding",
         epilog="Examples:\n  %(prog)s nextjs my-app\n  %(prog)s fastapi-react my-api\n  %(prog)s --list-templates",
@@ -846,17 +846,17 @@ def main:
     parser.add_argument("--list-templates", "-l", action="store_true", help="List templates")
     parser.add_argument("--json", action="store_true", help="JSON output")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.list_templates:
-        print_result(list_templates, args.json)
+        print_result(list_templates(), args.json)
         return
 
     if not args.template or not args.project_name:
-        parser.print_help
+        parser.print_help()
         sys.exit(1)
 
-    result = create_project(args.template, args.project_name, Path(args.output).resolve)
+    result = create_project(args.template, args.project_name, Path(args.output).resolve())
     print_result(result, args.json)
 
     if not result.get("success"):
@@ -864,4 +864,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

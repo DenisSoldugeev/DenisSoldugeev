@@ -38,13 +38,13 @@ Output EXACTLY: quality_score: <average of all 4>
 Nothing else."""
 
 try:
-    prompt = Path(TARGET_FILE).read_text
+    prompt = Path(TARGET_FILE).read_text()
 except FileNotFoundError:
     print(f"Target file not found: {TARGET_FILE}", file=sys.stderr)
     sys.exit(1)
 
 try:
-    test_cases = json.loads(Path(TEST_CASES_FILE).read_text)
+    test_cases = json.loads(Path(TEST_CASES_FILE).read_text())
 except FileNotFoundError:
     print(f"Test cases file not found: {TEST_CASES_FILE}", file=sys.stderr)
     sys.exit(1)
@@ -63,7 +63,7 @@ for i, case in enumerate(test_cases):
         scores.append(0)
         continue
 
-    actual = gen_result.stdout.strip
+    actual = gen_result.stdout.strip()
 
     # Judge the output
     judge_prompt = JUDGE_PROMPT_TEMPLATE.format(
@@ -83,10 +83,10 @@ for i, case in enumerate(test_cases):
         continue
 
     # Parse score
-    for line in judge_result.stdout.splitlines:
+    for line in judge_result.stdout.splitlines():
         if "quality_score:" in line:
             try:
-                score = float(line.split(":")[-1].strip)
+                score = float(line.split(":")[-1].strip())
                 scores.append(score)
             except ValueError:
                 scores.append(0)

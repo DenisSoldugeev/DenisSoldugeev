@@ -83,7 +83,7 @@ Expected unique, found 150 duplicates
 SELECT * FROM (
     SELECT
         *,
-        ROW_NUMBER OVER (
+        ROW_NUMBER() OVER (
             PARTITION BY order_id
             ORDER BY updated_at DESC
         ) as rn
@@ -177,7 +177,7 @@ Model fct_orders completed in 45 minutes
 }}
 
 SELECT * FROM {{ ref('stg_orders') }}
-{% if is_incremental %}
+{% if is_incremental() %}
 WHERE _loaded_at > (SELECT MAX(_loaded_at) FROM {{ this }})
 {% endif %}
 ```

@@ -105,7 +105,7 @@ def load_inventory(path):
 
 def compute_schedule(inventory, policy_days):
     """Compute rotation schedule for each secret."""
-    now = datetime.now
+    now = datetime.now()
     schedule = []
 
     for secret in inventory:
@@ -181,16 +181,16 @@ def build_summary(schedule):
 def print_human(schedule, summary, policy):
     """Print human-readable rotation plan."""
     print(f"=== Secret Rotation Plan (Policy: {policy}) ===")
-    print(f"Generated: {datetime.now.strftime('%Y-%m-%d %H:%M')}")
+    print(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     print(f"Total secrets: {summary['total_secrets']}")
-    print
+    print()
 
     print("--- Urgency Summary ---")
     for urg in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]:
         count = summary["by_urgency"].get(urg, 0)
         if count > 0:
             print(f"  {urg:10s}  {count}")
-    print
+    print()
 
     if not schedule:
         print("No secrets in inventory.")
@@ -208,7 +208,7 @@ def print_human(schedule, summary, policy):
             f"{entry['owner']}{overdue_marker}"
         )
 
-    print
+    print()
     print("--- Action Items ---")
     critical = [e for e in schedule if e["urgency"] == "CRITICAL"]
     high = [e for e in schedule if e["urgency"] == "HIGH"]
@@ -225,7 +225,7 @@ def print_human(schedule, summary, policy):
         print("  No urgent rotations needed.")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Create rotation schedule from a secret inventory file.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -255,7 +255,7 @@ def main:
     )
     parser.add_argument("--json", action="store_true", dest="json_output", help="Output as JSON")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     policy_days = POLICY_DAYS[args.policy]
     inventory = load_inventory(args.inventory)
@@ -265,7 +265,7 @@ def main:
     result = {
         "policy": args.policy,
         "policy_days": policy_days,
-        "generated_at": datetime.now.isoformat,
+        "generated_at": datetime.now().isoformat(),
         "summary": summary,
         "schedule": schedule,
     }
@@ -277,4 +277,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

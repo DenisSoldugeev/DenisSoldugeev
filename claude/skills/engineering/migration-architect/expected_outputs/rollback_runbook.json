@@ -228,7 +228,7 @@
           "name": "Drop migration artifacts",
           "description": "Remove temporary migration tables and procedures",
           "script_type": "sql",
-          "script_content": "-- Drop migration artifacts\nDROP TABLE IF EXISTS migration_log;\nDROP PROCEDURE IF EXISTS migrate_data;",
+          "script_content": "-- Drop migration artifacts\nDROP TABLE IF EXISTS migration_log;\nDROP PROCEDURE IF EXISTS migrate_data();",
           "estimated_duration_minutes": 5,
           "dependencies": [],
           "validation_commands": [

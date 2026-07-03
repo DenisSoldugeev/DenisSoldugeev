@@ -44,8 +44,8 @@ def load_json_input(input_file: Optional[str]) -> Dict[str, Any]:
             return json.loads(Path(input_file).read_text(encoding="utf-8"))
         except Exception as exc:
             raise CLIError(f"Failed reading --input file: {exc}") from exc
-    if not sys.stdin.isatty:
-        raw = sys.stdin.read.strip
+    if not sys.stdin.isatty():
+        raw = sys.stdin.read().strip()
         if raw:
             try:
                 return json.loads(raw)
@@ -58,8 +58,8 @@ def parse_worktrees(repo: Path) -> List[Dict[str, str]]:
     proc = run(["git", "worktree", "list", "--porcelain"], cwd=repo)
     entries: List[Dict[str, str]] = []
     current: Dict[str, str] = {}
-    for line in proc.stdout.splitlines:
-        if not line.strip:
+    for line in proc.stdout.splitlines():
+        if not line.strip():
             if current:
                 entries.append(current)
             current = {}
@@ -73,19 +73,19 @@ def parse_worktrees(repo: Path) -> List[Dict[str, str]]:
 
 def get_branch(path: Path) -> str:
     proc = run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=path)
-    return proc.stdout.strip
+    return proc.stdout.strip()
 
 
 def get_last_commit_age_days(path: Path) -> int:
     proc = run(["git", "log", "-1", "--format=%ct"], cwd=path)
-    timestamp = int(proc.stdout.strip or "0")
-    age_seconds = int(time.time) - timestamp
+    timestamp = int(proc.stdout.strip() or "0")
+    age_seconds = int(time.time()) - timestamp
     return max(0, age_seconds // 86400)
 
 
 def is_dirty(path: Path) -> bool:
     proc = run(["git", "status", "--porcelain"], cwd=path)
-    return bool(proc.stdout.strip)
+    return bool(proc.stdout.strip())
 
 
 def is_merged(repo: Path, branch: str, base_branch: str) -> bool:
@@ -112,7 +112,7 @@ def format_text(items: List[WorktreeInfo], removed: List[str]) -> str:
     return "\n".join(lines)
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Analyze and optionally cleanup stale git worktrees.")
     parser.add_argument("--input", help="Path to JSON input file. If omitted, reads JSON from stdin when piped.")
     parser.add_argument("--repo", default=".", help="Repository root path.")
@@ -121,14 +121,14 @@ def parse_args -> argparse.Namespace:
     parser.add_argument("--remove-merged", action="store_true", help="Remove worktrees that are stale, clean, and merged.")
     parser.add_argument("--force", action="store_true", help="Allow removal even if dirty (use carefully).")
     parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
-    return parser.parse_args
+    return parser.parse_args()
 
 
-def main -> int:
-    args = parse_args
+def main() -> int:
+    args = parse_args()
     payload = load_json_input(args.input)
 
-    repo = Path(str(payload.get("repo", args.repo))).resolve
+    repo = Path(str(payload.get("repo", args.repo))).resolve()
     stale_days = int(payload.get("stale_days", args.stale_days))
     base_branch = str(payload.get("base_branch", args.base_branch))
     remove_merged = bool(payload.get("remove_merged", args.remove_merged))
@@ -148,12 +148,12 @@ def main -> int:
     if not entries:
         raise CLIError("No worktrees found.")
 
-    main_path = Path(entries[0].get("worktree", "")).resolve
+    main_path = Path(entries[0].get("worktree", "")).resolve()
     infos: List[WorktreeInfo] = []
     removed: List[str] = []
 
     for entry in entries:
-        path = Path(entry.get("worktree", "")).resolve
+        path = Path(entry.get("worktree", "")).resolve()
         branch = get_branch(path)
         age = get_last_commit_age_days(path)
         dirty = is_dirty(path)
@@ -190,7 +190,7 @@ def main -> int:
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(main)
+        raise SystemExit(main())
     except CLIError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         raise SystemExit(2)

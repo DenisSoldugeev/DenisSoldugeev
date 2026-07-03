@@ -85,7 +85,7 @@ def validate_input(raw: dict) -> tuple[str, str, str, list[str], list[str]]:
         raise SystemExit(
             f"change_magnitude must be one of {sorted(MAGNITUDES)}; got '{mag}'"
         )
-    eff = str(raw.get("effective_date", "")).strip
+    eff = str(raw.get("effective_date", "")).strip()
     if not eff:
         raise SystemExit("effective_date is required (ISO 8601 string)")
     segs = list(raw.get("audience_segments") or [])
@@ -105,7 +105,7 @@ def _pick_channel(channels: list[str], preferred: list[str]) -> str:
 
 
 def _segment_voice(segment: str) -> str:
-    s = segment.lower
+    s = segment.lower()
     if "manager" in s or "lead" in s:
         return "manager"
     if "exec" in s or "leadership" in s:
@@ -180,7 +180,7 @@ def _faq_body(ct: str, mag: str, segment: str) -> str:
         lines.append(f"Q: {q}")
         lines.append(f"A: {a}")
         lines.append("")
-    return "\n".join(lines).rstrip
+    return "\n".join(lines).rstrip()
 
 
 def _followup_body(ct: str, eff: str, segment: str) -> str:
@@ -214,7 +214,7 @@ def build(raw: dict) -> CommsPackage:
             adkar_stage="Awareness" if voice != "manager" else "Desire",
             channel=_pick_channel(chans, ["manager_cascade", "email", "slack"]),
             timing="T-2",
-            subject=f"[Pre-brief] {ct.replace('_', ' ').title} announcement on {eff}",
+            subject=f"[Pre-brief] {ct.replace('_', ' ').title()} announcement on {eff}",
             body=_precomm_body(ct, mag, eff, seg),
         ))
         # 2. Announcement (T+0): Knowledge primary; ADKAR emphasis stage as secondary
@@ -224,7 +224,7 @@ def build(raw: dict) -> CommsPackage:
             adkar_stage="Knowledge",
             channel=_pick_channel(chans, ["allhands", "town_hall", "email"]),
             timing="T+0",
-            subject=f"{ct.replace('_', ' ').title}: what's changing and why",
+            subject=f"{ct.replace('_', ' ').title()}: what's changing and why",
             body=_announcement_body(ct, mag, eff, seg),
         ))
         # 3. FAQ (T+0 immediately after announcement): Knowledge + Ability
@@ -234,7 +234,7 @@ def build(raw: dict) -> CommsPackage:
             adkar_stage="Ability",
             channel=_pick_channel(chans, ["intranet", "email", "slack"]),
             timing="T+0",
-            subject=f"FAQ — {ct.replace('_', ' ').title}",
+            subject=f"FAQ — {ct.replace('_', ' ').title()}",
             body=_faq_body(ct, mag, seg),
         ))
         # 4. Follow-up (T+14): Reinforcement
@@ -273,7 +273,7 @@ def build(raw: dict) -> CommsPackage:
 
 def render_markdown(pkg: CommsPackage) -> str:
     lines: list[str] = []
-    lines.append(f"# Internal Comms Package — {pkg.change_type.replace('_', ' ').title}")
+    lines.append(f"# Internal Comms Package — {pkg.change_type.replace('_', ' ').title()}")
     lines.append("")
     lines.append(f"**Magnitude:** {pkg.magnitude}  ")
     lines.append(f"**Effective date:** {pkg.effective_date}  ")
@@ -298,7 +298,7 @@ def render_markdown(pkg: CommsPackage) -> str:
     return "\n".join(lines)
 
 
-def sample_input -> dict:
+def sample_input() -> dict:
     return {
         "change_type": "tool_rollout",
         "audience_segments": ["engineering managers", "engineering ICs", "rest of company"],
@@ -308,7 +308,7 @@ def sample_input -> dict:
     }
 
 
-def main -> int:
+def main() -> int:
     p = argparse.ArgumentParser(
         description="Fill a 4-artifact internal-comms package with ADKAR-tagged touchpoints."
     )
@@ -318,14 +318,14 @@ def main -> int:
         help="Output format (default: markdown).",
     )
     p.add_argument("--sample", action="store_true", help="Use built-in sample and exit.")
-    args = p.parse_args
+    args = p.parse_args()
 
     if args.sample:
-        raw = sample_input
+        raw = sample_input()
     else:
         if not args.input:
             p.error("--input is required unless --sample is given")
-        if not args.input.exists:
+        if not args.input.exists():
             p.error(f"input file not found: {args.input}")
         with args.input.open("r", encoding="utf-8") as f:
             raw = json.load(f)
@@ -339,4 +339,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

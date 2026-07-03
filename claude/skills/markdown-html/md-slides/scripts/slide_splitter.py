@@ -48,16 +48,16 @@ def _extract_title(slide_body: list[str]) -> tuple[str, list[str]]:
     """If the first non-blank line is a heading, treat it as the title and
     return (title, body_without_title_line). Otherwise return ('', body)."""
     for i, line in enumerate(slide_body):
-        if not line.strip:
+        if not line.strip():
             continue
         m = H1_RE.match(line)
         if m:
-            return (m.group(1).strip, slide_body[:i] + slide_body[i + 1:])
+            return (m.group(1).strip(), slide_body[:i] + slide_body[i + 1:])
         # Also accept H2 as a slide title if the slide has no H1 (common in
         # decks where H1 = whole-deck title and each slide leads with H2)
         m2 = re.match(r"^##\s+(.+?)\s*$", line)
         if m2:
-            return (m2.group(1).strip, slide_body[:i] + slide_body[i + 1:])
+            return (m2.group(1).strip(), slide_body[:i] + slide_body[i + 1:])
         break
     return ("", slide_body)
 
@@ -74,7 +74,7 @@ def _pick_boundary_auto(lines: list[str]) -> str:
 
 
 def split_slides(text: str, boundary: str = "auto") -> dict[str, Any]:
-    lines = text.splitlines
+    lines = text.splitlines()
 
     if boundary == "auto":
         chosen = _pick_boundary_auto(lines)
@@ -122,7 +122,7 @@ def split_slides(text: str, boundary: str = "auto") -> dict[str, Any]:
                 else:
                     # Everything before the first H1 (if non-empty) is the
                     # opening slide; the first H1 starts slide 2.
-                    if any(s.strip for s in current):
+                    if any(s.strip() for s in current):
                         raw_groups.append(current)
                         boundary_lines.append(0)
                     current = []
@@ -150,9 +150,9 @@ def split_slides(text: str, boundary: str = "auto") -> dict[str, Any]:
     over_threshold: list[int] = []
     max_lines = 0
     for idx, body_lines in enumerate(raw_groups):
-        while body_lines and not body_lines[0].strip:
+        while body_lines and not body_lines[0].strip():
             body_lines = body_lines[1:]
-        while body_lines and not body_lines[-1].strip:
+        while body_lines and not body_lines[-1].strip():
             body_lines = body_lines[:-1]
         if not body_lines:
             continue
@@ -253,9 +253,9 @@ def main(argv: list[str]) -> int:
     if args.sample:
         text = SAMPLE_MARKDOWN
     elif args.input:
-        text = sys.stdin.read if args.input == "-" else Path(args.input).read_text(encoding="utf-8")
+        text = sys.stdin.read() if args.input == "-" else Path(args.input).read_text(encoding="utf-8")
     else:
-        p.print_help
+        p.print_help()
         return 0
 
     result = split_slides(text, args.boundary)

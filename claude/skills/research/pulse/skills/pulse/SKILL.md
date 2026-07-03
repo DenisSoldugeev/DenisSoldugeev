@@ -1,6 +1,6 @@
 ---
 name: pulse
-description: "Multi-source recency research skill that takes the pulse of any topic across Reddit, Hacker News, the open web, and optionally X/Twitter within a configurable recent window (default 30 days). Forcing intake clarifies topic specificity, angle (trend/sentiment/problems/opportunities/comparison), time window, and platform scope before searching. Returns a synthesized briefing with citations, engagement metrics, and cross-platform pattern analysis. Triggers: 'pulse on [topic]', 'what's happening with [topic]', 'what are people saying about [topic]', 'current conversation about [topic]', 'take the pulse of [topic]', 'trending: [topic]', 'find me info on [topic]', or any variation requesting multi-source recency intelligence on a topic. Also use for competitor research, trend discovery, tool comparisons, and audience sentiment analysis."
+description: "Multi-source recency research skill that takes the pulse of any topic across Reddit, Hacker News, the open web, and optionally X/Twitter within a configurable recent window (default 30 days). Forcing intake clarifies topic specificity, angle (trend/sentiment/problems/opportunities/comparison), time window, and platform scope before searching. Returns a synthesized briefing with citations, engagement metrics, and cross-platform pattern analysis. Use when the user requests multi-source recency intelligence on a topic (e.g., 'pulse on [topic]', 'what's happening with [topic]', 'what are people saying about [topic]', 'current conversation about [topic]', 'take the pulse of [topic]', 'trending: [topic]', 'find me info on [topic]'), and for competitor research, trend discovery, tool comparisons, and audience sentiment analysis."
 license: MIT
 metadata:
   source_spec: "megaprompts/01-pulse-megaprompt.md"
@@ -229,7 +229,7 @@ Sources received: M. Sources cited: K. Training knowledge: 0 ([Background] exclu
 
 | Script | Role |
 |---|---|
-| `scripts/time_window_calculator.py` | Compute Unix timestamps + Reddit `t=` parameter from window string (`30d`, `7d`, etc.). Deterministic from `datetime.now`. |
+| `scripts/time_window_calculator.py` | Compute Unix timestamps + Reddit `t=` parameter from window string (`30d`, `7d`, etc.). Deterministic from `datetime.now()`. |
 | `scripts/citation_tracker.py` | JSON-backed three-count audit log (sent / received / cited) at `~/.pulse_sessions/<session>.json`. |
 | `scripts/topic_slug_generator.py` | Filesystem-safe slug + duplicate-date detection for output paths. |
 

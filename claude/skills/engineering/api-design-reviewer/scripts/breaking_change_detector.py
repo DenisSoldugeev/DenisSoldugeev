@@ -103,7 +103,7 @@ class BreakingChangeDetector:
     """Main breaking change detection engine."""
     
     def __init__(self):
-        self.report = ComparisonReport
+        self.report = ComparisonReport()
         self.old_spec: Optional[Dict] = None
         self.new_spec: Optional[Dict] = None
     
@@ -111,17 +111,17 @@ class BreakingChangeDetector:
         """Compare two API specifications and detect changes."""
         self.old_spec = old_spec
         self.new_spec = new_spec
-        self.report = ComparisonReport
+        self.report = ComparisonReport()
         
         # Compare different sections of the API specification
-        self._compare_info_section
-        self._compare_servers_section
-        self._compare_paths_section
-        self._compare_components_section
-        self._compare_security_section
+        self._compare_info_section()
+        self._compare_servers_section()
+        self._compare_paths_section()
+        self._compare_components_section()
+        self._compare_security_section()
         
         # Calculate summary statistics
-        self.report.calculate_summary
+        self.report.calculate_summary()
         
         return self.report
     
@@ -205,8 +205,8 @@ class BreakingChangeDetector:
         new_paths = self.new_spec.get('paths', {})
         
         # Find removed, added, and modified paths
-        old_path_set = set(old_paths.keys)
-        new_path_set = set(new_paths.keys)
+        old_path_set = set(old_paths.keys())
+        new_path_set = set(new_paths.keys())
         
         removed_paths = old_path_set - new_path_set
         added_paths = new_path_set - old_path_set
@@ -221,8 +221,8 @@ class BreakingChangeDetector:
                     severity=ChangeSeverity.CRITICAL,
                     category="endpoints",
                     path=f"/paths{path}",
-                    message=f"Endpoint removed: {method.upper} {path}",
-                    old_value=f"{method.upper} {path}",
+                    message=f"Endpoint removed: {method.upper()} {path}",
+                    old_value=f"{method.upper()} {path}",
                     new_value=None,
                     migration_guide=self._generate_endpoint_removal_migration(path, method, new_paths),
                     impact_description="Clients using this endpoint will receive 404 errors"
@@ -237,9 +237,9 @@ class BreakingChangeDetector:
                     severity=ChangeSeverity.INFO,
                     category="endpoints",
                     path=f"/paths{path}",
-                    message=f"New endpoint added: {method.upper} {path}",
+                    message=f"New endpoint added: {method.upper()} {path}",
                     old_value=None,
-                    new_value=f"{method.upper} {path}",
+                    new_value=f"{method.upper()} {path}",
                     impact_description="New functionality available to clients"
                 ))
         
@@ -250,7 +250,7 @@ class BreakingChangeDetector:
     def _extract_operations(self, path_object: Dict[str, Any]) -> List[str]:
         """Extract HTTP operations from a path object."""
         http_methods = {'get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace'}
-        return [method for method in path_object.keys if method.lower in http_methods]
+        return [method for method in path_object.keys() if method.lower() in http_methods]
     
     def _compare_path_operations(self, path: str, old_path_obj: Dict, new_path_obj: Dict) -> None:
         """Compare operations within a specific path."""
@@ -265,8 +265,8 @@ class BreakingChangeDetector:
                 severity=ChangeSeverity.CRITICAL,
                 category="endpoints",
                 path=f"/paths{path}/{method}",
-                message=f"HTTP method removed: {method.upper} {path}",
-                old_value=f"{method.upper} {path}",
+                message=f"HTTP method removed: {method.upper()} {path}",
+                old_value=f"{method.upper()} {path}",
                 new_value=None,
                 migration_guide=self._generate_method_removal_migration(path, method, new_operations),
                 impact_description="Clients using this method will receive 405 Method Not Allowed errors"
@@ -280,9 +280,9 @@ class BreakingChangeDetector:
                 severity=ChangeSeverity.INFO,
                 category="endpoints",
                 path=f"/paths{path}/{method}",
-                message=f"New HTTP method added: {method.upper} {path}",
+                message=f"New HTTP method added: {method.upper()} {path}",
                 old_value=None,
-                new_value=f"{method.upper} {path}",
+                new_value=f"{method.upper()} {path}",
                 impact_description="New method provides additional functionality for this resource"
             ))
         
@@ -313,8 +313,8 @@ class BreakingChangeDetector:
         old_param_map = {(p.get('name'), p.get('in')): p for p in old_params}
         new_param_map = {(p.get('name'), p.get('in')): p for p in new_params}
         
-        old_param_keys = set(old_param_map.keys)
-        new_param_keys = set(new_param_map.keys)
+        old_param_keys = set(old_param_map.keys())
+        new_param_keys = set(new_param_map.keys())
         
         # Removed parameters
         removed_params = old_param_keys - new_param_keys
@@ -501,8 +501,8 @@ class BreakingChangeDetector:
         """Compare response specifications."""
         responses_path = f"{base_path}/responses"
         
-        old_status_codes = set(old_responses.keys)
-        new_status_codes = set(new_responses.keys)
+        old_status_codes = set(old_responses.keys())
+        new_status_codes = set(new_responses.keys())
         
         # Removed status codes
         removed_codes = old_status_codes - new_status_codes
@@ -551,8 +551,8 @@ class BreakingChangeDetector:
     
     def _compare_content_types(self, base_path: str, old_content: Dict, new_content: Dict, context: str) -> None:
         """Compare content types and their schemas."""
-        old_types = set(old_content.keys)
-        new_types = set(new_content.keys)
+        old_types = set(old_content.keys())
+        new_types = set(new_content.keys())
         
         # Removed content types
         removed_types = old_types - new_types
@@ -633,8 +633,8 @@ class BreakingChangeDetector:
         old_required = set(old_schema.get('required', []))
         new_required = set(new_schema.get('required', []))
         
-        old_prop_names = set(old_props.keys)
-        new_prop_names = set(new_props.keys)
+        old_prop_names = set(old_props.keys())
+        new_prop_names = set(new_props.keys())
         
         # Removed properties
         removed_props = old_prop_names - new_prop_names
@@ -751,8 +751,8 @@ class BreakingChangeDetector:
         old_schemas = old_components.get('schemas', {})
         new_schemas = new_components.get('schemas', {})
         
-        old_schema_names = set(old_schemas.keys)
-        new_schema_names = set(new_schemas.keys)
+        old_schema_names = set(old_schemas.keys())
+        new_schema_names = set(new_schemas.keys())
         
         # Removed schemas
         removed_schemas = old_schema_names - new_schema_names
@@ -818,7 +818,7 @@ class BreakingChangeDetector:
         similar_paths = []
         path_segments = removed_path.strip('/').split('/')
         
-        for existing_path in remaining_paths.keys:
+        for existing_path in remaining_paths.keys():
             existing_segments = existing_path.strip('/').split('/')
             if len(existing_segments) == len(path_segments):
                 # Check similarity
@@ -844,9 +844,9 @@ class BreakingChangeDetector:
         }
         
         alternatives = []
-        for alt_method in method_alternatives.get(removed_method.lower, []):
+        for alt_method in method_alternatives.get(removed_method.lower(), []):
             if alt_method in remaining_methods:
-                alternatives.append(alt_method.upper)
+                alternatives.append(alt_method.upper())
         
         if alternatives:
             return f"Use alternative methods: {', '.join(alternatives)}"
@@ -857,8 +857,8 @@ class BreakingChangeDetector:
         """Generate JSON format report."""
         report_data = {
             "summary": self.report.summary,
-            "hasBreakingChanges": self.report.has_breaking_changes,
-            "changes": [change.to_dict for change in self.report.changes]
+            "hasBreakingChanges": self.report.has_breaking_changes(),
+            "changes": [change.to_dict() for change in self.report.changes]
         }
         
         return json.dumps(report_data, indent=2)
@@ -945,7 +945,7 @@ class BreakingChangeDetector:
             "═══════════════════════════════════════════════════════════════"
         ])
         
-        if self.report.has_breaking_changes:
+        if self.report.has_breaking_changes():
             breaking_count = self.report.summary.get('breaking_changes', 0)
             potentially_breaking_count = self.report.summary.get('potentially_breaking_changes', 0)
             
@@ -986,7 +986,7 @@ class BreakingChangeDetector:
         icon = severity_icons.get(change.severity, "❓")
         
         lines.extend([
-            f"{icon} {change.severity.value.upper}: {change.message}",
+            f"{icon} {change.severity.value.upper()}: {change.message}",
             f"   Path: {change.path}",
             f"   Category: {change.category}"
         ])
@@ -1000,7 +1000,7 @@ class BreakingChangeDetector:
         lines.append("")
 
 
-def main:
+def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Compare API specification versions to detect breaking changes",
@@ -1041,7 +1041,7 @@ Examples:
         help='Exit with code 1 if breaking changes are detected'
     )
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     # Load specification files
     try:
@@ -1065,7 +1065,7 @@ Examples:
         return 1
     
     # Initialize detector and compare specifications
-    detector = BreakingChangeDetector
+    detector = BreakingChangeDetector()
     
     try:
         report = detector.compare_specs(old_spec, new_spec)
@@ -1075,9 +1075,9 @@ Examples:
     
     # Generate report
     if args.format == 'json':
-        output = detector.generate_json_report
+        output = detector.generate_json_report()
     else:
-        output = detector.generate_text_report
+        output = detector.generate_text_report()
     
     # Write output
     if args.output:
@@ -1092,11 +1092,11 @@ Examples:
         print(output)
     
     # Exit with appropriate code
-    if args.exit_on_breaking and report.has_breaking_changes:
+    if args.exit_on_breaking and report.has_breaking_changes():
         return 1
     
     return 0
 
 
 if __name__ == '__main__':
-    sys.exit(main)
+    sys.exit(main())

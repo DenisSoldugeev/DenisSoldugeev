@@ -42,7 +42,7 @@ def analyse_image(path):
 
     try:
         img = Image.open(path)
-        result["format"] = img.format or os.path.splitext(path)[1].upper.strip(".")
+        result["format"] = img.format or os.path.splitext(path)[1].upper().strip(".")
         result["mode"] = img.mode
         result["size"] = img.size
         w, h = img.size
@@ -54,7 +54,7 @@ def analyse_image(path):
 
     # --- Alpha / transparency check ---
     if img.mode == "RGBA":
-        extrema = img.getextrema
+        extrema = img.getextrema()
         alpha_min = extrema[3][0]  # 0 = has real transparency, 255 = fully opaque
         if alpha_min == 0:
             result["status"] = "CLEAN"
@@ -70,7 +70,7 @@ def analyse_image(path):
         img = img.convert("RGB")
 
     # --- Sample corners and edges to detect background colour ---
-    pixels = img.load
+    pixels = img.load()
     sample_points = [
         (0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1),  # corners
         (w // 2, 0), (w // 2, h - 1),                       # top/bottom center
@@ -226,7 +226,7 @@ def collect_paths(args):
     for arg in args:
         if os.path.isdir(arg):
             for f in os.listdir(arg):
-                if f.lower.endswith((".png", ".jpg", ".jpeg", ".webp", ".avif")):
+                if f.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".avif")):
                     paths.append(os.path.join(arg, f))
         elif os.path.isfile(arg):
             paths.append(arg)
@@ -235,7 +235,7 @@ def collect_paths(args):
     return paths
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="2.5D Asset Inspector — checks images for background type, "
         "transparency, and depth-level recommendations."
@@ -250,7 +250,7 @@ def main:
         action="store_true",
         help="Output results as JSON",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     paths = collect_paths(args.paths)
     if not paths:
@@ -266,4 +266,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

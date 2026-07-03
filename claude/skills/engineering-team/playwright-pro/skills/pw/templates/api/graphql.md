@@ -22,12 +22,12 @@ const headers = {
 
 async function gql(request: any, query: string, variables = {}) {
   const res = await request.post(GQL_URL, { headers, data: { query, variables } });
-  const body = await res.json;
-  expect(body.errors).toBeUndefined;
+  const body = await res.json();
+  expect(body.errors).toBeUndefined();
   return body.data;
 }
 
-test.describe('GraphQL API',  => {
+test.describe('GraphQL API', () => {
   // Happy path: query
   test('query fetches {{entityName}} list', async ({ request }) => {
     const data = await gql(request, `
@@ -56,7 +56,7 @@ test.describe('GraphQL API',  => {
         create{{EntityName}}(input: $input) { id name }
       }
     `, { input: { name: '{{testEntityName}}', description: '{{testDescription}}' } });
-    expect(data.create{{EntityName}}.id).toBeTruthy;
+    expect(data.create{{EntityName}}.id).toBeTruthy();
     expect(data.create{{EntityName}}.name).toBe('{{testEntityName}}');
   });
 
@@ -86,8 +86,8 @@ test.describe('GraphQL API',  => {
       headers,
       data: { query: '{ invalidField }' },
     });
-    const body = await res.json;
-    expect(body.errors).toBeDefined;
+    const body = await res.json();
+    expect(body.errors).toBeDefined();
     expect(body.errors.length).toBeGreaterThan(0);
   });
 
@@ -97,7 +97,7 @@ test.describe('GraphQL API',  => {
       headers: { 'Content-Type': 'application/json' }, // No auth
       data: { query: '{ {{entityName}}s { id } }' },
     });
-    const body = await res.json;
+    const body = await res.json();
     expect(body.errors?.[0]?.extensions?.code).toMatch(/UNAUTHENTICATED|UNAUTHORIZED/);
   });
 
@@ -105,7 +105,7 @@ test.describe('GraphQL API',  => {
   test('subscription receives real-time update', async ({ page }) => {
     await page.goto('{{baseUrl}}/dashboard');
     const received: any[] = [];
-    await page.evaluate( => {
+    await page.evaluate(() => {
       const ws = new WebSocket('{{graphqlWsEndpoint}}');
       ws.onmessage = e => (window as any).__gqlMsg = JSON.parse(e.data);
     });
@@ -114,7 +114,7 @@ test.describe('GraphQL API',  => {
       headers,
       data: { query: 'mutation { trigger{{EntityName}}Event { id } }' },
     });
-    const msg = await page.evaluate( => (window as any).__gqlMsg);
+    const msg = await page.evaluate(() => (window as any).__gqlMsg);
     expect(msg?.type).toBe('data');
   });
 });
@@ -131,12 +131,12 @@ const headers = { 'Authorization': `Bearer {{apiToken}}`, 'Content-Type': 'appli
 
 async function gql(request, query, variables = {}) {
   const res = await request.post('{{graphqlEndpoint}}', { headers, data: { query, variables } });
-  const body = await res.json;
-  expect(body.errors).toBeUndefined;
+  const body = await res.json();
+  expect(body.errors).toBeUndefined();
   return body.data;
 }
 
-test.describe('GraphQL API',  => {
+test.describe('GraphQL API', () => {
   test('query fetches entity list', async ({ request }) => {
     const data = await gql(request, '{ {{entityName}}s { id name } }');
     expect(Array.isArray(data.{{entityName}}s)).toBe(true);
@@ -147,7 +147,7 @@ test.describe('GraphQL API',  => {
       'mutation($input: {{EntityName}}Input!) { create{{EntityName}}(input: $input) { id } }',
       { input: { name: '{{testEntityName}}' } }
     );
-    expect(data.create{{EntityName}}.id).toBeTruthy;
+    expect(data.create{{EntityName}}.id).toBeTruthy();
   });
 
   test('invalid query returns errors array', async ({ request }) => {
@@ -155,7 +155,7 @@ test.describe('GraphQL API',  => {
       headers,
       data: { query: '{ nonExistentField }' },
     });
-    const body = await res.json;
+    const body = await res.json();
     expect(body.errors?.length).toBeGreaterThan(0);
   });
 });

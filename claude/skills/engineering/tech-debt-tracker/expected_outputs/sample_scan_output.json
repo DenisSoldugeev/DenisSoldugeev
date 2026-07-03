@@ -62,7 +62,7 @@
       },
       "comment_patterns": {
         "todo": "(?i)(TODO|FIXME|HACK|XXX|BUG)[\\s:]*(.+)",
-        "commented_code": "^\\s*#.*[={}\\[\\];].*",
+        "commented_code": "^\\s*#.*[=(){}\\[\\];].*",
         "magic_numbers": "\\b\\d{2,}\\b",
         "long_strings": "[\"\\'](.{100,})[\"\\']"
       },

@@ -12,13 +12,13 @@
 
 ### 2. Click handler without keyboard support
 - **File:** sample-component.tsx:5
-- **Code:** `<div className="card" onClick={ => onEdit(user.id)}>`
+- **Code:** `<div className="card" onClick={() => onEdit(user.id)}>`
 - **WCAG:** 2.1.1 Keyboard (Level A)
 - **Fix:** Use `<button>` or add `role="button"`, `tabIndex={0}`, and `onKeyDown`
 
 ### 3. Click handler without keyboard support
 - **File:** sample-component.tsx:11
-- **Code:** `<div onClick={ => onDelete(user.id)} ...>`
+- **Code:** `<div onClick={() => onDelete(user.id)} ...>`
 - **WCAG:** 2.1.1 Keyboard (Level A)
 - **Fix:** Replace `<div>` with `<button>`
 

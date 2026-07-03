@@ -259,8 +259,8 @@ CREATE TABLE documents (
     id UUID PRIMARY KEY,
     document_type VARCHAR(50),
     data JSONB,
-    created_at TIMESTAMP DEFAULT NOW,
-    updated_at TIMESTAMP DEFAULT NOW
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
 -- Index on JSON properties
@@ -388,7 +388,7 @@ INSERT INTO users (email, name) VALUES ('user@example.com', 'John Doe');
 SELECT * FROM users WHERE status = 'active';  -- Route to read replica
 
 -- Consistent reads when required
-SELECT * FROM users WHERE id = LAST_INSERT_ID;  -- Route to primary
+SELECT * FROM users WHERE id = LAST_INSERT_ID();  -- Route to primary
 ```
 
 ## Caching Layers

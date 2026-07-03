@@ -124,7 +124,7 @@ class SchemaAnalyzer:
         # Remove comments and normalize whitespace
         ddl_content = re.sub(r'--.*$', '', ddl_content, flags=re.MULTILINE)
         ddl_content = re.sub(r'/\*.*?\*/', '', ddl_content, flags=re.DOTALL)
-        ddl_content = re.sub(r'\s+', ' ', ddl_content.strip)
+        ddl_content = re.sub(r'\s+', ' ', ddl_content.strip())
         
         # Extract CREATE TABLE statements
         create_table_pattern = re.compile(
@@ -133,7 +133,7 @@ class SchemaAnalyzer:
         )
         
         for match in create_table_pattern.finditer(ddl_content):
-            table_name = match.group(1).lower
+            table_name = match.group(1).lower()
             table_definition = match.group(2)
             
             table = self._parse_table_definition(table_name, table_definition)
@@ -154,21 +154,21 @@ class SchemaAnalyzer:
         parts = self._split_table_parts(definition)
         
         for part in parts:
-            part = part.strip
+            part = part.strip()
             if not part:
                 continue
                 
-            if part.upper.startswith('PRIMARY KEY'):
+            if part.upper().startswith('PRIMARY KEY'):
                 primary_key = self._parse_primary_key(part)
-            elif part.upper.startswith('FOREIGN KEY'):
+            elif part.upper().startswith('FOREIGN KEY'):
                 fk = self._parse_foreign_key(part)
                 if fk:
                     foreign_keys.append(fk)
-            elif part.upper.startswith('UNIQUE'):
+            elif part.upper().startswith('UNIQUE'):
                 unique = self._parse_unique_constraint(part)
                 if unique:
                     unique_constraints.append(unique)
-            elif part.upper.startswith('CHECK'):
+            elif part.upper().startswith('CHECK'):
                 check = self._parse_check_constraint(part)
                 if check:
                     check_constraints.update(check)
@@ -202,14 +202,14 @@ class SchemaAnalyzer:
             elif char == ')':
                 paren_count -= 1
             elif char == ',' and paren_count == 0:
-                parts.append(current_part.strip)
+                parts.append(current_part.strip())
                 current_part = ""
                 continue
             
             current_part += char
         
-        if current_part.strip:
-            parts.append(current_part.strip)
+        if current_part.strip():
+            parts.append(current_part.strip())
             
         return parts
     
@@ -221,13 +221,13 @@ class SchemaAnalyzer:
             re.IGNORECASE
         )
         
-        match = pattern.match(definition.strip)
+        match = pattern.match(definition.strip())
         if not match:
             return None
             
-        column_name = match.group(1).lower
-        data_type = match.group(2).upper
-        constraints = match.group(3).upper if match.group(3) else ""
+        column_name = match.group(1).lower()
+        data_type = match.group(2).upper()
+        constraints = match.group(3).upper() if match.group(3) else ""
         
         column = Column(
             name=column_name,
@@ -241,7 +241,7 @@ class SchemaAnalyzer:
         fk_pattern = re.compile(r'REFERENCES\s+(\w+)\s*\(\s*(\w+)\s*\)', re.IGNORECASE)
         fk_match = fk_pattern.search(constraints)
         if fk_match:
-            column.foreign_key = f"{fk_match.group(1).lower}.{fk_match.group(2).lower}"
+            column.foreign_key = f"{fk_match.group(1).lower()}.{fk_match.group(2).lower()}"
         
         # Parse default value
         default_pattern = re.compile(r'DEFAULT\s+([^,\s]+)', re.IGNORECASE)
@@ -256,7 +256,7 @@ class SchemaAnalyzer:
         pattern = re.compile(r'PRIMARY\s+KEY\s*\(\s*(.*?)\s*\)', re.IGNORECASE)
         match = pattern.search(definition)
         if match:
-            columns = [col.strip.lower for col in match.group(1).split(',')]
+            columns = [col.strip().lower() for col in match.group(1).split(',')]
             return columns
         return []
     
@@ -268,9 +268,9 @@ class SchemaAnalyzer:
         )
         match = pattern.search(definition)
         if match:
-            column = match.group(1).lower
-            ref_table = match.group(2).lower
-            ref_column = match.group(3).lower
+            column = match.group(1).lower()
+            ref_table = match.group(2).lower()
+            ref_column = match.group(3).lower()
             return (column, f"{ref_table}.{ref_column}")
         return None
     
@@ -279,7 +279,7 @@ class SchemaAnalyzer:
         pattern = re.compile(r'UNIQUE\s*\(\s*(.*?)\s*\)', re.IGNORECASE)
         match = pattern.search(definition)
         if match:
-            columns = [col.strip.lower for col in match.group(1).split(',')]
+            columns = [col.strip().lower() for col in match.group(1).split(',')]
             return columns
         return None
     
@@ -301,11 +301,11 @@ class SchemaAnalyzer:
         
         for match in index_pattern.finditer(ddl_content):
             unique = match.group(1) is not None
-            index_name = match.group(2).lower
-            table_name = match.group(3).lower
+            index_name = match.group(2).lower()
+            table_name = match.group(3).lower()
             columns_str = match.group(4)
             
-            columns = [col.strip.lower for col in columns_str.split(',')]
+            columns = [col.strip().lower() for col in columns_str.split(',')]
             
             index = Index(
                 name=index_name,
@@ -325,9 +325,9 @@ class SchemaAnalyzer:
             if 'tables' not in schema:
                 raise ValueError("JSON schema must contain 'tables' key")
             
-            for table_name, table_def in schema['tables'].items:
-                table = self._parse_json_table(table_name.lower, table_def)
-                self.tables[table_name.lower] = table
+            for table_name, table_def in schema['tables'].items():
+                table = self._parse_json_table(table_name.lower(), table_def)
+                self.tables[table_name.lower()] = table
                 
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON: {e}")
@@ -340,12 +340,12 @@ class SchemaAnalyzer:
         unique_constraints = table_def.get('unique_constraints', [])
         check_constraints = table_def.get('check_constraints', {})
         
-        for col_name, col_def in table_def.get('columns', {}).items:
+        for col_name, col_def in table_def.get('columns', {}).items():
             column = Column(
-                name=col_name.lower,
-                data_type=col_def.get('type', 'VARCHAR(255)').upper,
+                name=col_name.lower(),
+                data_type=col_def.get('type', 'VARCHAR(255)').upper(),
                 nullable=col_def.get('nullable', True),
-                primary_key=col_name.lower in [pk.lower for pk in primary_key],
+                primary_key=col_name.lower() in [pk.lower() for pk in primary_key],
                 unique=col_def.get('unique', False),
                 foreign_key=col_def.get('foreign_key'),
                 default_value=col_def.get('default')
@@ -359,7 +359,7 @@ class SchemaAnalyzer:
         return Table(
             name=table_name,
             columns=columns,
-            primary_key=[pk.lower for pk in primary_key],
+            primary_key=[pk.lower() for pk in primary_key],
             foreign_keys=foreign_keys,
             unique_constraints=unique_constraints,
             check_constraints=check_constraints,
@@ -368,7 +368,7 @@ class SchemaAnalyzer:
     
     def analyze_normalization(self) -> None:
         """Analyze normalization compliance."""
-        for table_name, table in self.tables.items:
+        for table_name, table in self.tables.items():
             self._check_first_normal_form(table)
             self._check_second_normal_form(table)
             self._check_third_normal_form(table)
@@ -378,8 +378,8 @@ class SchemaAnalyzer:
         """Check First Normal Form compliance."""
         # Check for atomic values (no arrays or delimited strings)
         for column in table.columns:
-            if any(pattern in column.data_type.upper for pattern in ['ARRAY', 'JSON', 'TEXT']):
-                if 'JSON' in column.data_type.upper:
+            if any(pattern in column.data_type.upper() for pattern in ['ARRAY', 'JSON', 'TEXT']):
+                if 'JSON' in column.data_type.upper():
                     # JSON columns can violate 1NF if storing arrays
                     self.normalization_issues.append(NormalizationIssue(
                         table=table.name,
@@ -391,8 +391,8 @@ class SchemaAnalyzer:
                     ))
             
             # Check for potential delimited values in VARCHAR/TEXT
-            if column.data_type.upper.startswith(('VARCHAR', 'CHAR', 'TEXT')):
-                if any(delimiter in column.name.lower for delimiter in ['list', 'array', 'tags', 'items']):
+            if column.data_type.upper().startswith(('VARCHAR', 'CHAR', 'TEXT')):
+                if any(delimiter in column.name.lower() for delimiter in ['list', 'array', 'tags', 'items']):
                     self.normalization_issues.append(NormalizationIssue(
                         table=table.name,
                         issue_type="1NF_VIOLATION",
@@ -437,7 +437,7 @@ class SchemaAnalyzer:
             if prefix != column.name:  # Has underscore
                 entity_groups[prefix].append(column.name)
         
-        for entity, columns in entity_groups.items:
+        for entity, columns in entity_groups.items():
             if len(columns) > 1 and entity != table.name.split('_')[0]:
                 # Potential entity that should be in its own table
                 id_column = f"{entity}_id"
@@ -467,7 +467,7 @@ class SchemaAnalyzer:
     
     def analyze_data_types(self) -> None:
         """Analyze data type usage for antipatterns."""
-        for table_name, table in self.tables.items:
+        for table_name, table in self.tables.items():
             for column in table.columns:
                 self._check_varchar_255_antipattern(table.name, column)
                 self._check_inappropriate_types(table.name, column)
@@ -488,8 +488,8 @@ class SchemaAnalyzer:
     def _check_inappropriate_types(self, table_name: str, column: Column) -> None:
         """Check for inappropriate data types."""
         # Date/time stored as string
-        if column.name.lower in ['date', 'time', 'created', 'updated', 'modified', 'timestamp']:
-            if column.data_type.upper.startswith(('VARCHAR', 'CHAR', 'TEXT')):
+        if column.name.lower() in ['date', 'time', 'created', 'updated', 'modified', 'timestamp']:
+            if column.data_type.upper().startswith(('VARCHAR', 'CHAR', 'TEXT')):
                 self.datatype_issues.append(DataTypeIssue(
                     table=table_name,
                     column=column.name,
@@ -500,8 +500,8 @@ class SchemaAnalyzer:
                 ))
         
         # Boolean stored as string/integer
-        if column.name.lower in ['active', 'enabled', 'deleted', 'visible', 'published']:
-            if not column.data_type.upper.startswith('BOOL'):
+        if column.name.lower() in ['active', 'enabled', 'deleted', 'visible', 'published']:
+            if not column.data_type.upper().startswith('BOOL'):
                 self.datatype_issues.append(DataTypeIssue(
                     table=table_name,
                     column=column.name,
@@ -512,8 +512,8 @@ class SchemaAnalyzer:
                 ))
         
         # Numeric IDs as VARCHAR
-        if column.name.lower.endswith('_id') or column.name.lower == 'id':
-            if column.data_type.upper.startswith(('VARCHAR', 'CHAR')):
+        if column.name.lower().endswith('_id') or column.name.lower() == 'id':
+            if column.data_type.upper().startswith(('VARCHAR', 'CHAR')):
                 self.datatype_issues.append(DataTypeIssue(
                     table=table_name,
                     column=column.name,
@@ -526,8 +526,8 @@ class SchemaAnalyzer:
     def _check_size_optimization(self, table_name: str, column: Column) -> None:
         """Check for size optimization opportunities."""
         # Oversized integer types
-        if column.data_type.upper == 'BIGINT':
-            if not any(keyword in column.name.lower for keyword in ['timestamp', 'big', 'large', 'count']):
+        if column.data_type.upper() == 'BIGINT':
+            if not any(keyword in column.name.lower() for keyword in ['timestamp', 'big', 'large', 'count']):
                 self.datatype_issues.append(DataTypeIssue(
                     table=table_name,
                     column=column.name,
@@ -539,7 +539,7 @@ class SchemaAnalyzer:
     
     def analyze_constraints(self) -> None:
         """Analyze missing constraints."""
-        for table_name, table in self.tables.items:
+        for table_name, table in self.tables.items():
             self._check_missing_primary_key(table)
             self._check_missing_foreign_key_constraints(table)
             self._check_missing_not_null_constraints(table)
@@ -617,7 +617,7 @@ class SchemaAnalyzer:
                 ))
             
             # Positive values for counts, prices, etc.
-            if column.name.lower in ['price', 'amount', 'count', 'quantity', 'age']:
+            if column.name.lower() in ['price', 'amount', 'count', 'quantity', 'age']:
                 if column.name not in str(table.check_constraints):
                     self.constraint_issues.append(ConstraintIssue(
                         table=table.name,
@@ -630,7 +630,7 @@ class SchemaAnalyzer:
     
     def analyze_naming_conventions(self) -> None:
         """Analyze naming convention compliance."""
-        for table_name, table in self.tables.items:
+        for table_name, table in self.tables.items():
             self._check_table_naming(table_name)
             for column in table.columns:
                 self._check_column_naming(table_name, column.name)
@@ -672,20 +672,20 @@ class SchemaAnalyzer:
     def _suggest_table_name(self, table_name: str) -> str:
         """Suggest corrected table name."""
         # Convert to snake_case and make plural
-        name = re.sub(r'([A-Z])', r'_\1', table_name).lower.strip('_')
+        name = re.sub(r'([A-Z])', r'_\1', table_name).lower().strip('_')
         return name + 's' if not name.endswith('s') else name
     
     def _suggest_column_name(self, column_name: str) -> str:
         """Suggest corrected column name."""
         # Convert to snake_case
-        return re.sub(r'([A-Z])', r'_\1', column_name).lower.strip('_')
+        return re.sub(r'([A-Z])', r'_\1', column_name).lower().strip('_')
     
     def check_missing_indexes(self) -> List[Dict[str, Any]]:
         """Check for missing indexes on foreign key columns."""
         missing_indexes = []
         
-        for table_name, table in self.tables.items:
-            existing_indexed_columns = set
+        for table_name, table in self.tables.items():
+            existing_indexed_columns = set()
             
             # Collect existing indexed columns
             for index in table.indexes:
@@ -711,8 +711,8 @@ class SchemaAnalyzer:
         erd_lines = ["erDiagram"]
         
         # Add table definitions
-        for table_name, table in self.tables.items:
-            erd_lines.append(f"    {table_name.upper} {{")
+        for table_name, table in self.tables.items():
+            erd_lines.append(f"    {table_name.upper()} {{")
             
             for column in table.columns:
                 data_type = column.data_type
@@ -736,13 +736,13 @@ class SchemaAnalyzer:
             erd_lines.append("    }")
         
         # Add relationships
-        relationships = set
-        for table_name, table in self.tables.items:
+        relationships = set()
+        for table_name, table in self.tables.items():
             for column in table.columns:
                 if column.foreign_key:
                     ref_table = column.foreign_key.split('.')[0]
                     if ref_table in self.tables:
-                        relationship = f"    {ref_table.upper} ||--o{{ {table_name.upper} : has"
+                        relationship = f"    {ref_table.upper()} ||--o{{ {table_name.upper()} : has"
                         relationships.add(relationship)
         
         erd_lines.extend(sorted(relationships))
@@ -754,10 +754,10 @@ class SchemaAnalyzer:
         return {
             "schema_overview": {
                 "total_tables": len(self.tables),
-                "total_columns": sum(len(table.columns) for table in self.tables.values),
-                "tables_with_primary_keys": len([t for t in self.tables.values if t.primary_key]),
-                "total_foreign_keys": sum(len(table.foreign_keys) for table in self.tables.values),
-                "total_indexes": sum(len(table.indexes) for table in self.tables.values)
+                "total_columns": sum(len(table.columns) for table in self.tables.values()),
+                "tables_with_primary_keys": len([t for t in self.tables.values() if t.primary_key]),
+                "total_foreign_keys": sum(len(table.foreign_keys) for table in self.tables.values()),
+                "total_indexes": sum(len(table.indexes) for table in self.tables.values())
             },
             "normalization_analysis": {
                 "total_issues": len(self.normalization_issues),
@@ -786,8 +786,8 @@ class SchemaAnalyzer:
                 "total_issues": len(self.naming_issues),
                 "issues": [asdict(issue) for issue in self.naming_issues]
             },
-            "missing_indexes": self.check_missing_indexes,
-            "recommendations": self._generate_recommendations
+            "missing_indexes": self.check_missing_indexes(),
+            "recommendations": self._generate_recommendations()
         }
     
     def _generate_recommendations(self) -> List[str]:
@@ -804,7 +804,7 @@ class SchemaAnalyzer:
             recommendations.append(f"Address {len(high_severity_issues)} high-severity issues immediately")
         
         # Missing primary keys
-        tables_without_pk = [name for name, table in self.tables.items if not table.primary_key]
+        tables_without_pk = [name for name, table in self.tables.items() if not table.primary_key]
         if tables_without_pk:
             recommendations.append(f"Add primary keys to tables: {', '.join(tables_without_pk)}")
         
@@ -905,7 +905,7 @@ class SchemaAnalyzer:
         return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Analyze database schema for design issues and generate ERD")
     parser.add_argument("--input", "-i", required=True, help="Input file (SQL DDL or JSON schema)")
     parser.add_argument("--output", "-o", help="Output file (default: stdout)")
@@ -914,18 +914,18 @@ def main:
     parser.add_argument("--generate-erd", "-e", action="store_true", help="Include Mermaid ERD in output")
     parser.add_argument("--erd-only", action="store_true", help="Output only the Mermaid ERD")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Read input file
         with open(args.input, 'r') as f:
-            content = f.read
+            content = f.read()
         
         # Initialize analyzer
-        analyzer = SchemaAnalyzer
+        analyzer = SchemaAnalyzer()
         
         # Parse input based on file extension
-        if args.input.lower.endswith('.json'):
+        if args.input.lower().endswith('.json'):
             analyzer.parse_json_schema(content)
         else:
             analyzer.parse_sql_ddl(content)
@@ -936,7 +936,7 @@ def main:
         
         if args.erd_only:
             # Output only ERD
-            erd = analyzer.generate_mermaid_erd
+            erd = analyzer.generate_mermaid_erd()
             if args.output:
                 with open(args.output, 'w') as f:
                     f.write(erd)
@@ -945,16 +945,16 @@ def main:
             return 0
         
         # Perform analysis
-        analyzer.analyze_normalization
-        analyzer.analyze_data_types
-        analyzer.analyze_constraints
-        analyzer.analyze_naming_conventions
+        analyzer.analyze_normalization()
+        analyzer.analyze_data_types()
+        analyzer.analyze_constraints()
+        analyzer.analyze_naming_conventions()
         
         # Generate report
-        analysis = analyzer.get_analysis_summary
+        analysis = analyzer.get_analysis_summary()
         
         if args.generate_erd:
-            analysis["mermaid_erd"] = analyzer.generate_mermaid_erd
+            analysis["mermaid_erd"] = analyzer.generate_mermaid_erd()
         
         # Output results
         if args.output_format == "json":
@@ -979,4 +979,4 @@ def main:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

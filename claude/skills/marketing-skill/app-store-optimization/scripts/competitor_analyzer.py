@@ -193,21 +193,21 @@ class CompetitorAnalyzer:
             'length': len(title),
             'has_brand': len(parts) > 0,
             'has_keywords': len(parts) > 1,
-            'components': [part.strip for part in parts],
-            'word_count': len(title.split),
+            'components': [part.strip() for part in parts],
+            'word_count': len(title.split()),
             'strategy': 'brand_plus_keywords' if len(parts) > 1 else 'brand_only'
         }
 
     def _analyze_description(self, description: str) -> Dict[str, Any]:
         """Analyze description structure and content."""
         lines = description.split('\n')
-        word_count = len(description.split)
+        word_count = len(description.split())
 
         # Check for structural elements
         has_bullet_points = '•' in description or '*' in description
-        has_sections = any(line.isupper for line in lines if len(line) > 0)
+        has_sections = any(line.isupper() for line in lines if len(line) > 0)
         has_call_to_action = any(
-            cta in description.lower
+            cta in description.lower()
             for cta in ['download', 'try', 'get', 'start', 'join']
         )
 
@@ -235,10 +235,10 @@ class CompetitorAnalyzer:
     ) -> Dict[str, Any]:
         """Extract keyword strategy from metadata."""
         # Extract keywords from title
-        title_keywords = [word.lower for word in title.split if len(word) > 3]
+        title_keywords = [word.lower() for word in title.split() if len(word) > 3]
 
         # Extract frequently used words from description
-        desc_words = re.findall(r'\b\w{4,}\b', description.lower)
+        desc_words = re.findall(r'\b\w{4,}\b', description.lower())
         word_freq = Counter(desc_words)
         frequent_words = [word for word, count in word_freq.most_common(15) if count > 2]
 
@@ -304,9 +304,9 @@ class CompetitorAnalyzer:
         sentences = description.split('.')
 
         for sentence in sentences:
-            sentence_lower = sentence.lower
+            sentence_lower = sentence.lower()
             if any(keyword in sentence_lower for keyword in differentiator_keywords):
-                differentiators.append(sentence.strip)
+                differentiators.append(sentence.strip())
 
         return differentiators[:5]
 
@@ -314,7 +314,7 @@ class CompetitorAnalyzer:
         """Find keywords used by multiple competitors."""
         keyword_counts = Counter(all_keywords)
         # Return keywords used by at least 2 competitors
-        common = [kw for kw, count in keyword_counts.items if count >= 2]
+        common = [kw for kw, count in keyword_counts.items() if count >= 2]
         return sorted(common, key=lambda x: keyword_counts[x], reverse=True)[:20]
 
     def _identify_keyword_gaps(self, analyses: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -327,14 +327,14 @@ class CompetitorAnalyzer:
             all_keywords_by_app[app_name] = set(keywords)
 
         # Find keywords used by some but not all
-        all_keywords_set = set
-        for keywords in all_keywords_by_app.values:
+        all_keywords_set = set()
+        for keywords in all_keywords_by_app.values():
             all_keywords_set.update(keywords)
 
         gaps = []
         for keyword in all_keywords_set:
             using_apps = [
-                app for app, keywords in all_keywords_by_app.items
+                app for app, keywords in all_keywords_by_app.items()
                 if keyword in keywords
             ]
             if 1 < len(using_apps) < len(analyses):
@@ -437,9 +437,9 @@ class CompetitorAnalyzer:
         features = []
 
         for line in lines:
-            line = line.strip
+            line = line.strip()
             # Check if line starts with bullet or number
-            if line and (line[0] in ['•', '*', '-', '✓'] or line[0].isdigit):
+            if line and (line[0] in ['•', '*', '-', '✓'] or line[0].isdigit()):
                 # Clean the line
                 cleaned = re.sub(r'^[•*\-✓\d.)\s]+', '', line)
                 if cleaned:

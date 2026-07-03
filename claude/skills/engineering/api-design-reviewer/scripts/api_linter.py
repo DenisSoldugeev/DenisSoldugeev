@@ -77,7 +77,7 @@ class APILinter:
     """Main API linting engine."""
     
     def __init__(self):
-        self.report = LintReport
+        self.report = LintReport()
         self.openapi_spec: Optional[Dict] = None
         self.raw_endpoints: Optional[Dict] = None
         
@@ -107,44 +107,44 @@ class APILinter:
     def lint_openapi_spec(self, spec: Dict[str, Any]) -> LintReport:
         """Lint an OpenAPI/Swagger specification."""
         self.openapi_spec = spec
-        self.report = LintReport
+        self.report = LintReport()
         
         # Basic structure validation
-        self._validate_openapi_structure
+        self._validate_openapi_structure()
         
         # Info section validation
-        self._validate_info_section
+        self._validate_info_section()
         
         # Server section validation
-        self._validate_servers_section
+        self._validate_servers_section()
         
         # Paths validation (main linting logic)
-        self._validate_paths_section
+        self._validate_paths_section()
         
         # Components validation
-        self._validate_components_section
+        self._validate_components_section()
         
         # Security validation
-        self._validate_security_section
+        self._validate_security_section()
         
         # Calculate final score
-        self.report.calculate_score
+        self.report.calculate_score()
         
         return self.report
 
     def lint_raw_endpoints(self, endpoints: Dict[str, Any]) -> LintReport:
         """Lint raw endpoint definitions."""
         self.raw_endpoints = endpoints
-        self.report = LintReport
+        self.report = LintReport()
         
         # Validate raw endpoint structure
-        self._validate_raw_endpoint_structure
+        self._validate_raw_endpoint_structure()
         
         # Lint each endpoint
-        for endpoint_path, endpoint_data in endpoints.get('endpoints', {}).items:
+        for endpoint_path, endpoint_data in endpoints.get('endpoints', {}).items():
             self._lint_raw_endpoint(endpoint_path, endpoint_data)
         
-        self.report.calculate_score
+        self.report.calculate_score()
         return self.report
 
     def _validate_openapi_structure(self) -> None:
@@ -241,13 +241,13 @@ class APILinter:
             return
         
         self.report.total_endpoints = sum(
-            len([method for method in path_obj.keys if method.upper in self.http_methods])
-            for path_obj in paths.values if isinstance(path_obj, dict)
+            len([method for method in path_obj.keys() if method.upper() in self.http_methods])
+            for path_obj in paths.values() if isinstance(path_obj, dict)
         )
         
-        endpoints_with_issues = set
+        endpoints_with_issues = set()
         
-        for path, path_obj in paths.items:
+        for path, path_obj in paths.items():
             if not isinstance(path_obj, dict):
                 continue
                 
@@ -257,11 +257,11 @@ class APILinter:
                 endpoints_with_issues.add(path)
             
             # Validate each operation in the path
-            for method, operation in path_obj.items:
-                if method.upper not in self.http_methods:
+            for method, operation in path_obj.items():
+                if method.upper() not in self.http_methods:
                     continue
                     
-                operation_issues = self._validate_operation(path, method.upper, operation)
+                operation_issues = self._validate_operation(path, method.upper(), operation)
                 if operation_issues:
                     endpoints_with_issues.add(path)
         
@@ -328,7 +328,7 @@ class APILinter:
             
             # Check for verb usage in URLs (anti-pattern)
             common_verbs = {'get', 'post', 'put', 'delete', 'create', 'update', 'remove', 'add'}
-            if segment.lower in common_verbs:
+            if segment.lower() in common_verbs:
                 self.report.add_issue(LintIssue(
                     severity='warning',
                     category='rest_conventions',
@@ -367,7 +367,7 @@ class APILinter:
     def _validate_operation(self, path: str, method: str, operation: Dict[str, Any]) -> bool:
         """Validate individual operation (HTTP method + path combination)."""
         has_issues = False
-        operation_path = f"/paths/{path}/{method.lower}"
+        operation_path = f"/paths/{path}/{method.lower()}"
         
         # Check for required operation fields
         if 'responses' not in operation:
@@ -436,7 +436,7 @@ class APILinter:
                 severity='error',
                 category='rest_conventions',
                 message=f"GET request should not have request body: {method} {path}",
-                path=f"/paths/{path}/{method.lower}/requestBody",
+                path=f"/paths/{path}/{method.lower()}/requestBody",
                 suggestion="Remove requestBody from GET request or use POST if body is needed"
             ))
             has_issues = True
@@ -447,7 +447,7 @@ class APILinter:
                 severity='warning',
                 category='rest_conventions',
                 message=f"DELETE request typically should not have request body: {method} {path}",
-                path=f"/paths/{path}/{method.lower}/requestBody",
+                path=f"/paths/{path}/{method.lower()}/requestBody",
                 suggestion="Consider using query parameters or path parameters instead"
             ))
             has_issues = True
@@ -455,12 +455,12 @@ class APILinter:
         # POST/PUT/PATCH should typically have request body (except for actions)
         if method in ['POST', 'PUT', 'PATCH'] and 'requestBody' not in operation:
             # Check if this is an action endpoint
-            if not any(action in path.lower for action in ['activate', 'deactivate', 'reset', 'confirm']):
+            if not any(action in path.lower() for action in ['activate', 'deactivate', 'reset', 'confirm']):
                 self.report.add_issue(LintIssue(
                     severity='info',
                     category='rest_conventions',
                     message=f"{method} request typically should have request body: {method} {path}",
-                    path=f"/paths/{path}/{method.lower}",
+                    path=f"/paths/{path}/{method.lower()}",
                     suggestion=f"Consider adding requestBody for {method} operation or use GET if no data is being sent"
                 ))
                 has_issues = True
@@ -480,26 +480,26 @@ class APILinter:
                 severity='error',
                 category='responses',
                 message=f"Missing success response for {method} {path}",
-                path=f"/paths/{path}/{method.lower}/responses",
+                path=f"/paths/{path}/{method.lower()}/responses",
                 suggestion="Define at least one success response (200, 201, 202, or 204)"
             ))
             has_issues = True
         
         # Check for error responses
-        has_error_responses = any(code.startswith('4') or code.startswith('5') for code in responses.keys)
+        has_error_responses = any(code.startswith('4') or code.startswith('5') for code in responses.keys())
         
         if not has_error_responses:
             self.report.add_issue(LintIssue(
                 severity='warning',
                 category='responses',
                 message=f"Missing error responses for {method} {path}",
-                path=f"/paths/{path}/{method.lower}/responses",
+                path=f"/paths/{path}/{method.lower()}/responses",
                 suggestion="Define common error responses (400, 404, 500, etc.)"
             ))
             has_issues = True
         
         # Validate individual response codes
-        for status_code, response in responses.items:
+        for status_code, response in responses.items():
             if status_code == 'default':
                 continue
                 
@@ -510,14 +510,14 @@ class APILinter:
                     severity='error',
                     category='responses',
                     message=f"Invalid status code '{status_code}' for {method} {path}",
-                    path=f"/paths/{path}/{method.lower}/responses/{status_code}",
+                    path=f"/paths/{path}/{method.lower()}/responses/{status_code}",
                     suggestion="Use valid HTTP status codes (e.g., 200, 404, 500)"
                 ))
                 has_issues = True
                 continue
             
             # Check if status code is appropriate for the method
-            expected_codes = self.standard_status_codes.get(method, set)
+            expected_codes = self.standard_status_codes.get(method, set())
             common_codes = {400, 401, 403, 404, 429, 500}  # Always acceptable
             
             if expected_codes and code_int not in expected_codes and code_int not in common_codes:
@@ -525,7 +525,7 @@ class APILinter:
                     severity='info',
                     category='responses',
                     message=f"Uncommon status code {status_code} for {method} {path}",
-                    path=f"/paths/{path}/{method.lower}/responses/{status_code}",
+                    path=f"/paths/{path}/{method.lower()}/responses/{status_code}",
                     suggestion=f"Consider using standard codes for {method}: {sorted(expected_codes)}"
                 ))
                 has_issues = True
@@ -537,7 +537,7 @@ class APILinter:
         has_issues = False
         
         for i, param in enumerate(parameters):
-            param_path = f"/paths/{path}/{method.lower}/parameters[{i}]"
+            param_path = f"/paths/{path}/{method.lower()}/parameters[{i}]"
             
             # Check required fields
             if 'name' not in param:
@@ -611,7 +611,7 @@ class APILinter:
                 severity='error',
                 category='request_body',
                 message=f"Request body missing content for {method} {path}",
-                path=f"/paths/{path}/{method.lower}/requestBody/content",
+                path=f"/paths/{path}/{method.lower()}/requestBody/content",
                 suggestion="Define content types for the request body"
             ))
             has_issues = True
@@ -638,7 +638,7 @@ class APILinter:
 
     def _validate_schemas(self, schemas: Dict[str, Any]) -> None:
         """Validate schema definitions."""
-        for schema_name, schema in schemas.items:
+        for schema_name, schema in schemas.items():
             # Check schema naming (should be PascalCase)
             if not self.pascal_case_pattern.match(schema_name):
                 self.report.add_issue(LintIssue(
@@ -655,7 +655,7 @@ class APILinter:
 
     def _validate_schema_properties(self, schema_name: str, properties: Dict[str, Any]) -> None:
         """Validate schema property naming."""
-        for prop_name, prop_def in properties.items:
+        for prop_name, prop_def in properties.items():
             # Properties should use camelCase
             if not self.camel_case_pattern.match(prop_name):
                 self.report.add_issue(LintIssue(
@@ -708,7 +708,7 @@ class APILinter:
             ))
             return
         
-        method = endpoint_data['method'].upper
+        method = endpoint_data['method'].upper()
         if method not in self.http_methods:
             self.report.add_issue(LintIssue(
                 severity='error',
@@ -720,7 +720,7 @@ class APILinter:
 
     def generate_json_report(self) -> str:
         """Generate JSON format report."""
-        issues_by_severity = self.report.get_issues_by_severity
+        issues_by_severity = self.report.get_issues_by_severity()
         
         report_data = {
             "summary": {
@@ -748,7 +748,7 @@ class APILinter:
 
     def generate_text_report(self) -> str:
         """Generate human-readable text report."""
-        issues_by_severity = self.report.get_issues_by_severity
+        issues_by_severity = self.report.get_issues_by_severity()
         
         report_lines = [
             "═══════════════════════════════════════════════════════════════",
@@ -780,16 +780,16 @@ class APILinter:
                     issues_by_category[issue.category] = []
                 issues_by_category[issue.category].append(issue)
             
-            for category, issues in issues_by_category.items:
+            for category, issues in issues_by_category.items():
                 report_lines.append(f"{'═' * 60}")
-                report_lines.append(f"CATEGORY: {category.upper.replace('_', ' ')}")
+                report_lines.append(f"CATEGORY: {category.upper().replace('_', ' ')}")
                 report_lines.append(f"{'═' * 60}")
                 
                 for issue in issues:
                     severity_icon = {"error": "🔴", "warning": "🟡", "info": "ℹ️"}[issue.severity]
                     
                     report_lines.extend([
-                        f"{severity_icon} {issue.severity.upper}: {issue.message}",
+                        f"{severity_icon} {issue.severity.upper()}: {issue.message}",
                         f"   Path: {issue.path}",
                     ])
                     
@@ -826,7 +826,36 @@ class APILinter:
         return "\n".join(report_lines)
 
 
-def main:
+# Embedded sample OpenAPI spec — intentionally imperfect (a verb in a URL, a
+# snake_case property) so --sample produces a representative report.
+SAMPLE_OPENAPI_SPEC = {
+    "openapi": "3.0.0",
+    "info": {"title": "Sample API", "version": "1.0.0"},
+    "servers": [{"url": "https://api.example.com"}],
+    "paths": {
+        "/user-profiles/{userId}": {
+            "get": {
+                "summary": "Get a user profile",
+                "responses": {"200": {"description": "OK"}, "404": {"description": "Not found"}},
+                "parameters": [{"name": "userId", "in": "path", "required": True}],
+            }
+        },
+        "/user-profiles/create": {
+            "post": {
+                "summary": "Create a user profile (verb-in-URL anti-pattern)",
+                "responses": {"201": {"description": "Created"}},
+            }
+        },
+    },
+    "components": {
+        "schemas": {
+            "UserProfile": {"properties": {"first_name": {"type": "string"}}}
+        }
+    },
+}
+
+
+def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Analyze OpenAPI/Swagger specifications for REST conventions and best practices",
@@ -836,12 +865,20 @@ Examples:
   python api_linter.py openapi.json
   python api_linter.py --format json openapi.json > report.json
   python api_linter.py --raw-endpoints endpoints.json
+  python api_linter.py --sample --format json
         """
     )
-    
+
     parser.add_argument(
         'input_file',
+        nargs='?',
         help='Input file: OpenAPI/Swagger JSON file or raw endpoints JSON'
+    )
+
+    parser.add_argument(
+        '--sample',
+        action='store_true',
+        help='Lint an embedded sample OpenAPI spec (no input file needed)'
     )
     
     parser.add_argument(
@@ -862,21 +899,26 @@ Examples:
         help='Output file (default: stdout)'
     )
     
-    args = parser.parse_args
-    
-    # Load input file
-    try:
-        with open(args.input_file, 'r') as f:
-            input_data = json.load(f)
-    except FileNotFoundError:
-        print(f"Error: Input file '{args.input_file}' not found.", file=sys.stderr)
-        return 1
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in '{args.input_file}': {e}", file=sys.stderr)
-        return 1
+    args = parser.parse_args()
+
+    # Load input data — from the embedded sample or the input file
+    if args.sample:
+        input_data = SAMPLE_OPENAPI_SPEC
+    else:
+        if not args.input_file:
+            parser.error("input_file is required (or use --sample)")
+        try:
+            with open(args.input_file, 'r') as f:
+                input_data = json.load(f)
+        except FileNotFoundError:
+            print(f"Error: Input file '{args.input_file}' not found.", file=sys.stderr)
+            return 1
+        except json.JSONDecodeError as e:
+            print(f"Error: Invalid JSON in '{args.input_file}': {e}", file=sys.stderr)
+            return 1
     
     # Initialize linter and run analysis
-    linter = APILinter
+    linter = APILinter()
     
     try:
         if args.raw_endpoints:
@@ -889,9 +931,9 @@ Examples:
     
     # Generate report
     if args.format == 'json':
-        output = linter.generate_json_report
+        output = linter.generate_json_report()
     else:
-        output = linter.generate_text_report
+        output = linter.generate_text_report()
     
     # Write output
     if args.output:
@@ -911,4 +953,4 @@ Examples:
 
 
 if __name__ == '__main__':
-    sys.exit(main)
+    sys.exit(main())

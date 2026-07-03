@@ -223,7 +223,7 @@ const fs = require('fs');
 
 // Parse pnpm workspace packages
 const packages = JSON.parse(
-  execSync('pnpm ls --depth -1 -r --json').toString
+  execSync('pnpm ls --depth -1 -r --json').toString()
 );
 
 let mermaid = 'graph TD\n';

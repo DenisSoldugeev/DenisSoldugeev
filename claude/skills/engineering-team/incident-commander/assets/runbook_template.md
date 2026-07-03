@@ -106,7 +106,7 @@ Health Check Alert Fired
 
 **Diagnosis:**
 1. Check active queries: `SELECT * FROM pg_stat_activity WHERE state = 'active';`
-2. Check for long-running queries: `SELECT pid, now - pg_stat_activity.query_start AS duration, query FROM pg_stat_activity WHERE state != 'idle' ORDER BY duration DESC;`
+2. Check for long-running queries: `SELECT pid, now() - pg_stat_activity.query_start AS duration, query FROM pg_stat_activity WHERE state != 'idle' ORDER BY duration DESC;`
 3. Check connection count: `SELECT count(*) FROM pg_stat_activity;`
 4. Check table bloat and vacuum status
 

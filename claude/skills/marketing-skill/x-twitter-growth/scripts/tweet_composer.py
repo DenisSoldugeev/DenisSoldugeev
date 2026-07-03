@@ -127,7 +127,7 @@ def validate_tweet(text: str) -> TweetDraft:
         warnings.append("Starts with @ — will be treated as reply, not shown in timeline")
 
     # Readability
-    lines = text.strip.split('\n')
+    lines = text.strip().split('\n')
     long_lines = [l for l in lines if len(l) > 70]
     if long_lines:
         warnings.append("Long unbroken lines — add line breaks for mobile readability")
@@ -138,7 +138,7 @@ def validate_tweet(text: str) -> TweetDraft:
 def generate_hooks(topic: str, count: int = 10) -> list:
     """Generate hook variations for a topic."""
     hooks = []
-    for pattern_type, patterns in HOOK_PATTERNS.items:
+    for pattern_type, patterns in HOOK_PATTERNS.items():
         for p in patterns:
             hook = p.replace("{topic}", topic).replace("{n}", "7").replace(
                 "{time}", "6 months").replace("{timeframe}", "month").replace(
@@ -219,7 +219,7 @@ def generate_thread_outline(topic: str, num_tweets: int = 8) -> str:
 """
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Generate tweets, threads, and hooks with proven patterns",
         formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -232,7 +232,7 @@ def main:
     parser.add_argument("--validate", nargs="?", const="", help="Tweet text to validate")
     parser.add_argument("--json", action="store_true", help="Output JSON")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.type == "validate" or args.validate is not None:
         text = args.validate or args.topic
@@ -250,7 +250,7 @@ def main:
                     print(f"  ⚠️  {w}")
             else:
                 print("  No issues found.")
-            print
+            print()
 
     elif args.type == "hooks":
         if not args.topic:
@@ -266,7 +266,7 @@ def main:
             for i, h in enumerate(hooks, 1):
                 print(f"  {i:2d}. [{h['type']:<12}] {h['hook']}")
                 print(f"      ({h['chars']} chars)")
-            print
+            print()
 
     elif args.type == "thread":
         if not args.topic:
@@ -287,4 +287,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

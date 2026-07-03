@@ -26,7 +26,7 @@ Documents the four roles a brand color plays: bg, accent, text, semantic. Valida
 Token taxonomy of `primary`/`onPrimary`/`primaryContainer`/`onPrimaryContainer` etc. We deliberately simplify: a long-form document doesn't need surface containers within accent containers. The 12-token system is the Material taxonomy collapsed to what document rendering actually requires.
 
 ### 4. Sara Soueidan — *Color Tokens for Accessible Color Systems* (sarasoueidan.com, 2022)
-Argues for contrast-walked link colors: a link in brand accent often fails the 4.5:1 floor against bg; the system must lighten or darken until it passes. Our `_ensure_link_contrast` is the direct implementation.
+Argues for contrast-walked link colors: a link in brand accent often fails the 4.5:1 floor against bg; the system must lighten or darken until it passes. Our `_ensure_link_contrast()` is the direct implementation.
 
 ### 5. Style Dictionary (amzn.github.io/style-dictionary)
 The industry-standard token transformation tool — takes JSON tokens and emits CSS / Swift / Kotlin / Flutter. We deliberately ship JSON tokens compatible with Style Dictionary in case a user wants to extend; we don't depend on it.

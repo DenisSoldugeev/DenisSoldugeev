@@ -298,12 +298,12 @@ Tools should handle edge cases gracefully:
 
 ### Unit Testing
 ```python
-def test_search_web_valid_input:
+def test_search_web_valid_input():
     result = search_web("test query", limit=5)
     assert result["success"] is True
     assert len(result["data"]["results"]) <= 5
 
-def test_search_web_invalid_input:
+def test_search_web_invalid_input():
     result = search_web("", limit=5)
     assert result["success"] is False
     assert result["error"]["code"] == "INVALID_INPUT"

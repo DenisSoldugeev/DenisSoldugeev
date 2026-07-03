@@ -174,7 +174,7 @@ def route_exception(payload: dict[str, Any]) -> dict[str, Any]:
         "justification": req.get("justification"),
         "strategic_value": req.get("strategic_value"),
         "customer_threats": req.get("customer_threats", []),
-        "submitted_at": req.get("submitted_at") or datetime.datetime.utcnow.isoformat + "Z",
+        "submitted_at": req.get("submitted_at") or datetime.datetime.utcnow().isoformat() + "Z",
         "compensating_commitments_required": compensating,
         "approver_chain": chain,
         "verdict": "IN_POLICY" if in_policy else "EXCEPTION",
@@ -250,7 +250,7 @@ def main(argv: list[str]) -> int:
             print(f"ERROR: could not read {args.input}: {e}", file=sys.stderr)
             return 1
     else:
-        ap.print_help
+        ap.print_help()
         return 0
 
     result = route_exception(payload)

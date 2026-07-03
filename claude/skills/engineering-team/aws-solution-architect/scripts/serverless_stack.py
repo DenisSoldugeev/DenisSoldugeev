@@ -17,7 +17,7 @@ class ServerlessStackGenerator:
             app_name: Application name (used for resource naming)
             requirements: Dictionary with API, database, auth requirements
         """
-        self.app_name = app_name.lower.replace(' ', '-')
+        self.app_name = app_name.lower().replace(' ', '-')
         self.requirements = requirements
         self.region = requirements.get('region', 'us-east-1')
 
@@ -245,7 +245,7 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import {{ Construct }} from 'constructs';
 
-export class {self.app_name.replace('-', '').title}Stack extends cdk.Stack {{
+export class {self.app_name.replace('-', '').title()}Stack extends cdk.Stack {{
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {{
     super(scope, id, props);
 

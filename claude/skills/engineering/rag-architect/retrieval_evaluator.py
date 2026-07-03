@@ -39,7 +39,7 @@ class Document:
     def _tokenize(self, text: str) -> List[str]:
         """Simple tokenization - split on whitespace and punctuation."""
         # Convert to lowercase and extract words
-        tokens = re.findall(r'\b[a-zA-Z0-9]+\b', text.lower)
+        tokens = re.findall(r'\b[a-zA-Z0-9]+\b', text.lower())
         return tokens
     
     def __str__(self):
@@ -51,25 +51,25 @@ class TFIDFRetriever:
     
     def __init__(self, documents: List[Document]):
         self.documents = {doc.doc_id: doc for doc in documents}
-        self.doc_ids = list(self.documents.keys)
-        self.vocabulary = set
+        self.doc_ids = list(self.documents.keys())
+        self.vocabulary = set()
         self.tf_scores = {}  # doc_id -> {term: tf_score}
         self.df_scores = {}  # term -> document_frequency
         self.idf_scores = {}  # term -> idf_score
-        self._build_index
+        self._build_index()
     
     def _build_index(self):
         """Build TF-IDF index from documents."""
         print(f"Building TF-IDF index for {len(self.documents)} documents...")
         
         # Calculate term frequencies and build vocabulary
-        for doc_id, doc in self.documents.items:
+        for doc_id, doc in self.documents.items():
             term_counts = Counter(doc.tokens)
             doc_length = len(doc.tokens)
             
             # Calculate TF scores (term_count / doc_length)
             tf_scores = {}
-            for term, count in term_counts.items:
+            for term, count in term_counts.items():
                 tf_scores[term] = count / doc_length if doc_length > 0 else 0
                 self.vocabulary.add(term)
             
@@ -77,17 +77,17 @@ class TFIDFRetriever:
         
         # Calculate document frequencies
         for term in self.vocabulary:
-            df = sum(1 for doc in self.documents.values if term in doc.tokens)
+            df = sum(1 for doc in self.documents.values() if term in doc.tokens)
             self.df_scores[term] = df
         
         # Calculate IDF scores: log(N / df)
         num_docs = len(self.documents)
-        for term, df in self.df_scores.items:
+        for term, df in self.df_scores.items():
             self.idf_scores[term] = math.log(num_docs / df) if df > 0 else 0
     
     def search(self, query: str, k: int = 10) -> List[Tuple[str, float]]:
         """Search for documents matching the query using TF-IDF similarity."""
-        query_tokens = re.findall(r'\b[a-zA-Z0-9]+\b', query.lower)
+        query_tokens = re.findall(r'\b[a-zA-Z0-9]+\b', query.lower())
         if not query_tokens:
             return []
         
@@ -103,7 +103,7 @@ class TFIDFRetriever:
                 scores[doc_id] = score
         
         # Sort by score and return top k
-        sorted_results = sorted(scores.items, key=lambda x: x[1], reverse=True)
+        sorted_results = sorted(scores.items(), key=lambda x: x[1], reverse=True)
         return sorted_results[:k]
     
     def _calculate_similarity(self, query_tf: Counter, query_length: int, doc_id: str) -> float:
@@ -115,7 +115,7 @@ class TFIDFRetriever:
         doc_vector = []
         
         # Only consider terms that appear in both query and document
-        common_terms = set(query_tf.keys) & set(doc_tf.keys)
+        common_terms = set(query_tf.keys()) & set(doc_tf.keys())
         
         if not common_terms:
             return 0.0
@@ -304,7 +304,7 @@ class RetrievalEvaluator:
         long_queries = []  # >= 8 words
         
         for result in query_results:
-            query_length = len(result['query'].split)
+            query_length = len(result['query'].split())
             precision = result['metrics'].get('precision@5', 0)
             
             if query_length <= 3:
@@ -413,7 +413,7 @@ def load_ground_truth(file_path: str) -> Dict[str, List[str]]:
     # Handle different JSON formats
     if isinstance(data, dict):
         # Convert all values to lists if they aren't already
-        return {k: v if isinstance(v, list) else [v] for k, v in data.items}
+        return {k: v if isinstance(v, list) else [v] for k, v in data.items()}
     else:
         raise ValueError("Invalid ground truth format. Expected dict mapping query_id -> relevant_doc_ids.")
 
@@ -424,16 +424,16 @@ def load_corpus(directory: str, extensions: List[str] = None) -> List[Document]:
     documents = []
     
     corpus_path = Path(directory)
-    if not corpus_path.exists:
+    if not corpus_path.exists():
         raise FileNotFoundError(f"Corpus directory not found: {directory}")
     
     for file_path in corpus_path.rglob('*'):
-        if file_path.is_file and file_path.suffix.lower in extensions:
+        if file_path.is_file() and file_path.suffix.lower() in extensions:
             try:
                 with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    content = f.read
+                    content = f.read()
                 
-                if content.strip:
+                if content.strip():
                     # Use filename (without extension) as doc_id
                     doc_id = file_path.stem
                     title = file_path.name
@@ -508,7 +508,7 @@ def generate_recommendations(evaluation_results: Dict[str, Any]) -> List[str]:
     return recommendations
 
 
-def main:
+def main():
     """Main function with command-line interface."""
     parser = argparse.ArgumentParser(description='Evaluate retrieval system performance')
     parser.add_argument('queries', help='JSON file containing queries')
@@ -521,7 +521,7 @@ def main:
                        help='File extensions to include from corpus')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Load data
@@ -536,7 +536,7 @@ def main:
         retriever = TFIDFRetriever(documents)
         
         # Run evaluation
-        evaluator = RetrievalEvaluator
+        evaluator = RetrievalEvaluator()
         results = evaluator.evaluate(queries, ground_truth, retriever, args.k_values)
         
         # Generate recommendations
@@ -558,7 +558,7 @@ def main:
         
         if args.verbose:
             print(f"\nDetailed Metrics:")
-            for metric, value in results['aggregate_metrics'].items:
+            for metric, value in results['aggregate_metrics'].items():
                 print(f"  {metric}: {value:.4f}")
             
             print(f"\nFailure Analysis:")
@@ -575,4 +575,4 @@ def main:
 
 
 if __name__ == '__main__':
-    exit(main)
+    exit(main())

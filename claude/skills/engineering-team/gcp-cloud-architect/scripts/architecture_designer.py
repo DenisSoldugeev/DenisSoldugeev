@@ -48,26 +48,26 @@ class ArchitectureDesigner:
         """
         if self.app_type in ['web_application', 'saas_platform']:
             if self.expected_users < 10000:
-                return self._serverless_web_architecture
+                return self._serverless_web_architecture()
             elif self.expected_users < 100000:
-                return self._gke_microservices_architecture
+                return self._gke_microservices_architecture()
             else:
-                return self._multi_region_architecture
+                return self._multi_region_architecture()
 
         elif self.app_type == 'mobile_backend':
-            return self._serverless_mobile_backend
+            return self._serverless_mobile_backend()
 
         elif self.app_type == 'data_pipeline':
-            return self._data_pipeline_architecture
+            return self._data_pipeline_architecture()
 
         elif self.app_type == 'microservices':
-            return self._gke_microservices_architecture
+            return self._gke_microservices_architecture()
 
         elif self.app_type == 'ml_platform':
-            return self._ml_platform_architecture
+            return self._ml_platform_architecture()
 
         else:
-            return self._serverless_web_architecture
+            return self._serverless_web_architecture()
 
     def _serverless_web_architecture(self) -> Dict[str, Any]:
         """Serverless web application pattern using Cloud Run."""
@@ -127,7 +127,7 @@ class ArchitectureDesigner:
                 }
             },
             'estimated_cost': {
-                'monthly_usd': self._calculate_serverless_cost,
+                'monthly_usd': self._calculate_serverless_cost(),
                 'breakdown': {
                     'Cloud CDN': '5-20 USD',
                     'Cloud Run': '5-25 USD',
@@ -224,7 +224,7 @@ class ArchitectureDesigner:
                 }
             },
             'estimated_cost': {
-                'monthly_usd': self._calculate_gke_cost,
+                'monthly_usd': self._calculate_gke_cost(),
                 'breakdown': {
                     'Cloud Load Balancing': '20-40 USD',
                     'GKE Autopilot': '75-250 USD',
@@ -417,7 +417,7 @@ class ArchitectureDesigner:
                 }
             },
             'estimated_cost': {
-                'monthly_usd': self._calculate_data_pipeline_cost,
+                'monthly_usd': self._calculate_data_pipeline_cost(),
                 'breakdown': {
                     'Pub/Sub': '5-30 USD',
                     'Dataflow': '20-150 USD',
@@ -586,7 +586,7 @@ class ArchitectureDesigner:
                 }
             },
             'estimated_cost': {
-                'monthly_usd': self._calculate_gke_cost * 2.0,
+                'monthly_usd': self._calculate_gke_cost() * 2.0,
                 'breakdown': {
                     'Cloud DNS': '5-15 USD',
                     'Cloud CDN': '20-100 USD',
@@ -650,7 +650,7 @@ class ArchitectureDesigner:
 
     def generate_service_checklist(self) -> list:
         """Generate implementation checklist for recommended architecture."""
-        architecture = self.recommend_architecture_pattern
+        architecture = self.recommend_architecture_pattern()
 
         checklist = [
             {
@@ -677,7 +677,7 @@ class ArchitectureDesigner:
                 'phase': 'Core Services',
                 'tasks': [
                     f"Deploy {service['service']}"
-                    for service in architecture['services'].values
+                    for service in architecture['services'].values()
                 ]
             },
             {
@@ -715,7 +715,7 @@ class ArchitectureDesigner:
         return checklist
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description='GCP Architecture Designer - Recommends GCP services based on workload requirements'
     )
@@ -755,7 +755,7 @@ def main:
         help='Monthly budget in USD (default: 500)'
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.input:
         try:
@@ -775,8 +775,8 @@ def main:
         }
 
     designer = ArchitectureDesigner(requirements)
-    result = designer.recommend_architecture_pattern
-    checklist = designer.generate_service_checklist
+    result = designer.recommend_architecture_pattern()
+    checklist = designer.generate_service_checklist()
 
     output = {
         'architecture': result,
@@ -794,7 +794,7 @@ def main:
         print(f"Description: {result['description']}")
         print(f"Use Case: {result['use_case']}")
         print(f"\nServices:")
-        for name, svc in result['services'].items:
+        for name, svc in result['services'].items():
             print(f"  - {name}: {svc['service']} ({svc['purpose']})")
         print(f"\nEstimated Monthly Cost: ${result['estimated_cost']['monthly_usd']:.2f}")
         print(f"\nPros: {', '.join(result['pros'])}")
@@ -802,4 +802,4 @@ def main:
 
 
 if __name__ == '__main__':
-    main
+    main()

@@ -20,9 +20,9 @@ import sys
 from datetime import datetime, timezone
 
 
-def generate_session_id:
+def generate_session_id():
     """Generate a timestamp-based session ID."""
-    return datetime.now.strftime("%Y%m%d-%H%M%S")
+    return datetime.now().strftime("%Y%m%d-%H%M%S")
 
 
 def create_directory_structure(base_path):
@@ -74,7 +74,7 @@ def create_session(base_path, session_id, task, agents, eval_cmd, metric,
         f"task: \"{task}\"",
         f"agent_count: {agents}",
         f"base_branch: {base_branch}",
-        f"created: {datetime.now(timezone.utc).isoformat}",
+        f"created: {datetime.now(timezone.utc).isoformat()}",
     ]
     if eval_cmd:
         config_lines.append(f"eval_cmd: \"{eval_cmd}\"")
@@ -92,8 +92,8 @@ def create_session(base_path, session_id, task, agents, eval_cmd, metric,
     state = {
         "session_id": session_id,
         "state": "init",
-        "created": datetime.now(timezone.utc).isoformat,
-        "updated": datetime.now(timezone.utc).isoformat,
+        "created": datetime.now(timezone.utc).isoformat(),
+        "updated": datetime.now(timezone.utc).isoformat(),
         "agents": {},
     }
     with open(state_path, "w") as f:
@@ -103,7 +103,7 @@ def create_session(base_path, session_id, task, agents, eval_cmd, metric,
     return session_dir
 
 
-def validate_git_repo:
+def validate_git_repo():
     """Check if current directory is a git repository."""
     if not os.path.isdir(".git"):
         # Check parent dirs
@@ -116,30 +116,30 @@ def validate_git_repo:
     return True
 
 
-def get_current_branch:
+def get_current_branch():
     """Get the current git branch name."""
     head_file = os.path.join(".git", "HEAD")
     if os.path.exists(head_file):
         with open(head_file) as f:
-            ref = f.read.strip
+            ref = f.read().strip()
             if ref.startswith("ref: refs/heads/"):
                 return ref[len("ref: refs/heads/"):]
     return "main"
 
 
-def run_demo:
+def run_demo():
     """Show a demo of what hub_init creates."""
     print("=" * 60)
     print("AgentHub Init — Demo Mode")
     print("=" * 60)
-    print
+    print()
     print("Session ID: 20260317-143022")
     print("Task: Optimize API response time below 100ms")
     print("Agents: 3")
     print("Eval: pytest bench.py --json")
     print("Metric: p50_ms (lower is better)")
     print("Base branch: dev")
-    print
+    print()
     print("Directory structure created:")
     print("  .agenthub/")
     print("  ├── .gitignore")
@@ -152,7 +152,7 @@ def run_demo:
     print("      ├── dispatch/")
     print("      ├── progress/")
     print("      └── results/")
-    print
+    print()
     print("config.yaml:")
     print('  session_id: 20260317-143022')
     print('  task: "Optimize API response time below 100ms"')
@@ -161,14 +161,14 @@ def run_demo:
     print('  eval_cmd: "pytest bench.py --json"')
     print("  metric: p50_ms")
     print("  direction: lower")
-    print
+    print()
     print("state.json:")
     print('  { "state": "init", "agents": {} }')
-    print
+    print()
     print("Next step: Run /hub:spawn to launch agents")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Initialize an AgentHub collaboration session"
     )
@@ -187,10 +187,10 @@ def main:
                         help="Output format (default: text)")
     parser.add_argument("--demo", action="store_true",
                         help="Show demo output without creating files")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.demo:
-        run_demo
+        run_demo()
         return
 
     if not args.task:
@@ -200,14 +200,14 @@ def main:
               file=sys.stderr)
         sys.exit(1)
 
-    if not validate_git_repo:
+    if not validate_git_repo():
         print("Error: Not a git repository. AgentHub requires git.",
               file=sys.stderr)
         sys.exit(1)
 
-    base_branch = args.base_branch or get_current_branch
+    base_branch = args.base_branch or get_current_branch()
     base_path = ".agenthub"
-    session_id = generate_session_id
+    session_id = generate_session_id()
 
     # Create structure
     create_directory_structure(base_path)
@@ -245,9 +245,9 @@ def main:
             print(f"  Metric: {args.metric} ({direction_str})")
         print(f"  Base branch: {base_branch}")
         print(f"  State: init")
-        print
+        print()
         print(f"Next step: Run /hub:spawn to launch {args.agents} agents")
 
 
 if __name__ == "__main__":
-    main
+    main()

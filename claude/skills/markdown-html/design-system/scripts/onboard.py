@@ -125,19 +125,19 @@ def _derive_and_check_palette(config: dict) -> tuple[bool, str]:
 
 
 def _writable(path_str: str) -> bool:
-    if not path_str or not path_str.strip:
+    if not path_str or not path_str.strip():
         return False
-    p = Path(path_str).expanduser
+    p = Path(path_str).expanduser()
     parent = p.parent if p.suffix else p
     # If neither the path nor its parent exists, walk up until we find one
-    while not parent.exists:
+    while not parent.exists():
         if parent.parent == parent:
             return False
         parent = parent.parent
     return os.access(parent, os.W_OK)
 
 
-def _print_questions -> None:
+def _print_questions() -> None:
     print(f"Onboarding questions — markdown-html/{cfg.SKILL}:\n")
     for key, prompt, choices, _c, hint in QUESTIONS:
         line = f"  {prompt}"
@@ -146,7 +146,7 @@ def _print_questions -> None:
         if hint:
             line += f"\n     hint: {hint}"
         print(line)
-        print
+        print()
 
 
 def run_interactive(config: dict) -> dict:
@@ -159,14 +159,14 @@ def run_interactive(config: dict) -> dict:
         cur = f" (current: {current})" if current not in (None, "") else ""
         if hint:
             print(f"   hint: {hint}")
-        raw = input(f"{prompt}{suffix}{cur}: ").strip
+        raw = input(f"{prompt}{suffix}{cur}: ").strip()
         if not raw:
             continue
         try:
             _apply(config, key, caster(raw))
         except ValueError:
             print(f"   ! invalid value for {key}, keeping current")
-        print
+        print()
     return config
 
 
@@ -183,22 +183,22 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
 
     if args.show:
-        _print_questions
+        _print_questions()
         print("Current effective config:")
         import json
-        print(json.dumps(cfg.load_config, indent=2, sort_keys=True))
+        print(json.dumps(cfg.load_config(), indent=2, sort_keys=True))
         return 0
 
     if args.reset:
-        path = cfg.project_config_path if args.scope == "project" else cfg.GLOBAL_CONFIG_PATH
-        if path.exists:
-            path.unlink
+        path = cfg.project_config_path() if args.scope == "project" else cfg.GLOBAL_CONFIG_PATH
+        if path.exists():
+            path.unlink()
             print(f"removed {path}")
         else:
             print(f"no config at {path}")
         return 0
 
-    config = cfg.load_config
+    config = cfg.load_config()
 
     if args.set:
         for item in args.set:
@@ -214,11 +214,11 @@ def main(argv: list[str] | None = None) -> int:
                     pass
             _apply(config, k, v)
     elif not args.defaults:
-        if sys.stdin.isatty:
+        if sys.stdin.isatty():
             config = run_interactive(config)
         else:
             print("non-interactive shell: use --defaults or --set key=value. Showing questions:\n")
-            _print_questions
+            _print_questions()
             return 0
 
     # Hard rule 1: refuse if default_output_dir is empty or unwritable
@@ -245,7 +245,7 @@ def main(argv: list[str] | None = None) -> int:
     if msg.startswith("warnings:"):
         print(f"note: {msg} — proceeding (warnings, not failures).")
 
-    config["setup_completed_at"] = _dt.datetime.now(_dt.timezone.utc).isoformat
+    config["setup_completed_at"] = _dt.datetime.now(_dt.timezone.utc).isoformat()
     path = cfg.write_config(config, scope=args.scope)
     print(f"saved markdown-html/{cfg.SKILL} customization -> {path}")
     print(f"derived 12-token palette stored under derived_palette in the same file.")
@@ -253,4 +253,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

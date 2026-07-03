@@ -166,7 +166,7 @@ def estimate_resources(data: dict[str, Any], phases: list[dict[str, Any]]) -> di
         Resource allocation dictionary.
     """
     total_weeks = sum(p["duration_weeks"] for p in phases)
-    complexity = data.get("complexity", "medium").lower
+    complexity = data.get("complexity", "medium").lower()
     scope_items = data.get("scope_items", [])
     num_integrations = data.get("num_integrations", 0)
 
@@ -314,7 +314,7 @@ def generate_evaluation_scorecard(data: dict[str, Any]) -> dict[str, Any]:
 
     # Merge custom categories with defaults
     categories = {}
-    for cat_name, cat_data in DEFAULT_EVAL_CATEGORIES.items:
+    for cat_name, cat_data in DEFAULT_EVAL_CATEGORIES.items():
         if cat_name in custom_categories:
             custom = custom_categories[cat_name]
             categories[cat_name] = {
@@ -332,9 +332,9 @@ def generate_evaluation_scorecard(data: dict[str, Any]) -> dict[str, Any]:
             }
 
     # Normalize weights to sum to 1.0
-    total_weight = sum(c["weight"] for c in categories.values)
+    total_weight = sum(c["weight"] for c in categories.values())
     if total_weight > 0 and abs(total_weight - 1.0) > 0.01:
-        for cat in categories.values:
+        for cat in categories.values():
             cat["weight"] = round(safe_divide(cat["weight"], total_weight), 2)
 
     return {
@@ -362,7 +362,7 @@ def identify_risks(data: dict[str, Any], resources: dict[str, Any]) -> list[dict
         List of risk entries with probability, impact, and mitigation.
     """
     risks = []
-    complexity = data.get("complexity", "medium").lower
+    complexity = data.get("complexity", "medium").lower()
     num_integrations = data.get("num_integrations", 0)
     total_weeks = resources["total_duration_weeks"]
     stakeholders = data.get("stakeholders", [])
@@ -596,7 +596,7 @@ def format_text(result: dict[str, Any]) -> str:
     lines.append(f"POC Name:          {info['poc_name']}")
     lines.append(f"Customer:          {info['customer']}")
     lines.append(f"Opportunity Value: {info['opportunity_value']}")
-    lines.append(f"Complexity:        {info['complexity'].upper}")
+    lines.append(f"Complexity:        {info['complexity'].upper()}")
     lines.append(f"Start Date:        {info['start_date']}")
     lines.append(f"Champion:          {info['champion']}")
     lines.append(f"Decision Maker:    {info['decision_maker']}")
@@ -625,7 +625,7 @@ def format_text(result: dict[str, Any]) -> str:
     lines.append("RESOURCE ALLOCATION")
     lines.append("-" * 70)
     lines.append(f"Total Duration:    {res['total_duration_weeks']} weeks")
-    lines.append(f"Complexity:        {res['complexity'].upper}")
+    lines.append(f"Complexity:        {res['complexity'].upper()}")
     lines.append("")
     lines.append("  Totals:")
     lines.append(f"    SE Hours:           {res['totals']['se_hours']}")
@@ -667,11 +667,11 @@ def format_text(result: dict[str, Any]) -> str:
     lines.append(f"  Strong Pass Threshold: {scorecard['strong_pass_threshold']}/5.0")
     lines.append("")
     lines.append("  Scoring Scale:")
-    for score, desc in scorecard["scoring_scale"].items:
+    for score, desc in scorecard["scoring_scale"].items():
         lines.append(f"    {score} = {desc}")
     lines.append("")
     lines.append("  Categories:")
-    for cat_name, cat_data in scorecard["categories"].items:
+    for cat_name, cat_data in scorecard["categories"].items():
         lines.append(f"\n    {cat_name} (weight: {cat_data['weight']:.0%})")
         for criterion in cat_data["criteria"]:
             lines.append(f"      [ ] {criterion}")
@@ -683,7 +683,7 @@ def format_text(result: dict[str, Any]) -> str:
     lines.append("RISK REGISTER")
     lines.append("-" * 70)
     for risk in risks:
-        lines.append(f"  [{risk['impact'].upper}] {risk['risk']}")
+        lines.append(f"  [{risk['impact'].upper()}] {risk['risk']}")
         lines.append(f"       Probability: {risk['probability']} | Impact: {risk['impact']}")
         lines.append(f"       Category: {risk['category']}")
         lines.append(f"       Mitigation: {risk['mitigation']}")
@@ -702,7 +702,7 @@ def format_text(result: dict[str, Any]) -> str:
         lines.append("")
 
     lines.append("  Recommendation Logic:")
-    for decision, logic in framework["recommendation_logic"].items:
+    for decision, logic in framework["recommendation_logic"].items():
         lines.append(f"    {decision}: {logic}")
     lines.append("")
 
@@ -722,7 +722,7 @@ def format_text(result: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def main -> None:
+def main() -> None:
     """Main entry point for the POC Planner."""
     parser = argparse.ArgumentParser(
         description="Plan proof-of-concept engagements with timeline, resources, and evaluation scorecards.",
@@ -750,7 +750,7 @@ def main -> None:
         help="Output format: json or text (default: text)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     data = load_poc_data(args.input_file)
     result = plan_poc(data)
@@ -762,4 +762,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

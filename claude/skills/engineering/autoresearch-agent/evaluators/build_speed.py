@@ -19,13 +19,13 @@ for i in range(RUNS):
     if CLEAN_CMD:
         subprocess.run(CLEAN_CMD, shell=True, capture_output=True, timeout=60)
 
-    t0 = time.perf_counter
+    t0 = time.perf_counter()
     result = subprocess.run(BUILD_CMD, shell=True, capture_output=True, timeout=600)
-    elapsed = time.perf_counter - t0
+    elapsed = time.perf_counter() - t0
 
     if result.returncode != 0:
         print(f"Build {i+1} failed (exit {result.returncode})", file=sys.stderr)
-        print(f"stderr: {result.stderr.decode[:200]}", file=sys.stderr)
+        print(f"stderr: {result.stderr.decode()[:200]}", file=sys.stderr)
         sys.exit(1)
 
     times.append(elapsed)

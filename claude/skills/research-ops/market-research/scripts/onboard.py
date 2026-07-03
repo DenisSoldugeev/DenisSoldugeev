@@ -38,7 +38,7 @@ QUESTIONS = [
 ]
 
 
-def _print_questions -> None:
+def _print_questions() -> None:
     print(f"Onboarding questions — {cfg.SKILL}:\n")
     for _k, prompt, choices, _c in QUESTIONS:
         line = f"  {prompt}"
@@ -52,7 +52,7 @@ def run_interactive(config: dict) -> dict:
     for key, prompt, choices, caster in QUESTIONS:
         suffix = f" [{'/'.join(choices)}]" if choices else ""
         cur = f" (current: {config.get(key)})" if config.get(key) is not None else ""
-        raw = input(f"{prompt}{suffix}{cur}: ").strip
+        raw = input(f"{prompt}{suffix}{cur}: ").strip()
         if not raw:
             continue
         try:
@@ -72,20 +72,20 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
 
     if args.show:
-        _print_questions
+        _print_questions()
         print("\nCurrent effective config:")
-        print(json.dumps(cfg.load_config, indent=2, sort_keys=True))
+        print(json.dumps(cfg.load_config(), indent=2, sort_keys=True))
         return 0
 
     if args.reset:
-        path = cfg.project_config_path if args.scope == "project" else cfg.GLOBAL_CONFIG_PATH
-        if path.exists:
-            path.unlink; print(f"removed {path}")
+        path = cfg.project_config_path() if args.scope == "project" else cfg.GLOBAL_CONFIG_PATH
+        if path.exists():
+            path.unlink(); print(f"removed {path}")
         else:
             print(f"no config at {path}")
         return 0
 
-    config = cfg.load_config
+    config = cfg.load_config()
 
     if args.set:
         for item in args.set:
@@ -100,18 +100,18 @@ def main(argv: list[str] | None = None) -> int:
                     pass
             config[k] = v
     elif not args.defaults:
-        if sys.stdin.isatty:
+        if sys.stdin.isatty():
             config = run_interactive(config)
         else:
             print("non-interactive shell: use --defaults or --set key=value. Showing questions:\n")
-            _print_questions
+            _print_questions()
             return 0
 
-    config["setup_completed_at"] = _dt.datetime.now(_dt.timezone.utc).isoformat
+    config["setup_completed_at"] = _dt.datetime.now(_dt.timezone.utc).isoformat()
     path = cfg.write_config(config, scope=args.scope)
     print(f"saved {cfg.SKILL} customization -> {path}")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

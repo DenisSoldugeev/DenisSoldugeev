@@ -99,7 +99,7 @@ class MetricsCalculator:
         nesting_level = 0
 
         for line in lines:
-            stripped = line.strip
+            stripped = line.strip()
 
             # Increase nesting level
             if any(keyword in stripped for keyword in ['if ', 'for ', 'while ', 'def ', 'function ', 'class ']):
@@ -197,10 +197,10 @@ class MetricsCalculator:
         # Common assertion patterns
         patterns = [
             r'\bassert[A-Z]\w*\(',  # JUnit: assertTrue, assertEquals
-            r'\bexpect\(',  # Jest/Vitest: expect
+            r'\bexpect\(',  # Jest/Vitest: expect()
             r'\bassert\s+',  # Python: assert
             r'\.should\.',  # Chai: should
-            r'\.to\.',  # Chai: expect.to
+            r'\.to\.',  # Chai: expect().to
         ]
 
         count = 0
@@ -213,8 +213,8 @@ class MetricsCalculator:
         """Count test functions."""
         patterns = [
             r'\btest_\w+',  # Python: test_*
-            r'\bit\(',  # Jest/Mocha: it
-            r'\btest\(',  # Jest: test
+            r'\bit\(',  # Jest/Mocha: it()
+            r'\btest\(',  # Jest: test()
             r'@Test',  # JUnit: @Test
             r'\bdef test_',  # Python def test_
         ]
@@ -272,7 +272,7 @@ class MetricsCalculator:
 
             # Check for descriptive words
             descriptive_words = ['should', 'when', 'given', 'returns', 'throws', 'handles']
-            if any(word in name.lower for word in descriptive_words):
+            if any(word in name.lower() for word in descriptive_words):
                 name_score += 30
 
             # Check for underscores or camelCase (not just letters)
@@ -281,7 +281,7 @@ class MetricsCalculator:
 
             # Avoid generic names
             generic = ['test1', 'test2', 'testit', 'mytest']
-            if name.lower not in generic:
+            if name.lower() not in generic:
                 name_score += 20
 
             score += name_score
@@ -293,7 +293,7 @@ class MetricsCalculator:
         smells = []
 
         # Test smell 1: No assertions
-        if 'assert' not in test_code.lower and 'expect' not in test_code.lower:
+        if 'assert' not in test_code.lower() and 'expect' not in test_code.lower():
             smells.append({
                 'smell': 'missing_assertions',
                 'description': 'Tests without assertions',
@@ -312,7 +312,7 @@ class MetricsCalculator:
             })
 
         # Test smell 3: Sleeps in tests
-        if 'sleep' in test_code.lower or 'wait' in test_code.lower:
+        if 'sleep' in test_code.lower() or 'wait' in test_code.lower():
             smells.append({
                 'smell': 'sleepy_test',
                 'description': 'Tests using sleep/wait (potential flakiness)',

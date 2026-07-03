@@ -77,18 +77,18 @@ class SpecValidator:
 
     def validate(self) -> Dict[str, Any]:
         """Run all validation checks and return results."""
-        self._check_sections_present
-        self._check_functional_requirements
-        self._check_acceptance_criteria
-        self._check_edge_cases
-        self._check_rfc_keywords
-        self._check_api_contracts
-        self._check_data_models
-        self._check_out_of_scope
-        self._check_placeholders
-        self._check_traceability
+        self._check_sections_present()
+        self._check_functional_requirements()
+        self._check_acceptance_criteria()
+        self._check_edge_cases()
+        self._check_rfc_keywords()
+        self._check_api_contracts()
+        self._check_data_models()
+        self._check_out_of_scope()
+        self._check_placeholders()
+        self._check_traceability()
 
-        total_score = self._calculate_score
+        total_score = self._calculate_score()
 
         return {
             "file": self.file_path,
@@ -142,7 +142,7 @@ class SpecValidator:
     def _check_functional_requirements(self):
         """Validate functional requirements format and content."""
         content = self._find_section_content(r"^##\s+Functional\s+Requirements")
-        if not content.strip:
+        if not content.strip():
             return
 
         fr_pattern = re.compile(r"-\s+FR-(\d+):")
@@ -172,7 +172,7 @@ class SpecValidator:
     def _check_acceptance_criteria(self):
         """Validate acceptance criteria use Given/When/Then format."""
         content = self._find_section_content(r"^##\s+Acceptance\s+Criteria")
-        if not content.strip:
+        if not content.strip():
             return
 
         ac_pattern = re.compile(r"###\s+AC-(\d+):")
@@ -212,7 +212,7 @@ class SpecValidator:
     def _check_edge_cases(self):
         """Validate edge cases section."""
         content = self._find_section_content(r"^##\s+Edge\s+Cases")
-        if not content.strip:
+        if not content.strip():
             return
 
         ec_pattern = re.compile(r"-\s+EC-(\d+):")
@@ -234,12 +234,12 @@ class SpecValidator:
             pattern = rf"(?:system|service|API|endpoint)\s+{kw}\s+"
             if re.search(pattern, context_content):
                 self._add_finding("warning", "rfc_keywords",
-                                  f"Found lowercase '{kw}' in requirements. RFC 2119 keywords should be UPPERCASE: {kw.upper}")
+                                  f"Found lowercase '{kw}' in requirements. RFC 2119 keywords should be UPPERCASE: {kw.upper()}")
 
     def _check_api_contracts(self):
         """Validate API contracts section."""
         content = self._find_section_content(r"^##\s+API\s+Contracts")
-        if not content.strip:
+        if not content.strip():
             return
 
         # Check for at least one endpoint definition
@@ -255,7 +255,7 @@ class SpecValidator:
     def _check_data_models(self):
         """Validate data models section."""
         content = self._find_section_content(r"^##\s+Data\s+Models")
-        if not content.strip:
+        if not content.strip():
             return
 
         # Check for table format
@@ -266,7 +266,7 @@ class SpecValidator:
     def _check_out_of_scope(self):
         """Validate out of scope section."""
         content = self._find_section_content(r"^##\s+Out\s+of\s+Scope")
-        if not content.strip:
+        if not content.strip():
             return
 
         os_pattern = re.compile(r"-\s+OS-(\d+):")
@@ -298,7 +298,7 @@ class SpecValidator:
         ac_content = self._find_section_content(r"^##\s+Acceptance\s+Criteria")
         fr_content = self._find_section_content(r"^##\s+Functional\s+Requirements")
 
-        if not ac_content.strip or not fr_content.strip:
+        if not ac_content.strip() or not fr_content.strip():
             return
 
         # Extract FR IDs
@@ -314,8 +314,8 @@ class SpecValidator:
 
     def _calculate_score(self) -> int:
         """Calculate the total completeness score."""
-        total = sum(s["score"] for s in self.section_scores.values)
-        maximum = sum(s["max"] for s in self.section_scores.values)
+        total = sum(s["score"] for s in self.section_scores.values())
+        maximum = sum(s["max"] for s in self.section_scores.values())
 
         if maximum == 0:
             return 0
@@ -374,7 +374,7 @@ class SpecValidator:
 
         # Section breakdown
         lines.append("Section Breakdown:")
-        for key, data in self.section_scores.items:
+        for key, data in self.section_scores.items():
             status = "PRESENT" if data["present"] else "MISSING"
             lines.append(f"  {data['name']}: {data['score']}/{data['max']} ({status})")
 
@@ -398,7 +398,7 @@ def format_human(result: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Validate a feature specification for completeness and quality.",
         epilog="Example: python spec_validator.py --file spec.md --strict",
@@ -421,21 +421,21 @@ def main:
         help="Output results as JSON",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     file_path = Path(args.file)
-    if not file_path.exists:
+    if not file_path.exists():
         print(f"Error: File not found: {file_path}", file=sys.stderr)
         sys.exit(2)
 
     content = file_path.read_text(encoding="utf-8")
 
-    if not content.strip:
+    if not content.strip():
         print(f"Error: File is empty: {file_path}", file=sys.stderr)
         sys.exit(2)
 
     validator = SpecValidator(content, str(file_path))
-    result = validator.validate
+    result = validator.validate()
 
     if args.json_flag:
         print(json.dumps(result, indent=2))
@@ -458,4 +458,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

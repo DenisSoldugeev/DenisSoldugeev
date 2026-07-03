@@ -136,7 +136,7 @@ def route_discount(deal: dict, profile_name: str = "saas") -> RoutingResult:
 
     pct = float(deal.get("discount_pct", 0.0))
     arr = float(deal.get("deal_size_arr", 0.0))
-    tier = (deal.get("customer_tier") or "mid").lower
+    tier = (deal.get("customer_tier") or "mid").lower()
 
     # Find the landing band
     landing = bands[-1]
@@ -174,7 +174,7 @@ def route_discount(deal: dict, profile_name: str = "saas") -> RoutingResult:
         and len(chain) > 2
         and pct <= bands[1]["max_pct"]
     ):
-        dropped = chain.pop
+        dropped = chain.pop()
         modifiers.append(
             f"SMB fast-lane: ARR ${arr:,.0f} <= ${profile['smb_fast_lane_arr']:,} "
             f"drops {dropped} from chain"
@@ -182,7 +182,7 @@ def route_discount(deal: dict, profile_name: str = "saas") -> RoutingResult:
         days = max(0, days - 1)
 
     # Dedup chain while preserving order
-    seen: set[str] = set
+    seen: set[str] = set()
     ordered = []
     for a in chain:
         if a not in seen:
@@ -260,4 +260,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

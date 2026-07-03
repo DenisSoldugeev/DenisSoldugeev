@@ -212,7 +212,7 @@ ROLLBACK PHASES
         Script:
           -- Drop migration artifacts
           DROP TABLE IF EXISTS migration_log;
-          DROP PROCEDURE IF EXISTS migrate_data;
+          DROP PROCEDURE IF EXISTS migrate_data();
         Success Criteria: No migration artifacts remain
 
      99. Validate rollback completion

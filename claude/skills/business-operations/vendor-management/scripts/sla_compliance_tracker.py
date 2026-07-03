@@ -72,7 +72,7 @@ _LOWER_IS_BETTER_HINTS = (
 
 
 def _is_lower_better(sla_metric: str) -> bool:
-    metric_lc = sla_metric.lower
+    metric_lc = sla_metric.lower()
     return any(h in metric_lc for h in _LOWER_IS_BETTER_HINTS)
 
 
@@ -339,4 +339,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main)
+    raise SystemExit(main())

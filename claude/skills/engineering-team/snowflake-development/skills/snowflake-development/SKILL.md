@@ -58,8 +58,8 @@ This applies to DECLARE variables, LET variables, and procedure parameters when 
 
 ```sql
 MERGE INTO target t USING source s ON t.id = s.id
-WHEN MATCHED THEN UPDATE SET t.name = s.name, t.updated_at = CURRENT_TIMESTAMP
-WHEN NOT MATCHED THEN INSERT (id, name, updated_at) VALUES (s.id, s.name, CURRENT_TIMESTAMP);
+WHEN MATCHED THEN UPDATE SET t.name = s.name, t.updated_at = CURRENT_TIMESTAMP()
+WHEN NOT MATCHED THEN INSERT (id, name, updated_at) VALUES (s.id, s.name, CURRENT_TIMESTAMP());
 ```
 
 > See `references/snowflake_sql_and_pipelines.md` for deeper SQL patterns and anti-patterns.
@@ -166,12 +166,12 @@ session = Session.builder.configs({
     "password": os.environ["SNOWFLAKE_PASSWORD"],
     "role": "my_role", "warehouse": "my_wh",
     "database": "my_db", "schema": "my_schema"
-}).create
+}).create()
 ```
 
 - Never hardcode credentials. Use environment variables or key pair auth.
-- DataFrames are lazy -- executed on `collect` / `show`.
-- Do NOT call `collect` on large DataFrames. Process server-side with DataFrame operations.
+- DataFrames are lazy -- executed on `collect()` / `show()`.
+- Do NOT call `collect()` on large DataFrames. Process server-side with DataFrame operations.
 - Use **vectorized UDFs** (10-100x faster) for batch and ML workloads.
 
 ## dbt on Snowflake
@@ -187,7 +187,7 @@ session = Session.builder.configs({
 {{ config(transient=true, copy_grants=true, query_tag='team_daily') }}
 ```
 
-- Do NOT use `{{ this }}` without `{% if is_incremental %}` guard.
+- Do NOT use `{{ this }}` without `{% if is_incremental() %}` guard.
 - Use `dynamic_table` materialization for streaming or near-real-time marts.
 
 ## Performance
@@ -250,7 +250,7 @@ Surface these issues without being asked when you notice them in context:
 
 ### Workflow 3: Debug a Failing Pipeline
 
-1. **Check task history**: `SELECT * FROM TABLE(INFORMATION_SCHEMA.TASK_HISTORY) WHERE STATE = 'FAILED' ORDER BY SCHEDULED_TIME DESC;`
+1. **Check task history**: `SELECT * FROM TABLE(INFORMATION_SCHEMA.TASK_HISTORY()) WHERE STATE = 'FAILED' ORDER BY SCHEDULED_TIME DESC;`
 2. **Check DT refresh**: `SELECT * FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLE_REFRESH_HISTORY('my_dt')) ORDER BY REFRESH_END_TIME DESC;`
 3. **Check stream staleness**: `SHOW STREAMS; -- check stale_after column`
 4. **Consult troubleshooting reference**: See `references/troubleshooting.md` for error-specific fixes
@@ -265,7 +265,7 @@ Surface these issues without being asked when you notice them in context:
 | Missing colon prefix in procedures | "Invalid identifier" runtime error | Always use `:variable_name` in SQL blocks |
 | Single warehouse for all workloads | Contention between load, transform, and query | Separate warehouses per workload type |
 | Hardcoded credentials in Snowpark | Security risk, breaks in CI/CD | Use `os.environ[]` or key pair auth |
-| `collect` on large DataFrames | Pulls entire result set to client memory | Process server-side with DataFrame operations |
+| `collect()` on large DataFrames | Pulls entire result set to client memory | Process server-side with DataFrame operations |
 | Nested subqueries instead of CTEs | Unreadable, hard to debug, Snowflake optimizes CTEs better | Use `WITH` clauses |
 | Using deprecated Cortex functions | `CLASSIFY_TEXT`, `SUMMARIZE` etc. will be removed | Use `AI_CLASSIFY`, `AI_COMPLETE` etc. |
 | Tasks without `WHEN SYSTEM$STREAM_HAS_DATA` | Task runs on schedule even with no new data, wasting credits | Add the WHEN clause for stream-driven tasks |

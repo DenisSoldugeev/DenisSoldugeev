@@ -83,7 +83,7 @@ Before the site-specific patterns, these apply everywhere:
 |-------|----------|
 | `/seo/keyword-research-guide` | `/seo/keyword-research/a-complete-guide-to-keyword-research-for-beginners-in-2024` |
 | `/guides/cold-email` | `/blog/2024/03/15/cold-email-guide` |
-| `/author/jane-doe` | `/author?id=42` |
+| `/author/reza-rezvani` | `/author?id=42` |
 | Flat category → post structure | 4-level nesting |
 
 ### Blog-Specific Notes

@@ -306,7 +306,7 @@
           "expected_output": {
             "content": "# Research Paper Title\n\nAbstract: This paper discusses...",
             "metadata": {
-              "author": "Dr. Smith",
+              "author": "the author",
               "creation_date": "2024-01-15",
               "pages": 15
             },

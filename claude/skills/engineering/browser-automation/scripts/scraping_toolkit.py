@@ -20,17 +20,17 @@ from datetime import datetime
 def build_scraping_script(url, selectors, paginate=False, output_format="script"):
     """Build a Playwright scraping script from the given parameters."""
 
-    selector_list = [s.strip for s in selectors.split(",") if s.strip]
+    selector_list = [s.strip() for s in selectors.split(",") if s.strip()]
     if not selector_list:
         return None, "No valid selectors provided."
 
     field_names = []
     for sel in selector_list:
         # Derive field name from selector: .product-title -> product_title
-        name = sel.strip("#.>:+~ ")
+        name = sel.strip("#.[]()>:+~ ")
         name = name.replace("-", "_").replace(" ", "_").replace(".", "_")
         # Remove non-alphanumeric
-        name = "".join(c if c.isalnum or c == "_" else "" for c in name)
+        name = "".join(c if c.isalnum() or c == "_" else "" for c in name)
         if not name:
             name = f"field_{len(field_names)}"
         field_names.append(name)
@@ -55,13 +55,13 @@ def build_scraping_script(url, selectors, paginate=False, output_format="script"
                 "format": "jsonl",
                 "deduplicate_by": field_names[0] if field_names else None,
             },
-            "generated_at": datetime.now.isoformat,
+            "generated_at": datetime.now().isoformat(),
         }
         return config, None
 
     # Build Python script
     fields_dict_str = "{\n"
-    for name, sel in field_map.items:
+    for name, sel in field_map.items():
         fields_dict_str += f'        "{name}": "{sel}",\n'
     fields_dict_str += "    }"
 
@@ -78,16 +78,16 @@ def build_scraping_script(url, selectors, paginate=False, output_format="script"
                 all_items.extend(items)
 
                 next_btn = page.locator(next_sel)
-                if await next_btn.count == 0:
+                if await next_btn.count() == 0:
                     break
                 try:
-                    is_disabled = await next_btn.is_disabled
+                    is_disabled = await next_btn.is_disabled()
                 except Exception:
                     is_disabled = True
                 if is_disabled:
                     break
 
-                await next_btn.click
+                await next_btn.click()
                 await page.wait_for_load_state("networkidle")
                 await asyncio.sleep(random.uniform(0.8, 2.5))
 
@@ -101,7 +101,7 @@ def build_scraping_script(url, selectors, paginate=False, output_format="script"
 """
 Auto-generated Playwright scraping script.
 Target: {url}
-Generated: {datetime.now.isoformat}
+Generated: {datetime.now().isoformat()}
 
 Requirements:
     pip install playwright
@@ -132,28 +132,28 @@ async def extract_items(page, container_selector, field_map):
     cards = await page.query_selector_all(container_selector)
     for card in cards:
         item = {{}}
-        for name, selector in field_map.items:
+        for name, selector in field_map.items():
             el = await card.query_selector(selector)
             if el:
-                item[name] = (await el.text_content or "").strip
+                item[name] = (await el.text_content() or "").strip()
             else:
                 item[name] = None
         items.append(item)
     return items
 
 {pagination_block}
-async def main:
-    async with async_playwright as p:
+async def main():
+    async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(
             viewport={{"width": 1920, "height": 1080}},
             user_agent=random.choice(USER_AGENTS),
         )
-        page = await context.new_page
+        page = await context.new_page()
 
         # Remove WebDriver flag
         await page.add_init_script(
-            "Object.defineProperty(navigator, \'webdriver\', {{get:  => undefined}});"
+            "Object.defineProperty(navigator, \'webdriver\', {{get: () => undefined}});"
         )
 
         print(f"Navigating to {{URL}}...")
@@ -162,17 +162,17 @@ async def main:
         data = await {main_call}
         print(json.dumps(data, indent=2, ensure_ascii=False))
 
-        await browser.close
+        await browser.close()
 
 
 if __name__ == "__main__":
-    asyncio.run(main)
+    asyncio.run(main())
 ''')
 
     return script, None
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Generate Playwright scraping script skeletons from URL and selectors.",
         epilog=(
@@ -212,7 +212,7 @@ def main:
         help="Output JSON configuration instead of Python script",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     output_format = "json" if args.json_output else "script"
     result, error = build_scraping_script(
@@ -245,4 +245,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -111,8 +111,8 @@ class AgentPlanner:
     """Multi-agent system architecture planner"""
     
     def __init__(self):
-        self.common_tools = self._define_common_tools
-        self.pattern_heuristics = self._define_pattern_heuristics
+        self.common_tools = self._define_common_tools()
+        self.pattern_heuristics = self._define_pattern_heuristics()
     
     def _define_common_tools(self) -> Dict[str, Tool]:
         """Define commonly used tools across agents"""
@@ -213,7 +213,7 @@ class AgentPlanner:
         # Score each pattern based on requirements
         pattern_scores = {}
         
-        for pattern, heuristics in self.pattern_heuristics.items:
+        for pattern, heuristics in self.pattern_heuristics.items():
             score = 0
             
             # Team size fit
@@ -225,10 +225,10 @@ class AgentPlanner:
             
             # Task complexity assessment
             complexity_indicators = [
-                "parallel" in requirements.description.lower,
-                "sequential" in requirements.description.lower,
-                "hierarchical" in requirements.description.lower,
-                "distributed" in requirements.description.lower,
+                "parallel" in requirements.description.lower(),
+                "sequential" in requirements.description.lower(),
+                "hierarchical" in requirements.description.lower(),
+                "distributed" in requirements.description.lower(),
                 task_count > 5,
                 len(requirements.constraints) > 3
             ]
@@ -239,9 +239,9 @@ class AgentPlanner:
                 score += 2
             elif pattern == AgentArchitecturePattern.SUPERVISOR and 2 <= complexity_score <= 4:
                 score += 2
-            elif pattern == AgentArchitecturePattern.PIPELINE and "sequential" in requirements.description.lower:
+            elif pattern == AgentArchitecturePattern.PIPELINE and "sequential" in requirements.description.lower():
                 score += 3
-            elif pattern == AgentArchitecturePattern.SWARM and "parallel" in requirements.description.lower:
+            elif pattern == AgentArchitecturePattern.SWARM and "parallel" in requirements.description.lower():
                 score += 3
             elif pattern == AgentArchitecturePattern.HIERARCHICAL and complexity_score >= 4:
                 score += 2
@@ -257,7 +257,7 @@ class AgentPlanner:
             pattern_scores[pattern] = score
         
         # Select the highest scoring pattern
-        best_pattern = max(pattern_scores.items, key=lambda x: x[1])[0]
+        best_pattern = max(pattern_scores.items(), key=lambda x: x[1])[0]
         return best_pattern
     
     def design_agents(self, requirements: SystemRequirements, pattern: AgentArchitecturePattern) -> List[AgentDefinition]:
@@ -279,7 +279,7 @@ class AgentPlanner:
     
     def _design_single_agent(self, requirements: SystemRequirements) -> List[AgentDefinition]:
         """Design a single general-purpose agent"""
-        all_tools = list(self.common_tools.values)
+        all_tools = list(self.common_tools.values())
         
         agent = AgentDefinition(
             name="universal_agent",
@@ -333,9 +333,9 @@ class AgentPlanner:
         for i, domain in enumerate(task_domains[:requirements.team_size - 1]):
             specialist = AgentDefinition(
                 name=f"{domain}_specialist",
-                role=f"{domain.title} Specialist",
+                role=f"{domain.title()} Specialist",
                 archetype=AgentRole.SPECIALIST,
-                responsibilities=[task for task in requirements.tasks if domain in task.lower],
+                responsibilities=[task for task in requirements.tasks if domain in task.lower()],
                 capabilities=[f"{domain}_expertise", "specialized_tools", "domain_knowledge"],
                 tools=self._select_tools_for_domain(domain),
                 communication_interfaces=["supervisor_messaging"],
@@ -365,7 +365,7 @@ class AgentPlanner:
                 archetype=AgentRole.SPECIALIST,
                 responsibilities=requirements.tasks,  # All agents can handle all tasks
                 capabilities=base_capabilities + [f"specialization_{i%3}"],  # Some specialization
-                tools=list(self.common_tools.values),
+                tools=list(self.common_tools.values()),
                 communication_interfaces=["peer_messaging", "broadcast", "consensus_protocol"],
                 constraints={
                     "peer_discovery_timeout": "10s",
@@ -427,7 +427,7 @@ class AgentPlanner:
                 archetype=AgentRole.SPECIALIST,
                 responsibilities=["task_execution", "result_delivery", "status_reporting"],
                 capabilities=["task_execution", "specialized_skills", "reliability"],
-                tools=self._select_diverse_tools,
+                tools=self._select_diverse_tools(),
                 communication_interfaces=["team_messaging"],
                 constraints={"task_focus": "single", "reporting_interval": "30min"},
                 success_criteria=["complete assigned tasks", "maintain quality", "meet deadlines"],
@@ -447,7 +447,7 @@ class AgentPlanner:
         for i, stage in enumerate(pipeline_stages):
             agent = AgentDefinition(
                 name=f"pipeline_stage_{i+1}_{stage}",
-                role=f"Pipeline Stage {i+1}: {stage.title}",
+                role=f"Pipeline Stage {i+1}: {stage.title()}",
                 archetype=AgentRole.SPECIALIST,
                 responsibilities=[f"process_{stage}", f"validate_{stage}_output", "handoff_to_next_stage"],
                 capabilities=[f"{stage}_processing", "quality_control", "data_transformation"],
@@ -476,8 +476,8 @@ class AgentPlanner:
             "file": ["file", "document", "save", "load", "manage"]
         }
         
-        for domain, keywords in domain_keywords.items:
-            if any(keyword in " ".join(tasks).lower for keyword in keywords):
+        for domain, keywords in domain_keywords.items():
+            if any(keyword in " ".join(tasks).lower() for keyword in keywords):
                 domains.append(domain)
         
         return domains[:5]  # Limit to 5 domains
@@ -489,7 +489,7 @@ class AgentPlanner:
         
         # Try to infer stages from tasks
         stages = []
-        task_text = " ".join(tasks).lower
+        task_text = " ".join(tasks).lower()
         
         if "collect" in task_text or "gather" in task_text:
             stages.append("collection")
@@ -844,14 +844,14 @@ class AgentPlanner:
         return design, mermaid_diagram, roadmap
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Multi-Agent System Architecture Planner")
     parser.add_argument("input_file", help="JSON file with system requirements")
     parser.add_argument("-o", "--output", help="Output file prefix (default: agent_architecture)")
     parser.add_argument("--format", choices=["json", "yaml", "both"], default="both", 
                        help="Output format")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Load requirements
@@ -861,7 +861,7 @@ def main:
         requirements = SystemRequirements(**requirements_data)
         
         # Plan the system
-        planner = AgentPlanner
+        planner = AgentPlanner()
         design, mermaid_diagram, roadmap = planner.plan_system(requirements)
         
         # Prepare output
@@ -908,4 +908,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

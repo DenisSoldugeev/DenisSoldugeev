@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Optional, Tuple
 PATTERN_LIBRARY = {
     "my_open_bugs": {
         "phrases": ["my open bugs", "my bugs", "bugs assigned to me"],
-        "jql": 'assignee = currentUser AND type = Bug AND status != Done',
+        "jql": 'assignee = currentUser() AND type = Bug AND status != Done',
         "description": "All open bugs assigned to current user",
     },
     "high_priority_bugs": {
@@ -36,7 +36,7 @@ PATTERN_LIBRARY = {
     },
     "my_open_tasks": {
         "phrases": ["my open tasks", "my tasks", "tasks assigned to me", "my work"],
-        "jql": 'assignee = currentUser AND status != Done',
+        "jql": 'assignee = currentUser() AND status != Done',
         "description": "All open issues assigned to current user",
     },
     "unassigned_issues": {
@@ -56,12 +56,12 @@ PATTERN_LIBRARY = {
     },
     "overdue": {
         "phrases": ["overdue", "past due", "missed deadline", "overdue tasks"],
-        "jql": 'duedate < now AND status != Done',
+        "jql": 'duedate < now() AND status != Done',
         "description": "Issues past their due date",
     },
     "due_this_week": {
         "phrases": ["due this week", "due soon", "upcoming deadlines"],
-        "jql": 'duedate >= startOfWeek AND duedate <= endOfWeek AND status != Done',
+        "jql": 'duedate >= startOfWeek() AND duedate <= endOfWeek() AND status != Done',
         "description": "Issues due this week",
     },
     "blocked_issues": {
@@ -76,7 +76,7 @@ PATTERN_LIBRARY = {
     },
     "sprint_issues": {
         "phrases": ["current sprint", "this sprint", "active sprint"],
-        "jql": 'sprint in openSprints',
+        "jql": 'sprint in openSprints()',
         "description": "Issues in the current active sprint",
     },
     "backlog": {
@@ -96,7 +96,7 @@ PATTERN_LIBRARY = {
     },
     "done_this_week": {
         "phrases": ["done this week", "completed this week", "resolved this week"],
-        "jql": 'status changed to Done DURING (startOfWeek, now)',
+        "jql": 'status changed to Done DURING (startOfWeek(), now())',
         "description": "Issues completed during the current week",
     },
     "created_vs_resolved": {
@@ -106,7 +106,7 @@ PATTERN_LIBRARY = {
     },
     "my_reported_issues": {
         "phrases": ["my reported", "reported by me", "i created", "i reported"],
-        "jql": 'reporter = currentUser ORDER BY created DESC',
+        "jql": 'reporter = currentUser() ORDER BY created DESC',
         "description": "Issues reported by current user",
     },
     "stale_issues": {
@@ -163,12 +163,12 @@ KEYWORD_FRAGMENTS = {
     "low": ("priority", "in (Low, Lowest)"),
     "lowest": ("priority", "= Lowest"),
     # Assignee
-    "me": ("assignee", "= currentUser"),
-    "mine": ("assignee", "= currentUser"),
+    "me": ("assignee", "= currentUser()"),
+    "mine": ("assignee", "= currentUser()"),
     "unassigned": ("assignee", "is EMPTY"),
     # Time
-    "overdue": ("duedate", "< now"),
-    "today": ("duedate", "= now"),
+    "overdue": ("duedate", "< now()"),
+    "today": ("duedate", "= now()"),
 }
 
 PROJECT_PATTERN = re.compile(r'\b([A-Z]{2,10})\b')
@@ -193,8 +193,8 @@ EXCLUDED_WORDS = {
 
 def find_matching_pattern(description: str) -> Optional[Dict[str, Any]]:
     """Check if description matches a known pattern exactly."""
-    desc_lower = description.lower.strip
-    for pattern_name, pattern_data in PATTERN_LIBRARY.items:
+    desc_lower = description.lower().strip()
+    for pattern_name, pattern_data in PATTERN_LIBRARY.items():
         for phrase in pattern_data["phrases"]:
             if phrase in desc_lower or desc_lower in phrase:
                 return {
@@ -219,8 +219,8 @@ def build_jql_from_description(description: str) -> Dict[str, Any]:
 
     # Dynamic query building
     clauses = []
-    used_fields = set
-    desc_lower = description.lower
+    used_fields = set()
+    desc_lower = description.lower()
 
     # Extract project
     project = _extract_project(description)
@@ -229,8 +229,8 @@ def build_jql_from_description(description: str) -> Dict[str, Any]:
         used_fields.add("project")
 
     # Extract keyword-based fragments
-    for keyword, (field, fragment) in KEYWORD_FRAGMENTS.items:
-        if keyword in desc_lower.split and field not in used_fields:
+    for keyword, (field, fragment) in KEYWORD_FRAGMENTS.items():
+        if keyword in desc_lower.split() and field not in used_fields:
             clauses.append(f"{field} {fragment}")
             used_fields.add(field)
 
@@ -238,8 +238,8 @@ def build_jql_from_description(description: str) -> Dict[str, Any]:
     assignee_match = ASSIGNEE_PATTERN.search(description)
     if assignee_match and "assignee" not in used_fields:
         assignee = assignee_match.group(1)
-        if assignee.lower in ("me", "myself"):
-            clauses.append("assignee = currentUser")
+        if assignee.lower() in ("me", "myself"):
+            clauses.append("assignee = currentUser()")
         else:
             clauses.append(f'assignee = "{assignee}"')
         used_fields.add("assignee")
@@ -258,16 +258,16 @@ def build_jql_from_description(description: str) -> Dict[str, Any]:
     date_match = DATE_RANGE_PATTERN.search(description)
     if date_match:
         amount = date_match.group(1)
-        unit = date_match.group(2).lower
+        unit = date_match.group(2).lower()
         unit_char = {"day": "d", "week": "w", "month": "m"}.get(unit, "d")
         clauses.append(f"created >= -{amount}{unit_char}")
 
     # Extract sprint reference
     sprint_match = SPRINT_NAME_PATTERN.search(description)
     if sprint_match:
-        sprint_name = sprint_match.group(1).strip
-        if sprint_name.lower in ("current", "active", "open"):
-            clauses.append("sprint in openSprints")
+        sprint_name = sprint_match.group(1).strip()
+        if sprint_name.lower() in ("current", "active", "open"):
+            clauses.append("sprint in openSprints()")
         else:
             clauses.append(f'sprint = "{sprint_name}"')
 
@@ -319,7 +319,7 @@ def validate_jql_syntax(jql: str) -> Dict[str, Any]:
     """Basic JQL syntax validation."""
     issues = []
 
-    if not jql.strip:
+    if not jql.strip():
         return {"valid": False, "issues": ["Empty query"]}
 
     # Check balanced quotes
@@ -338,12 +338,12 @@ def validate_jql_syntax(jql: str) -> Dict[str, Any]:
 
     # Check for known JQL operators
     valid_operators = {"=", "!=", ">", "<", ">=", "<=", "~", "!~", "in", "not in", "is", "is not", "was", "was not", "changed"}
-    jql_upper = jql.upper
+    jql_upper = jql.upper()
 
     # Check AND/OR placement
-    if jql_upper.strip.startswith("AND") or jql_upper.strip.startswith("OR"):
+    if jql_upper.strip().startswith("AND") or jql_upper.strip().startswith("OR"):
         issues.append("Query cannot start with AND/OR")
-    if jql_upper.strip.endswith("AND") or jql_upper.strip.endswith("OR"):
+    if jql_upper.strip().endswith("AND") or jql_upper.strip().endswith("OR"):
         issues.append("Query cannot end with AND/OR")
 
     # Check ORDER BY syntax
@@ -402,7 +402,7 @@ def format_patterns_output(output_format: str) -> str:
     """Format available patterns list."""
     if output_format == "json":
         patterns = {}
-        for name, data in PATTERN_LIBRARY.items:
+        for name, data in PATTERN_LIBRARY.items():
             patterns[name] = {
                 "description": data["description"],
                 "phrases": data["phrases"],
@@ -416,7 +416,7 @@ def format_patterns_output(output_format: str) -> str:
     lines.append("=" * 60)
     lines.append("")
 
-    for name, data in PATTERN_LIBRARY.items:
+    for name, data in PATTERN_LIBRARY.items():
         lines.append(f"  {name}")
         lines.append(f"    Description: {data['description']}")
         lines.append(f"    Phrases: {', '.join(data['phrases'])}")
@@ -436,7 +436,7 @@ def format_json_output(result: Dict[str, Any]) -> Dict[str, Any]:
 # CLI Interface
 # ---------------------------------------------------------------------------
 
-def main -> int:
+def main() -> int:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Build JQL queries from natural language descriptions"
@@ -458,7 +458,7 @@ def main -> int:
         help="List all available query patterns",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         if args.patterns:
@@ -491,4 +491,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

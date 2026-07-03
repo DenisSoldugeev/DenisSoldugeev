@@ -52,9 +52,9 @@ DECOMPOSITION_SIGNALS = {
 
 
 def count_signals(text: str, signal_map: Dict[str, List[str]]) -> Dict[str, int]:
-    text_lower = text.lower
+    text_lower = text.lower()
     counts: Dict[str, int] = {}
-    for component, phrases in signal_map.items:
+    for component, phrases in signal_map.items():
         component_count = 0
         for phrase in phrases:
             # Allow optional plural 's' / 'ed' / 'ing' suffix for single-word phrases (not multi-word)
@@ -72,9 +72,9 @@ def recommend(question: str) -> Dict[str, Any]:
     spider = count_signals(question, SPIDER_SIGNALS)
     decomp = count_signals(question, DECOMPOSITION_SIGNALS)
 
-    pico_total = sum(pico.values)
-    spider_total = sum(spider.values)
-    decomp_total = sum(decomp.values)
+    pico_total = sum(pico.values())
+    spider_total = sum(spider.values())
+    decomp_total = sum(decomp.values())
 
     total = pico_total + spider_total + decomp_total
 
@@ -94,17 +94,17 @@ def recommend(question: str) -> Dict[str, Any]:
     elif decomp_total > pico_total and decomp_total > spider_total:
         framework = "Decomposition"
         confidence = "high" if decomp_total >= 3 else "medium"
-        active = [k for k, v in decomp.items if v > 0]
+        active = [k for k, v in decomp.items() if v > 0]
         rationale = f"Decomposition signals dominate ({decomp_total} total, components: {', '.join(active)})"
     elif spider_total > pico_total and spider_total > decomp_total:
         framework = "SPIDER"
         confidence = "high" if spider_total >= 3 else "medium"
-        active = [k for k, v in spider.items if v > 0]
+        active = [k for k, v in spider.items() if v > 0]
         rationale = f"SPIDER signals dominate ({spider_total} total, components: {', '.join(active)})"
     else:
         framework = "PICO"
         confidence = "high" if pico_total >= 3 else "medium" if pico_total >= 1 else "low"
-        active = [k for k, v in pico.items if v > 0]
+        active = [k for k, v in pico.items() if v > 0]
         rationale = f"PICO signals dominate ({pico_total} total, components: {', '.join(active) if active else 'default'})"
 
     # Sub-area starter questions (template — actual generation needs LLM context)
@@ -165,9 +165,9 @@ def render_human(result: Dict[str, Any]) -> str:
     out.append(f"Rationale:       {result['rationale']}")
     out.append("")
     out.append("Signal counts:")
-    for fw, components in result["signal_counts"].items:
-        total = sum(components.values)
-        active = ", ".join(f"{k}={v}" for k, v in components.items if v > 0) or "(none)"
+    for fw, components in result["signal_counts"].items():
+        total = sum(components.values())
+        active = ", ".join(f"{k}={v}" for k, v in components.items() if v > 0) or "(none)"
         out.append(f"  {fw:<18s} total={total}  ({active})")
     out.append("")
     out.append("Starter sub-area questions:")
@@ -191,7 +191,7 @@ def main(argv: List[str]) -> int:
     elif args.question:
         result = recommend(args.question)
     else:
-        parser.print_help; return 0
+        parser.print_help(); return 0
 
     if args.output == "json":
         print(json.dumps(result, indent=2))

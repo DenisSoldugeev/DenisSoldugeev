@@ -383,7 +383,7 @@ WITH source_data AS (
     FROM {{ source('raw', 'customers') }}
 ),
 
-{% if is_incremental %}
+{% if is_incremental() %}
 -- Get current records that have changed
 changed_records AS (
     SELECT
@@ -410,7 +410,7 @@ SELECT
     CAST('9999-12-31' AS TIMESTAMP) as effective_end_date,
     TRUE as is_current,
     row_hash
-{% if is_incremental %}
+{% if is_incremental() %}
 FROM changed_records
 {% else %}
 FROM source_data
@@ -776,7 +776,7 @@ SELECT * FROM enriched
 WITH orders AS (
     SELECT * FROM {{ ref('int_orders_enriched') }}
 
-    {% if is_incremental %}
+    {% if is_incremental() %}
     -- Only process new/changed records
     WHERE order_updated_at > (
         SELECT COALESCE(MAX(order_updated_at), '1900-01-01')

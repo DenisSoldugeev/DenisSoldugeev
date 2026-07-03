@@ -70,7 +70,7 @@ Out of scope: nested lists, HTML inlines, footnotes, definition lists, task list
 ## Hard rules
 
 1. **Refuses input < 100 lines.** Markdown wins below the threshold (Shihipar).
-2. **Refuses without onboarding.** `config_loader.setup_completed` must return `True`. Otherwise surface `/ds:design-system`.
+2. **Refuses without onboarding.** `config_loader.setup_completed()` must return `True`. Otherwise surface `/ds:design-system`.
 3. **Single-file output.** All CSS + JS inline. Only externals are `fonts.googleapis.com` and `cdn.jsdelivr.net` (Prism). Anything else is a regression.
 4. **Customization must change behavior.** `design_style=editorial` produces 720px-wide layout with 1.75 line-height; `playful` rounds the callouts and adds shadow; `technical` is dense with 0.875rem code. Smoke-tested.
 5. **WCAG-compliant tokens.** Inherits the design-system's WCAG AA palette — body text ≥ 4.5:1 contrast, links iteratively walked to 4.5:1.

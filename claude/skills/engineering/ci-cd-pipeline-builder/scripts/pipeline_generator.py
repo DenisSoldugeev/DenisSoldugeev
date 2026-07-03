@@ -32,14 +32,14 @@ class PipelineSummary:
     languages: List[str]
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate CI/CD pipeline YAML from detected stack.")
     parser.add_argument("--input", help="Stack report JSON file. If omitted, can read stdin JSON.")
     parser.add_argument("--repo", help="Repository path for auto-detection fallback.")
     parser.add_argument("--platform", choices=["github", "gitlab"], required=True, help="Target CI platform.")
     parser.add_argument("--output", help="Write YAML to this file; otherwise print to stdout.")
     parser.add_argument("--format", choices=["text", "json"], default="text", help="Summary output format.")
-    return parser.parse_args
+    return parser.parse_args()
 
 
 def load_json_input(input_path: Optional[str]) -> Optional[Dict[str, Any]]:
@@ -49,8 +49,8 @@ def load_json_input(input_path: Optional[str]) -> Optional[Dict[str, Any]]:
         except Exception as exc:
             raise CLIError(f"Failed reading --input: {exc}") from exc
 
-    if not sys.stdin.isatty:
-        raw = sys.stdin.read.strip
+    if not sys.stdin.isatty():
+        raw = sys.stdin.read().strip()
         if raw:
             try:
                 return json.loads(raw)
@@ -63,7 +63,7 @@ def load_json_input(input_path: Optional[str]) -> Optional[Dict[str, Any]]:
 def detect_stack(repo: Path) -> Dict[str, Any]:
     scripts = {}
     pkg_file = repo / "package.json"
-    if pkg_file.exists:
+    if pkg_file.exists():
         try:
             pkg = json.loads(pkg_file.read_text(encoding="utf-8"))
             raw_scripts = pkg.get("scripts", {})
@@ -73,20 +73,20 @@ def detect_stack(repo: Path) -> Dict[str, Any]:
             scripts = {}
 
     languages: List[str] = []
-    if pkg_file.exists:
+    if pkg_file.exists():
         languages.append("node")
-    if (repo / "pyproject.toml").exists or (repo / "requirements.txt").exists:
+    if (repo / "pyproject.toml").exists() or (repo / "requirements.txt").exists():
         languages.append("python")
-    if (repo / "go.mod").exists:
+    if (repo / "go.mod").exists():
         languages.append("go")
 
     return {
         "languages": sorted(set(languages)),
         "signals": {
-            "pnpm_lock": (repo / "pnpm-lock.yaml").exists,
-            "yarn_lock": (repo / "yarn.lock").exists,
-            "npm_lock": (repo / "package-lock.json").exists,
-            "dockerfile": (repo / "Dockerfile").exists,
+            "pnpm_lock": (repo / "pnpm-lock.yaml").exists(),
+            "yarn_lock": (repo / "yarn.lock").exists(),
+            "npm_lock": (repo / "package-lock.json").exists(),
+            "dockerfile": (repo / "Dockerfile").exists(),
         },
         "lint_commands": ["npm run lint"] if "lint" in scripts else [],
         "test_commands": ["npm test"] if "test" in scripts else [],
@@ -167,6 +167,21 @@ def github_yaml(stack: Dict[str, Any]) -> str:
                 "      - run: go build ./...",
             ]
         )
+
+    if not any(lang in langs for lang in ("node", "python", "go")):
+        # terraform/docker-only (or unrecognized) stacks: run detected commands directly
+        lines.extend(
+            [
+                "  ci:",
+                "    runs-on: ubuntu-latest",
+                "    steps:",
+                "      - uses: actions/checkout@v4",
+            ]
+        )
+        if "terraform" in langs:
+            lines.append("      - uses: hashicorp/setup-terraform@v3")
+        for cmd in lint_cmds + test_cmds + build_cmds:
+            lines.append(f"      - run: {cmd}")
 
     return "\n".join(lines) + "\n"
 
@@ -251,18 +266,34 @@ def gitlab_yaml(stack: Dict[str, Any]) -> str:
             ]
         )
 
+    if not any(lang in langs for lang in ("node", "python", "go")):
+        # terraform/docker-only (or unrecognized) stacks: run detected commands directly
+        image = "hashicorp/terraform:1.9" if "terraform" in langs else "alpine:3.20"
+        for stage, cmds in (("lint", lint_cmds), ("test", test_cmds), ("build", build_cmds)):
+            lines.extend(
+                [
+                    "",
+                    f"generic_{stage}:",
+                    f"  image: {image}",
+                    f"  stage: {stage}",
+                    "  script:",
+                ]
+            )
+            for cmd in cmds:
+                lines.append(f"    - {cmd}")
+
     return "\n".join(lines) + "\n"
 
 
-def main -> int:
-    args = parse_args
+def main() -> int:
+    args = parse_args()
     stack = load_json_input(args.input)
 
     if stack is None:
         if not args.repo:
             raise CLIError("Provide stack input via --input/stdin or set --repo for auto-detection.")
-        repo = Path(args.repo).resolve
-        if not repo.exists or not repo.is_dir:
+        repo = Path(args.repo).resolve()
+        if not repo.exists() or not repo.is_dir():
             raise CLIError(f"Invalid repo path: {repo}")
         stack = detect_stack(repo)
 
@@ -304,7 +335,7 @@ def main -> int:
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(main)
+        raise SystemExit(main())
     except CLIError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         raise SystemExit(2)

@@ -117,7 +117,7 @@ def compute_self_hosted_cost_3yr(profile: Dict[str, Any], model_class: str) -> f
     return (monthly_inference * 36) + (annual_ops * 3)
 
 
-def compute_build_cost_3yr -> float:
+def compute_build_cost_3yr() -> float:
     return BUILD_FROM_SCRATCH_ONE_TIME + (BUILD_FROM_SCRATCH_ANNUAL * 3)
 
 
@@ -230,7 +230,7 @@ def analyze(profile: Dict[str, Any]) -> Dict[str, Any]:
         "api_open_hosted_3yr": compute_api_cost_3yr(profile, "open-router-hosted"),
         "finetune_3yr": compute_finetune_cost_3yr(profile),
         "self_hosted_70b_3yr": compute_self_hosted_cost_3yr(profile, "70b-class"),
-        "build_3yr": compute_build_cost_3yr,
+        "build_3yr": compute_build_cost_3yr(),
     }
 
     recommendation, reasoning, failure_modes = pick_recommendation(profile, costs)
@@ -262,7 +262,7 @@ def analyze(profile: Dict[str, Any]) -> Dict[str, Any]:
         "recommendation": recommendation,
         "reasoning": reasoning,
         "failure_modes": failure_modes,
-        "costs_3yr_usd": {k: round(v, 0) for k, v in costs.items},
+        "costs_3yr_usd": {k: round(v, 0) for k, v in costs.items()},
         "breakeven_monthly_queries_api_vs_finetune": breakeven_monthly_queries,
         "current_monthly_volume": profile.get("monthly_volume_queries", 0),
     }
@@ -325,7 +325,7 @@ def _wrap(text: str, indent: int, width: int = 70) -> List[str]:
     return textwrap.wrap(text, width=width, initial_indent=" " * indent, subsequent_indent=" " * indent) or [" " * indent + text]
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Decide API vs fine-tune vs build with 3-year TCO comparison.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -333,7 +333,7 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to use_case JSON (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
@@ -361,4 +361,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

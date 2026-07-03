@@ -3,15 +3,21 @@
 Prompt Optimizer - Static analysis tool for prompt engineering
 
 Features:
-- Token estimation (GPT-4/Claude approximation)
+- Token estimation (model-agnostic chars-per-token approximation)
 - Prompt structure analysis
 - Clarity scoring
 - Few-shot example extraction and management
 - Optimization suggestions
 
+Model-agnostic by design: pass any model name with --model (only the tokenizer
+family is inferred from it), and supply current pricing yourself with
+--price-per-mtok if you want cost estimates. No model IDs or prices are
+hardcoded, so this tool does not rot as the model landscape changes.
+
 Usage:
     python prompt_optimizer.py prompt.txt --analyze
-    python prompt_optimizer.py prompt.txt --tokens --model gpt-4
+    python prompt_optimizer.py prompt.txt --tokens
+    python prompt_optimizer.py prompt.txt --tokens --model claude --price-per-mtok 3.00
     python prompt_optimizer.py prompt.txt --optimize --output optimized.txt
     python prompt_optimizer.py prompt.txt --extract-examples --output examples.json
 """
@@ -25,23 +31,11 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict
 
 
-# Token estimation ratios (chars per token approximation)
+# Token estimation ratios (chars per token approximation), inferred from the
+# tokenizer FAMILY in the --model string. Any model name is accepted.
 TOKEN_RATIOS = {
-    'gpt-4': 4.0,
-    'gpt-3.5': 4.0,
-    'claude': 3.5,
-    'default': 4.0
-}
-
-# Cost per 1K tokens (input)
-COST_PER_1K = {
-    'gpt-4': 0.03,
-    'gpt-4-turbo': 0.01,
-    'gpt-3.5-turbo': 0.0005,
-    'claude-3-opus': 0.015,
-    'claude-3-sonnet': 0.003,
-    'claude-3-haiku': 0.00025,
-    'default': 0.01
+    'claude': 3.5,   # Anthropic tokenizer tends to be denser
+    'default': 4.0,  # common BPE-family approximation
 }
 
 
@@ -49,7 +43,7 @@ COST_PER_1K = {
 class PromptAnalysis:
     """Results of prompt analysis"""
     token_count: int
-    estimated_cost: float
+    estimated_cost: Optional[float]
     model: str
     clarity_score: int
     structure_score: int
@@ -72,15 +66,21 @@ class FewShotExample:
 
 
 def estimate_tokens(text: str, model: str = 'default') -> int:
-    """Estimate token count based on character ratio"""
-    ratio = TOKEN_RATIOS.get(model, TOKEN_RATIOS['default'])
+    """Estimate token count based on character ratio (family inferred from model name)"""
+    family = 'claude' if 'claude' in model.lower() else 'default'
+    ratio = TOKEN_RATIOS[family]
     return int(len(text) / ratio)
 
 
-def estimate_cost(token_count: int, model: str = 'default') -> float:
-    """Estimate cost based on token count"""
-    cost_per_1k = COST_PER_1K.get(model, COST_PER_1K['default'])
-    return round((token_count / 1000) * cost_per_1k, 6)
+def estimate_cost(token_count: int, price_per_mtok: Optional[float] = None) -> Optional[float]:
+    """Estimate input cost from a user-supplied price (USD per million tokens).
+
+    Returns None when no price is supplied — pricing changes too often to hardcode;
+    look up your provider's current rate and pass --price-per-mtok.
+    """
+    if price_per_mtok is None:
+        return None
+    return round((token_count / 1_000_000) * price_per_mtok, 6)
 
 
 def find_ambiguous_instructions(text: str) -> List[Dict[str, str]]:
@@ -104,9 +104,9 @@ def find_ambiguous_instructions(text: str) -> List[Dict[str, str]]:
                 issues.append({
                     'type': 'ambiguity',
                     'line': i,
-                    'text': match.group,
+                    'text': match.group(),
                     'message': message,
-                    'context': line.strip[:80]
+                    'context': line.strip()[:80]
                 })
 
     return issues
@@ -120,9 +120,9 @@ def find_redundant_content(text: str) -> List[Dict[str, str]]:
     # Check for repeated phrases (3+ words)
     seen_phrases = {}
     for i, line in enumerate(lines, 1):
-        words = line.split
+        words = line.split()
         for j in range(len(words) - 2):
-            phrase = ' '.join(words[j:j+3]).lower
+            phrase = ' '.join(words[j:j+3]).lower()
             phrase = re.sub(r'[^\w\s]', '', phrase)
             if phrase and len(phrase) > 10:
                 if phrase in seen_phrases:
@@ -131,7 +131,7 @@ def find_redundant_content(text: str) -> List[Dict[str, str]]:
                         'line': i,
                         'text': phrase,
                         'message': f'Phrase repeated from line {seen_phrases[phrase]}',
-                        'context': line.strip[:80]
+                        'context': line.strip()[:80]
                     })
                 else:
                     seen_phrases[phrase] = i
@@ -177,14 +177,14 @@ def extract_sections(text: str) -> List[Dict[str, any]]:
     for i, line in enumerate(lines, 1):
         is_header = False
         for pattern in section_patterns:
-            match = re.match(pattern, line.strip, re.IGNORECASE)
+            match = re.match(pattern, line.strip(), re.IGNORECASE)
             if match:
                 if current_section['content']:
                     current_section['end'] = i - 1
                     current_section['line_count'] = len(current_section['content'])
                     sections.append(current_section)
                 current_section = {
-                    'name': match.group(1).strip if match.groups else line.strip,
+                    'name': match.group(1).strip() if match.groups() else line.strip(),
                     'start': i,
                     'content': []
                 }
@@ -213,8 +213,8 @@ def extract_few_shot_examples(text: str) -> List[FewShotExample]:
     matches = re.finditer(example_pattern, text, re.DOTALL | re.IGNORECASE)
     for i, match in enumerate(matches, 1):
         examples.append(FewShotExample(
-            input_text=match.group(2).strip if match.group(2) else '',
-            output_text=match.group(3).strip if match.group(3) else '',
+            input_text=match.group(2).strip() if match.group(2) else '',
+            output_text=match.group(3).strip() if match.group(3) else '',
             index=i
         ))
 
@@ -224,8 +224,8 @@ def extract_few_shot_examples(text: str) -> List[FewShotExample]:
         matches = re.finditer(io_pattern, text, re.DOTALL)
         for i, match in enumerate(matches, 1):
             examples.append(FewShotExample(
-                input_text=match.group(1).strip,
-                output_text=match.group(2).strip,
+                input_text=match.group(1).strip(),
+                output_text=match.group(2).strip(),
                 index=i
             ))
 
@@ -299,13 +299,14 @@ def generate_suggestions(analysis: PromptAnalysis) -> List[str]:
     return suggestions
 
 
-def analyze_prompt(text: str, model: str = 'gpt-4') -> PromptAnalysis:
+def analyze_prompt(text: str, model: str = 'default',
+                   price_per_mtok: Optional[float] = None) -> PromptAnalysis:
     """Perform comprehensive prompt analysis"""
 
     # Basic metrics
     token_count = estimate_tokens(text, model)
-    cost = estimate_cost(token_count, model)
-    word_count = len(text.split)
+    cost = estimate_cost(token_count, price_per_mtok)
+    word_count = len(text.split())
     line_count = len(text.split('\n'))
 
     # Find issues
@@ -352,10 +353,10 @@ def optimize_prompt(text: str) -> str:
     optimized = re.sub(r' {2,}', ' ', optimized)
 
     # Trim lines
-    lines = [line.rstrip for line in optimized.split('\n')]
+    lines = [line.rstrip() for line in optimized.split('\n')]
     optimized = '\n'.join(lines)
 
-    return optimized.strip
+    return optimized.strip()
 
 
 def format_report(analysis: PromptAnalysis) -> str:
@@ -368,7 +369,10 @@ def format_report(analysis: PromptAnalysis) -> str:
 
     report.append("📊 METRICS")
     report.append(f"  Token count:     {analysis.token_count:,}")
-    report.append(f"  Estimated cost:  ${analysis.estimated_cost:.4f} ({analysis.model})")
+    if analysis.estimated_cost is not None:
+        report.append(f"  Estimated cost:  ${analysis.estimated_cost:.4f} ({analysis.model}, user-supplied price)")
+    else:
+        report.append("  Estimated cost:  n/a (pass --price-per-mtok with your provider's current rate)")
     report.append(f"  Word count:      {analysis.word_count:,}")
     report.append(f"  Line count:      {analysis.line_count}")
     report.append("")
@@ -410,14 +414,14 @@ def format_report(analysis: PromptAnalysis) -> str:
     return '\n'.join(report)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Prompt Optimizer - Analyze and optimize prompts",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   %(prog)s prompt.txt --analyze
-  %(prog)s prompt.txt --tokens --model claude-3-sonnet
+  %(prog)s prompt.txt --tokens --model claude --price-per-mtok 3.00
   %(prog)s prompt.txt --optimize --output optimized.txt
   %(prog)s prompt.txt --extract-examples --output examples.json
         """
@@ -428,18 +432,21 @@ Examples:
     parser.add_argument('--tokens', '-t', action='store_true', help='Count tokens only')
     parser.add_argument('--optimize', '-O', action='store_true', help='Generate optimized version')
     parser.add_argument('--extract-examples', '-e', action='store_true', help='Extract few-shot examples')
-    parser.add_argument('--model', '-m', default='gpt-4',
-                       choices=['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo', 'claude-3-opus', 'claude-3-sonnet', 'claude-3-haiku'],
-                       help='Model for token/cost estimation')
+    parser.add_argument('--model', '-m', default='default',
+                       help='Model name (any string; only the tokenizer family is inferred: '
+                            'names containing "claude" use 3.5 chars/token, otherwise 4.0)')
+    parser.add_argument('--price-per-mtok', type=float, default=None,
+                       help='Input price in USD per million tokens (look up your provider\'s '
+                            'current rate); omit to skip cost estimation')
     parser.add_argument('--output', '-o', help='Output file path')
     parser.add_argument('--json', '-j', action='store_true', help='Output as JSON')
     parser.add_argument('--compare', '-c', help='Compare with baseline analysis JSON')
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Read prompt file
     prompt_path = Path(args.prompt)
-    if not prompt_path.exists:
+    if not prompt_path.exists():
         print(f"Error: File not found: {args.prompt}", file=sys.stderr)
         sys.exit(1)
 
@@ -448,7 +455,7 @@ Examples:
     # Tokens only
     if args.tokens:
         token_count = estimate_tokens(text, args.model)
-        cost = estimate_cost(token_count, args.model)
+        cost = estimate_cost(token_count, args.price_per_mtok)
         if args.json:
             print(json.dumps({
                 'tokens': token_count,
@@ -457,7 +464,8 @@ Examples:
             }, indent=2))
         else:
             print(f"Tokens: {token_count:,}")
-            print(f"Estimated cost: ${cost:.4f} ({args.model})")
+            if cost is not None:
+                print(f"Estimated cost: ${cost:.4f} ({args.model}, user-supplied price)")
         sys.exit(0)
 
     # Extract examples
@@ -490,18 +498,18 @@ Examples:
         sys.exit(0)
 
     # Default: full analysis
-    analysis = analyze_prompt(text, args.model)
+    analysis = analyze_prompt(text, args.model, args.price_per_mtok)
 
     # Compare with baseline
     if args.compare:
         baseline_path = Path(args.compare)
-        if baseline_path.exists:
-            baseline = json.loads(baseline_path.read_text)
+        if baseline_path.exists():
+            baseline = json.loads(baseline_path.read_text())
             print("\n📊 COMPARISON WITH BASELINE")
             print(f"  Tokens: {baseline.get('token_count', 0):,} -> {analysis.token_count:,}")
             print(f"  Clarity: {baseline.get('clarity_score', 0)} -> {analysis.clarity_score}")
             print(f"  Issues: {len(baseline.get('issues', []))} -> {len(analysis.issues)}")
-            print
+            print()
 
     if args.json:
         print(json.dumps(asdict(analysis), indent=2))
@@ -516,4 +524,4 @@ Examples:
 
 
 if __name__ == '__main__':
-    main
+    main()

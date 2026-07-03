@@ -113,7 +113,7 @@ def build_control_domain(
     }
 
 
-def load_control_library -> list[dict]:
+def load_control_library() -> list[dict]:
     """
     Core control domains mapped across SOC 2, ISO 27001, HIPAA, and GDPR.
     Each domain represents a logical grouping of controls.
@@ -571,10 +571,10 @@ def status_icon(status: str) -> str:
 
 # ─── Display ─────────────────────────────────────────────────────────────────
 
-def print_header:
+def print_header():
     print("\n" + "=" * 80)
     print("  CISO COMPLIANCE TRACKER — Multi-Framework Coverage")
-    print(f"  Generated: {datetime.now.strftime('%Y-%m-%d %H:%M')}")
+    print(f"  Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     print("=" * 80)
 
 
@@ -584,7 +584,7 @@ def print_framework_summary(coverage: dict):
     header = f"{'Framework':<20} {'Done':<6} {'WIP':<5} {'Gap':<5} {'Complete':<10} {'Remain Cost':<14} {'Remain Days'}"
     print(header)
     print("-" * 80)
-    for fw_id, data in coverage.items:
+    for fw_id, data in coverage.items():
         pct = f"{data['pct_complete']:.0f}%"
         print(
             f"{data['framework']:<20} {data['implemented']:<6} {data['in_progress']:<5} "
@@ -610,7 +610,7 @@ def print_control_table(controls: list[dict], framework_filter: Optional[str] = 
 
     for c in filtered:
         fw_badges = "/".join(
-            fw.upper[:3] for fw in ["soc2", "iso27001", "hipaa", "gdpr"]
+            fw.upper()[:3] for fw in ["soc2", "iso27001", "hipaa", "gdpr"]
             if fw in c["frameworks_applicable"]
         )
         icon = status_icon(c["status"])
@@ -623,7 +623,7 @@ def print_control_table(controls: list[dict], framework_filter: Optional[str] = 
 def print_gap_analysis(coverage: dict):
     print("\n⚠️  GAP ANALYSIS — Controls Not Yet Started")
     print("-" * 70)
-    for fw_id, data in coverage.items:
+    for fw_id, data in coverage.items():
         if data["gap_controls"]:
             print(f"\n  {data['framework']} — {len(data['gap_controls'])} gaps:")
             for gap in data["gap_controls"]:
@@ -650,7 +650,7 @@ def print_roadmap(controls: list[dict], target_frameworks: list[str]):
     print(f"\n🗺️  IMPLEMENTATION ROADMAP — {fw_names}")
     print("-" * 80)
     print("Priority order: most framework coverage first, then quick wins")
-    print
+    print()
 
     cumulative_days = 0
     cumulative_cost = 0
@@ -667,14 +667,14 @@ def print_roadmap(controls: list[dict], target_frameworks: list[str]):
               f"| Cumulative: {cumulative_days}d / {fmt_dollars(cumulative_cost)}")
         if c.get("owner"):
             print(f"      Owner: {c['owner']}")
-        print
+        print()
 
 
-def print_framework_profiles:
+def print_framework_profiles():
     print("\n💼 FRAMEWORK PROFILES")
     print("-" * 70)
-    for fw_id, fw in FRAMEWORKS.items:
-        print(f"\n  {fw['name']} ({fw_id.upper})")
+    for fw_id, fw in FRAMEWORKS.items():
+        print(f"\n  {fw['name']} ({fw_id.upper()})")
         print(f"  Timeline:     ~{fw['typical_timeline_months']} months")
         print(f"  First-year cost: {fmt_dollars(fw['typical_cost_usd'])}")
         print(f"  Annual maintenance: {fmt_dollars(fw['annual_maintenance_usd'])}/yr")
@@ -690,7 +690,7 @@ def export_csv(controls: list[dict], filepath: str):
     ]
     with open(filepath, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
-        writer.writeheader
+        writer.writeheader()
         for c in controls:
             row = {k: c.get(k, "") for k in fields}
             row["frameworks_applicable"] = ", ".join(c["frameworks_applicable"])
@@ -704,7 +704,7 @@ def export_csv(controls: list[dict], filepath: str):
 
 # ─── Main ────────────────────────────────────────────────────────────────────
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="CISO Compliance Tracker — Multi-framework coverage and roadmap"
     )
@@ -712,7 +712,7 @@ def main:
     parser.add_argument("--csv", metavar="FILE", help="Export CSV to file")
     parser.add_argument(
         "--framework", metavar="FRAMEWORK",
-        choices=list(FRAMEWORKS.keys),
+        choices=list(FRAMEWORKS.keys()),
         help="Filter to single framework (soc2, iso27001, hipaa, gdpr)"
     )
     parser.add_argument("--gap-analysis", action="store_true", help="Show gap analysis")
@@ -720,14 +720,14 @@ def main:
                         help="Sequenced roadmap for frameworks e.g. 'soc2,iso27001'")
     parser.add_argument("--profiles", action="store_true", help="Show framework profiles")
     parser.add_argument("--leverage", action="store_true", help="Show high-leverage controls")
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    controls = load_control_library
+    controls = load_control_library()
     coverage = calculate_framework_coverage(controls)
 
     if args.json:
         output = {
-            "generated": datetime.now.isoformat,
+            "generated": datetime.now().isoformat(),
             "frameworks": FRAMEWORKS,
             "coverage": coverage,
             "controls": controls,
@@ -739,16 +739,16 @@ def main:
         export_csv(controls, args.csv)
         return
 
-    print_header
+    print_header()
 
     if args.profiles:
-        print_framework_profiles
+        print_framework_profiles()
         return
 
     if args.roadmap:
-        target_fws = [fw.strip for fw in args.roadmap.split(",") if fw.strip in FRAMEWORKS]
+        target_fws = [fw.strip() for fw in args.roadmap.split(",") if fw.strip() in FRAMEWORKS]
         if not target_fws:
-            print(f"Unknown frameworks. Valid: {', '.join(FRAMEWORKS.keys)}")
+            print(f"Unknown frameworks. Valid: {', '.join(FRAMEWORKS.keys())}")
             sys.exit(1)
         print_framework_summary(coverage)
         print_roadmap(controls, target_fws)
@@ -774,8 +774,8 @@ def main:
     print("  --leverage                  Controls covering most frameworks")
     print("  --profiles                  Framework timelines and costs")
     print("  --csv controls.csv          Export for stakeholder review")
-    print
+    print()
 
 
 if __name__ == "__main__":
-    main
+    main()

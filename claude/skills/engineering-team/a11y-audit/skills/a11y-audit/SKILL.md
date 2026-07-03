@@ -95,7 +95,7 @@ python scripts/a11y_scanner.py /path/to/project --baseline audit-baseline.json
 // BEFORE: src/components/ProductCard.tsx
 function ProductCard({ product }) {
   return (
-    <div onClick={ => navigate(`/product/${product.id}`)}>
+    <div onClick={() => navigate(`/product/${product.id}`)}>
       <img src={product.image} />
       <div style={{ color: '#aaa', fontSize: '12px' }}>{product.name}</div>
       <span style={{ color: '#999' }}>${product.price}</span>

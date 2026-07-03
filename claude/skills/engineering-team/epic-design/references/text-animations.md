@@ -291,7 +291,7 @@ function scrambleText(el, finalText, duration = 1.5) {
         result += originalText[i];
       } else {
         // Still scrambling
-        result += chars[Math.floor(Math.random * chars.length)];
+        result += chars[Math.floor(Math.random() * chars.length)];
       }
     }
     el.textContent = result;
@@ -307,7 +307,7 @@ ScrollTrigger.create({
   trigger: '.scramble-title',
   start: 'top 80%',
   once: true,
-  onEnter:  => {
+  onEnter: () => {
     scrambleText(
       document.querySelector('.scramble-title'),
       document.querySelector('.scramble-title').dataset.text,
@@ -376,13 +376,13 @@ Element automatically animates in when entering the viewport AND animates out wh
 .theatrical {
   /* Enter when element comes into view */
   animation: theatrical-enter linear both;
-  animation-timeline: view;
+  animation-timeline: view();
   animation-range: entry 0% entry 40%;
 }
 
 .theatrical-with-exit {
   animation: theatrical-enter linear both, theatrical-exit linear both;
-  animation-timeline: view, view;
+  animation-timeline: view(), view();
   animation-range: entry 0% entry 30%, exit 60% exit 100%;
 }
 ```
@@ -500,11 +500,11 @@ function initReactiveMarquee(wrapperEl) {
   let velocity = 0;
   let baseSpeed = 0.8; // px per frame base speed
   let lastScrollY = window.scrollY;
-  let lastTime = performance.now;
+  let lastTime = performance.now();
 
   // Track scroll velocity
-  window.addEventListener('scroll',  => {
-    const now = performance.now;
+  window.addEventListener('scroll', () => {
+    const now = performance.now();
     const dt = now - lastTime;
     const dy = window.scrollY - lastScrollY;
     velocity = Math.abs(dy / dt) * 30; // scale to marquee speed
@@ -512,7 +512,7 @@ function initReactiveMarquee(wrapperEl) {
     lastTime = now;
   }, { passive: true });
 
-  function animate {
+  function animate() {
     velocity = Math.max(0, velocity - 0.3); // decay
     const speed = baseSpeed + velocity;
     currentX -= speed;
@@ -526,7 +526,7 @@ function initReactiveMarquee(wrapperEl) {
     track.style.transform = `translateX(${currentX}px)`;
     requestAnimationFrame(animate);
   }
-  animate;
+  animate();
 }
 ```
 
@@ -678,7 +678,7 @@ The most premium results come from layering multiple text techniques in the same
 
 ```javascript
 // Example: Full hero text sequence
-function initHeroTextSequence {
+function initHeroTextSequence() {
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: '.hero-scene',

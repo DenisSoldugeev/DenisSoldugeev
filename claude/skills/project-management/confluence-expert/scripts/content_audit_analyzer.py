@@ -144,7 +144,7 @@ def check_organization(pages: List[Dict[str, Any]]) -> Dict[str, Any]:
         "orphaned_pages": orphaned,
         "orphaned_count": len(orphaned),
         "labeled_count": total - len(orphaned),
-        "label_distribution": dict(sorted(label_counts.items, key=lambda x: -x[1])[:20]),
+        "label_distribution": dict(sorted(label_counts.items(), key=lambda x: -x[1])[:20]),
     }
 
 
@@ -229,7 +229,7 @@ def analyze_content_health(data: Dict[str, Any]) -> Dict[str, Any]:
             "action_items": [],
         }
 
-    reference_date = datetime.now
+    reference_date = datetime.now()
 
     # Run all checks
     dimensions = {
@@ -242,7 +242,7 @@ def analyze_content_health(data: Dict[str, Any]) -> Dict[str, Any]:
 
     # Calculate weighted health score
     weighted_scores = []
-    for dim_name, dim_result in dimensions.items:
+    for dim_name, dim_result in dimensions.items():
         weight = HEALTH_WEIGHTS.get(dim_name, 0.1)
         weighted_scores.append(dim_result["score"] * weight)
 
@@ -365,16 +365,16 @@ def format_text_output(result: Dict[str, Any]) -> str:
     lines.append("HEALTH SUMMARY")
     lines.append("-" * 30)
     lines.append(f"Health Score: {result['health_score']}/100")
-    lines.append(f"Grade: {result['grade'].title}")
+    lines.append(f"Grade: {result['grade'].title()}")
     lines.append(f"Total Pages Analyzed: {result['total_pages']}")
     lines.append("")
 
     # Dimension scores
     lines.append("DIMENSION SCORES")
     lines.append("-" * 30)
-    for dim_name, dim_data in result.get("dimensions", {}).items:
+    for dim_name, dim_data in result.get("dimensions", {}).items():
         weight = HEALTH_WEIGHTS.get(dim_name, 0)
-        lines.append(f"{dim_name.replace('_', ' ').title} (Weight: {weight:.0%})")
+        lines.append(f"{dim_name.replace('_', ' ').title()} (Weight: {weight:.0%})")
         lines.append(f"  Score: {dim_data['score']:.1f}/100")
 
         if dim_name == "freshness":
@@ -395,7 +395,7 @@ def format_text_output(result: Dict[str, Any]) -> str:
         lines.append("ACTION ITEMS")
         lines.append("-" * 30)
         for i, item in enumerate(action_items, 1):
-            priority = item["priority"].upper
+            priority = item["priority"].upper()
             lines.append(f"{i}. [{priority}] {item['action']}")
         lines.append("")
 
@@ -411,7 +411,7 @@ def format_json_output(result: Dict[str, Any]) -> Dict[str, Any]:
 # CLI Interface
 # ---------------------------------------------------------------------------
 
-def main -> int:
+def main() -> int:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Analyze Confluence page inventory for content health"
@@ -427,7 +427,7 @@ def main -> int:
         help="Output format (default: text)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         with open(args.pages_file, "r") as f:
@@ -454,4 +454,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -22,8 +22,8 @@ Variables: [Type] - [Parameter Name]         e.g., "DLV - plan_name"
 |--------------|------|-------|
 | `CON - GA4 Measurement ID` | Constant | `G-XXXXXXXXXX` |
 | `CON - Environment` | Constant | `production` |
-| `JS - Page Path` | Custom JavaScript | `function { return window.location.pathname; }` |
-| `JS - User ID` | Custom JavaScript | `function { return window.currentUserId || undefined; }` |
+| `JS - Page Path` | Custom JavaScript | `function() { return window.location.pathname; }` |
+| `JS - User ID` | Custom JavaScript | `function() { return window.currentUserId || undefined; }` |
 
 ### GA4 Configuration Tag
 
@@ -236,7 +236,7 @@ window.dataLayer.push({
 Add to `<head>` BEFORE GTM loads:
 ```javascript
 window.dataLayer = window.dataLayer || [];
-function gtag{dataLayer.push(arguments);}
+function gtag(){dataLayer.push(arguments);}
 
 // Default all to denied
 gtag('consent', 'default', {

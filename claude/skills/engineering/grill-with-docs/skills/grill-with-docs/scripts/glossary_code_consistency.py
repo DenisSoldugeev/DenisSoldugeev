@@ -133,7 +133,7 @@ def extract_glossary_terms(context_md_text: str) -> List[str]:
 def walk_codebase(root: Path, extensions: Set[str], exclude_dirs: Set[str]) -> List[Path]:
     found: List[Path] = []
     for path in root.rglob("*"):
-        if path.is_dir:
+        if path.is_dir():
             continue
         if any(part in exclude_dirs for part in path.parts):
             continue
@@ -153,7 +153,7 @@ def count_term_in_text(text: str, term: str) -> int:
 
 
 def count_proper_nouns(text: str) -> Counter:
-    counter: Counter = Counter
+    counter: Counter = Counter()
     for match in PROPER_NOUN_RE.finditer(text):
         counter[match.group(1)] += 1
     return counter
@@ -166,11 +166,11 @@ def analyze(
 ) -> Dict[str, Any]:
     """code_files: list of (relative_path, text) tuples."""
     glossary_terms = extract_glossary_terms(context_md_text)
-    glossary_term_set_lower = {t.lower for t in glossary_terms}
+    glossary_term_set_lower = {t.lower() for t in glossary_terms}
 
     # Per-term usage count in non-test files
     term_usage: Dict[str, int] = {t: 0 for t in glossary_terms}
-    code_proper_nouns: Counter = Counter
+    code_proper_nouns: Counter = Counter()
     files_scanned = 0
     files_tests_skipped = 0
 
@@ -182,19 +182,19 @@ def analyze(
         files_scanned += 1
         for term in glossary_terms:
             term_usage[term] += count_term_in_text(text, term)
-        for noun, count in count_proper_nouns(text).items:
+        for noun, count in count_proper_nouns(text).items():
             code_proper_nouns[noun] += count
 
     # Dead glossary: terms with zero usage
-    dead_terms = [t for t, n in term_usage.items if n == 0]
+    dead_terms = [t for t, n in term_usage.items() if n == 0]
 
     # Code-only proper nouns: frequent capitalized identifiers NOT in glossary
     # and NOT in the generic stop-list
     code_only: List[Tuple[str, int]] = []
-    for noun, count in code_proper_nouns.most_common:
+    for noun, count in code_proper_nouns.most_common():
         if count < min_proper_noun_frequency:
             break
-        if noun.lower in glossary_term_set_lower:
+        if noun.lower() in glossary_term_set_lower:
             continue
         if noun in GENERIC_WORDS:
             continue
@@ -218,7 +218,7 @@ def render_human(result: Dict[str, Any]) -> str:
     out.append(f"  Glossary terms: {result['glossary_term_count']}")
     out.append("")
     out.append("Term usage (occurrences in non-test code):")
-    for term, count in sorted(result["term_usage"].items, key=lambda kv: (-kv[1], kv[0])):
+    for term, count in sorted(result["term_usage"].items(), key=lambda kv: (-kv[1], kv[0])):
         marker = "  " if count > 0 else "!!"
         out.append(f"  {marker} {term:<30s} {count}")
     out.append("")
@@ -241,7 +241,7 @@ def render_human(result: Dict[str, Any]) -> str:
 
 
 def run_sample(min_freq: int) -> Dict[str, Any]:
-    files = [(p, t) for p, t in SAMPLE_CODE_FILES.items]
+    files = [(p, t) for p, t in SAMPLE_CODE_FILES.items()]
     return analyze(SAMPLE_CONTEXT_MD, files, min_freq)
 
 
@@ -269,14 +269,14 @@ def main(argv: List[str]) -> int:
     elif args.context and args.code:
         context_path = Path(args.context)
         code_root = Path(args.code)
-        if not context_path.exists:
+        if not context_path.exists():
             print(f"error: {args.context} not found", file=sys.stderr)
             return 2
-        if not code_root.exists:
+        if not code_root.exists():
             print(f"error: {args.code} not found", file=sys.stderr)
             return 2
         if args.extensions:
-            exts = {e.strip if e.strip.startswith(".") else "." + e.strip for e in args.extensions.split(",")}
+            exts = {e.strip() if e.strip().startswith(".") else "." + e.strip() for e in args.extensions.split(",")}
         else:
             exts = DEFAULT_EXTENSIONS
         files: List[Tuple[str, str]] = []
@@ -287,7 +287,7 @@ def main(argv: List[str]) -> int:
                 continue
         result = analyze(context_path.read_text(encoding="utf-8"), files, args.min_frequency)
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     if args.output == "json":

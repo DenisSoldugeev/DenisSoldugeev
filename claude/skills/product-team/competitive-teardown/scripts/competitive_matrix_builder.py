@@ -119,11 +119,11 @@ def gap_analysis(
     return {
         "gaps": gaps,
         "biggest_opportunities": sorted(
-            [{"dimension": k, **v} for k, v in gaps.items if v["status"] == "behind"],
+            [{"dimension": k, **v} for k, v in gaps.items() if v["status"] == "behind"],
             key=lambda x: x["gap_to_best"]
         )[:5],
         "competitive_advantages": sorted(
-            [{"dimension": k, **v} for k, v in gaps.items if v["status"] == "ahead"],
+            [{"dimension": k, **v} for k, v in gaps.items() if v["status"] == "ahead"],
             key=lambda x: -x["gap_to_avg"]
         )[:5]
     }
@@ -186,7 +186,7 @@ def format_text(result: Dict[str, Any]) -> str:
             for opp in ga["biggest_opportunities"]:
                 lines.append(f"  • {opp['dimension']}: You={opp['your_score']}, "
                            f"Best={opp['competitor_best']}, Gap={opp['gap_to_best']} "
-                           f"[{opp['priority'].upper} priority]")
+                           f"[{opp['priority'].upper()} priority]")
 
         if ga["competitive_advantages"]:
             lines.append("\n## COMPETITIVE ADVANTAGES (where you lead)\n")
@@ -219,7 +219,7 @@ def build_matrix(data: Dict[str, Any], weight_overrides: Optional[Dict[str, floa
         return {"error": "No competitors provided"}
     if not dimensions:
         # Auto-detect from first competitor's scores
-        dimensions = list(competitors[0].get("scores", {}).keys)
+        dimensions = list(competitors[0].get("scores", {}).keys())
 
     weights = data.get("weights", {})
     if weight_overrides:
@@ -239,7 +239,7 @@ def build_matrix(data: Dict[str, Any], weight_overrides: Optional[Dict[str, floa
             s["is_you"] = True
 
     result = {
-        "generated_at": datetime.now.isoformat,
+        "generated_at": datetime.now().isoformat(),
         "dimensions": dimensions,
         "weights": weights if weights else {d: 1.0 for d in dimensions},
         "scored_competitors": scored,
@@ -260,11 +260,11 @@ def parse_weights(weight_str: str) -> Dict[str, float]:
     for pair in weight_str.split(","):
         if "=" in pair:
             k, v = pair.split("=", 1)
-            weights[k.strip] = float(v.strip)
+            weights[k.strip()] = float(v.strip())
     return weights
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Build competitive matrix with scoring and gap analysis"
     )
@@ -276,7 +276,7 @@ def main:
     parser.add_argument("--output", type=str, default=None,
                        help="Output file path (default: stdout)")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     data = load_competitors(args.input)
     weight_overrides = parse_weights(args.weights) if args.weights else None
@@ -296,4 +296,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

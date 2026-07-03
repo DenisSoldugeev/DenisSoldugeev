@@ -3,7 +3,7 @@
 
 Catches the parser-fatal and resume-breaking mistakes before a workflow runs:
 meta-block rules, banned non-deterministic calls, forbidden Node/FS access in
-the orchestrator, parallel-needs-thunks, unguarded loops, and the script-size
+the orchestrator, parallel()-needs-thunks, unguarded loops, and the script-size
 cap. Reports PASS / WARN / FAIL with line numbers.
 
 Stdlib only. Heuristic (regex/text) — it does not execute the file.
@@ -90,15 +90,15 @@ def check_meta(code, findings):
         findings.append((FAIL, None, "No `export const meta = {...}` declaration found (required, must be first statement)."))
         return
     # meta should be the first non-empty, non-import statement.
-    head = code[:m.start]
-    head_sig = re.sub(r"^\s*import\b.*$", "", head, flags=re.MULTILINE).strip
+    head = code[:m.start()]
+    head_sig = re.sub(r"^\s*import\b.*$", "", head, flags=re.MULTILINE).strip()
     if head_sig:
-        findings.append((WARN, _lineno(code, m.start),
+        findings.append((WARN, _lineno(code, m.start()),
                          "`meta` may not be the first statement — move it above all other code (imports are allowed before it)."))
     # Extract the meta object body (balanced braces).
-    brace_start = code.find("{", m.end)
+    brace_start = code.find("{", m.end())
     if brace_start == -1:
-        findings.append((FAIL, _lineno(code, m.start), "`meta` is not an object literal."))
+        findings.append((FAIL, _lineno(code, m.start()), "`meta` is not an object literal."))
         return
     depth, j = 0, brace_start
     while j < len(code):
@@ -130,49 +130,49 @@ def check_meta(code, findings):
 
 def check_nondeterminism(code, findings):
     for pat, msg in [
-        (r"\bMath\.random\s*\(", "Math.random is banned (non-reproducible, breaks resume) — vary the prompt by index instead."),
-        (r"\bDate\.now\s*\(", "Date.now is banned (breaks resume) — pass timestamps via `args`."),
-        (r"\bnew\s+Date\s*\(\s*\)", "argless `new Date` is banned (breaks resume) — use `new Date(specificValue)` or pass via `args`."),
+        (r"\bMath\.random\s*\(", "Math.random() is banned (non-reproducible, breaks resume) — vary the prompt by index instead."),
+        (r"\bDate\.now\s*\(", "Date.now() is banned (breaks resume) — pass timestamps via `args`."),
+        (r"\bnew\s+Date\s*\(\s*\)", "argless `new Date()` is banned (breaks resume) — use `new Date(specificValue)` or pass via `args`."),
     ]:
         for m in re.finditer(pat, code):
-            findings.append((FAIL, _lineno(code, m.start), msg))
+            findings.append((FAIL, _lineno(code, m.start()), msg))
 
 
 def check_node_apis(code, findings):
     for pat, msg in [
-        (r"\brequire\s*\(", "`require(...)` is unavailable in the orchestrator — do this work inside an agent call."),
-        (r"\bimport\s+.*\bfrom\s+['\"]fs['\"]", "filesystem access is unavailable in the orchestrator — move it inside an agent."),
-        (r"\bprocess\.\w+", "`process.*` is unavailable in the orchestrator — move it inside an agent."),
-        (r"\bfs\.\w+\s*\(", "`fs.*` filesystem calls are unavailable in the orchestrator — move it inside an agent."),
-        (r"\bfetch\s*\(", "network `fetch(...)` is unavailable in the orchestrator — move it inside an agent."),
+        (r"\brequire\s*\(", "`require(...)` is unavailable in the orchestrator — do this work inside an agent() call."),
+        (r"\bimport\s+.*\bfrom\s+['\"]fs['\"]", "filesystem access is unavailable in the orchestrator — move it inside an agent()."),
+        (r"\bprocess\.\w+", "`process.*` is unavailable in the orchestrator — move it inside an agent()."),
+        (r"\bfs\.\w+\s*\(", "`fs.*` filesystem calls are unavailable in the orchestrator — move it inside an agent()."),
+        (r"\bfetch\s*\(", "network `fetch(...)` is unavailable in the orchestrator — move it inside an agent()."),
     ]:
         for m in re.finditer(pat, code):
-            findings.append((FAIL, _lineno(code, m.start), msg))
+            findings.append((FAIL, _lineno(code, m.start()), msg))
 
 
 def check_parallel_thunks(code, findings):
-    """parallel(...) elements must be thunks:  => ... , not bare agent(...) promises."""
+    """parallel(...) elements must be thunks: () => ... , not bare agent(...) promises."""
     for m in re.finditer(r"\bparallel\s*\(", code):
         # Look at the slice right after the opening paren up to a reasonable window.
-        start = m.end
+        start = m.end()
         window = code[start:start + 400]
         # Common correct forms contain `=>` ; bare-promise misuse is parallel([agent(...) , ...]) or .map(x => agent(...)) without the extra thunk.
-        # Flag .map(...) that returns agent(...) directly without ` =>`.
+        # Flag .map(...) that returns agent(...) directly without `() =>`.
         if re.search(r"\.map\s*\(\s*\([^)]*\)\s*=>\s*agent\s*\(", window):
-            findings.append((WARN, _lineno(code, m.start),
-                             "parallel(items.map(x => agent(...))) passes promises, not thunks — wrap as `x =>  => agent(...)`."))
+            findings.append((WARN, _lineno(code, m.start()),
+                             "parallel(items.map(x => agent(...))) passes promises, not thunks — wrap as `x => () => agent(...)`."))
         elif re.search(r"\[\s*agent\s*\(", window):
-            findings.append((WARN, _lineno(code, m.start),
-                             "parallel([ agent(...) , ... ]) passes bare promises — use thunks: `[ => agent(...), ...]`."))
+            findings.append((WARN, _lineno(code, m.start()),
+                             "parallel([ agent(...) , ... ]) passes bare promises — use thunks: `[() => agent(...), ...]`."))
 
 
 def check_loops_guarded(code, findings):
-    """Every while/for loop should reference a counter bound or budget.remaining."""
+    """Every while/for loop should reference a counter bound or budget.remaining()."""
     for m in re.finditer(r"\bwhile\s*\(([^)]*)\)", code):
         cond = m.group(1)
-        ln = _lineno(code, m.start)
+        ln = _lineno(code, m.start())
         if "true" in cond and "budget" not in cond:
-            findings.append((WARN, ln, "`while (true)` loop — add a counter or budget.remaining guard or it hits the 1000-agent cap."))
+            findings.append((WARN, ln, "`while (true)` loop — add a counter or budget.remaining() guard or it hits the 1000-agent cap."))
         elif "budget" not in cond and not re.search(r"[<>]=?|!==?|===?", cond):
             findings.append((WARN, ln, "loop condition has no obvious bound — confirm a counter cap or budget guard exists."))
 
@@ -229,7 +229,7 @@ SAMPLE = """export const meta = {
   description: `template strings not allowed`,
 }
 
-const ts = Date.now
+const ts = Date.now()
 while (true) {
   const r = await parallel([agent('find a bug')])
   bugs.push(...r)
@@ -251,7 +251,7 @@ def main(argv=None):
     else:
         try:
             with open(args.path, "r", encoding="utf-8") as fh:
-                raw = fh.read
+                raw = fh.read()
         except OSError as e:
             print(f"Could not read {args.path}: {e}", file=sys.stderr)
             return 2
@@ -271,4 +271,4 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

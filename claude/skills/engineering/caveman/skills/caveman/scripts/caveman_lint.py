@@ -91,7 +91,7 @@ def find_violations(text: str) -> List[Dict[str, Any]]:
     """Find banned phrases. Returns list of {category, phrase, count}."""
     masked = _protect_code(text)
     violations: List[Dict[str, Any]] = []
-    for category, phrases in BANNED_PHRASES.items:
+    for category, phrases in BANNED_PHRASES.items():
         for phrase in phrases:
             count = _count_phrase(phrase, masked)
             if count > 0:
@@ -120,7 +120,7 @@ def analyze(text: str) -> Dict[str, Any]:
 
     return {
         "char_count": len(text),
-        "word_count": len(text.split),
+        "word_count": len(text.split()),
         "violation_categories": sorted(set(v["category"] for v in violations)),
         "total_violations": total_violations,
         "has_exception_context": has_exception,
@@ -156,7 +156,7 @@ def render_text(text: str, r: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Lint a response for caveman-mode compliance.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -165,12 +165,12 @@ def main -> int:
     parser.add_argument("text", nargs="?", help="Input text (uses embedded sample if omitted)")
     parser.add_argument("--file", help="Read input from file")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.file:
         try:
             with open(args.file, "r", encoding="utf-8") as f:
-                text = f.read
+                text = f.read()
         except (IOError, OSError) as e:
             print(f"error: {e}", file=sys.stderr)
             return 1
@@ -188,4 +188,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

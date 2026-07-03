@@ -36,7 +36,7 @@ from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Any
 
-SCRIPT_DIR = Path(__file__).resolve.parent
+SCRIPT_DIR = Path(__file__).resolve().parent
 PROFILES_DIR = SCRIPT_DIR.parent / "profiles"
 
 
@@ -95,12 +95,12 @@ class Match:
     profile_data: dict[str, Any] = field(default_factory=dict)
 
 
-def load_profiles -> dict[str, dict[str, Any]]:
+def load_profiles() -> dict[str, dict[str, Any]]:
     profiles: dict[str, dict[str, Any]] = {}
-    if not PROFILES_DIR.exists:
+    if not PROFILES_DIR.exists():
         return profiles
     for p in sorted(PROFILES_DIR.glob("*.json")):
-        with p.open as f:
+        with p.open() as f:
             data = json.load(f)
         profiles[data.get("profile_name", p.stem)] = data
     return profiles
@@ -157,16 +157,16 @@ def score_profile(profile: dict[str, Any], inputs: Inputs) -> Match:
     # profile_name, stack.language, stack.runtime. The previous substring search over
     # the entire serialized profile false-matched e.g. "go" against "django"/"mongo".
     if inputs.language_preference:
-        lang = inputs.language_preference.lower
+        lang = inputs.language_preference.lower()
         stack = profile.get("stack", {})
         language_fields = [
-            name.lower,
-            str(stack.get("language", "")).lower,
-            str(stack.get("runtime", "")).lower,
+            name.lower(),
+            str(stack.get("language", "")).lower(),
+            str(stack.get("runtime", "")).lower(),
         ]
         # Token-level match: split on '-' and check exact membership so "go" doesn't
         # match "mongo" but still matches "go-or-rust-microservice".
-        tokens: set[str] = set
+        tokens: set[str] = set()
         for field in language_fields:
             tokens.update(field.replace("_", "-").split("-"))
         if lang in tokens:
@@ -183,7 +183,7 @@ def score_profile(profile: dict[str, Any], inputs: Inputs) -> Match:
 
 
 def rank(profiles: dict[str, dict[str, Any]], inputs: Inputs) -> list[Match]:
-    matches = [score_profile(p, inputs) for p in profiles.values]
+    matches = [score_profile(p, inputs) for p in profiles.values()]
     matches.sort(key=lambda m: m.score, reverse=True)
     return matches
 
@@ -194,7 +194,7 @@ def render_markdown(inputs: Inputs, matches: list[Match], kills: list[str]) -> s
     L.append("")
     L.append("## Inputs (your assumptions, Karpathy #1)")
     L.append("")
-    for k, v in asdict(inputs).items:
+    for k, v in asdict(inputs).items():
         L.append(f"- **{k}**: `{v}`")
     L.append("")
     if kills:
@@ -240,21 +240,21 @@ def render_markdown(inputs: Inputs, matches: list[Match], kills: list[str]) -> s
     if anti:
         L.append("## Anti-patterns (DO NOT introduce on this profile)")
         L.append("")
-        for k, v in anti.items:
+        for k, v in anti.items():
             L.append(f"- **{k}** — {v}")
         L.append("")
     thresh = top.profile_data.get("success_thresholds", {})
     if thresh:
         L.append("## Verifiable SLO floor (Karpathy #4)")
         L.append("")
-        for k, v in thresh.items:
+        for k, v in thresh.items():
             L.append(f"- `{k}` = {v}")
         L.append("")
     approvers = top.profile_data.get("named_approver_chain", {})
     if approvers:
         L.append("## Named approvers (this tool NEVER auto-approves)")
         L.append("")
-        for k, v in approvers.items:
+        for k, v in approvers.items():
             L.append(f"- **{k}**: {v}")
         L.append("")
     canon = top.profile_data.get("canon_references", [])
@@ -296,7 +296,7 @@ def render_json(inputs: Inputs, matches: list[Match], kills: list[str]) -> str:
     )
 
 
-def build_parser -> argparse.ArgumentParser:
+def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         description="Deterministic backend pattern + stack picker. Surfaces tradeoffs + SLO floor + named approvers. Never auto-approves.",
         epilog="See ../references/forcing_questions.md for the 7-question grill.",
@@ -334,15 +334,15 @@ def build_parser -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = build_parser
+    parser = build_parser()
     args = parser.parse_args(argv)
-    profiles = load_profiles
+    profiles = load_profiles()
 
     if args.list_profiles:
         if not profiles:
             print("No profiles found in", PROFILES_DIR, file=sys.stderr)
             return 1
-        for name, data in profiles.items:
+        for name, data in profiles.items():
             print(f"{name}: {data.get('description', '')[:120]}")
         return 0
 
@@ -384,7 +384,7 @@ def main(argv: list[str] | None = None) -> int:
             needs_admin_panel=(args.needs_admin_panel == "true"),
         )
 
-    kills = inputs.kill_criteria_check
+    kills = inputs.kill_criteria_check()
     matches = rank(profiles, inputs)
     if args.output == "json":
         print(render_json(inputs, matches, kills))
@@ -394,4 +394,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

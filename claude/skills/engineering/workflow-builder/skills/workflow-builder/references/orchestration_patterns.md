@@ -8,7 +8,7 @@ Copy-paste shapes for the common multi-agent topologies. Pick by answering the t
 
 ```js
 const findings = await parallel(
-  questions.map((q, i) =>  =>
+  questions.map((q, i) => () =>
     agent(`Research and report verified facts:\n\n${q}`,
           { label: `q${i + 1}`, schema: RESEARCH_SCHEMA }))
 )
@@ -26,7 +26,7 @@ const report = await agent(
 const results = await pipeline(
   DIMENSIONS,
   d => agent(d.prompt, { label: `review:${d.key}`, phase: 'Review', schema: FINDINGS_SCHEMA }),
-  review => parallel((review?.findings ?? []).map(f =>  =>
+  review => parallel((review?.findings ?? []).map(f => () =>
     agent(`Adversarially verify: ${f.title}`, { schema: VERDICT_SCHEMA })))
 )
 ```
@@ -36,7 +36,7 @@ const results = await pipeline(
 **When:** the next stage needs the *entire* previous result set in hand — to dedup, merge, or early-exit on a count.
 
 ```js
-const all = await parallel(DIMENSIONS.map(d =>  => agent(d.prompt, { schema: FINDINGS_SCHEMA })))
+const all = await parallel(DIMENSIONS.map(d => () => agent(d.prompt, { schema: FINDINGS_SCHEMA })))
 const deduped = dedupeByFileAndLine(all.filter(Boolean).flatMap(r => r.findings))
 const summary = await agent(`Summarize ${deduped.length} unique findings:\n${JSON.stringify(deduped)}`)
 ```
@@ -63,7 +63,7 @@ while (bugs.length < 10 && bugs.length < 100 /* hard cap guard */) {
 
 ```js
 const issues = []
-while (budget.total && budget.remaining > 50_000) {
+while (budget.total && budget.remaining() > 50_000) {
   const r = await agent('Find one more issue not yet reported...', { schema: ISSUE_SCHEMA })
   if (!r?.issues?.length) break
   issues.push(...r.issues)
@@ -75,7 +75,7 @@ while (budget.total && budget.remaining > 50_000) {
 **When:** a finding will be acted on and a plausible-but-wrong one is costly. Findings survive on majority vote.
 
 ```js
-const votes = await parallel(Array.from({ length: 3 }, (_, i) =>  =>
+const votes = await parallel(Array.from({ length: 3 }, (_, i) => () =>
   agent(`Try hard to REFUTE this claim, return { refuted: boolean }:\n${claim}`,
         { label: `skeptic:${i + 1}`, schema: VERDICT_SCHEMA })))
 const survives = votes.filter(v => v && !v.refuted).length >= 2
@@ -86,9 +86,9 @@ const survives = votes.filter(v => v && !v.refuted).length >= 2
 **When:** a wide solution space benefits from several independent attempts, scored and synthesized.
 
 ```js
-const drafts = await parallel(ANGLES.map(a =>  =>
+const drafts = await parallel(ANGLES.map(a => () =>
   agent(`Produce a plan. Take a strictly ${a} approach.`)))
-const scored = await parallel(drafts.map((d, i) =>  =>
+const scored = await parallel(drafts.map((d, i) => () =>
   agent(`Score this plan 1-10 with reasons:\n${d}`, { label: `judge:${i + 1}`, schema: SCORE_SCHEMA })))
 const winner = drafts[scored.indexOf(scored.reduce((a, b) => (a?.score ?? 0) >= (b?.score ?? 0) ? a : b))]
 const final = await agent(`Refine the winning plan:\n${winner}`, { model: 'opus' })
@@ -100,7 +100,7 @@ const final = await agent(`Refine the winning plan:\n${winner}`, { model: 'opus'
 
 ```js
 const found = []
-const seen = new Set
+const seen = new Set()
 let dryRounds = 0
 while (dryRounds < 2 && found.length < 100) {
   const r = await agent(`Find items not in:\n${JSON.stringify([...seen])}`, { schema: ITEMS_SCHEMA })
@@ -144,7 +144,7 @@ const FINDINGS_SCHEMA = {
 }
 ```
 
-Between stages, stringify structured data into the next prompt (`JSON.stringify(...)`); the schema only shapes what comes *back* from a single `agent` call.
+Between stages, stringify structured data into the next prompt (`JSON.stringify(...)`); the schema only shapes what comes *back* from a single `agent()` call.
 
 ---
 

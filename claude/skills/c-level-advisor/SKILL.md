@@ -7,15 +7,16 @@ description: "C-level advisory skills: CEO/CTO/CFO/CMO/CPO/CISO and other execut
 
 C-level advisory skills: CEO/CTO/CFO/CMO/CPO/CISO and other executive strategy advisors.
 
-35 skills. Load the specific sub-skill SKILL.md you need on demand.
+37 skills. Load the specific sub-skill SKILL.md you need on demand.
 
 | Skill | Path | Focus |
 |-------|------|-------|
 | agent-protocol | `agent-protocol/SKILL.md` | Inter-agent communication protocol for C-suite agent teams. Defines invocation syntax, loop prevention, isolat… |
+| arquiteto-de-empresa | `arquiteto-de-empresa/SKILL.md` | Arquiteto de Empresa: constrói um negócio do zero como bundle OKF (Open Knowledge Format) — uma árvore de arqu… |
 | board-deck-builder | `board-deck-builder/SKILL.md` | Assembles comprehensive board and investor update decks by pulling perspectives from all C-suite roles. Use wh… |
 | board-meeting | `board-meeting/SKILL.md` | Multi-agent board meeting protocol for strategic decisions. Runs a structured 6-phase deliberation: context lo… |
-| c-level-agents | `c-level-agents/skills/c-level-agents/SKILL.md` | Founder-mode executive team. 8 ds-* C-suite agents (CFO, CMO, CRO, CPO, COO, CHRO, CISO, Chief of Staff) and 1… |
-| c-level-skills | `c-level-skills/SKILL.md` | 10 C-level advisory agent skills and plugins for Claude Code, Codex, Gemini CLI, Cursor, OpenClaw. CEO, CTO, C… |
+| c-level-agents | `c-level-agents/skills/c-level-agents/SKILL.md` | Founder-mode executive team. 13 ds-* C-suite agents (CFO, CMO, CRO, CPO, COO, CHRO, CISO, GC, CDO, CAIO, CCO, … |
+| c-level-skills | `c-level-skills/SKILL.md` | Index and router for the C-level advisory bundle: 33 skills covering 14 C-suite roles, orchestration, cross-cu… |
 | ceo-advisor | `ceo-advisor/SKILL.md` | Executive leadership guidance for strategic decision-making, organizational development, and stakeholder manag… |
 | cfo-advisor | `cfo-advisor/SKILL.md` | Financial leadership for startups and scaling companies. Financial modeling, unit economics, fundraising strat… |
 | change-management | `change-management/SKILL.md` | Framework for rolling out organizational changes without chaos. Covers the ADKAR model adapted for startups, c… |
@@ -32,10 +33,10 @@ C-level advisory skills: CEO/CTO/CFO/CMO/CPO/CISO and other executive strategy a
 | coo-advisor | `coo-advisor/SKILL.md` | Operations leadership for scaling companies. Process design, OKR execution, operational cadence, and scaling p… |
 | cpo-advisor | `cpo-advisor/SKILL.md` | Product leadership for scaling companies. Product vision, portfolio strategy, product-market fit, and product … |
 | cro-advisor | `cro-advisor/SKILL.md` | Revenue leadership for B2B SaaS companies. Revenue forecasting, sales model design, pricing strategy, net reve… |
-| ds-onboard | `ds-onboard/SKILL.md` | Founder onboarding interview that captures company context across 7 dimensions. Invoke with /ds:setup for init… |
 | cto-advisor | `cto-advisor/SKILL.md` | Technical leadership guidance for engineering teams, architecture decisions, and technology strategy. Use when… |
 | culture-architect | `culture-architect/SKILL.md` | Build, measure, and evolve company culture as operational behavior — not wall posters. Covers mission/vision/v… |
 | decision-logger | `decision-logger/SKILL.md` | Two-layer memory architecture for board meeting decisions. Manages raw transcripts (Layer 1) and approved deci… |
+| ds-onboard | `ds-onboard/SKILL.md` | Founder onboarding interview that captures company context across 7 dimensions. Invoke with /ds:setup for init… |
 | executive-mentor | `executive-mentor/skills/executive-mentor/SKILL.md` | Adversarial thinking partner for founders and executives. Stress-tests plans, prepares for brutal board meetin… |
 | founder-coach | `founder-coach/SKILL.md` | Personal leadership development for founders and first-time CEOs. Covers founder archetype identification, del… |
 | general-counsel-advisor | `general-counsel-advisor/SKILL.md` | General Counsel advisory for startups: contract review (MSA, SaaS, NDA, DPA, employment), IP strategy, term sh… |

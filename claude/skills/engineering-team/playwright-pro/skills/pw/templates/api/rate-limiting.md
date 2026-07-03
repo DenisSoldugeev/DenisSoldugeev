@@ -20,22 +20,22 @@ const headers = {
   'Content-Type': 'application/json',
 };
 
-test.describe('Rate Limiting',  => {
+test.describe('Rate Limiting', () => {
   // Happy path: rate limit headers present on normal requests
   test('includes rate limit headers on success response', async ({ request }) => {
     const res = await request.get(`{{apiBaseUrl}}/{{rateLimitedEndpoint}}`, { headers });
-    expect(res.status).toBe(200);
-    expect(res.headers['x-ratelimit-limit']).toBeTruthy;
-    expect(res.headers['x-ratelimit-remaining']).toBeTruthy;
-    expect(Number(res.headers['x-ratelimit-limit'])).toBe({{rateLimit}});
+    expect(res.status()).toBe(200);
+    expect(res.headers()['x-ratelimit-limit']).toBeTruthy();
+    expect(res.headers()['x-ratelimit-remaining']).toBeTruthy();
+    expect(Number(res.headers()['x-ratelimit-limit'])).toBe({{rateLimit}});
   });
 
   // Happy path: remaining count decrements
   test('x-ratelimit-remaining decrements with each request', async ({ request }) => {
     const first = await request.get(`{{apiBaseUrl}}/{{rateLimitedEndpoint}}`, { headers });
     const second = await request.get(`{{apiBaseUrl}}/{{rateLimitedEndpoint}}`, { headers });
-    const remaining1 = Number(first.headers['x-ratelimit-remaining']);
-    const remaining2 = Number(second.headers['x-ratelimit-remaining']);
+    const remaining1 = Number(first.headers()['x-ratelimit-remaining']);
+    const remaining2 = Number(second.headers()['x-ratelimit-remaining']);
     expect(remaining2).toBeLessThan(remaining1);
   });
 
@@ -45,14 +45,14 @@ test.describe('Rate Limiting',  => {
     let retryAfter: string | undefined;
     for (let i = 0; i <= {{rateLimit}}; i++) {
       const res = await request.get(`{{apiBaseUrl}}/{{rateLimitedEndpoint}}`, { headers });
-      lastStatus = res.status;
+      lastStatus = res.status();
       if (lastStatus === 429) {
-        retryAfter = res.headers['retry-after'];
+        retryAfter = res.headers()['retry-after'];
         break;
       }
     }
     expect(lastStatus).toBe(429);
-    expect(retryAfter).toBeTruthy;
+    expect(retryAfter).toBeTruthy();
   });
 
   // Error case: 429 body contains error message
@@ -62,10 +62,10 @@ test.describe('Rate Limiting',  => {
       await request.get(`{{apiBaseUrl}}/{{rateLimitedEndpoint}}`, { headers });
     }
     const res = await request.get(`{{apiBaseUrl}}/{{rateLimitedEndpoint}}`, { headers });
-    if (res.status === 429) {
-      const body = await res.json;
+    if (res.status() === 429) {
+      const body = await res.json();
       expect(body.error ?? body.message).toMatch(/rate limit|too many requests/i);
-      expect(Number(res.headers['retry-after'])).toBeGreaterThan(0);
+      expect(Number(res.headers()['retry-after'])).toBeGreaterThan(0);
     }
   });
 
@@ -81,7 +81,7 @@ test.describe('Rate Limiting',  => {
     const res = await request.get(`{{apiBaseUrl}}/{{rateLimitedEndpoint}}`, {
       headers: { 'Authorization': `Bearer {{apiToken2}}` },
     });
-    expect(res.status).toBe(200);
+    expect(res.status()).toBe(200);
   });
 
   // Edge case: reset after window expires
@@ -91,11 +91,11 @@ test.describe('Rate Limiting',  => {
       await request.get(`{{apiBaseUrl}}/{{rateLimitedEndpoint}}`, { headers });
     }
     // Advance clock past the window
-    await page.clock.install;
+    await page.clock.install();
     await page.clock.fastForward({{rateLimitWindowMs}});
     // Should succeed again
     const res = await request.get(`{{apiBaseUrl}}/{{rateLimitedEndpoint}}`, { headers });
-    expect(res.status).toBe(200);
+    expect(res.status()).toBe(200);
   });
 });
 ```
@@ -109,12 +109,12 @@ const { test, expect } = require('@playwright/test');
 
 const headers = { 'Authorization': `Bearer {{apiToken}}` };
 
-test.describe('Rate Limiting',  => {
+test.describe('Rate Limiting', () => {
   test('includes rate limit headers on success', async ({ request }) => {
     const res = await request.get(`{{apiBaseUrl}}/{{rateLimitedEndpoint}}`, { headers });
-    expect(res.status).toBe(200);
-    expect(res.headers['x-ratelimit-limit']).toBeTruthy;
-    expect(res.headers['x-ratelimit-remaining']).toBeTruthy;
+    expect(res.status()).toBe(200);
+    expect(res.headers()['x-ratelimit-limit']).toBeTruthy();
+    expect(res.headers()['x-ratelimit-remaining']).toBeTruthy();
   });
 
   test('returns 429 with Retry-After when limit exceeded', async ({ request }) => {
@@ -122,11 +122,11 @@ test.describe('Rate Limiting',  => {
     let retryAfter;
     for (let i = 0; i <= {{rateLimit}}; i++) {
       const res = await request.get(`{{apiBaseUrl}}/{{rateLimitedEndpoint}}`, { headers });
-      lastStatus = res.status;
-      if (lastStatus === 429) { retryAfter = res.headers['retry-after']; break; }
+      lastStatus = res.status();
+      if (lastStatus === 429) { retryAfter = res.headers()['retry-after']; break; }
     }
     expect(lastStatus).toBe(429);
-    expect(retryAfter).toBeTruthy;
+    expect(retryAfter).toBeTruthy();
   });
 
   test('per-user buckets: other user unaffected', async ({ request }) => {
@@ -136,7 +136,7 @@ test.describe('Rate Limiting',  => {
     const res = await request.get(`{{apiBaseUrl}}/{{rateLimitedEndpoint}}`, {
       headers: { 'Authorization': `Bearer {{apiToken2}}` },
     });
-    expect(res.status).toBe(200);
+    expect(res.status()).toBe(200);
   });
 });
 ```

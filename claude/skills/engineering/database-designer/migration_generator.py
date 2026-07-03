@@ -124,13 +124,13 @@ class SchemaComparator:
         if 'tables' not in schema_data:
             return tables
         
-        for table_name, table_def in schema_data['tables'].items:
+        for table_name, table_def in schema_data['tables'].items():
             columns = {}
             primary_key = table_def.get('primary_key', [])
             foreign_keys = {}
             
             # Parse columns
-            for col_name, col_def in table_def.get('columns', {}).items:
+            for col_name, col_def in table_def.get('columns', {}).items():
                 column = Column(
                     name=col_name,
                     data_type=col_def.get('type', 'VARCHAR(255)'),
@@ -161,16 +161,16 @@ class SchemaComparator:
     
     def compare_schemas(self) -> Dict[str, List[Dict[str, Any]]]:
         """Compare schemas and identify all changes."""
-        self._compare_tables
-        self._compare_columns
-        self._compare_constraints
-        self._compare_indexes
+        self._compare_tables()
+        self._compare_columns()
+        self._compare_constraints()
+        self._compare_indexes()
         return self.changes
     
     def _compare_tables(self):
         """Compare table-level changes."""
-        current_tables = set(self.current_schema.keys)
-        target_tables = set(self.target_schema.keys)
+        current_tables = set(self.current_schema.keys())
+        target_tables = set(self.target_schema.keys())
         
         # Tables added
         for table_name in target_tables - current_tables:
@@ -204,7 +204,7 @@ class SchemaComparator:
         
         # Sort by similarity and identify renames
         similarity_scores.sort(reverse=True)
-        used_tables = set
+        used_tables = set()
         
         for score, old_name, new_name in similarity_scores:
             if old_name not in used_tables and new_name not in used_tables:
@@ -225,8 +225,8 @@ class SchemaComparator:
         table1 = self.current_schema[table1_name]
         table2 = self.target_schema[table2_name]
         
-        cols1 = set(table1.columns.keys)
-        cols2 = set(table2.columns.keys)
+        cols1 = set(table1.columns.keys())
+        cols2 = set(table2.columns.keys())
         
         if not cols1 and not cols2:
             return 1.0
@@ -240,14 +240,14 @@ class SchemaComparator:
     
     def _compare_columns(self):
         """Compare column-level changes."""
-        common_tables = set(self.current_schema.keys).intersection(set(self.target_schema.keys))
+        common_tables = set(self.current_schema.keys()).intersection(set(self.target_schema.keys()))
         
         for table_name in common_tables:
             current_table = self.current_schema[table_name]
             target_table = self.target_schema[table_name]
             
-            current_columns = set(current_table.columns.keys)
-            target_columns = set(target_table.columns.keys)
+            current_columns = set(current_table.columns.keys())
+            target_columns = set(target_table.columns.keys())
             
             # Columns added
             for col_name in target_columns - current_columns:
@@ -311,7 +311,7 @@ class SchemaComparator:
     
     def _compare_constraints(self):
         """Compare constraint changes."""
-        common_tables = set(self.current_schema.keys).intersection(set(self.target_schema.keys))
+        common_tables = set(self.current_schema.keys()).intersection(set(self.target_schema.keys()))
         
         for table_name in common_tables:
             current_table = self.current_schema[table_name]
@@ -352,8 +352,8 @@ class SchemaComparator:
                 })
             
             # Compare check constraints
-            current_checks = set(current_table.check_constraints.items)
-            target_checks = set(target_table.check_constraints.items)
+            current_checks = set(current_table.check_constraints.items())
+            target_checks = set(target_table.check_constraints.items())
             
             for name, condition in target_checks - current_checks:
                 self.changes['constraints_added'].append({
@@ -373,14 +373,14 @@ class SchemaComparator:
     
     def _compare_indexes(self):
         """Compare index changes."""
-        common_tables = set(self.current_schema.keys).intersection(set(self.target_schema.keys))
+        common_tables = set(self.current_schema.keys()).intersection(set(self.target_schema.keys()))
         
         for table_name in common_tables:
             current_indexes = {idx['name']: idx for idx in self.current_schema[table_name].indexes}
             target_indexes = {idx['name']: idx for idx in self.target_schema[table_name].indexes}
             
-            current_names = set(current_indexes.keys)
-            target_names = set(target_indexes.keys)
+            current_names = set(current_indexes.keys())
+            target_names = set(target_indexes.keys())
             
             # Indexes added
             for idx_name in target_names - current_names:
@@ -442,7 +442,7 @@ class MigrationGenerator:
         
         return MigrationPlan(
             migration_id=migration_id,
-            created_at=datetime.now.isoformat,
+            created_at=datetime.now().isoformat(),
             source_schema_hash=self._calculate_changes_hash(changes),
             target_schema_hash="",  # Would be calculated from target schema
             steps=self.migration_steps,
@@ -467,7 +467,7 @@ class MigrationGenerator:
         """Create migration step for table creation."""
         columns_sql = []
         
-        for col_name, column in table.columns.items:
+        for col_name, column in table.columns.items():
             col_sql = f"{col_name} {column.data_type}"
             
             if not column.nullable:
@@ -487,7 +487,7 @@ class MigrationGenerator:
             columns_sql.append(pk_sql)
         
         # Add foreign keys
-        for col_name, ref in table.foreign_keys.items:
+        for col_name, ref in table.foreign_keys.items():
             fk_sql = f"FOREIGN KEY ({col_name}) REFERENCES {ref}"
             columns_sql.append(fk_sql)
         
@@ -495,7 +495,7 @@ class MigrationGenerator:
         drop_sql = f"DROP TABLE IF EXISTS {table.name};"
         
         return MigrationStep(
-            step_id=self._generate_step_id,
+            step_id=self._generate_step_id(),
             step_type="CREATE_TABLE",
             table=table.name,
             description=f"Create table {table.name} with {len(table.columns)} columns",
@@ -537,7 +537,7 @@ class MigrationGenerator:
         risk_level = "HIGH" if not column.nullable and not column.default_value else "LOW"
         
         return MigrationStep(
-            step_id=self._generate_step_id,
+            step_id=self._generate_step_id(),
             step_type="ADD_COLUMN",
             table=table,
             description=f"Add column {column.name} to {table}",
@@ -567,7 +567,7 @@ class MigrationGenerator:
         drop_sql = f"ALTER TABLE {table} DROP COLUMN {column.name};"
         
         return MigrationStep(
-            step_id=self._generate_step_id,
+            step_id=self._generate_step_id(),
             step_type="ADD_COLUMN_ZD",
             table=table,
             description=f"Add column {column.name} to {table} (zero-downtime phase 1)",
@@ -631,7 +631,7 @@ class MigrationGenerator:
         risk_level = self._assess_column_modification_risk(current_def, target_def)
         
         return MigrationStep(
-            step_id=self._generate_step_id,
+            step_id=self._generate_step_id(),
             step_type="MODIFY_COLUMN",
             table=table,
             description=f"Modify column {column}: {', '.join(changes)}",
@@ -655,7 +655,7 @@ class MigrationGenerator:
         
         # Step 1: Add new column
         step1 = MigrationStep(
-            step_id=self._generate_step_id,
+            step_id=self._generate_step_id(),
             step_type="ADD_TEMP_COLUMN",
             table=table,
             description=f"Add temporary column {temp_column} for zero-downtime migration",
@@ -667,7 +667,7 @@ class MigrationGenerator:
         
         # Step 2: Copy data
         step2 = MigrationStep(
-            step_id=self._generate_step_id,
+            step_id=self._generate_step_id(),
             step_type="COPY_COLUMN_DATA",
             table=table,
             description=f"Copy data from {column} to {temp_column}",
@@ -679,7 +679,7 @@ class MigrationGenerator:
         
         # Step 3: Drop old column
         step3 = MigrationStep(
-            step_id=self._generate_step_id,
+            step_id=self._generate_step_id(),
             step_type="DROP_OLD_COLUMN",
             table=table,
             description=f"Drop original column {column}",
@@ -691,7 +691,7 @@ class MigrationGenerator:
         
         # Step 4: Rename new column
         step4 = MigrationStep(
-            step_id=self._generate_step_id,
+            step_id=self._generate_step_id(),
             step_type="RENAME_COLUMN",
             table=table,
             description=f"Rename {temp_column} to {column}",
@@ -753,7 +753,7 @@ class MigrationGenerator:
             return None
         
         return MigrationStep(
-            step_id=self._generate_step_id,
+            step_id=self._generate_step_id(),
             step_type="ADD_CONSTRAINT",
             table=table,
             description=description,
@@ -780,7 +780,7 @@ class MigrationGenerator:
         drop_sql = f"DROP INDEX {index['name']};"
         
         return MigrationStep(
-            step_id=self._generate_step_id,
+            step_id=self._generate_step_id(),
             step_type="ADD_INDEX",
             table=table,
             description=f"Create index {index['name']} on ({columns_sql})",
@@ -805,7 +805,7 @@ class MigrationGenerator:
         rollback_sql = f"ALTER TABLE {new_name} RENAME TO {old_name};"
         
         return MigrationStep(
-            step_id=self._generate_step_id,
+            step_id=self._generate_step_id(),
             step_type="RENAME_TABLE",
             table=old_name,
             description=f"Rename table {old_name} to {new_name}",
@@ -838,7 +838,7 @@ class MigrationGenerator:
         add_sql = f"ALTER TABLE {table} ADD COLUMN {col_sql};"
         
         return MigrationStep(
-            step_id=self._generate_step_id,
+            step_id=self._generate_step_id(),
             step_type="DROP_COLUMN",
             table=table,
             description=f"Drop column {column.name} from {table}",
@@ -884,7 +884,7 @@ class MigrationGenerator:
             return None
         
         return MigrationStep(
-            step_id=self._generate_step_id,
+            step_id=self._generate_step_id(),
             step_type="DROP_CONSTRAINT",
             table=table,
             description=description,
@@ -912,7 +912,7 @@ class MigrationGenerator:
         create_sql = f"CREATE {unique_keyword}INDEX {index['name']} ON {table} ({columns_sql});"
         
         return MigrationStep(
-            step_id=self._generate_step_id,
+            step_id=self._generate_step_id(),
             step_type="DROP_INDEX",
             table=table,
             description=f"Drop index {index['name']}",
@@ -938,7 +938,7 @@ class MigrationGenerator:
         create_sql = f"-- Recreate table {table.name} (implementation needed)"
         
         return MigrationStep(
-            step_id=self._generate_step_id,
+            step_id=self._generate_step_id(),
             step_type="DROP_TABLE",
             table=table.name,
             description=f"Drop table {table.name}",
@@ -950,12 +950,12 @@ class MigrationGenerator:
     def _generate_migration_id(self, changes: Dict[str, List[Dict[str, Any]]]) -> str:
         """Generate unique migration ID."""
         content = json.dumps(changes, sort_keys=True)
-        return hashlib.md5(content.encode).hexdigest[:8]
+        return hashlib.md5(content.encode()).hexdigest()[:8]
     
     def _calculate_changes_hash(self, changes: Dict[str, List[Dict[str, Any]]]) -> str:
         """Calculate hash of changes for versioning."""
         content = json.dumps(changes, sort_keys=True)
-        return hashlib.md5(content.encode).hexdigest
+        return hashlib.md5(content.encode()).hexdigest()
     
     def _generate_summary(self, changes: Dict[str, List[Dict[str, Any]]]) -> Dict[str, Any]:
         """Generate migration summary."""
@@ -1073,9 +1073,9 @@ def format_migration_plan_text(plan: MigrationPlan, validations: List[Validation
     lines.append(f"Total Steps: {summary['total_steps']}")
     
     changes = summary['changes_summary']
-    for change_type, count in changes.items:
+    for change_type, count in changes.items():
         if count > 0:
-            lines.append(f"{change_type.replace('_', ' ').title}: {count}")
+            lines.append(f"{change_type.replace('_', ' ').title()}: {count}")
     lines.append("")
     
     # Risk Assessment
@@ -1114,7 +1114,7 @@ def format_migration_plan_text(plan: MigrationPlan, validations: List[Validation
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Generate database migration scripts")
     parser.add_argument("--current", "-c", required=True, help="Current schema JSON file")
     parser.add_argument("--target", "-t", required=True, help="Target schema JSON file")
@@ -1128,7 +1128,7 @@ def main:
     parser.add_argument("--include-validations", action="store_true",
                        help="Include validation queries in output")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Load schemas
@@ -1139,11 +1139,11 @@ def main:
             target_schema = json.load(f)
         
         # Compare schemas
-        comparator = SchemaComparator
+        comparator = SchemaComparator()
         comparator.load_schemas(current_schema, target_schema)
-        changes = comparator.compare_schemas
+        changes = comparator.compare_schemas()
         
-        if not any(changes.values):
+        if not any(changes.values()):
             print("No schema changes detected.")
             return 0
         
@@ -1154,7 +1154,7 @@ def main:
         # Generate validations if requested
         validations = None
         if args.include_validations or args.validate_only:
-            validator = ValidationGenerator
+            validator = ValidationGenerator()
             validations = validator.generate_validations(migration_plan)
         
         # Format output
@@ -1196,4 +1196,4 @@ def main:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

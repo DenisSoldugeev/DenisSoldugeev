@@ -35,12 +35,12 @@ class ValidationResult:
     tool_count: int
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate MCP tool definitions.")
     parser.add_argument("--input", help="Path to manifest JSON file. If omitted, reads from stdin.")
     parser.add_argument("--strict", action="store_true", help="Exit non-zero when errors are found.")
     parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
-    return parser.parse_args
+    return parser.parse_args()
 
 
 def load_manifest(input_path: Optional[str]) -> Dict[str, Any]:
@@ -50,9 +50,9 @@ def load_manifest(input_path: Optional[str]) -> Dict[str, Any]:
         except Exception as exc:
             raise CLIError(f"Failed reading --input: {exc}") from exc
     else:
-        if sys.stdin.isatty:
+        if sys.stdin.isatty():
             raise CLIError("No input provided. Use --input or pipe manifest JSON via stdin.")
-        data = sys.stdin.read.strip
+        data = sys.stdin.read().strip()
         if not data:
             raise CLIError("Empty stdin.")
 
@@ -83,7 +83,7 @@ def validate_schema(tool_name: str, schema: Dict[str, Any]) -> Tuple[List[str], 
         errors.append(f"{tool_name}: inputSchema.required must be an array.")
         required = []
 
-    prop_keys = set(props.keys)
+    prop_keys = set(props.keys())
     for req in required:
         if req not in prop_keys:
             errors.append(f"{tool_name}: required field '{req}' is not defined in properties.")
@@ -91,7 +91,7 @@ def validate_schema(tool_name: str, schema: Dict[str, Any]) -> Tuple[List[str], 
     if not props:
         warnings.append(f"{tool_name}: no input properties declared.")
 
-    for pname, pdef in props.items:
+    for pname, pdef in props.items():
         if not isinstance(pdef, dict):
             errors.append(f"{tool_name}: property '{pname}' must be an object.")
             continue
@@ -110,14 +110,14 @@ def validate_manifest(payload: Dict[str, Any]) -> ValidationResult:
     if not isinstance(tools, list):
         raise CLIError("Manifest must include a 'tools' array.")
 
-    seen_names = set
+    seen_names = set()
     for idx, tool in enumerate(tools):
         if not isinstance(tool, dict):
             errors.append(f"tool[{idx}] is not an object.")
             continue
 
-        name = str(tool.get("name", "")).strip
-        desc = str(tool.get("description", "")).strip
+        name = str(tool.get("name", "")).strip()
+        desc = str(tool.get("description", "")).strip()
         schema = tool.get("inputSchema")
 
         if not name:
@@ -163,8 +163,8 @@ def to_text(result: ValidationResult) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
-    args = parse_args
+def main() -> int:
+    args = parse_args()
     payload = load_manifest(args.input)
     result = validate_manifest(payload)
 
@@ -180,7 +180,7 @@ def main -> int:
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(main)
+        raise SystemExit(main())
     except CLIError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         raise SystemExit(2)

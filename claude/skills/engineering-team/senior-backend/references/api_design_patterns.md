@@ -120,7 +120,7 @@ app.use('/api/v1', (req, res, next) => {
   res.set('Deprecation', 'true');
   res.set('Sunset', 'Sat, 01 Jun 2025 00:00:00 GMT');
   res.set('Link', '</api/v2>; rel="successor-version"');
-  next;
+  next();
 }, v1Routes);
 ```
 
@@ -223,7 +223,7 @@ const errorHandler: ErrorRequestHandler = (err: ApiError, req, res, next) => {
     },
     meta: {
       request_id: req.id,
-      timestamp: new Date.toISOString,
+      timestamp: new Date().toISOString(),
     },
   });
 };
@@ -288,7 +288,7 @@ async function paginatedQuery<T>(
   { limit, cursor, direction = 'forward' }: CursorPagination
 ): Promise<{ data: T[]; nextCursor?: string; hasMore: boolean }> {
   // Decode cursor
-  const decoded = cursor ? JSON.parse(Buffer.from(cursor, 'base64').toString) : null;
+  const decoded = cursor ? JSON.parse(Buffer.from(cursor, 'base64').toString()) : null;
 
   // Apply cursor condition
   if (decoded) {
@@ -379,7 +379,7 @@ const authenticate: RequestHandler = async (req, res, next) => {
     const token = authHeader.slice(7);
     const payload = jwt.verify(token, process.env.JWT_SECRET!) as TokenPayload;
     req.user = payload;
-    next;
+    next();
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
       return res.status(401).json({ error: { code: 'TOKEN_EXPIRED' } });
@@ -409,7 +409,7 @@ const apiKeyAuth: RequestHandler = async (req, res, next) => {
   }
 
   req.apiClient = client;
-  next;
+  next();
 };
 ```
 
@@ -490,7 +490,7 @@ const idempotencyMiddleware: RequestHandler = async (req, res, next) => {
   const idempotencyKey = req.headers['idempotency-key'] as string;
 
   if (!idempotencyKey) {
-    return next; // Optional for some endpoints
+    return next(); // Optional for some endpoints
   }
 
   // Check for existing response
@@ -511,7 +511,7 @@ const idempotencyMiddleware: RequestHandler = async (req, res, next) => {
     return originalJson(body);
   };
 
-  next;
+  next();
 };
 ```
 

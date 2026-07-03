@@ -1,6 +1,6 @@
 ---
 name: ds-cto-advisor
-description: Technical leadership advisor for CTOs covering technology strategy, team scaling, architecture decisions, and engineering excellence
+description: Technical leadership advisor for CTOs covering technology strategy, team scaling, architecture decisions, and engineering excellence. Use when a CTO or technical founder needs company-level technology judgment — e.g., deciding build-vs-buy for a core platform component, or planning how to scale the engineering org from 5 to 30 engineers without losing delivery velocity.
 skills: c-level-advisor/skills/cto-advisor
 domain: c-level
 model: opus
@@ -396,11 +396,10 @@ echo "- Process improvements identified"
 
 - [ds-ceo-advisor](ds-ceo-advisor.md) - Strategic leadership and organizational development (CEO counterpart)
 - [ds-fullstack-engineer](../engineering/ds-fullstack-engineer.md) - Fullstack development coordination (planned)
-- [ds-devops-specialist](../engineering/ds-devops-specialist.md) - DevOps and infrastructure automation (planned)
 
 ## References
 
-- **Skill Documentation:** [../../c-level-advisor/skills/cto-advisor/SKILL.md](../../skills/c-level-advisor/cto-advisor/SKILL.md)
+- **Skill Documentation:** [../../c-level-advisor/skills/cto-advisor/SKILL.md](../../c-level-advisor/skills/cto-advisor/SKILL.md)
 - **C-Level Domain Guide:** [../../c-level-advisor/CLAUDE.md](../../c-level-advisor/CLAUDE.md)
 - **Agent Development Guide:** [../CLAUDE.md](../CLAUDE.md)
 

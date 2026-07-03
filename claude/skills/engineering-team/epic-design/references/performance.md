@@ -22,14 +22,14 @@ Never put animation logic directly in event listeners. Always batch through rAF:
 let rafId = null;
 let pendingScrollY = 0;
 
-function onScroll {
+function onScroll() {
   pendingScrollY = window.scrollY;
   if (!rafId) {
     rafId = requestAnimationFrame(processScroll);
   }
 }
 
-function processScroll {
+function processScroll() {
   rafId = null;
   document.documentElement.style.setProperty('--scroll-y', pendingScrollY);
   // update other values...
@@ -53,7 +53,7 @@ window.addEventListener('scroll', onScroll, { passive: true });
 }
 
 /* DO: Remove after animation completes */
-element.addEventListener('animationend',  => {
+element.addEventListener('animationend', () => {
   element.style.willChange = 'auto';
 });
 
@@ -75,8 +75,8 @@ Never animate all elements all the time. Only animate what's currently visible.
 
 ```javascript
 class AnimationManager {
-  constructor {
-    this.activeAnimations = new Set;
+  constructor() {
+    this.activeAnimations = new Set();
     this.observer = new IntersectionObserver(
       this.handleIntersection.bind(this),
       { threshold: 0.1, rootMargin: '50px 0px' }
@@ -110,7 +110,7 @@ class AnimationManager {
   }
 }
 
-const animManager = new AnimationManager;
+const animManager = new AnimationManager();
 document.querySelectorAll('.animated-layer').forEach(el => animManager.observe(el));
 ```
 
@@ -184,17 +184,17 @@ const isLowPower = navigator.hardwareConcurrency <= 4; // heuristic for low-end 
 
 const performanceMode = (isTouchDevice || prefersReduced || isLowPower) ? 'lite' : 'full';
 
-function initForPerformanceMode {
+function initForPerformanceMode() {
   if (performanceMode === 'lite') {
     // Disable: mouse tracking, floating loops, particles, perspective zoom
     document.documentElement.classList.add('perf-lite');
     // Keep: basic scroll fade-ins, curtain reveals (CSS only)
   } else {
     // Full experience
-    initParallaxLayers;
-    initFloatingLoops;
-    initParticles;
-    initMouseTracking;
+    initParallaxLayers();
+    initFloatingLoops();
+    initParticles();
+    initMouseTracking();
   }
 }
 ```
@@ -232,7 +232,7 @@ Before shipping, verify:
 
 ```javascript
 // BAD: Creates new tween every scroll event
-window.addEventListener('scroll',  => {
+window.addEventListener('scroll', () => {
   gsap.to(element, { y: window.scrollY * 0.5 }); // creates new tween each frame!
 });
 
@@ -248,9 +248,9 @@ gsap.to(element, {
 // GOOD: Kill ScrollTriggers when not needed
 const trigger = ScrollTrigger.create({ ... });
 // Later:
-trigger.kill;
+trigger.kill();
 
-// GOOD: Use gsap.set for instant placement (no tween overhead)
+// GOOD: Use gsap.set() for instant placement (no tween overhead)
 gsap.set('.element', { x: 0, opacity: 1 });
 
 // GOOD: Batch DOM reads/writes

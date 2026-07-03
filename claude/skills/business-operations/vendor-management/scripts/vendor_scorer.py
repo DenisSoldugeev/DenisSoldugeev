@@ -389,7 +389,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--input", type=Path, help="Path to JSON vendor catalog.")
     parser.add_argument(
         "--profile",
-        choices=sorted(PROFILES.keys),
+        choices=sorted(PROFILES.keys()),
         default="saas",
         help="Industry profile to use for dimension weighting (default: saas).",
     )
@@ -428,4 +428,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main)
+    raise SystemExit(main())

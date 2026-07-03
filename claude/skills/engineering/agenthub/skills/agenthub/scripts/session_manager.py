@@ -45,7 +45,7 @@ def load_state(session_id):
 def save_state(session_id, state):
     """Save session state.json."""
     state_path = os.path.join(SESSIONS_PATH, session_id, "state.json")
-    state["updated"] = datetime.now(timezone.utc).isoformat
+    state["updated"] = datetime.now(timezone.utc).isoformat()
     with open(state_path, "w") as f:
         json.dump(state, f, indent=2)
         f.write("\n")
@@ -59,10 +59,10 @@ def load_config(session_id):
     config = {}
     with open(config_path) as f:
         for line in f:
-            line = line.strip
+            line = line.strip()
             if ":" in line and not line.startswith("#"):
                 key, val = line.split(":", 1)
-                config[key.strip] = val.strip.strip('"')
+                config[key.strip()] = val.strip().strip('"')
     return config
 
 
@@ -73,7 +73,7 @@ def run_git(*args):
             ["git"] + list(args),
             capture_output=True, text=True, check=True
         )
-        return result.stdout.strip
+        return result.stdout.strip()
     except subprocess.CalledProcessError:
         return ""
 
@@ -109,7 +109,7 @@ def list_sessions(output_format="text"):
         return
 
     print("AgentHub Sessions")
-    print
+    print()
     header = f"{'SESSION ID':<20} {'STATE':<12} {'AGENTS':<8} {'TASK'}"
     print(header)
     print("-" * 70)
@@ -147,11 +147,11 @@ def show_status(session_id, output_format="text"):
     branches = run_git("branch", "--list", f"hub/{session_id}/*",
                        "--format=%(refname:short)")
     if branches:
-        print
+        print()
         print("  Branches:")
         for b in branches.split("\n"):
-            if b.strip:
-                print(f"    {b.strip}")
+            if b.strip():
+                print(f"    {b.strip()}")
 
 
 def update_state(session_id, new_state):
@@ -210,23 +210,23 @@ def cleanup_session(session_id):
     print(f"Cleaned up {removed} worktrees for session {session_id}")
 
 
-def run_demo:
+def run_demo():
     """Show demo output."""
     print("=" * 60)
     print("AgentHub Session Manager — Demo Mode")
     print("=" * 60)
-    print
+    print()
 
     print("--- Session List ---")
     print("AgentHub Sessions")
-    print
+    print()
     header = f"{'SESSION ID':<20} {'STATE':<12} {'AGENTS':<8} {'TASK'}"
     print(header)
     print("-" * 70)
     print(f"{'20260317-143022':<20} {'merged':<12} {'3':<8} Optimize API response time below 100ms")
     print(f"{'20260317-151500':<20} {'running':<12} {'2':<8} Refactor auth module for JWT support")
     print(f"{'20260317-160000':<20} {'init':<12} {'4':<8} Implement caching strategy")
-    print
+    print()
 
     print("--- Session Detail ---")
     print("Session: 20260317-143022")
@@ -238,21 +238,21 @@ def run_demo:
     print("  Metric: p50_ms (lower)")
     print("  Created: 2026-03-17T14:30:22Z")
     print("  Updated: 2026-03-17T14:45:00Z")
-    print
+    print()
     print("  Branches:")
     print("    hub/20260317-143022/agent-1/attempt-1  (archived)")
     print("    hub/20260317-143022/agent-2/attempt-1  (merged)")
     print("    hub/20260317-143022/agent-3/attempt-1  (archived)")
-    print
+    print()
 
     print("--- State Transitions ---")
     print("Valid transitions:")
-    for state, transitions in VALID_TRANSITIONS.items:
+    for state, transitions in VALID_TRANSITIONS.items():
         arrow = " → ".join(transitions) if transitions else "(terminal)"
         print(f"  {state}: {arrow}")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="AgentHub session state machine and lifecycle manager"
     )
@@ -270,10 +270,10 @@ def main:
                         help="Output format (default: text)")
     parser.add_argument("--demo", action="store_true",
                         help="Show demo output")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.demo:
-        run_demo
+        run_demo()
         return
 
     if args.list:
@@ -295,8 +295,8 @@ def main:
         cleanup_session(args.cleanup)
         return
 
-    parser.print_help
+    parser.print_help()
 
 
 if __name__ == "__main__":
-    main
+    main()

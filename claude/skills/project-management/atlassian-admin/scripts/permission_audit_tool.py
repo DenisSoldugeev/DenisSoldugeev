@@ -72,13 +72,13 @@ def check_over_permissioned_groups(
         group_permissions = {}
         for grant in grants:
             group = grant.get("group", "")
-            permission = grant.get("permission", "").lower
+            permission = grant.get("permission", "").lower()
             if group:
                 if group not in group_permissions:
-                    group_permissions[group] = set
+                    group_permissions[group] = set()
                 group_permissions[group].add(permission)
 
-        for group, perms in group_permissions.items:
+        for group, perms in group_permissions.items():
             admin_perms = perms & SENSITIVE_PERMISSIONS
             if len(admin_perms) >= 3:
                 findings.append({
@@ -119,7 +119,7 @@ def check_direct_user_permissions(
             permission = grant.get("permission", "")
 
             if user and not grant.get("group"):
-                severity = "high" if permission.lower in SENSITIVE_PERMISSIONS else "medium"
+                severity = "high" if permission.lower() in SENSITIVE_PERMISSIONS else "medium"
                 findings.append({
                     "rule": "direct_user_permission",
                     "severity": severity,
@@ -142,21 +142,21 @@ def check_missing_restrictions(
         scheme_name = scheme.get("name", "Unknown Scheme")
         grants = scheme.get("grants", [])
 
-        granted_permissions = set
+        granted_permissions = set()
         for grant in grants:
-            granted_permissions.add(grant.get("permission", "").lower)
+            granted_permissions.add(grant.get("permission", "").lower())
 
         # Check if delete permissions are unrestricted
         delete_perms = {"delete_issues", "delete_all_comments", "delete_all_attachments"}
         unrestricted_deletes = delete_perms & granted_permissions
 
         for grant in grants:
-            perm = grant.get("permission", "").lower
+            perm = grant.get("permission", "").lower()
             group = grant.get("group", "")
             if perm in delete_perms and group:
                 # Check if granted to broad groups
                 broad_groups = {"users", "everyone", "all-users", "jira-users", "jira-software-users"}
-                if group.lower in broad_groups:
+                if group.lower() in broad_groups:
                     findings.append({
                         "rule": "unrestricted_delete",
                         "severity": "critical",
@@ -192,17 +192,17 @@ def check_scheme_consistency(
     scheme_perms = {}
     for scheme in schemes:
         name = scheme.get("name", "Unknown")
-        perms = set
+        perms = set()
         for grant in scheme.get("grants", []):
-            perms.add(grant.get("permission", "").lower)
+            perms.add(grant.get("permission", "").lower())
         scheme_perms[name] = perms
 
     # Find schemes with significantly different permission sets
-    all_perms = set
-    for perms in scheme_perms.values:
+    all_perms = set()
+    for perms in scheme_perms.values():
         all_perms |= perms
 
-    scheme_names = list(scheme_perms.keys)
+    scheme_names = list(scheme_perms.keys())
     for i in range(len(scheme_names)):
         for j in range(i + 1, len(scheme_names)):
             name_a = scheme_names[i]
@@ -229,8 +229,8 @@ def check_compliance_gaps(
         scheme_name = scheme.get("name", "Unknown Scheme")
         grants = scheme.get("grants", [])
 
-        groups_used = set
-        users_used = set
+        groups_used = set()
+        users_used = set()
         for grant in grants:
             if grant.get("group"):
                 groups_used.add(grant["group"])
@@ -238,9 +238,9 @@ def check_compliance_gaps(
                 users_used.add(grant["user"])
 
         # Check for separation of duties
-        admin_groups = set
+        admin_groups = set()
         for grant in grants:
-            if grant.get("permission", "").lower in SENSITIVE_PERMISSIONS and grant.get("group"):
+            if grant.get("permission", "").lower() in SENSITIVE_PERMISSIONS and grant.get("group"):
                 admin_groups.add(grant["group"])
 
         if len(admin_groups) == 1 and len(groups_used) > 1:
@@ -330,7 +330,7 @@ def audit_permissions(data: Dict[str, Any]) -> Dict[str, Any]:
 def _generate_remediations(findings: List[Dict[str, str]]) -> List[str]:
     """Generate remediation recommendations."""
     remediations = []
-    rules_seen = set
+    rules_seen = set()
 
     for finding in findings:
         rule = finding["rule"]
@@ -378,7 +378,7 @@ def format_text_output(result: Dict[str, Any]) -> str:
     lines.append("-" * 30)
     lines.append(f"Risk Score: {result['risk_score']}/100 (lower is better)")
     lines.append(f"Health Score: {result['health_score']}/100")
-    lines.append(f"Grade: {result['grade'].title}")
+    lines.append(f"Grade: {result['grade'].title()}")
     lines.append(f"Schemes Analyzed: {result['schemes_analyzed']}")
     lines.append("")
 
@@ -397,7 +397,7 @@ def format_text_output(result: Dict[str, Any]) -> str:
         lines.append("DETAILED FINDINGS")
         lines.append("-" * 30)
         for i, finding in enumerate(findings, 1):
-            severity = finding["severity"].upper
+            severity = finding["severity"].upper()
             lines.append(f"{i}. [{severity}] {finding['message']}")
             lines.append(f"   Rule: {finding['rule']}")
             if finding.get("scheme"):
@@ -423,7 +423,7 @@ def format_json_output(result: Dict[str, Any]) -> Dict[str, Any]:
 # CLI Interface
 # ---------------------------------------------------------------------------
 
-def main -> int:
+def main() -> int:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Audit Atlassian permission schemes for security issues"
@@ -439,7 +439,7 @@ def main -> int:
         help="Output format (default: text)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         with open(args.permissions_file, "r") as f:
@@ -466,4 +466,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

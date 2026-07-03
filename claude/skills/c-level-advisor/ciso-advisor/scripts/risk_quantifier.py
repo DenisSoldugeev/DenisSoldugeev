@@ -69,7 +69,7 @@ def build_risk(
     mitigated_ale = ale * (1 - mitigation_effectiveness)  # Residual after mitigation
     mitigation_roi = ((ale - mitigated_ale - mitigation_cost) / mitigation_cost * 100
                       if mitigation_cost > 0 else 0)
-    total_business_impact = sum(business_impacts.values)
+    total_business_impact = sum(business_impacts.values())
 
     return {
         "name": name,
@@ -95,7 +95,7 @@ def build_risk(
 
 # ─── Sample Data ─────────────────────────────────────────────────────────────
 
-def load_sample_risks -> list[dict]:
+def load_sample_risks() -> list[dict]:
     """
     Sample risk register for a Series B SaaS company with ~$15M ARR,
     ~50K customer records, B2B enterprise focus.
@@ -365,7 +365,7 @@ def calculate_portfolio_summary(risks: list[dict]) -> dict:
         "total_risk_reduction": risk_reduction,
         "total_mitigation_cost": total_mitigation_cost,
         "portfolio_roi_pct": portfolio_roi,
-        "by_category": dict(sorted(by_category.items, key=lambda x: -x[1]["total_ale"])),
+        "by_category": dict(sorted(by_category.items(), key=lambda x: -x[1]["total_ale"])),
         "by_mitigation_status": by_status,
     }
 
@@ -427,10 +427,10 @@ def severity_color(label: str) -> str:
 
 # ─── Display ─────────────────────────────────────────────────────────────────
 
-def print_header:
+def print_header():
     print("\n" + "=" * 80)
     print("  CISO RISK QUANTIFIER — Security Risk Portfolio")
-    print(f"  Generated: {datetime.now.strftime('%Y-%m-%d %H:%M')}")
+    print(f"  Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     print("=" * 80)
 
 
@@ -443,15 +443,15 @@ def print_portfolio_summary(summary: dict):
     print(f"  Risk reduction from controls: {fmt_dollars(summary['total_risk_reduction'])}/yr")
     print(f"  Total mitigation spend:       {fmt_dollars(summary['total_mitigation_cost'])}/yr")
     print(f"  Portfolio ROI:                {fmt_pct(summary['portfolio_roi_pct'])}")
-    print
+    print()
 
     print("  Risk by Category (sorted by ALE):")
-    for cat, data in summary["by_category"].items:
+    for cat, data in summary["by_category"].items():
         print(f"    {cat:<35} {data['count']} risks  ALE: {fmt_dollars(data['total_ale'])}/yr")
 
-    print
+    print()
     print("  Mitigation Status:")
-    for status, count in summary["by_mitigation_status"].items:
+    for status, count in summary["by_mitigation_status"].items():
         print(f"    {status:<20} {count} risks")
 
 
@@ -480,23 +480,23 @@ def print_risk_detail(risk: dict, index: int):
     print(f"{'─' * 70}")
     print(f"  Category:    {risk['category']}")
     print(f"  Description: {risk['description'][:120]}...")
-    print
+    print()
     print(f"  RISK CALCULATION:")
     print(f"    Asset Value:             {fmt_dollars(risk['asset_value'])}")
     print(f"    Exposure Factor:         {fmt_pct(risk['exposure_factor'] * 100)}")
     print(f"    Single Loss Expectancy:  {fmt_dollars(risk['sle'])}")
     print(f"    Annual Rate (ARO):       {risk['annual_rate']:.2f}x/year")
     print(f"    Annual Loss Expectancy:  {fmt_dollars(risk['ale'])}/yr  ← INHERENT RISK")
-    print
+    print()
     print(f"  MITIGATION:")
     print(f"    Mitigation Cost:         {fmt_dollars(risk['mitigation_cost'])}/yr")
     print(f"    Effectiveness:           {fmt_pct(risk['mitigation_effectiveness'] * 100)}")
     print(f"    Residual ALE:            {fmt_dollars(risk['mitigated_ale'])}/yr")
     print(f"    Mitigation ROI:          {fmt_pct(risk['mitigation_roi_pct'])}")
     print(f"    Status:                  {risk['mitigation_status']}")
-    print
+    print()
     print(f"  BUSINESS IMPACT BREAKDOWN:")
-    for impact_type, amount in risk["business_impacts"].items:
+    for impact_type, amount in risk["business_impacts"].items():
         print(f"    {impact_type:<30} {fmt_dollars(amount)}")
     print(f"    {'TOTAL':<30} {fmt_dollars(risk['total_business_impact'])}")
     if risk["notes"]:
@@ -551,7 +551,7 @@ def export_csv(risks: list[dict], filepath: str):
     ]
     with open(filepath, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
-        writer.writeheader
+        writer.writeheader()
         for risk in risks:
             row = {k: risk.get(k, "") for k in fields}
             writer.writerow(row)
@@ -564,15 +564,15 @@ def export_json(risks: list[dict]) -> str:
 
 # ─── Interactive Entry ───────────────────────────────────────────────────────
 
-def interactive_add_risk -> dict:
+def interactive_add_risk() -> dict:
     """Interactive CLI for adding a new risk."""
     print("\n── ADD NEW RISK ──────────────────────────────────────")
-    name = input("Risk name: ").strip
+    name = input("Risk name: ").strip()
 
     print(f"Category options: {', '.join(RISK_CATEGORIES)}")
-    category = input("Category: ").strip
+    category = input("Category: ").strip()
 
-    description = input("Description (brief): ").strip
+    description = input("Description (brief): ").strip()
 
     print("\nAsset valuation:")
     asset_value = float(input("  Asset value ($): ").replace(",", "").replace("$", ""))
@@ -584,7 +584,7 @@ def interactive_add_risk -> dict:
     mitigation_effectiveness = float(input("  Mitigation effectiveness (0.0–1.0): "))
 
     print(f"Status options: {', '.join(MITIGATION_STATUSES)}")
-    mitigation_status = input("  Status: ").strip
+    mitigation_status = input("  Status: ").strip()
 
     print("\nBusiness impacts (enter 0 to skip):")
     business_impacts = {}
@@ -594,7 +594,7 @@ def interactive_add_risk -> dict:
         if amount > 0:
             business_impacts[impact_type] = amount
 
-    notes = input("\nNotes: ").strip
+    notes = input("\nNotes: ").strip()
 
     return build_risk(
         name=name,
@@ -613,7 +613,7 @@ def interactive_add_risk -> dict:
 
 # ─── Main ────────────────────────────────────────────────────────────────────
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="CISO Risk Quantifier — Quantify security risks in business terms"
     )
@@ -624,12 +624,12 @@ def main:
     parser.add_argument("--board", action="store_true", help="Show board-ready summary only")
     parser.add_argument("--detail", action="store_true", help="Show detailed risk breakdowns")
     parser.add_argument("--add", action="store_true", help="Interactively add a risk")
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    risks = load_sample_risks
+    risks = load_sample_risks()
 
     if args.add:
-        new_risk = interactive_add_risk
+        new_risk = interactive_add_risk()
         risks.append(new_risk)
         print(f"\n✅ Added risk: {new_risk['name']} | ALE: {fmt_dollars(new_risk['ale'])}/yr")
 
@@ -639,7 +639,7 @@ def main:
 
     if args.json:
         output = {
-            "generated": datetime.now.isoformat,
+            "generated": datetime.now().isoformat(),
             "summary": summary,
             "risks": risks_sorted,
         }
@@ -650,7 +650,7 @@ def main:
         export_csv(risks_sorted, args.csv)
         return
 
-    print_header
+    print_header()
 
     if args.board:
         print_board_summary(risks_sorted, summary)
@@ -683,8 +683,8 @@ def main:
     print("   3. Run `--board` for a board-ready one-page summary")
     print("   4. Run `--csv risks.csv` to export for stakeholder review")
     print("   5. Run `--add` to interactively add risks to the register")
-    print
+    print()
 
 
 if __name__ == "__main__":
-    main
+    main()

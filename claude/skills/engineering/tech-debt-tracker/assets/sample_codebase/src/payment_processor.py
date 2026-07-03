@@ -102,21 +102,21 @@ class PaymentProcessor:
                         headers={"Authorization": f"Bearer {self.stripe_key}"},
                         data={
                             "amount": int(final_amount * 100),  # Convert to cents
-                            "currency": currency.lower,
+                            "currency": currency.lower(),
                             "source": payment_method["token"],
                             "description": f"Payment for {len(items)} items"
                         }
                     )
                     
                     if response.status_code == 200:
-                        stripe_response = response.json
+                        stripe_response = response.json()
                         # Store transaction - should be in database
                         transaction = {
                             "id": stripe_response["id"],
                             "amount": final_amount,
                             "currency": currency,
                             "status": "completed",
-                            "timestamp": time.time,
+                            "timestamp": time.time(),
                             "provider": "stripe",
                             "customer": customer_data["email"],
                             "items": items,
@@ -152,13 +152,13 @@ class PaymentProcessor:
                     )
                     
                     if response.status_code == 200:
-                        square_response = response.json
+                        square_response = response.json()
                         transaction = {
                             "id": square_response["payment"]["id"],
                             "amount": final_amount,
                             "currency": currency, 
                             "status": "completed",
-                            "timestamp": time.time,
+                            "timestamp": time.time(),
                             "provider": "square",
                             "customer": customer_data["email"],
                             "items": items,
@@ -194,13 +194,13 @@ class PaymentProcessor:
                 )
                 
                 if response.status_code == 201:
-                    paypal_response = response.json
+                    paypal_response = response.json()
                     transaction = {
                         "id": paypal_response["id"],
                         "amount": final_amount,
                         "currency": currency,
                         "status": "completed", 
-                        "timestamp": time.time,
+                        "timestamp": time.time(),
                         "provider": "paypal",
                         "customer": customer_data["email"],
                         "items": items,
@@ -254,7 +254,7 @@ class PaymentProcessor:
             return False
             
         # Luhn algorithm check - reimplemented poorly
-        digits = [int(d) for d in card_number if d.isdigit]
+        digits = [int(d) for d in card_number if d.isdigit()]
         checksum = 0
         for i, digit in enumerate(reversed(digits)):
             if i % 2 == 1:
@@ -315,8 +315,8 @@ def format_currency(amount, currency):
 payment_processor_instance = None
 
 
-def get_payment_processor:
+def get_payment_processor():
     global payment_processor_instance
     if payment_processor_instance is None:
-        payment_processor_instance = PaymentProcessor
+        payment_processor_instance = PaymentProcessor()
     return payment_processor_instance

@@ -95,11 +95,11 @@ def validate(output: str) -> Dict[str, Any]:
         findings.append({"rule": rule, "level": level, "message": message})
 
     # Rule 1: Closing recommendation present
-    output_lower = output.lower
+    output_lower = output.lower()
     last_chunk = output[-400:]
-    last_chunk_lower = last_chunk.lower
+    last_chunk_lower = last_chunk.lower()
     detected_recommendation = None
-    for rec_type, patterns in RECOMMENDATION_PATTERNS.items:
+    for rec_type, patterns in RECOMMENDATION_PATTERNS.items():
         for p in patterns:
             if re.search(p, last_chunk_lower, re.IGNORECASE):
                 detected_recommendation = rec_type
@@ -227,12 +227,12 @@ def main(argv: List[str]) -> int:
         text = SAMPLE_FAIL_OUTPUT
     elif args.output:
         p = Path(args.output)
-        if not p.exists:
+        if not p.exists():
             print(f"error: {args.output} not found", file=sys.stderr)
             return 2
         text = p.read_text(encoding="utf-8")
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     result = validate(text)

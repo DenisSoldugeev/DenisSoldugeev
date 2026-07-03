@@ -9,11 +9,11 @@ description: "/ds:aeo — Answer Engine Optimization workflow. Audit content for
 
 The `ds-aeo` command is the **entry point for AEO workflows**: audit → optimize → publish → track citations.
 
-## Distinct From `/seo-auditor`
+## Distinct From `/ds:seo-audit`
 
 These share a foundation (E-E-A-T) but optimize for different conversion events:
 
-- **`/seo-auditor`** — optimizes for ranking + click-through in Google/Bing search results
+- **`/ds:seo-audit`** — optimizes for ranking + click-through in Google/Bing search results
 - **`/ds:aeo`** (this command) — optimizes for being cited as authoritative source by LLMs
 
 They can run on the same content. The ds-aeo agent will surface this and recommend running both for high-leverage pages.
@@ -28,7 +28,7 @@ They can run on the same content. The ds-aeo agent will surface this and recomme
 
 ## When NOT To Run
 
-- Pure click-through SEO without AI-citation intent → use `/seo-auditor`
+- Pure click-through SEO without AI-citation intent → use `/ds:seo-audit`
 - Brand-voice content with no factual claims (citations require facts)
 - Time-sensitive news (LLM training lag means citation comes months later)
 - Topics where LLMs already have strong training (e.g., elementary math)
@@ -154,9 +154,9 @@ Content for YMYL topics scoring below threshold is unlikely to be cited regardle
 
 ## Related
 
-- Agent: [`ds-aeo`](../agents/marketing/ds-aeo.md)
-- Skill: [`aeo`](../skills/marketing-skill/aeo/SKILL.md)
-- Companion: `/seo-auditor` (SEO + AEO often run together)
+- Agent: [`ds-aeo`](agents/marketing/ds-aeo.md)
+- Skill: [`aeo`](marketing-skill/skills/aeo/SKILL.md)
+- Companion: `/ds:seo-audit` (SEO + AEO often run together)
 - Source: ported from `/aeo-box`
 
 ---

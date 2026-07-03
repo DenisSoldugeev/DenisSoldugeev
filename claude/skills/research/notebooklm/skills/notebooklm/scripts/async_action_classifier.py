@@ -114,7 +114,32 @@ ACTION_TIMING = {
         "timeout_seconds": 90,
         "polling_interval_seconds": 5,
     },
+    "flashcards": {
+        "category": "studio",
+        "verdict": "WAIT",
+        "estimated_duration_seconds": (30, 60),
+        "timeout_seconds": 120,
+        "polling_interval_seconds": 10,
+    },
+    "quiz": {
+        "category": "studio",
+        "verdict": "WAIT",
+        "estimated_duration_seconds": (30, 60),
+        "timeout_seconds": 120,
+        "polling_interval_seconds": 10,
+    },
     # Studio outputs — slow (fire-and-notify)
+    "video_overview": {
+        "category": "studio",
+        "verdict": "FIRE_AND_NOTIFY",
+        "estimated_duration_seconds": (300, 900),
+        "estimated_duration_human": "5-15 minutes",
+        "notify_message": (
+            "Video Overview generation triggered. Estimated 5-15 minutes. "
+            "NotebookLM will notify you in-app and via email when ready. "
+            "NOT waiting in this session — returning control to you now."
+        ),
+    },
     "audio_overview": {
         "category": "studio",
         "verdict": "FIRE_AND_NOTIFY",
@@ -165,11 +190,11 @@ ACTION_TIMING = {
 def classify(action: str) -> Dict[str, Any]:
     if action not in ACTION_TIMING:
         # Try fuzzy match for synonyms
-        action_lower = action.lower.replace(" ", "_").replace("-", "_")
+        action_lower = action.lower().replace(" ", "_").replace("-", "_")
         for known_action in ACTION_TIMING:
             if action_lower in known_action or known_action in action_lower:
                 return {"action": known_action, "matched_from": action, **ACTION_TIMING[known_action]}
-        raise ValueError(f"Unknown action '{action}'. Known: {sorted(ACTION_TIMING.keys)}")
+        raise ValueError(f"Unknown action '{action}'. Known: {sorted(ACTION_TIMING.keys())}")
     return {"action": action, **ACTION_TIMING[action]}
 
 
@@ -224,7 +249,7 @@ def main(argv: List[str]) -> int:
         except ValueError as e:
             print(f"error: {e}", file=sys.stderr); return 2
     else:
-        parser.print_help; return 0
+        parser.print_help(); return 0
 
     if args.output == "json":
         print(json.dumps(result, indent=2))

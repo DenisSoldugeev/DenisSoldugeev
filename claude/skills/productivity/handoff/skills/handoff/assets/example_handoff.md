@@ -51,7 +51,7 @@ _Git context (auto-included from config)._
 ## Artifacts
 
 - Branch: `claude/handoff-skill-review-LnSxe`
-- Draft PR: 
+- Draft PR: /claude-skills/pull/724
 - SKILL.md: `productivity/handoff/skills/handoff/SKILL.md`
 - Linter: `productivity/handoff/skills/handoff/scripts/redaction_linter.py`
 - Inspired by: https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff

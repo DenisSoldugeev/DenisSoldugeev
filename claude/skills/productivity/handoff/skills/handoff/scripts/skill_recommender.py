@@ -16,7 +16,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import config_loader  # noqa: E402
 
 # Domains the recommender knows about, ordered by typical relevance.
@@ -56,15 +56,15 @@ def _find_repo_root(start: Path) -> Path:
     Plugin folders also carry .claude-plugin/, so we cannot stop at the
     first match — that would pin the recommender to a single plugin.
     """
-    cur = start.resolve
+    cur = start.resolve()
     outermost: Path | None = None
     for parent in [cur, *cur.parents]:
-        if (parent / "CLAUDE.md").exists:
+        if (parent / "CLAUDE.md").exists():
             outermost = parent
     if outermost is not None:
         return outermost
     for parent in [cur, *cur.parents]:
-        if (parent / ".claude-plugin").exists:
+        if (parent / ".claude-plugin").exists():
             return parent
     return start
 
@@ -75,23 +75,23 @@ def _parse_frontmatter(text: str) -> dict[str, str]:
     end = text.find("\n---", 3)
     if end == -1:
         return {}
-    block = text[3:end].strip
+    block = text[3:end].strip()
     out: dict[str, str] = {}
     key: str | None = None
     buf: list[str] = []
-    for raw in block.splitlines:
-        if not raw.strip:
+    for raw in block.splitlines():
+        if not raw.strip():
             continue
         m = re.match(r"^([A-Za-z0-9_\-]+)\s*:\s*(.*)$", raw)
         if m and not raw.startswith(" ") and not raw.startswith("\t"):
             if key is not None:
-                out[key] = " ".join(buf).strip.strip('"').strip("'")
+                out[key] = " ".join(buf).strip().strip('"').strip("'")
             key = m.group(1)
             buf = [m.group(2)]
         elif key is not None:
-            buf.append(raw.strip.strip('"').strip("'"))
+            buf.append(raw.strip().strip('"').strip("'"))
     if key is not None:
-        out[key] = " ".join(buf).strip.strip('"').strip("'")
+        out[key] = " ".join(buf).strip().strip('"').strip("'")
     return out
 
 
@@ -104,7 +104,7 @@ def _collect_skills(repo_root: Path, scope: str, current_domain: str | None) -> 
         domains = [current_domain]
     for d in domains:
         domain_root = repo_root / d
-        if not domain_root.is_dir:
+        if not domain_root.is_dir():
             continue
         for skill_md in domain_root.rglob("SKILL.md"):
             if any(p.name in {"node_modules", ".git", "documentation"} for p in skill_md.parents):
@@ -116,7 +116,7 @@ def _collect_skills(repo_root: Path, scope: str, current_domain: str | None) -> 
             fm = _parse_frontmatter(text)
             slug = fm.get("name") or skill_md.parent.name
             description = fm.get("description") or ""
-            title = slug.replace("-", " ").title
+            title = slug.replace("-", " ").title()
             cards.append(
                 SkillCard(
                     slug=slug,
@@ -130,7 +130,7 @@ def _collect_skills(repo_root: Path, scope: str, current_domain: str | None) -> 
 
 
 def _tokenize(text: str) -> list[str]:
-    return [t.lower for t in re.findall(r"[A-Za-z][A-Za-z0-9_-]{2,}", text)]
+    return [t.lower() for t in re.findall(r"[A-Za-z][A-Za-z0-9_-]{2,}", text)]
 
 
 _STOPWORDS = {
@@ -145,7 +145,7 @@ _STOPWORDS = {
 def _score(card: SkillCard, goal_tokens: list[str], goal_set: set[str]) -> int:
     if not goal_tokens:
         return 0
-    haystack = f"{card.slug} {card.title} {card.description}".lower
+    haystack = f"{card.slug} {card.title} {card.description}".lower()
     score = 0
     for tok in goal_set:
         if tok in _STOPWORDS:
@@ -154,20 +154,20 @@ def _score(card: SkillCard, goal_tokens: list[str], goal_set: set[str]) -> int:
             continue
         occurrences = haystack.count(tok)
         score += occurrences
-        if tok in card.slug.lower:
+        if tok in card.slug.lower():
             score += 3
     return score
 
 
 def _short_description(description: str, limit: int = 140) -> str:
-    description = re.sub(r"\s+", " ", description).strip
+    description = re.sub(r"\s+", " ", description).strip()
     if len(description) <= limit:
         return description
     cut = description[:limit]
     last_space = cut.rfind(" ")
     if last_space > 80:
         cut = cut[:last_space]
-    return cut.rstrip + "..."
+    return cut.rstrip() + "..."
 
 
 def recommend(goal: str, repo_root: Path, scope: str, current_domain: str | None) -> list[dict]:
@@ -230,7 +230,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.sample:
-        repo_root = _find_repo_root(Path(__file__).resolve)
+        repo_root = _find_repo_root(Path(__file__).resolve())
         results = recommend(
             goal="implement redaction linter for handoff documents",
             repo_root=repo_root,
@@ -243,10 +243,10 @@ def main(argv: list[str] | None = None) -> int:
             print(_format_markdown(results, "implement redaction linter for handoff documents"))
         return 0
 
-    config = config_loader.load_config
+    config = config_loader.load_config()
     scope = args.scope or config.get("skill_recommendation_scope", "all")
 
-    repo_root = Path(args.repo_root).resolve if args.repo_root else _find_repo_root(Path.cwd)
+    repo_root = Path(args.repo_root).resolve() if args.repo_root else _find_repo_root(Path.cwd())
     results = recommend(
         goal=args.goal,
         repo_root=repo_root,
@@ -261,4 +261,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

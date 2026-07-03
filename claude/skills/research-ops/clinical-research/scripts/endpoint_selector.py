@@ -90,7 +90,7 @@ def score_endpoint(ep: dict, profile_mult: float) -> dict:
     flags: list[str] = []
     composite = 0.0
     breakdown = {}
-    for dim, w in WEIGHTS.items:
+    for dim, w in WEIGHTS.items():
         s = float(raw.get(dim, 0.0))
         if dim == "regulatory_acceptance":
             s = min(100.0, s * profile_mult)
@@ -144,7 +144,7 @@ def _render_human(result: dict) -> str:
     lines = [f"!! {BANNER}", "", f"Indication: {result['indication']}  (profile: {result['profile']})", ""]
     for ep in result["endpoints"]:
         lines.append(f"[{ep['classification']}] {ep['name']}  — composite {ep['composite']}/100")
-        for dim, s in ep["breakdown"].items:
+        for dim, s in ep["breakdown"].items():
             lines.append(f"      {dim:24s} {s}")
         for f in ep["flags"]:
             lines.append(f"      ! {f}")
@@ -162,7 +162,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--sample", action="store_true", help="use the embedded sample")
     args = p.parse_args(argv)
 
-    conf = _cfg.load_config if _cfg else {}
+    conf = _cfg.load_config() if _cfg else {}
     profile = args.profile or conf.get("default_profile", "drug")
     data = SAMPLE if (args.sample or not args.input) else json.load(open(args.input))
     try:
@@ -180,4 +180,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -105,7 +105,7 @@ grep -rn $EXCLUDE \
 ```bash
 # eval usage
 grep -rnE $EXCLUDE \
-  "(\beval\s*\(|new\s+Function\s*\" \
+  "(\beval\s*\(|new\s+Function\s*\()" \
   --include="*.js" --include="*.ts" --include="*.jsx" --include="*.tsx" \
   . 2>/dev/null
 
@@ -121,7 +121,7 @@ grep -rnE $EXCLUDE \
 
 ```bash
 grep -rnE $EXCLUDE \
-  "(set-cookie|setCookie|cookie\" \
+  "(set-cookie|setCookie|cookie\()" \
   . 2>/dev/null
 # Verify HttpOnly, Secure, SameSite flags are present
 grep -rnE $EXCLUDE \
@@ -333,7 +333,7 @@ grep -rnE $EXCLUDE \
   "async\s+\w+\s*\(" \
   --include="*.js" --include="*.ts" --include="*.jsx" --include="*.tsx" \
   . 2>/dev/null
-# Check for .catch or try/catch wrapping
+# Check for .catch() or try/catch wrapping
 ```
 
 ### CODE-09: React error boundaries

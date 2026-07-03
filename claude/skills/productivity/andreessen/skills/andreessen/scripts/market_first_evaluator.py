@@ -142,7 +142,7 @@ def render_human(r: Dict[str, Any]) -> str:
     out.append("")
     out.append(f"  Weighted contributions: market {r['contributions']['market']} | "
                f"team {r['contributions']['team']} | product {r['contributions']['product']}")
-    out.append(f"  Dominant factor: {r['dominant_factor'].upper}")
+    out.append(f"  Dominant factor: {r['dominant_factor'].upper()}")
     out.append(f"  Composite score: {r['composite_score']}/10")
     out.append("")
     out.append(f"  VERDICT: {r['verdict']}")
@@ -161,13 +161,13 @@ def render_human(r: Dict[str, Any]) -> str:
 
 
 def _wrap(text: str, width: int) -> List[str]:
-    words, lines, cur = text.split, [], ""
+    words, lines, cur = text.split(), [], ""
     for w in words:
         if len(cur) + len(w) + 1 > width:
             lines.append(cur)
             cur = w
         else:
-            cur = f"{cur} {w}".strip
+            cur = f"{cur} {w}".strip()
     if cur:
         lines.append(cur)
     return lines
@@ -194,7 +194,7 @@ def main(argv: List[str]) -> int:
         vals = dict(size=args.size, growth=args.growth, timing=args.timing,
                     pull=args.pull, team=args.team, product=args.product)
     else:
-        p.print_help
+        p.print_help()
         print("\nerror: provide all six scores (--size --growth --timing --pull --team --product) or --sample",
               file=sys.stderr)
         return 2

@@ -35,10 +35,10 @@ The ds-capture agent orchestrates the `capture` skill across brain-dump-organize
 
 1. **Detect the trigger** — explicit phrase OR implicit unstructured block paste
 2. **Capture everything** — no item is too trivial; user prunes later
-3. **Classify items** — task vs decision vs question vs project-component (use `scripts/dump_classifier.py` as a heuristic seed)
+3. **Classify items** — task vs decision vs question vs project-component (use `skills/capture/scripts/dump_classifier.py` as a heuristic seed)
 4. **Cluster** — only when natural clustering exists; don't force structure on small dumps
-5. **Inventory the workspace** — `scripts/workspace_inventory.py` for real Glob+Grep matches; never fabricate
-6. **Compress when warranted** — `scripts/complexity_estimator.py` recommends full 4-section vs compressed
+5. **Inventory the workspace** — `skills/capture/scripts/workspace_inventory.py` for real Glob+Grep matches; never fabricate
+6. **Compress when warranted** — `skills/capture/scripts/complexity_estimator.py` recommends full 4-section vs compressed
 7. **Deliver + wait** — output the sections; wait for the user's pick before any further action
 
 Differentiates clearly:
@@ -193,8 +193,8 @@ Which should I tackle?
 
 ## Related Agents
 
-- [ds-grill-master](../../../engineering/grill-me/agents/ds-grill-master.md) — slow, deliberate plan interrogator (different mode)
-- [ds-grill-with-docs](../../../engineering/grill-with-docs/agents/ds-grill-with-docs.md) — docs-anchored grill (different scope)
+- [ds-grill-master](engineering/grill-me/agents/ds-grill-master.md) — slow, deliberate plan interrogator (different mode)
+- [ds-grill-with-docs](engineering/grill-with-docs/agents/ds-grill-with-docs.md) — docs-anchored grill (different scope)
 - [ds-handoff-author](../../handoff/agents/ds-handoff-author.md) — different artifact (continuation prompt)
 
 ## References

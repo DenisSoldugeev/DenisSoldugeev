@@ -81,7 +81,7 @@ class TDDWorkflow:
         validations = []
 
         # Check test exists
-        if not test_code or len(test_code.strip) < 10:
+        if not test_code or len(test_code.strip()) < 10:
             validations.append({
                 'valid': False,
                 'message': 'No test code provided'
@@ -93,7 +93,7 @@ class TDDWorkflow:
             })
 
         # Check for assertions
-        has_assertion = any(keyword in test_code.lower
+        has_assertion = any(keyword in test_code.lower()
                            for keyword in ['assert', 'expect', 'should'])
         validations.append({
             'valid': has_assertion,
@@ -145,7 +145,7 @@ class TDDWorkflow:
         validations = []
 
         # Check implementation exists
-        if not implementation_code or len(implementation_code.strip) < 5:
+        if not implementation_code or len(implementation_code.strip()) < 5:
             validations.append({
                 'valid': False,
                 'message': 'No implementation code provided'
@@ -269,7 +269,7 @@ class TDDWorkflow:
         # - Not too complex (few nested structures)
 
         lines = code.split('\n')
-        non_empty_lines = [line for line in lines if line.strip and not line.strip.startswith('#')]
+        non_empty_lines = [line for line in lines if line.strip() and not line.strip().startswith('#')]
 
         # Check length
         if len(non_empty_lines) > 50:
@@ -279,7 +279,7 @@ class TDDWorkflow:
         max_depth = 0
         current_depth = 0
         for line in lines:
-            stripped = line.lstrip
+            stripped = line.lstrip()
             if stripped:
                 indent = len(line) - len(stripped)
                 depth = indent // 4  # Assuming 4-space indent
@@ -296,8 +296,8 @@ class TDDWorkflow:
         # - Simpler structure
 
         # Check for reduced duplication (basic check)
-        original_lines = set(line.strip for line in original.split('\n') if line.strip)
-        refactored_lines = set(line.strip for line in refactored.split('\n') if line.strip)
+        original_lines = set(line.strip() for line in original.split('\n') if line.strip())
+        refactored_lines = set(line.strip() for line in refactored.split('\n') if line.strip())
 
         # If unique lines increased proportionally, likely extracted duplicates
         if len(refactored_lines) > len(original_lines):
@@ -320,7 +320,7 @@ class TDDWorkflow:
 
         # Filter out keywords
         keywords = {'if', 'else', 'for', 'while', 'def', 'class', 'return', 'import', 'from'}
-        identifiers = [i for i in identifiers if i.lower not in keywords]
+        identifiers = [i for i in identifiers if i.lower() not in keywords]
 
         if not identifiers:
             return 0.0
@@ -339,11 +339,11 @@ class TDDWorkflow:
         # Check for duplication (simple check)
         line_counts = {}
         for line in lines:
-            stripped = line.strip
+            stripped = line.strip()
             if len(stripped) > 10:  # Ignore very short lines
                 line_counts[stripped] = line_counts.get(stripped, 0) + 1
 
-        duplicates = [line for line, count in line_counts.items if count > 2]
+        duplicates = [line for line, count in line_counts.items() if count > 2]
         if duplicates:
             suggestions.append(f'Found {len(duplicates)} duplicated code patterns - consider extraction')
 
@@ -370,8 +370,8 @@ class TDDWorkflow:
         """Generate summary of TDD workflow progress."""
         summary = [
             "# TDD Workflow Summary\n",
-            f"Current Phase: {self.current_phase.value.upper}",
-            f"Current State: {self.state.value.replace('_', ' ').title}",
+            f"Current Phase: {self.current_phase.value.upper()}",
+            f"Current State: {self.state.value.replace('_', ' ').title()}",
             f"Completed Cycles: {len(self.history)}\n"
         ]
 

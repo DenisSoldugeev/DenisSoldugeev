@@ -96,7 +96,7 @@ class HTTPClient:
 
         # Create SSL context
         if not verify_ssl:
-            self.ssl_context = ssl.create_default_context
+            self.ssl_context = ssl.create_default_context()
             self.ssl_context.check_hostname = False
             self.ssl_context.verify_mode = ssl.CERT_NONE
         else:
@@ -104,13 +104,13 @@ class HTTPClient:
 
     def request(self, url: str, method: str = 'GET', body: Optional[bytes] = None) -> RequestResult:
         """Execute HTTP request and return result."""
-        start_time = time.perf_counter
+        start_time = time.perf_counter()
 
         try:
             request = Request(url, data=body, method=method)
 
             # Add headers
-            for key, value in self.headers.items:
+            for key, value in self.headers.items():
                 request.add_header(key, value)
 
             # Add content-type for POST/PUT
@@ -120,8 +120,8 @@ class HTTPClient:
 
             # Execute request
             with urlopen(request, timeout=self.timeout, context=self.ssl_context) as response:
-                response_data = response.read
-                elapsed = (time.perf_counter - start_time) * 1000
+                response_data = response.read()
+                elapsed = (time.perf_counter() - start_time) * 1000
 
                 return RequestResult(
                     success=True,
@@ -131,7 +131,7 @@ class HTTPClient:
                 )
 
         except HTTPError as e:
-            elapsed = (time.perf_counter - start_time) * 1000
+            elapsed = (time.perf_counter() - start_time) * 1000
             return RequestResult(
                 success=False,
                 status_code=e.code,
@@ -140,7 +140,7 @@ class HTTPClient:
             )
 
         except URLError as e:
-            elapsed = (time.perf_counter - start_time) * 1000
+            elapsed = (time.perf_counter() - start_time) * 1000
             return RequestResult(
                 success=False,
                 status_code=0,
@@ -149,7 +149,7 @@ class HTTPClient:
             )
 
         except TimeoutError:
-            elapsed = (time.perf_counter - start_time) * 1000
+            elapsed = (time.perf_counter() - start_time) * 1000
             return RequestResult(
                 success=False,
                 status_code=0,
@@ -158,7 +158,7 @@ class HTTPClient:
             )
 
         except Exception as e:
-            elapsed = (time.perf_counter - start_time) * 1000
+            elapsed = (time.perf_counter() - start_time) * 1000
             return RequestResult(
                 success=False,
                 status_code=0,
@@ -174,8 +174,8 @@ class LoadTester:
                  headers: Optional[Dict[str, str]] = None, concurrency: int = 10,
                  duration: float = 10.0, timeout: float = 30.0, verify_ssl: bool = True):
         self.url = url
-        self.method = method.upper
-        self.body = body.encode if body else None
+        self.method = method.upper()
+        self.body = body.encode() if body else None
         self.headers = headers or {}
         self.concurrency = concurrency
         self.duration = duration
@@ -183,8 +183,8 @@ class LoadTester:
         self.verify_ssl = verify_ssl
 
         self.results: List[RequestResult] = []
-        self.stop_event = threading.Event
-        self.results_lock = threading.Lock
+        self.stop_event = threading.Event()
+        self.results_lock = threading.Lock()
 
     def run(self) -> LoadTestResults:
         """Execute load test and return results."""
@@ -195,9 +195,9 @@ class LoadTester:
         print("-" * 50)
 
         self.results = []
-        self.stop_event.clear
+        self.stop_event.clear()
 
-        start_time = time.time
+        start_time = time.time()
 
         # Start worker threads
         with ThreadPoolExecutor(max_workers=self.concurrency) as executor:
@@ -208,16 +208,16 @@ class LoadTester:
 
             # Wait for duration
             time.sleep(self.duration)
-            self.stop_event.set
+            self.stop_event.set()
 
             # Wait for workers to finish
             for future in as_completed(futures):
                 try:
-                    future.result
+                    future.result()
                 except Exception as e:
                     print(f"Worker error: {e}")
 
-        elapsed_time = time.time - start_time
+        elapsed_time = time.time() - start_time
 
         return self._aggregate_results(elapsed_time)
 
@@ -229,7 +229,7 @@ class LoadTester:
             verify_ssl=self.verify_ssl,
         )
 
-        while not self.stop_event.is_set:
+        while not self.stop_event.is_set():
             result = client.request(self.url, self.method, self.body)
 
             with self.results_lock:
@@ -311,7 +311,7 @@ def print_results(results: LoadTestResults, verbose: bool = False):
     print(f"\nTHROUGHPUT:")
     print(f"  Total requests: {results.total_requests:,}")
     print(f"  Requests/sec: {results.requests_per_second:.1f}")
-    print(f"  Successful: {results.successful_requests:,} ({results.success_rate:.1f}%)")
+    print(f"  Successful: {results.successful_requests:,} ({results.success_rate():.1f}%)")
     print(f"  Failed: {results.failed_requests:,}")
 
     print(f"\nLATENCY (ms):")
@@ -326,7 +326,7 @@ def print_results(results: LoadTestResults, verbose: bool = False):
 
     if results.errors_by_type:
         print(f"\nERRORS:")
-        for error_type, count in sorted(results.errors_by_type.items, key=lambda x: -x[1]):
+        for error_type, count in sorted(results.errors_by_type.items(), key=lambda x: -x[1]):
             print(f"  {error_type}: {count}")
 
     if verbose:
@@ -344,15 +344,15 @@ def print_results(results: LoadTestResults, verbose: bool = False):
     if results.latency_p95 > 200:
         print(f"  Warning: P95 latency ({results.latency_p95:.0f}ms) exceeds 200ms target")
 
-    if results.success_rate < 99.0:
-        print(f"  Warning: Success rate ({results.success_rate:.1f}%) below 99%")
+    if results.success_rate() < 99.0:
+        print(f"  Warning: Success rate ({results.success_rate():.1f}%) below 99%")
         print(f"    Check server capacity and error logs")
 
     if results.latency_stddev > results.latency_avg:
         print(f"  Warning: High latency variance (stddev > avg)")
         print(f"    Indicates inconsistent performance")
 
-    if results.success_rate >= 99.0 and results.latency_p95 <= 200:
+    if results.success_rate() >= 99.0 and results.latency_p95 <= 200:
         print(f"  Performance looks good for this load level")
 
     print("=" * 60)
@@ -378,7 +378,7 @@ def compare_results(results1: LoadTestResults, results2: LoadTestResults):
 
     metrics = [
         ("Requests/sec", results1.requests_per_second, results2.requests_per_second, False),
-        ("Success rate (%)", results1.success_rate, results2.success_rate, False),
+        ("Success rate (%)", results1.success_rate(), results2.success_rate(), False),
         ("Latency Avg (ms)", results1.latency_avg, results2.latency_avg, True),
         ("Latency P50 (ms)", results1.latency_p50, results2.latency_p50, True),
         ("Latency P90 (ms)", results1.latency_p90, results2.latency_p90, True),
@@ -408,7 +408,7 @@ def compare_results(results1: LoadTestResults, results2: LoadTestResults):
     else:
         score2 += 1
 
-    if results1.success_rate > results2.success_rate:
+    if results1.success_rate() > results2.success_rate():
         score1 += 1
     else:
         score2 += 1
@@ -452,7 +452,7 @@ class APILoadTester:
                 verify_ssl=self.verify_ssl,
             )
 
-            result = tester.run
+            result = tester.run()
             results.append(result)
 
             if not self.compare:
@@ -474,11 +474,11 @@ def parse_headers(header_args: Optional[List[str]]) -> Dict[str, str]:
         for h in header_args:
             if ':' in h:
                 key, value = h.split(':', 1)
-                headers[key.strip] = value.strip
+                headers[key.strip()] = value.strip()
     return headers
 
 
-def main:
+def main():
     """CLI entry point."""
     parser = argparse.ArgumentParser(
         description='HTTP load testing tool',
@@ -556,7 +556,7 @@ Examples:
         help='Output file path for results'
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Validate
     if args.compare and len(args.urls) < 2:
@@ -580,7 +580,7 @@ Examples:
             verify_ssl=not args.no_verify_ssl,
         )
 
-        results = tester.run
+        results = tester.run()
 
         if args.json:
             output = json.dumps(results, indent=2)
@@ -604,4 +604,4 @@ Examples:
 
 
 if __name__ == '__main__':
-    main
+    main()

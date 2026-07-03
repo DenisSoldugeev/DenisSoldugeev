@@ -40,7 +40,7 @@ from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Any
 
-SCRIPT_DIR = Path(__file__).resolve.parent
+SCRIPT_DIR = Path(__file__).resolve().parent
 PROFILES_DIR = SCRIPT_DIR.parent / "profiles"
 
 
@@ -90,12 +90,12 @@ class Match:
     profile_data: dict[str, Any] = field(default_factory=dict)
 
 
-def load_profiles -> dict[str, dict[str, Any]]:
+def load_profiles() -> dict[str, dict[str, Any]]:
     profiles: dict[str, dict[str, Any]] = {}
-    if not PROFILES_DIR.exists:
+    if not PROFILES_DIR.exists():
         return profiles
     for p in sorted(PROFILES_DIR.glob("*.json")):
-        with p.open as f:
+        with p.open() as f:
             data = json.load(f)
         profiles[data.get("profile_name", p.stem)] = data
     return profiles
@@ -179,7 +179,7 @@ def score_profile(profile: dict[str, Any], inputs: Inputs) -> Match:
 
 
 def rank(profiles: dict[str, dict[str, Any]], inputs: Inputs) -> list[Match]:
-    matches = [score_profile(p, inputs) for p in profiles.values]
+    matches = [score_profile(p, inputs) for p in profiles.values()]
     matches.sort(key=lambda m: m.score, reverse=True)
     return matches
 
@@ -190,7 +190,7 @@ def render_markdown(inputs: Inputs, matches: list[Match], kills: list[str]) -> s
     lines.append("")
     lines.append("## Inputs (your assumptions, Karpathy #1)")
     lines.append("")
-    for k, v in asdict(inputs).items:
+    for k, v in asdict(inputs).items():
         lines.append(f"- **{k}**: `{v}`")
     lines.append("")
     if kills:
@@ -238,21 +238,21 @@ def render_markdown(inputs: Inputs, matches: list[Match], kills: list[str]) -> s
     if anti:
         lines.append("## Anti-patterns (DO NOT introduce these on this profile)")
         lines.append("")
-        for k, v in anti.items:
+        for k, v in anti.items():
             lines.append(f"- **{k}** — {v}")
         lines.append("")
     thresholds = top.profile_data.get("success_thresholds", {})
     if thresholds:
         lines.append("## Verifiable success criteria (Karpathy #4)")
         lines.append("")
-        for k, v in thresholds.items:
+        for k, v in thresholds.items():
             lines.append(f"- `{k}` = {v}")
         lines.append("")
     approvers = top.profile_data.get("named_approver_chain", {})
     if approvers:
         lines.append("## Named approvers (this tool NEVER auto-approves)")
         lines.append("")
-        for k, v in approvers.items:
+        for k, v in approvers.items():
             lines.append(f"- **{k}**: {v}")
         lines.append("")
     canon = top.profile_data.get("canon_references", [])
@@ -292,7 +292,7 @@ def render_json(inputs: Inputs, matches: list[Match], kills: list[str]) -> str:
     return json.dumps(out, indent=2)
 
 
-def build_parser -> argparse.ArgumentParser:
+def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         description="Deterministic fullstack-stack picker. Matches inputs against profile JSON files; surfaces tradeoffs + kill criteria + named approvers. Never auto-approves.",
         epilog="See ../references/forcing_questions.md for the 7-question grill that must be walked before this tool is run.",
@@ -335,16 +335,16 @@ def build_parser -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = build_parser
+    parser = build_parser()
     args = parser.parse_args(argv)
 
-    profiles = load_profiles
+    profiles = load_profiles()
 
     if args.list_profiles:
         if not profiles:
             print("No profiles found in", PROFILES_DIR, file=sys.stderr)
             return 1
-        for name, data in profiles.items:
+        for name, data in profiles.items():
             print(f"{name}: {data.get('description', '')[:120]}")
         return 0
 
@@ -389,7 +389,7 @@ def main(argv: list[str] | None = None) -> int:
             read_write_ratio=args.read_write_ratio,
         )
 
-    kills = inputs.kill_criteria_check
+    kills = inputs.kill_criteria_check()
     matches = rank(profiles, inputs)
 
     if args.output == "json":
@@ -400,4 +400,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

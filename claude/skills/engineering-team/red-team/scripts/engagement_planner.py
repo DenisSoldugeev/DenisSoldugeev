@@ -122,11 +122,11 @@ KILL_CHAIN_PHASE_ORDER = [
 ]
 
 
-def list_techniques:
+def list_techniques():
     """Print a formatted table of all MITRE techniques and exit."""
     print(f"{'ID':<12} {'Name':<45} {'Tactic':<25} {'Det.Risk':<10} {'Access'}")
     print("-" * 110)
-    for tid, data in sorted(MITRE_TECHNIQUES.items):
+    for tid, data in sorted(MITRE_TECHNIQUES.items()):
         print(
             f"{tid:<12} {data['name']:<45} {data['tactic']:<25} "
             f"{data['detection_risk']:<10.2f} {data['access_level']}"
@@ -144,7 +144,7 @@ def build_engagement_plan(techniques_input, access_level, crown_jewels, target_c
     not_found = []
 
     for tid in techniques_input:
-        tid = tid.strip.upper
+        tid = tid.strip().upper()
         if tid not in MITRE_TECHNIQUES:
             not_found.append(tid)
             continue
@@ -176,7 +176,7 @@ def build_engagement_plan(techniques_input, access_level, crown_jewels, target_c
         tactic_map.setdefault(t["tactic"], []).append(t)
 
     phases = []
-    tactics_present = set(tactic_map.keys)
+    tactics_present = set(tactic_map.keys())
     for phase_name in KILL_CHAIN_PHASE_ORDER:
         if phase_name in tactic_map:
             techniques_in_phase = sorted(
@@ -219,7 +219,7 @@ def build_engagement_plan(techniques_input, access_level, crown_jewels, target_c
             })
 
     # Collect OPSEC risks for tactics present in the selected techniques
-    seen_risks = set
+    seen_risks = set()
     applicable_opsec = []
     for risk_item in OPSEC_RISKS:
         relevant = risk_item["relevant_tactics"]
@@ -280,7 +280,7 @@ def build_engagement_plan(techniques_input, access_level, crown_jewels, target_c
     return plan, len(scope_violations)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Red Team Engagement Planner — Builds structured engagement plans from MITRE ATT&CK techniques.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -336,10 +336,10 @@ def main:
         help="Print all available MITRE techniques and exit",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.list_techniques:
-        list_techniques  # exits internally
+        list_techniques()  # exits internally
 
     # Authorization gate
     if not args.authorized:
@@ -353,7 +353,7 @@ def main:
             print(f"ERROR: {msg}", file=sys.stderr)
         sys.exit(1)
 
-    if not args.techniques.strip:
+    if not args.techniques.strip():
         msg = "No techniques specified. Use --techniques T1059,T1078,... or --list-techniques."
         if args.output_json:
             print(json.dumps({"error": msg, "exit_code": 1}, indent=2))
@@ -361,8 +361,8 @@ def main:
             print(f"ERROR: {msg}", file=sys.stderr)
         sys.exit(1)
 
-    techniques_input = [t.strip for t in args.techniques.split(",") if t.strip]
-    crown_jewels = [c.strip for c in args.crown_jewels.split(",") if c.strip]
+    techniques_input = [t.strip() for t in args.techniques.split(",") if t.strip()]
+    crown_jewels = [c.strip() for c in args.crown_jewels.split(",") if c.strip()]
 
     plan, violation_count = build_engagement_plan(
         techniques_input=techniques_input,
@@ -385,7 +385,7 @@ def main:
 
         print("\n--- Kill-Chain Phases ---")
         for phase in plan["phases"]:
-            print(f"\n  [{phase['phase'].upper}]")
+            print(f"\n  [{phase['phase'].upper()}]")
             for t in phase["techniques"]:
                 print(f"    {t['id']:<12} {t['name']:<45} risk={t['detection_risk']:.2f}  effort={t['effort_score']:.3f}")
 
@@ -398,7 +398,7 @@ def main:
 
         print("\n--- OPSEC Risks ---")
         for risk in plan["opsec_risks"]:
-            print(f"  [{risk['severity'].upper}] {risk['risk']}")
+            print(f"  [{risk['severity'].upper()}] {risk['risk']}")
             print(f"    Mitigation: {risk['mitigation']}")
 
         if plan["scope_violations"]:
@@ -409,7 +409,7 @@ def main:
         print("\n--- Required Authorizations ---")
         for auth in plan["required_authorizations"]:
             print(f"  - {auth}")
-        print
+        print()
 
     if violation_count > 0:
         sys.exit(2)
@@ -417,4 +417,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

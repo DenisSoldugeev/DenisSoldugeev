@@ -1,6 +1,6 @@
 ---
 name: "cmo-review"
-description: "/ds:cmo-review <plan> — Narrative-first interrogation of positioning, ICP, message house, and channel mix."
+description: "/ds:cmo-review <plan> — Narrative-first interrogation of positioning, ICP, message house, and channel mix. Use when launching a campaign or repositioning, or when CAC is rising and the one-sentence positioning test fails."
 ---
 
 # /ds:cmo-review — CMO Forcing Questions
@@ -51,8 +51,8 @@ The narrative-first strategist pressure-tests positioning before debating tactic
 
 1. **Run the models:**
    ```bash
-   python ../../../skills/cmo-advisor/scripts/marketing_budget_modeler.py
-   python ../../../skills/cmo-advisor/scripts/growth_model_simulator.py
+   python ../../../cmo-advisor/scripts/marketing_budget_modeler.py
+   python ../../../cmo-advisor/scripts/growth_model_simulator.py
    ```
 2. **Answer the six questions** in writing.
 3. **Apply the verdict:**

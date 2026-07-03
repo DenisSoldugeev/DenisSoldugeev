@@ -125,7 +125,7 @@ def collect_soc2_evidence(period_start: str, period_end: str) -> dict:
         },
         'confidentiality': {
             'encryption_status': get_encryption_audit(period_start, period_end),
-            'data_classification': get_data_inventory,
+            'data_classification': get_data_inventory(),
             'access_logs': get_sensitive_data_access_logs(period_start, period_end),
         }
     }
@@ -191,11 +191,11 @@ class PCIDataHandler:
         Encrypt PAN for storage.
         Requirement 3.5: Protect keys used to protect stored account data.
         """
-        return self.cipher.encrypt(pan.encode).decode
+        return self.cipher.encrypt(pan.encode()).decode()
 
     def decrypt_pan(self, encrypted_pan: str) -> str:
         """Decrypt PAN (requires authorization logging)."""
-        return self.cipher.decrypt(encrypted_pan.encode).decode
+        return self.cipher.decrypt(encrypted_pan.encode()).decode()
 
     @staticmethod
     def validate_pan(pan: str) -> bool:
@@ -221,7 +221,7 @@ class PCIDataHandler:
         Requirement 3.3: Mask PAN when displayed.
         """
         def replace_pan(match):
-            return self.mask_pan(match.group)
+            return self.mask_pan(match.group())
 
         return self.PAN_PATTERN.sub(replace_pan, log_message)
 ```
@@ -329,7 +329,7 @@ def log_phi_access(access: PHIAccessLog):
     """
     phi_logger.info(
         f"PHI_ACCESS|"
-        f"timestamp={access.timestamp.isoformat}|"
+        f"timestamp={access.timestamp.isoformat()}|"
         f"user={access.user_id}|"
         f"patient={access.patient_id}|"
         f"action={access.action}|"
@@ -379,7 +379,7 @@ class HIPAACompliantStorage:
 
         if not authorized_elements:
             log_phi_access(PHIAccessLog(
-                timestamp=datetime.utcnow,
+                timestamp=datetime.utcnow(),
                 user_id=self.user.id,
                 patient_id=patient_id,
                 action='view',
@@ -395,7 +395,7 @@ class HIPAACompliantStorage:
 
         # Log successful access
         log_phi_access(PHIAccessLog(
-            timestamp=datetime.utcnow,
+            timestamp=datetime.utcnow(),
             user_id=self.user.id,
             patient_id=patient_id,
             action='view',
@@ -483,13 +483,13 @@ class DataSubjectRequest:
         verification_token = self._send_verification(subject_email)
 
         request = {
-            'id': self._generate_request_id,
+            'id': self._generate_request_id(),
             'subject_email': subject_email,
             'type': request_type.value,
             'details': details,
             'status': 'pending_verification',
-            'submitted_at': datetime.utcnow.isoformat,
-            'deadline': (datetime.utcnow + timedelta(days=self.RESPONSE_DEADLINE_DAYS)).isoformat,
+            'submitted_at': datetime.utcnow().isoformat(),
+            'deadline': (datetime.utcnow() + timedelta(days=self.RESPONSE_DEADLINE_DAYS)).isoformat(),
             'verification_token': verification_token
         }
 
@@ -535,7 +535,7 @@ class DataSubjectRequest:
                 erasure_report['data_deleted'].append({
                     'system': data_item['system'],
                     'data_type': data_item['type'],
-                    'deleted_at': datetime.utcnow.isoformat
+                    'deleted_at': datetime.utcnow().isoformat()
                 })
             else:
                 erasure_report['data_retained'].append({
@@ -544,7 +544,7 @@ class DataSubjectRequest:
                     'retention_reason': data_item['legal_basis']
                 })
 
-        erasure_report['completed_at'] = datetime.utcnow.isoformat
+        erasure_report['completed_at'] = datetime.utcnow().isoformat()
 
         # Update request status
         self.db.dsr_requests.update(
@@ -564,7 +564,7 @@ class DataSubjectRequest:
         subject_email = request['subject_email']
 
         export_data = {
-            'export_date': datetime.utcnow.isoformat,
+            'export_date': datetime.utcnow().isoformat(),
             'data_subject': subject_email,
             'format': 'JSON',
             'data': {}
@@ -611,10 +611,10 @@ class ConsentManager:
             'purpose': purpose,
             'consent_given': consent_given,
             'consent_text': consent_text,
-            'timestamp': datetime.utcnow.isoformat,
+            'timestamp': datetime.utcnow().isoformat(),
             'method': 'explicit_checkbox',  # Not pre-ticked
-            'ip_address': self._get_user_ip,
-            'user_agent': self._get_user_agent,
+            'ip_address': self._get_user_ip(),
+            'user_agent': self._get_user_agent(),
             'version': '1.0'  # Track consent version
         }
 
@@ -641,7 +641,7 @@ class ConsentManager:
             'user_id': user_id,
             'purpose': purpose,
             'consent_given': False,
-            'timestamp': datetime.utcnow.isoformat,
+            'timestamp': datetime.utcnow().isoformat(),
             'action': 'withdrawal'
         }
 

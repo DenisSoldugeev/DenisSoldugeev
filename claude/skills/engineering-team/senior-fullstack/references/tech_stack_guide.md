@@ -38,14 +38,14 @@ Technology selection guide with trade-offs, use cases, and integration patterns 
 ```typescript
 // App Router pattern
 // app/users/page.tsx
-async function UsersPage {
-  const users = await db.user.findMany; // Server component
+async function UsersPage() {
+  const users = await db.user.findMany(); // Server component
   return <UserList users={users} />;
 }
 
 // app/users/[id]/page.tsx
-export async function generateStaticParams {
-  const users = await db.user.findMany;
+export async function generateStaticParams() {
+  const users = await db.user.findMany();
   return users.map((user) => ({ id: user.id }));
 }
 ```
@@ -105,8 +105,8 @@ export async function generateStaticParams {
 import express from "express";
 import { userRouter } from "./routes/users";
 
-const app = express;
-app.use(express.json);
+const app = express();
+app.use(express.json());
 app.use("/api/users", userRouter);
 app.listen(3000);
 ```
@@ -153,9 +153,9 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
-  @Post
+  @Post()
   @UseGuards(AuthGuard)
-  create(@Body createUserDto: CreateUserDto) {
+  create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 }
@@ -175,11 +175,11 @@ export class UsersController {
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 
-app = FastAPI
+app = FastAPI()
 
 @app.get("/users/{user_id}", response_model=UserResponse)
 async def get_user(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == user_id).first
+    user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404)
     return user
@@ -220,10 +220,10 @@ async def get_user(user_id: int, db: Session = Depends(get_db)):
 ```sql
 -- JSON support
 CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email VARCHAR(255) UNIQUE NOT NULL,
   profile JSONB DEFAULT '{}',
-  created_at TIMESTAMPTZ DEFAULT NOW
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Full-text search
@@ -278,7 +278,7 @@ await redis.set(`session:${sessionId}`, JSON.stringify(user), "EX", 3600);
 // Rate limiting
 const requests = await redis.incr(`rate:${ip}`);
 if (requests === 1) await redis.expire(`rate:${ip}`, 60);
-if (requests > 100) throw new TooManyRequestsError;
+if (requests > 100) throw new TooManyRequestsError();
 
 // Pub/Sub
 redis.publish("notifications", JSON.stringify({ userId, message }));
@@ -305,11 +305,11 @@ redis.publish("notifications", JSON.stringify({ userId, message }));
 ```typescript
 // schema.prisma
 model User {
-  id        String   @id @default(cuid)
+  id        String   @id @default(cuid())
   email     String   @unique
   posts     Post[]
   profile   Profile?
-  createdAt DateTime @default(now)
+  createdAt DateTime @default(now())
 }
 
 // Usage - fully typed
@@ -333,14 +333,14 @@ const user = await prisma.user.findUnique({
 ```typescript
 // Schema definition
 const users = pgTable("users", {
-  id: uuid("id").primaryKey.defaultRandom,
-  email: varchar("email", { length: 255 }).notNull.unique,
-  createdAt: timestamp("created_at").defaultNow,
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Query - SQL-like syntax
 const result = await db
-  .select
+  .select()
   .from(users)
   .where(eq(users.email, "user@example.com"))
   .leftJoin(posts, eq(posts.userId, users.id));
@@ -367,7 +367,7 @@ class User(Base):
 users = session.query(User)\
     .filter(User.email.like("%@example.com"))\
     .options(joinedload(User.posts))\
-    .all
+    .all()
 ```
 
 ---
@@ -418,13 +418,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 // Middleware
 import { clerkMiddleware } from "@clerk/nextjs/server";
 
-export default clerkMiddleware;
+export default clerkMiddleware();
 
 // Usage
 import { auth } from "@clerk/nextjs/server";
 
-export async function GET {
-  const { userId } = await auth;
+export async function GET() {
+  const { userId } = await auth();
   if (!userId) return new Response("Unauthorized", { status: 401 });
   // ...
 }
@@ -465,7 +465,7 @@ function authenticate(req, res, next) {
 
   try {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
-    next;
+    next();
   } catch {
     res.status(401).json({ error: "Invalid token" });
   }

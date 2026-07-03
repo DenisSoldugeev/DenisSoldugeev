@@ -37,7 +37,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 
-SESSIONS_DIR = Path.home / ".patent_sessions"
+SESSIONS_DIR = Path.home() / ".patent_sessions"
 MIN_GAP_SECONDS = 1.0
 VALID_SOURCES = ["google_patents", "espacenet", "uspto", "lens", "websearch"]
 VALID_SUB_USE_CASES = ["novelty", "fto", "landscape", "diligence", "litigation"]
@@ -49,7 +49,7 @@ def session_path(name: str) -> Path:
 
 def load_session(name: str) -> Dict[str, Any]:
     p = session_path(name)
-    if not p.exists:
+    if not p.exists():
         raise FileNotFoundError(f"Session not found: {name}")
     return json.loads(p.read_text(encoding="utf-8"))
 
@@ -59,16 +59,16 @@ def save_session(name: str, data: Dict[str, Any]) -> None:
     session_path(name).write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
-def now_iso -> str:
-    return datetime.now(timezone.utc).isoformat
+def now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
-def now_ts -> float:
-    return datetime.now(timezone.utc).timestamp
+def now_ts() -> float:
+    return datetime.now(timezone.utc).timestamp()
 
 
 def action_start(name: str, invention: Optional[str], sub_use_case: Optional[str]) -> Dict[str, Any]:
-    if session_path(name).exists:
+    if session_path(name).exists():
         raise FileExistsError(f"Session already exists: {name}")
     if sub_use_case and sub_use_case not in VALID_SUB_USE_CASES:
         raise ValueError(f"Invalid sub-use-case '{sub_use_case}'. Pick from: {VALID_SUB_USE_CASES}")
@@ -76,7 +76,7 @@ def action_start(name: str, invention: Optional[str], sub_use_case: Optional[str
         "session": name,
         "invention": invention or "",
         "sub_use_case": sub_use_case or "",
-        "started_at": now_iso,
+        "started_at": now_iso(),
         "ended_at": None,
         "lens_byok_used": False,
         "searches": [],
@@ -101,13 +101,13 @@ def action_record_search(name: str, source: str, query: str) -> Dict[str, Any]:
         raise ValueError(f"Invalid source '{source}'. Pick from: {VALID_SOURCES}")
     if data["searches"]:
         last_ts = data["searches"][-1].get("ts", 0)
-        gap = now_ts - last_ts
+        gap = now_ts() - last_ts
         if gap < MIN_GAP_SECONDS:
             raise RuntimeError(
                 f"Sequential discipline violated: {gap:.2f}s gap (need >= {MIN_GAP_SECONDS}s). "
                 f"Wait {MIN_GAP_SECONDS - gap:.2f}s more."
             )
-    data["searches"].append({"source": source, "query": query, "at": now_iso, "ts": now_ts})
+    data["searches"].append({"source": source, "query": query, "at": now_iso(), "ts": now_ts()})
     data["counts"]["searches_total"] += 1
     data["counts"]["searches_by_source"][source] += 1
     save_session(name, data)
@@ -118,7 +118,7 @@ def action_record_received(name: str, source: str, count: int) -> Dict[str, Any]
     data = load_session(name)
     if source not in VALID_SOURCES:
         raise ValueError(f"Invalid source '{source}'")
-    data["received_log"].append({"source": source, "count": count, "at": now_iso})
+    data["received_log"].append({"source": source, "count": count, "at": now_iso()})
     data["counts"]["received_total"] += count
     data["counts"]["received_by_source"][source] += count
     save_session(name, data)
@@ -131,7 +131,7 @@ def action_record_cited(name: str, source: str, patent_num: str, title: Optional
         raise ValueError(f"Invalid source '{source}'")
     if any(c["patent_num"] == patent_num for c in data["cited"]):
         return data
-    data["cited"].append({"source": source, "patent_num": patent_num, "title": title, "at": now_iso})
+    data["cited"].append({"source": source, "patent_num": patent_num, "title": title, "at": now_iso()})
     data["counts"]["cited_total"] += 1
     data["counts"]["cited_by_source"][source] += 1
     save_session(name, data)
@@ -152,7 +152,7 @@ def action_status(name: str) -> Dict[str, Any]:
 def action_close(name: str) -> Dict[str, Any]:
     data = load_session(name)
     if data.get("ended_at") is None:
-        data["ended_at"] = now_iso
+        data["ended_at"] = now_iso()
         save_session(name, data)
     return data
 
@@ -169,14 +169,14 @@ def render_status_human(data: Dict[str, Any]) -> str:
     c = data["counts"]
     out.append(f"Total searches:    {c['searches_total']}")
     out.append("By source:")
-    for src, n in c["searches_by_source"].items:
+    for src, n in c["searches_by_source"].items():
         if n > 0:
             out.append(f"  {src:<18s} {n}")
     out.append("")
     out.append(f"Patents received:  {c['received_total']}")
     out.append(f"Patents cited:     {c['cited_total']}")
     out.append("Cited by source:")
-    for src, n in c["cited_by_source"].items:
+    for src, n in c["cited_by_source"].items():
         if n > 0:
             out.append(f"  {src:<18s} {n}")
     out.append("")

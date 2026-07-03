@@ -152,8 +152,8 @@ def plan(payload: Dict[str, Any]) -> Dict[str, Any]:
     } for q in quarters if not q["auditor"]["independent"]]
 
     # Coverage check
-    audited_clauses = set
-    audited_controls = set
+    audited_clauses = set()
+    audited_controls = set()
     for q in quarters:
         audited_clauses.update(q["scope_clauses"])
         audited_controls.update(q["scope_annex_a_controls"])
@@ -225,7 +225,7 @@ def render_text(p: Dict[str, Any], source: str) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="ISO/IEC 42001 Clause 9.2 internal audit 12-month plan generator.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -233,7 +233,7 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to audit scope JSON (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
@@ -259,4 +259,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

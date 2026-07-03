@@ -47,7 +47,7 @@ class InterviewAnalyzer:
     
     def analyze_interview(self, text: str) -> Dict:
         """Analyze a single interview transcript"""
-        text_lower = text.lower
+        text_lower = text.lower()
         sentences = self._split_sentences(text)
         
         analysis = {
@@ -68,14 +68,14 @@ class InterviewAnalyzer:
         """Split text into sentences"""
         # Simple sentence splitting
         sentences = re.split(r'[.!?]+', text)
-        return [s.strip for s in sentences if s.strip]
+        return [s.strip() for s in sentences if s.strip()]
     
     def _extract_pain_points(self, sentences: List[str]) -> List[Dict]:
         """Extract pain points from sentences"""
         pain_points = []
         
         for sentence in sentences:
-            sentence_lower = sentence.lower
+            sentence_lower = sentence.lower()
             for indicator in self.pain_indicators:
                 if indicator in sentence_lower:
                     # Extract context around the pain point
@@ -93,7 +93,7 @@ class InterviewAnalyzer:
         delights = []
         
         for sentence in sentences:
-            sentence_lower = sentence.lower
+            sentence_lower = sentence.lower()
             for indicator in self.delight_indicators:
                 if indicator in sentence_lower:
                     delights.append({
@@ -110,7 +110,7 @@ class InterviewAnalyzer:
         requests = []
         
         for sentence in sentences:
-            sentence_lower = sentence.lower
+            sentence_lower = sentence.lower()
             for indicator in self.request_indicators:
                 if indicator in sentence_lower:
                     requests.append({
@@ -197,7 +197,7 @@ class InterviewAnalyzer:
                 continue
             
             score = 0
-            sentence_lower = sentence.lower
+            sentence_lower = sentence.lower()
             
             # Score based on insight indicators
             if any(ind in sentence_lower for ind in self.pain_indicators):
@@ -237,7 +237,7 @@ class InterviewAnalyzer:
         # Find general numbers with context
         number_contexts = re.findall(r'(\d+)\s+(\w+)', text)
         for num, context in number_contexts:
-            if context.lower not in ['the', 'a', 'an', 'and', 'or', 'of']:
+            if context.lower() not in ['the', 'a', 'an', 'and', 'or', 'of']:
                 metrics.append(f"{num} {context}")
         
         return list(set(metrics))[:10]
@@ -253,14 +253,14 @@ class InterviewAnalyzer:
             r'similar to\s+(\w+)',
         ]
         
-        competitors = set
+        competitors = set()
         for pattern in competitor_patterns:
             matches = re.findall(pattern, text, re.IGNORECASE)
             competitors.update(matches)
         
         # Filter out common words
         common_words = {'this', 'that', 'it', 'them', 'other', 'another', 'something'}
-        competitors = [c for c in competitors if c.lower not in common_words and len(c) > 2]
+        competitors = [c for c in competitors if c.lower() not in common_words and len(c) > 2]
         
         return list(competitors)[:5]
     
@@ -312,9 +312,9 @@ def aggregate_interviews(interviews: List[Dict]) -> Dict:
             'negative': 0,
             'neutral': 0
         },
-        'top_themes': Counter,
-        'metrics_summary': set,
-        'competitors_mentioned': Counter
+        'top_themes': Counter(),
+        'metrics_summary': set(),
+        'competitors_mentioned': Counter()
     }
     
     for interview in interviews:
@@ -363,7 +363,7 @@ def format_single_interview(analysis: Dict) -> str:
     
     # Sentiment
     sentiment = analysis['sentiment_score']
-    output.append(f"\n📊 Overall Sentiment: {sentiment['label'].upper}")
+    output.append(f"\n📊 Overall Sentiment: {sentiment['label'].upper()}")
     output.append(f"   Score: {sentiment['score']}")
     output.append(f"   Positive signals: {sentiment['positive_signals']}")
     output.append(f"   Negative signals: {sentiment['negative_signals']}")
@@ -372,7 +372,7 @@ def format_single_interview(analysis: Dict) -> str:
     if analysis['pain_points']:
         output.append("\n🔥 Pain Points Identified:")
         for i, pain in enumerate(analysis['pain_points'][:5], 1):
-            output.append(f"\n{i}. [{pain['severity'].upper}] {pain['quote'][:100]}...")
+            output.append(f"\n{i}. [{pain['severity'].upper()}] {pain['quote'][:100]}...")
     
     # Feature Requests
     if analysis['feature_requests']:
@@ -410,7 +410,7 @@ def format_single_interview(analysis: Dict) -> str:
     
     return "\n".join(output)
 
-def main:
+def main():
     import sys
     import argparse
 
@@ -425,7 +425,7 @@ def main:
         "--json", action="store_true",
         help="Output results as JSON"
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if not args.file:
         print("Usage: python customer_interview_analyzer.py <interview_file.txt>")
@@ -438,9 +438,9 @@ def main:
         sys.exit(1)
 
     with open(args.file, 'r') as f:
-        interview_text = f.read
+        interview_text = f.read()
 
-    analyzer = InterviewAnalyzer
+    analyzer = InterviewAnalyzer()
     analysis = analyzer.analyze_interview(interview_text)
 
     if args.json:
@@ -449,4 +449,4 @@ def main:
         print(format_single_interview(analysis))
 
 if __name__ == "__main__":
-    main
+    main()

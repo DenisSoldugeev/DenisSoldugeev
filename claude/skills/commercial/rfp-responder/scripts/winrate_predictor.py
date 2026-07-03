@@ -209,7 +209,7 @@ def render_markdown(result: dict[str, Any]) -> str:
     out.append("## Factor breakdown\n")
     out.append("| Factor | Contribution (pp) |")
     out.append("|---|---|")
-    for k, v in result["factor_breakdown"].items:
+    for k, v in result["factor_breakdown"].items():
         sign = "+" if v >= 0 else ""
         out.append(f"| {k} | {sign}{v} |")
     out.append("")
@@ -226,7 +226,7 @@ def main(argv: list[str] | None = None) -> int:
         description="Shipley-derived winrate estimate + bid/no-bid verdict."
     )
     parser.add_argument("--input", help="Path to deal-context JSON.")
-    parser.add_argument("--profile", choices=list(PROFILES.keys), default="saas",
+    parser.add_argument("--profile", choices=list(PROFILES.keys()), default="saas",
                         help="Industry profile (default: saas).")
     parser.add_argument("--output", choices=["json", "markdown"], default="markdown")
     parser.add_argument("--sample", action="store_true", help="Use built-in synthetic input.")
@@ -236,12 +236,12 @@ def main(argv: list[str] | None = None) -> int:
         payload = SAMPLE_INPUT
     elif args.input:
         path = Path(args.input)
-        if not path.exists:
+        if not path.exists():
             print(f"ERROR: input file not found: {args.input}", file=sys.stderr)
             return 1
         payload = json.loads(path.read_text(encoding="utf-8"))
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     result = predict(payload, args.profile)
@@ -253,4 +253,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

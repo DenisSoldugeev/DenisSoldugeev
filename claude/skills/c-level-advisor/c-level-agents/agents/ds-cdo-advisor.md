@@ -32,31 +32,31 @@ Differentiates from `ds-cto-advisor` (architecture), `ds-ciso-advisor` (security
 
 ## Skill Integration
 
-**Skill Location:** `../../skills/chief-data-officer-advisor/`
+**Skill Location:** `../../chief-data-officer-advisor/`
 
 ### Python Tools
 
 1. **AI Training Data Audit**
-   - Path: `../../skills/chief-data-officer-advisor/scripts/ai_training_data_audit.py`
-   - Usage: `python ../../skills/chief-data-officer-advisor/scripts/ai_training_data_audit.py sources.json`
+   - Path: `../../chief-data-officer-advisor/scripts/ai_training_data_audit.py`
+   - Usage: `python ../../chief-data-officer-advisor/scripts/ai_training_data_audit.py sources.json`
    - Audits data sources on 3 dimensions (origin × class × use case), returns GO/MITIGATE/NO-GO per source with risk + remediation + GDPR/AI Act citations
 
 2. **Data Product Strategy Picker**
-   - Path: `../../skills/chief-data-officer-advisor/scripts/data_product_strategy_picker.py`
-   - Usage: `python ../../skills/chief-data-officer-advisor/scripts/data_product_strategy_picker.py profile.json`
+   - Path: `../../chief-data-officer-advisor/scripts/data_product_strategy_picker.py`
+   - Usage: `python ../../chief-data-officer-advisor/scripts/data_product_strategy_picker.py profile.json`
    - Picks warehouse/lakehouse/mesh + build-vs-buy per layer + 12-month sequencing roadmap. Deterministic, derived from profile.
 
 3. **Data Asset Valuator**
-   - Path: `../../skills/chief-data-officer-advisor/scripts/data_asset_valuator.py`
-   - Usage: `python ../../skills/chief-data-officer-advisor/scripts/data_asset_valuator.py corpus.json`
+   - Path: `../../chief-data-officer-advisor/scripts/data_asset_valuator.py`
+   - Usage: `python ../../chief-data-officer-advisor/scripts/data_asset_valuator.py corpus.json`
    - Computes strategic value (0-10), moat strength, M&A multiplier (with carve-out penalties), and ranks 3 productization paths
 
 ### Knowledge Bases
 
-- `../../skills/chief-data-officer-advisor/references/ai_training_data_rights.md` — Training rights matrix + GDPR Art. 6 + EU AI Act + US state patchwork
-- `../../skills/chief-data-officer-advisor/references/data_product_strategy.md` — Architecture kill criteria + build-vs-buy decision tree + sequencing pattern
-- `../../skills/chief-data-officer-advisor/references/customer_data_as_asset.md` — Valuation framework + 3 productization paths + M&A diligence prep checklist + contractual constraint audit
-- `../../skills/chief-data-officer-advisor/references/data_team_org_evolution.md` — Stage-to-role map + centralize-vs-embed trigger + anti-patterns
+- `../../chief-data-officer-advisor/references/ai_training_data_rights.md` — Training rights matrix + GDPR Art. 6 + EU AI Act + US state patchwork
+- `../../chief-data-officer-advisor/references/data_product_strategy.md` — Architecture kill criteria + build-vs-buy decision tree + sequencing pattern
+- `../../chief-data-officer-advisor/references/customer_data_as_asset.md` — Valuation framework + 3 productization paths + M&A diligence prep checklist + contractual constraint audit
+- `../../chief-data-officer-advisor/references/data_team_org_evolution.md` — Stage-to-role map + centralize-vs-embed trigger + anti-patterns
 
 ## Workflows
 
@@ -66,7 +66,7 @@ Differentiates from `ds-cto-advisor` (architecture), `ds-ciso-advisor` (security
 ```bash
 # 1. Build sources.json (one entry per source, tagged with origin × class × use case)
 # 2. Run the audit
-python ../../skills/chief-data-officer-advisor/scripts/ai_training_data_audit.py sources.json
+python ../../chief-data-officer-advisor/scripts/ai_training_data_audit.py sources.json
 # 3. For each NO-GO: document the kill reason; either drop the source or change the use case
 # 4. For each MITIGATE: assign owner + remediation; block training until complete
 # 5. Cross-check top-3 mitigations with ds-general-counsel-advisor
@@ -79,7 +79,7 @@ python ../../skills/chief-data-officer-advisor/scripts/ai_training_data_audit.py
 ```bash
 # 1. Build profile.json (stage, consumers, volume, ML models, culture, priorities)
 # 2. Run the picker
-python ../../skills/chief-data-officer-advisor/scripts/data_product_strategy_picker.py profile.json
+python ../../chief-data-officer-advisor/scripts/data_product_strategy_picker.py profile.json
 # 3. Cross-check architecture choice with ds-cto-advisor (engineering capacity)
 # 4. Cross-check 3-year TCO with ds-cfo-advisor
 # 5. Identify kill criteria explicitly; commit to revisiting in Q4
@@ -92,7 +92,7 @@ python ../../skills/chief-data-officer-advisor/scripts/data_product_strategy_pic
 ```bash
 # 1. Inventory corpus (customers, history, exclusivity, carve-outs, regulated content)
 # 2. Run the valuator
-python ../../skills/chief-data-officer-advisor/scripts/data_asset_valuator.py corpus.json
+python ../../chief-data-officer-advisor/scripts/data_asset_valuator.py corpus.json
 # 3. Run the M&A diligence checklist in customer_data_as_asset.md
 # 4. Surface contractual carve-outs to ds-general-counsel-advisor
 # 5. Decide productization path (benchmark → embedding → license, in viability order)
@@ -104,7 +104,7 @@ python ../../skills/chief-data-officer-advisor/scripts/data_asset_valuator.py co
 **Goal:** Sequence the next 18 months of data hires aligned to business decisions.
 
 1. List top 5 decisions the business can't make today due to missing data/analysis
-2. Map each decision to the role that unblocks it (see references/data_team_org_evolution.md)
+2. Map each decision to the role that unblocks it (see ../../chief-data-officer-advisor/references/data_team_org_evolution.md)
 3. Sequence hires (one at a time, ramp before next)
 4. Cross-check with ds-chro-advisor on comp bands + leveling
 5. Identify centralize-vs-embed trigger date
@@ -125,11 +125,11 @@ python ../../skills/chief-data-officer-advisor/scripts/data_asset_valuator.py co
 #!/bin/bash
 echo "📊 CDO Quarterly Review"
 echo "1. Training data audit"
-python ../../skills/chief-data-officer-advisor/scripts/ai_training_data_audit.py current-sources.json
+python ../../chief-data-officer-advisor/scripts/ai_training_data_audit.py current-sources.json
 echo "2. Architecture review"
-python ../../skills/chief-data-officer-advisor/scripts/data_product_strategy_picker.py current-profile.json
+python ../../chief-data-officer-advisor/scripts/data_product_strategy_picker.py current-profile.json
 echo "3. Data asset valuation"
-python ../../skills/chief-data-officer-advisor/scripts/data_asset_valuator.py corpus.json
+python ../../chief-data-officer-advisor/scripts/data_asset_valuator.py corpus.json
 echo "Kill criteria + checkpoint dates in each output."
 ```
 
@@ -144,7 +144,7 @@ echo "Kill criteria + checkpoint dates in each output."
 
 ## Related Agents
 
-- [ds-cto-advisor](../../../../agents/c-level/ds-cto-advisor.md) — architecture capacity
+- [ds-cto-advisor](../../../agents/c-level/ds-cto-advisor.md) — architecture capacity
 - [ds-ciso-advisor](ds-ciso-advisor.md) — data security, threat modeling for productized data
 - [ds-cpo-advisor](ds-cpo-advisor.md) — product strategy (when data becomes product)
 - [ds-general-counsel-advisor](ds-general-counsel-advisor.md) — contractual constraints, DPA, training-rights
@@ -153,7 +153,7 @@ echo "Kill criteria + checkpoint dates in each output."
 
 ## References
 
-- Skill: [../../skills/chief-data-officer-advisor/SKILL.md](../../chief-data-officer-advisor/SKILL.md)
+- Skill: [../../chief-data-officer-advisor/SKILL.md](../../chief-data-officer-advisor/SKILL.md)
 - Voice spec: [../references/persona-voices.md](../references/persona-voices.md)
 - Sibling command: [`/ds:cdo-review`](../skills/cdo-review/SKILL.md)
 

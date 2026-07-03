@@ -30,7 +30,7 @@ Systematically review Playwright test files for anti-patterns, missed best pract
 Load `anti-patterns.md` from this skill directory. Check for all 20 anti-patterns.
 
 **Critical (must fix):**
-1. `waitForTimeout` usage
+1. `waitForTimeout()` usage
 2. Non-web-first assertions (`expect(await ...)`)
 3. Hardcoded URLs instead of `baseURL`
 4. CSS/XPath selectors when role-based exists
@@ -42,8 +42,8 @@ Load `anti-patterns.md` from this skill directory. Check for all 20 anti-pattern
 8. Tests longer than 50 lines (consider splitting)
 9. Magic strings without named constants
 10. Missing error/edge case tests
-11. `page.evaluate` for things locators can do
-12. Nested `test.describe` more than 2 levels deep
+11. `page.evaluate()` for things locators can do
+12. Nested `test.describe()` more than 2 levels deep
 13. Generic test names ("should work", "test 1")
 
 **Info (consider):**
@@ -53,7 +53,7 @@ Load `anti-patterns.md` from this skill directory. Check for all 20 anti-pattern
 17. No visual regression tests for UI-heavy pages
 18. Console error assertions not checked
 19. Network idle waits instead of specific assertions
-20. Missing `test.describe` grouping
+20. Missing `test.describe()` grouping
 
 ### 3. Score Each File
 
@@ -71,7 +71,7 @@ For each file:
 ## <filename> — Score: X/10
 
 ### Critical
-- Line 15: `waitForTimeout(2000)` → use `expect(locator).toBeVisible`
+- Line 15: `waitForTimeout(2000)` → use `expect(locator).toBeVisible()`
 - Line 28: CSS selector `.btn-submit` → `getByRole('button', { name: "submit" })`
 
 ### Warning

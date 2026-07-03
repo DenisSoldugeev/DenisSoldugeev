@@ -43,7 +43,7 @@ from pathlib import Path
 from typing import Any
 
 _DESIGN_SYSTEM_SCRIPTS = (
-    Path(__file__).resolve.parent.parent.parent / "design-system" / "scripts"
+    Path(__file__).resolve().parent.parent.parent / "design-system" / "scripts"
 )
 sys.path.insert(0, str(_DESIGN_SYSTEM_SCRIPTS))
 try:
@@ -85,7 +85,7 @@ def _derive_danger_color(palette: dict[str, str]) -> str:
 
 
 def _resolve_severity_color(severity: str, palette: dict[str, str], danger: str) -> str:
-    sev = severity.upper
+    sev = severity.upper()
     spec = SEVERITY_DEFAULTS.get(sev, {"token": "--md-text-muted"})
     token = spec["token"]
     if token == "_danger":
@@ -103,7 +103,7 @@ def _palette_to_css(palette: dict[str, str]) -> str:
             "--md-link": "#00D4AA", "--md-link-hover": "#08FECE",
             "--md-success": "#10A85C", "--md-warn": "#C87C10",
         }
-    return "\n".join(f"    {k}: {v};" for k, v in palette.items)
+    return "\n".join(f"    {k}: {v};" for k, v in palette.items())
 
 
 def _font_url(heading: str, body: str) -> str:
@@ -319,7 +319,7 @@ def _annotation_anchor(idx: int) -> str:
 
 
 def _render_severity_badge(severity: str, palette: dict[str, str], danger: str) -> str:
-    spec = SEVERITY_DEFAULTS.get(severity.upper, {"icon": "?", "aria": severity})
+    spec = SEVERITY_DEFAULTS.get(severity.upper(), {"icon": "?", "aria": severity})
     color = _resolve_severity_color(severity, palette, danger)
     icon = html.escape(spec["icon"])
     aria = html.escape(spec["aria"])
@@ -327,7 +327,7 @@ def _render_severity_badge(severity: str, palette: dict[str, str], danger: str) 
         f'<span class="sev-badge" style="color: {color}" '
         f'role="status" aria-label="{aria}">'
         f'<span class="sev-icon" aria-hidden="true">{icon}</span>'
-        f'{html.escape(severity.upper)}'
+        f'{html.escape(severity.upper())}'
         f'</span>'
     )
 
@@ -448,7 +448,7 @@ def render(
     if annlist:
         counts = annotations.get("summary", {}).get("counts_by_severity", {})
         count_summary = " · ".join(
-            f"{n} {sev}" for sev, n in sorted(counts.items)
+            f"{n} {sev}" for sev, n in sorted(counts.items())
         )
         jump_nav_html = (
             '<nav class="jump-nav" aria-label="Review annotations">'
@@ -552,12 +552,12 @@ def main(argv: list[str]) -> int:
     args = p.parse_args(argv)
 
     if args.sample:
-        sys.path.insert(0, str(Path(__file__).resolve.parent))
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
         import annotation_extractor
         import diff_parser
         text = diff_parser.SAMPLE_MARKDOWN
         diff_blocks = diff_parser.parse_markdown_for_diffs(text)
-        sev_conv = [s.strip.upper for s in args.severity_convention.split(",")]
+        sev_conv = [s.strip().upper() for s in args.severity_convention.split(",")]
         annotations = annotation_extractor.extract_annotations(text, diff_blocks, sev_conv)
         reviewer = args.reviewer or "Sample Reviewer"
         pr_title = args.title
@@ -572,7 +572,7 @@ def main(argv: list[str]) -> int:
         pr_title = args.title
 
     # Hard rule 1: reviewer name is mandatory (named owner per research-ops discipline)
-    if not reviewer or not reviewer.strip:
+    if not reviewer or not reviewer.strip():
         print("refusing: --reviewer is required. A code review must name a human reviewer.",
               file=sys.stderr)
         return 3
@@ -586,7 +586,7 @@ def main(argv: list[str]) -> int:
     if args.no_config or os.environ.get("MARKDOWN_HTML_NO_CONFIG") == "1":
         config = _cfg.DEFAULTS if _cfg else {}
     else:
-        config = _cfg.load_config if _cfg else {}
+        config = _cfg.load_config() if _cfg else {}
 
     output = render(diff_blocks, annotations, config, reviewer, pr_title)
 

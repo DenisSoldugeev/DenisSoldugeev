@@ -34,12 +34,12 @@ class StackReport:
     signals: Dict[str, bool]
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Detect stack/tooling from a repository.")
     parser.add_argument("--input", help="JSON input file (precomputed signal payload).")
     parser.add_argument("--repo", default=".", help="Repository path to scan.")
     parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
-    return parser.parse_args
+    return parser.parse_args()
 
 
 def load_payload(input_path: Optional[str]) -> Optional[dict]:
@@ -49,8 +49,8 @@ def load_payload(input_path: Optional[str]) -> Optional[dict]:
         except Exception as exc:
             raise CLIError(f"Failed reading --input file: {exc}") from exc
 
-    if not sys.stdin.isatty:
-        raw = sys.stdin.read.strip
+    if not sys.stdin.isatty():
+        raw = sys.stdin.read().strip()
         if raw:
             try:
                 return json.loads(raw)
@@ -62,7 +62,7 @@ def load_payload(input_path: Optional[str]) -> Optional[dict]:
 
 def read_package_scripts(repo: Path) -> Dict[str, str]:
     pkg = repo / "package.json"
-    if not pkg.exists:
+    if not pkg.exists():
         return {}
     try:
         data = json.loads(pkg.read_text(encoding="utf-8"))
@@ -74,17 +74,18 @@ def read_package_scripts(repo: Path) -> Dict[str, str]:
 
 def detect(repo: Path) -> StackReport:
     signals = {
-        "package_json": (repo / "package.json").exists,
-        "pnpm_lock": (repo / "pnpm-lock.yaml").exists,
-        "yarn_lock": (repo / "yarn.lock").exists,
-        "npm_lock": (repo / "package-lock.json").exists,
-        "pyproject": (repo / "pyproject.toml").exists,
-        "requirements": (repo / "requirements.txt").exists,
-        "go_mod": (repo / "go.mod").exists,
-        "dockerfile": (repo / "Dockerfile").exists,
-        "vercel": (repo / "vercel.json").exists,
-        "helm": (repo / "helm").exists or (repo / "charts").exists,
-        "k8s": (repo / "k8s").exists or (repo / "kubernetes").exists,
+        "package_json": (repo / "package.json").exists(),
+        "pnpm_lock": (repo / "pnpm-lock.yaml").exists(),
+        "yarn_lock": (repo / "yarn.lock").exists(),
+        "npm_lock": (repo / "package-lock.json").exists(),
+        "pyproject": (repo / "pyproject.toml").exists(),
+        "requirements": (repo / "requirements.txt").exists(),
+        "go_mod": (repo / "go.mod").exists(),
+        "dockerfile": (repo / "Dockerfile").exists(),
+        "terraform": any(repo.glob("*.tf")) or (repo / "terraform").is_dir(),
+        "vercel": (repo / "vercel.json").exists(),
+        "helm": (repo / "helm").exists() or (repo / "charts").exists(),
+        "k8s": (repo / "k8s").exists() or (repo / "kubernetes").exists(),
     }
 
     languages: List[str] = []
@@ -107,6 +108,12 @@ def detect(repo: Path) -> StackReport:
     if signals["go_mod"]:
         languages.append("go")
 
+    if signals["terraform"]:
+        languages.append("terraform")
+
+    if signals["dockerfile"]:
+        languages.append("docker")
+
     scripts = read_package_scripts(repo)
     lint_commands: List[str] = []
     test_commands: List[str] = []
@@ -128,8 +135,18 @@ def detect(repo: Path) -> StackReport:
         test_commands.append("go test ./...")
         build_commands.append("go build ./...")
 
+    if "terraform" in languages:
+        tf_dir = "terraform" if (repo / "terraform").is_dir() and not any(repo.glob("*.tf")) else "."
+        lint_commands.append(f"terraform -chdir={tf_dir} fmt -check -recursive")
+        test_commands.append(f"terraform -chdir={tf_dir} validate")
+        build_commands.append(f"terraform -chdir={tf_dir} plan -input=false")
+
+    if "docker" in languages:
+        lint_commands.append("hadolint Dockerfile")
+        build_commands.append("docker build -t app:ci .")
+
     return StackReport(
-        repo=str(repo.resolve),
+        repo=str(repo.resolve()),
         languages=sorted(set(languages)),
         package_managers=sorted(set(package_managers)),
         ci_targets=ci_targets,
@@ -153,8 +170,8 @@ def format_text(report: StackReport) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
-    args = parse_args
+def main() -> int:
+    args = parse_args()
     payload = load_payload(args.input)
 
     if payload:
@@ -163,8 +180,8 @@ def main -> int:
         except TypeError as exc:
             raise CLIError(f"Invalid input payload for StackReport: {exc}") from exc
     else:
-        repo = Path(args.repo).resolve
-        if not repo.exists or not repo.is_dir:
+        repo = Path(args.repo).resolve()
+        if not repo.exists() or not repo.is_dir():
             raise CLIError(f"Invalid repo path: {repo}")
         report = detect(repo)
 
@@ -178,7 +195,7 @@ def main -> int:
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(main)
+        raise SystemExit(main())
     except CLIError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         raise SystemExit(2)

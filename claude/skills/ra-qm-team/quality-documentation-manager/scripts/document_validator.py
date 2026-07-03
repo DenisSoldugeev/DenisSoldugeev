@@ -65,6 +65,7 @@ class Document:
     status: str
     effective_date: Optional[str] = None
     review_date: Optional[str] = None
+    author: Optional[str] = None
     approver: Optional[str] = None
     approval_date: Optional[str] = None
     change_history: List[Dict] = field(default_factory=list)
@@ -100,24 +101,24 @@ class DocumentValidator:
 
     def __init__(self, document: Document):
         self.document = document
-        self.today = datetime.now
+        self.today = datetime.now()
         self.findings: List[ValidationFinding] = []
 
     def validate(self) -> ValidationResult:
         """Run all validation checks."""
-        self._validate_document_number
-        self._validate_title
-        self._validate_status_lifecycle
-        self._validate_dates
-        self._validate_approvals
-        self._validate_change_history
-        self._validate_electronic_controls
+        self._validate_document_number()
+        self._validate_title()
+        self._validate_status_lifecycle()
+        self._validate_dates()
+        self._validate_approvals()
+        self._validate_change_history()
+        self._validate_electronic_controls()
 
         # Calculate compliance score
-        score = self._calculate_compliance_score
+        score = self._calculate_compliance_score()
 
         # Generate recommendations
-        recommendations = self._generate_recommendations
+        recommendations = self._generate_recommendations()
 
         # Count findings by severity
         critical = len([f for f in self.findings if f.severity == Severity.CRITICAL])
@@ -159,7 +160,7 @@ class DocumentValidator:
             ))
             return
 
-        prefix, category, sequence, revision = match.groups
+        prefix, category, sequence, revision = match.groups()
 
         if prefix not in self.VALID_PREFIXES:
             self.findings.append(ValidationFinding(
@@ -488,7 +489,7 @@ def format_text_output(result: ValidationResult) -> str:
     return "\n".join(lines)
 
 
-def interactive_mode:
+def interactive_mode():
     """Run interactive document validation."""
     print("=" * 60)
     print("Document Validator - Interactive Mode")
@@ -496,30 +497,30 @@ def interactive_mode:
 
     print("\nEnter document information:\n")
 
-    number = input("Document Number (e.g., SOP-02-001): ").strip
-    title = input("Document Title: ").strip
+    number = input("Document Number (e.g., SOP-02-001): ").strip()
+    title = input("Document Title: ").strip()
 
     print("\nDocument Types: QM, SOP, WI, TF, POL, SPEC, PLN, RPT")
-    doc_type = input("Document Type: ").strip.upper
+    doc_type = input("Document Type: ").strip().upper()
 
-    revision = input("Revision (e.g., 01 or A): ").strip
+    revision = input("Revision (e.g., 01 or A): ").strip()
 
     print("\nStatuses: Draft, Under Review, Approved, Effective, Superseded, Obsolete")
-    status = input("Status: ").strip
+    status = input("Status: ").strip()
 
-    effective_date = input("Effective Date (YYYY-MM-DD, or Enter to skip): ").strip or None
-    review_date = input("Next Review Date (YYYY-MM-DD, or Enter to skip): ").strip or None
+    effective_date = input("Effective Date (YYYY-MM-DD, or Enter to skip): ").strip() or None
+    review_date = input("Next Review Date (YYYY-MM-DD, or Enter to skip): ").strip() or None
 
-    author = input("Author Name (or Enter to skip): ").strip or None
-    approver = input("Approver Name (or Enter to skip): ").strip or None
+    author = input("Author Name (or Enter to skip): ").strip() or None
+    approver = input("Approver Name (or Enter to skip): ").strip() or None
 
-    has_audit = input("Has Audit Trail? (y/n): ").strip.lower == 'y'
-    has_esig = input("Uses Electronic Signatures? (y/n): ").strip.lower == 'y'
+    has_audit = input("Has Audit Trail? (y/n): ").strip().lower() == 'y'
+    has_esig = input("Uses Electronic Signatures? (y/n): ").strip().lower() == 'y'
 
     sig_components = 0
     if has_esig:
-        sig_input = input("Number of signature components (e.g., 2): ").strip
-        sig_components = int(sig_input) if sig_input.isdigit else 0
+        sig_input = input("Number of signature components (e.g., 2): ").strip()
+        sig_components = int(sig_input) if sig_input.isdigit() else 0
 
     doc = Document(
         number=number,
@@ -537,11 +538,11 @@ def interactive_mode:
     )
 
     validator = DocumentValidator(doc)
-    result = validator.validate
+    result = validator.validate()
     print("\n" + format_text_output(result))
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Quality Documentation Validator"
     )
@@ -567,10 +568,10 @@ def main:
         help="Generate sample document JSON"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.interactive:
-        interactive_mode
+        interactive_mode()
         return
 
     if args.sample:
@@ -582,7 +583,7 @@ def main:
             "status": "Effective",
             "effective_date": "2024-01-15",
             "review_date": "2025-01-15",
-            "author": "J. Smith",
+            "author": "the author",
             "approver": "M. Jones",
             "approval_date": "2024-01-10",
             "change_history": [
@@ -633,7 +634,7 @@ def main:
         )
 
     validator = DocumentValidator(doc)
-    result = validator.validate
+    result = validator.validate()
 
     if args.output == "json":
         print(json.dumps(asdict(result), indent=2))
@@ -642,4 +643,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

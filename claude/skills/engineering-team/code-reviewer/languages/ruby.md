@@ -33,7 +33,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 ## Security
 
 - Flag `eval` / `instance_eval` with user-controlled strings — remote code execution
-- Flag `system` / `exec` / backtick calls with user-controlled input — shell injection
+- Flag `system()` / `exec()` / backtick calls with user-controlled input — shell injection
 - Flag `YAML.load` on untrusted data — use `YAML.safe_load`
 - Flag `Marshal.load` on untrusted data — arbitrary code execution
 - Flag raw SQL string interpolation in ActiveRecord — use parameterized queries (`where("name = ?", name)`)

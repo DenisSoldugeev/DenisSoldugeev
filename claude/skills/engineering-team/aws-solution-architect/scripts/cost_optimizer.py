@@ -32,23 +32,23 @@ class CostOptimizer:
         potential_savings = 0.0
 
         # Analyze compute resources
-        compute_savings = self._analyze_compute
+        compute_savings = self._analyze_compute()
         potential_savings += compute_savings
 
         # Analyze storage
-        storage_savings = self._analyze_storage
+        storage_savings = self._analyze_storage()
         potential_savings += storage_savings
 
         # Analyze database
-        database_savings = self._analyze_database
+        database_savings = self._analyze_database()
         potential_savings += database_savings
 
         # Analyze networking
-        network_savings = self._analyze_networking
+        network_savings = self._analyze_networking()
         potential_savings += network_savings
 
         # General AWS optimizations
-        general_savings = self._analyze_general_optimizations
+        general_savings = self._analyze_general_optimizations()
         potential_savings += general_savings
 
         return {
@@ -57,7 +57,7 @@ class CostOptimizer:
             'optimized_monthly_spend': round(self.monthly_spend - potential_savings, 2),
             'savings_percentage': round((potential_savings / self.monthly_spend) * 100, 2) if self.monthly_spend > 0 else 0,
             'recommendations': self.recommendations,
-            'priority_actions': self._prioritize_recommendations
+            'priority_actions': self._prioritize_recommendations()
         }
 
     def _analyze_compute(self) -> float:

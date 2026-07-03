@@ -115,7 +115,7 @@ class ComponentScanner:
             return
 
         # Skip files without JSX indicators
-        if 'return' not in content or ('<' not in content and 'jsx' not in content.lower):
+        if 'return' not in content or ('<' not in content and 'jsx' not in content.lower()):
             # Could still be a hook
             if not self.HOOK_PATTERN.search(content):
                 return
@@ -155,7 +155,7 @@ class ComponentScanner:
         props_match = self.PROPS_PATTERN.search(content)
         if props_match:
             props_str = props_match.group(1) or ''
-            props = [p.strip.split(':')[0].strip for p in props_str.split(',') if p.strip]
+            props = [p.strip().split(':')[0].strip() for p in props_str.split(',') if p.strip()]
 
         # Extract imports
         imports = re.findall(r"import\s+(?:{[^}]+}|[^;]+)\s+from\s+['\"]([^'\"]+)['\"]", content)
@@ -167,7 +167,7 @@ class ComponentScanner:
             name=name,
             file_path=str(file_path),
             component_type=component_type,
-            has_props=bool(props) or 'props' in content.lower,
+            has_props=bool(props) or 'props' in content.lower(),
             props=props[:10],  # Limit props
             has_hooks=hooks[:10],  # Limit hooks
             has_context=bool(self.CONTEXT_PATTERN.search(content)),
@@ -241,14 +241,14 @@ class TestGenerator:
         """Generate a basic render test"""
         props_str = self._get_mock_props(component)
 
-        code = f'''  it('renders without crashing',  => {{
+        code = f'''  it('renders without crashing', () => {{
     render(<{component.name}{props_str} />);
   }});
 
-  it('renders expected content',  => {{
+  it('renders expected content', () => {{
     render(<{component.name}{props_str} />);
     // TODO: Add specific content assertions
-    // expect(screen.getByRole('...')).toBeInTheDocument;
+    // expect(screen.getByRole('...')).toBeInTheDocument();
   }});'''
 
         return TestCase(
@@ -264,7 +264,7 @@ class TestGenerator:
 
         prop_tests = []
         for prop in props:
-            prop_tests.append(f'''  it('renders with {prop} prop',  => {{
+            prop_tests.append(f'''  it('renders with {prop} prop', () => {{
     render(<{component.name} {prop}="test-value" />);
     // TODO: Assert that {prop} affects rendering
   }});''')
@@ -280,9 +280,9 @@ class TestGenerator:
 
     def _generate_interaction_test(self, component: ComponentInfo) -> TestCase:
         """Generate user interaction tests"""
-        code = f'''  it('handles user interaction', async  => {{
-    const user = userEvent.setup;
-    const handleClick = jest.fn;
+        code = f'''  it('handles user interaction', async () => {{
+    const user = userEvent.setup();
+    const handleClick = jest.fn();
 
     render(<{component.name} onClick={{handleClick}} />);
 
@@ -293,13 +293,13 @@ class TestGenerator:
     expect(handleClick).toHaveBeenCalledTimes(1);
   }});
 
-  it('handles keyboard navigation', async  => {{
-    const user = userEvent.setup;
+  it('handles keyboard navigation', async () => {{
+    const user = userEvent.setup();
     render(<{component.name} />);
 
     // TODO: Add keyboard interaction tests
-    // await user.tab;
-    // expect(screen.getByRole('...')).toHaveFocus;
+    // await user.tab();
+    // expect(screen.getByRole('...')).toHaveFocus();
   }});'''
 
         return TestCase(
@@ -311,16 +311,16 @@ class TestGenerator:
 
     def _generate_state_test(self, component: ComponentInfo) -> TestCase:
         """Generate state-related tests"""
-        code = f'''  it('updates state correctly', async  => {{
-    const user = userEvent.setup;
+        code = f'''  it('updates state correctly', async () => {{
+    const user = userEvent.setup();
     render(<{component.name} />);
 
     // TODO: Trigger state change
     // await user.click(screen.getByRole('button'));
 
     // TODO: Assert state change is reflected in UI
-    await waitFor( => {{
-      // expect(screen.getByText('...')).toBeInTheDocument;
+    await waitFor(() => {{
+      // expect(screen.getByText('...')).toBeInTheDocument();
     }});
   }});'''
 
@@ -335,10 +335,10 @@ class TestGenerator:
         """Generate accessibility test"""
         props_str = self._get_mock_props(component)
 
-        code = f'''  it('has no accessibility violations', async  => {{
+        code = f'''  it('has no accessibility violations', async () => {{
     const {{ container }} = render(<{component.name}{props_str} />);
     const results = await axe(container);
-    expect(results).toHaveNoViolations;
+    expect(results).toHaveNoViolations();
   }});'''
 
         return TestCase(
@@ -379,7 +379,7 @@ class TestGenerator:
             lines.append('')
 
         # Describe block
-        lines.append(f"describe('{test_file.component.name}',  => {{")
+        lines.append(f"describe('{test_file.component.name}', () => {{")
 
         # Test cases grouped by type
         test_types = {}
@@ -388,7 +388,7 @@ class TestGenerator:
                 test_types[test_case.test_type] = []
             test_types[test_case.test_type].append(test_case)
 
-        for test_type, cases in test_types.items:
+        for test_type, cases in test_types.items():
             for case in cases:
                 lines.append('')
                 lines.append(f'  // {case.description}')
@@ -431,12 +431,12 @@ class TestSuiteGenerator:
         print(f"Scanning: {self.source_path}")
 
         # Validate source path
-        if not self.source_path.exists:
+        if not self.source_path.exists():
             raise ValueError(f"Source path does not exist: {self.source_path}")
 
         # Scan for components
         scanner = ComponentScanner(self.source_path, self.verbose)
-        components = scanner.scan
+        components = scanner.scan()
 
         print(f"Found {len(components)} React components")
 
@@ -506,8 +506,8 @@ class TestSuiteGenerator:
                 by_type[comp_type] = []
             by_type[comp_type].append(comp)
 
-        for comp_type, comps in sorted(by_type.items):
-            print(f"\n{comp_type.upper} COMPONENTS ({len(comps)}):")
+        for comp_type, comps in sorted(by_type.items()):
+            print(f"\n{comp_type.upper()} COMPONENTS ({len(comps)}):")
             for comp in comps:
                 hooks_str = f" [hooks: {', '.join(comp.has_hooks[:3])}]" if comp.has_hooks else ""
                 state_str = " [stateful]" if comp.has_state else ""
@@ -522,11 +522,11 @@ class TestSuiteGenerator:
         self.results['components'] = [asdict(c) for c in components]
         self.results['summary'] = {
             'total_components': len(components),
-            'by_type': {k: len(v) for k, v in by_type.items}
+            'by_type': {k: len(v) for k, v in by_type.items()}
         }
 
 
-def main:
+def main():
     """Main entry point"""
     parser = argparse.ArgumentParser(
         description="Generate Jest + React Testing Library test stubs for React components",
@@ -579,7 +579,7 @@ Examples:
         help='Output results as JSON'
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         generator = TestSuiteGenerator(
@@ -591,7 +591,7 @@ Examples:
             template=args.template
         )
 
-        results = generator.run
+        results = generator.run()
 
         if args.json:
             print(json.dumps(results, indent=2))
@@ -602,4 +602,4 @@ Examples:
 
 
 if __name__ == '__main__':
-    main
+    main()

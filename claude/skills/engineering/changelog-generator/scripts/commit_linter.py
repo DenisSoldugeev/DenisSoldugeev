@@ -37,28 +37,28 @@ class LintReport:
     violations: List[str]
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate conventional commit subjects.")
     parser.add_argument("--input", help="File with commit subjects (one per line).")
     parser.add_argument("--from-ref", help="Git ref start (exclusive).")
     parser.add_argument("--to-ref", help="Git ref end (inclusive).")
     parser.add_argument("--strict", action="store_true", help="Exit non-zero when violations exist.")
     parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
-    return parser.parse_args
+    return parser.parse_args()
 
 
 def lines_from_file(path: str) -> List[str]:
     try:
-        return [line.strip for line in Path(path).read_text(encoding="utf-8").splitlines if line.strip]
+        return [line.strip() for line in Path(path).read_text(encoding="utf-8").splitlines() if line.strip()]
     except Exception as exc:
         raise CLIError(f"Failed reading --input file: {exc}") from exc
 
 
-def lines_from_stdin -> List[str]:
-    if sys.stdin.isatty:
+def lines_from_stdin() -> List[str]:
+    if sys.stdin.isatty():
         return []
-    data = sys.stdin.read
-    return [line.strip for line in data.splitlines if line.strip]
+    data = sys.stdin.read()
+    return [line.strip() for line in data.splitlines() if line.strip()]
 
 
 def lines_from_git(args: argparse.Namespace) -> List[str]:
@@ -73,14 +73,14 @@ def lines_from_git(args: argparse.Namespace) -> List[str]:
             check=True,
         )
     except subprocess.CalledProcessError as exc:
-        raise CLIError(f"git log failed for range '{range_spec}': {exc.stderr.strip}") from exc
-    return [line.strip for line in proc.stdout.splitlines if line.strip]
+        raise CLIError(f"git log failed for range '{range_spec}': {exc.stderr.strip()}") from exc
+    return [line.strip() for line in proc.stdout.splitlines() if line.strip()]
 
 
 def load_lines(args: argparse.Namespace) -> List[str]:
     if args.input:
         return lines_from_file(args.input)
-    stdin_lines = lines_from_stdin
+    stdin_lines = lines_from_stdin()
     if stdin_lines:
         return stdin_lines
     git_lines = lines_from_git(args)
@@ -115,8 +115,8 @@ def format_text(report: LintReport) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
-    args = parse_args
+def main() -> int:
+    args = parse_args()
     lines = load_lines(args)
     report = lint(lines)
 
@@ -132,7 +132,7 @@ def main -> int:
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(main)
+        raise SystemExit(main())
     except CLIError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         raise SystemExit(2)

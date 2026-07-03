@@ -76,7 +76,7 @@ FROM {{ ref('stg_orders') }} o
 LEFT JOIN {{ ref('dim_customers') }} c
     ON o.customer_id = c.customer_id
 
-{% if is_incremental %}
+{% if is_incremental() %}
 WHERE o._extracted_at > (SELECT MAX(_extracted_at) FROM {{ this }})
 {% endif %}
 ```
@@ -238,15 +238,15 @@ spark = SparkSession.builder \
     .appName("UserEventsProcessor") \
     .config("spark.sql.streaming.checkpointLocation", "/checkpoints/user-events") \
     .config("spark.sql.shuffle.partitions", "12") \
-    .getOrCreate
+    .getOrCreate()
 
 # Define schema
 event_schema = StructType([
-    StructField("event_id", StringType, False),
-    StructField("user_id", StringType, False),
-    StructField("event_type", StringType, False),
-    StructField("timestamp", StringType, False),
-    StructField("properties", MapType(StringType, StringType), True)
+    StructField("event_id", StringType(), False),
+    StructField("user_id", StringType(), False),
+    StructField("event_type", StringType(), False),
+    StructField("timestamp", StringType(), False),
+    StructField("properties", MapType(StringType(), StringType()), True)
 ])
 
 # Read from Kafka
@@ -256,7 +256,7 @@ events_df = spark.readStream \
     .option("subscribe", "user-events") \
     .option("startingOffsets", "latest") \
     .option("failOnDataLoss", "false") \
-    .load
+    .load()
 
 # Parse JSON
 parsed_df = events_df \
@@ -283,9 +283,9 @@ query = aggregated_df.writeStream \
     .option("checkpointLocation", "/checkpoints/user-events-aggregated") \
     .option("path", "/data/lake/user_events_aggregated") \
     .trigger(processingTime="1 minute") \
-    .start
+    .start()
 
-query.awaitTermination
+query.awaitTermination()
 ```
 
 #### Step 4: Handle Late Data and Errors
@@ -297,8 +297,8 @@ from pyspark.sql.functions import current_timestamp, lit
 def process_with_error_handling(batch_df, batch_id):
     try:
         # Attempt processing
-        valid_df = batch_df.filter(col("event_id").isNotNull)
-        invalid_df = batch_df.filter(col("event_id").isNull)
+        valid_df = batch_df.filter(col("event_id").isNotNull())
+        invalid_df = batch_df.filter(col("event_id").isNull())
 
         # Write valid records
         valid_df.write \
@@ -307,9 +307,9 @@ def process_with_error_handling(batch_df, batch_id):
             .save("/data/lake/user_events")
 
         # Write invalid to DLQ
-        if invalid_df.count > 0:
+        if invalid_df.count() > 0:
             invalid_df \
-                .withColumn("error_timestamp", current_timestamp) \
+                .withColumn("error_timestamp", current_timestamp()) \
                 .withColumn("error_reason", lit("missing_event_id")) \
                 .write \
                 .format("delta") \
@@ -325,7 +325,7 @@ def process_with_error_handling(batch_df, batch_id):
 query = parsed_df.writeStream \
     .foreachBatch(process_with_error_handling) \
     .option("checkpointLocation", "/checkpoints/user-events") \
-    .start
+    .start()
 ```
 
 #### Step 5: Monitor Stream Health
@@ -393,7 +393,7 @@ great_expectations datasource new
 # expectations/orders_suite.py
 import great_expectations as gx
 
-context = gx.get_context
+context = gx.get_context()
 
 # Create expectation suite
 suite = context.add_expectation_suite("orders_quality_suite")
@@ -561,14 +561,14 @@ def generate_quality_report(connection, table_name: "str-dict"
 
     report = {
         "table": table_name,
-        "timestamp": datetime.now.isoformat,
+        "timestamp": datetime.now().isoformat(),
         "checks": {}
     }
 
     # Row count check
     row_count = connection.execute(
         f"SELECT COUNT(*) FROM {table_name}"
-    ).fetchone[0]
+    ).fetchone()[0]
     report["checks"]["row_count"] = {
         "value": row_count,
         "status": "pass" if row_count > 0 else "fail"
@@ -577,10 +577,10 @@ def generate_quality_report(connection, table_name: "str-dict"
     # Freshness check
     max_date = connection.execute(
         f"SELECT MAX(created_at) FROM {table_name}"
-    ).fetchone[0]
-    hours_old = (datetime.now - max_date).total_seconds / 3600
+    ).fetchone()[0]
+    hours_old = (datetime.now() - max_date).total_seconds() / 3600
     report["checks"]["freshness"] = {
-        "max_timestamp": max_date.isoformat,
+        "max_timestamp": max_date.isoformat(),
         "hours_old": round(hours_old, 2),
         "status": "pass" if hours_old < 24 else "fail"
     }
@@ -593,7 +593,7 @@ def generate_quality_report(connection, table_name: "str-dict"
         COUNT(*) as total
     FROM {table_name}
     """
-    null_result = connection.execute(null_query).fetchone
+    null_result = connection.execute(null_query).fetchone()
     report["checks"]["null_rates"] = {
         "order_id": null_result[0] / null_result[2] if null_result[2] > 0 else 0,
         "customer_id": null_result[1] / null_result[2] if null_result[2] > 0 else 0,
@@ -605,7 +605,7 @@ def generate_quality_report(connection, table_name: "str-dict"
     SELECT COUNT(*) - COUNT(DISTINCT order_id) as duplicates
     FROM {table_name}
     """
-    duplicates = connection.execute(dup_query).fetchone[0]
+    duplicates = connection.execute(dup_query).fetchone()[0]
     report["checks"]["duplicates"] = {
         "count": duplicates,
         "status": "pass" if duplicates == 0 else "fail"
@@ -614,7 +614,7 @@ def generate_quality_report(connection, table_name: "str-dict"
     # Overall status
     all_passed = all(
         check["status"] == "pass"
-        for check in report["checks"].values
+        for check in report["checks"].values()
     )
     report["overall_status"] = "pass" if all_passed else "fail"
 

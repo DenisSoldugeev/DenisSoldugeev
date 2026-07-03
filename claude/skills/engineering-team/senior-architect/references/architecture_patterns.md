@@ -188,7 +188,7 @@ const orderCreated: DomainEvent = {
   eventId: "evt-123",
   eventType: "OrderCreated",
   aggregateId: "order-456",
-  timestamp: new Date,
+  timestamp: new Date(),
   payload: {
     customerId: "cust-789",
     items: [...],
@@ -299,7 +299,7 @@ class Order {
   private state: OrderState;
 
   static fromEvents(events: OrderEvent[]): Order {
-    const order = new Order;
+    const order = new Order();
     events.forEach(event => order.apply(event));
     return order;
   }

@@ -434,10 +434,10 @@ class ASOScorer:
         """Identify areas of strength (scores >= 75)."""
         strengths = []
 
-        for category, data in score_breakdown.items:
+        for category, data in score_breakdown.items():
             if data['score'] >= 75:
                 strengths.append(
-                    f"{category.replace('_', ' ').title}: {data['score']}/100"
+                    f"{category.replace('_', ' ').title()}: {data['score']}/100"
                 )
 
         return strengths if strengths else ["Focus on building strengths across all areas"]
@@ -446,10 +446,10 @@ class ASOScorer:
         """Identify areas needing improvement (scores < 60)."""
         weaknesses = []
 
-        for category, data in score_breakdown.items:
+        for category, data in score_breakdown.items():
             if data['score'] < 60:
                 weaknesses.append(
-                    f"{category.replace('_', ' ').title}: {data['score']}/100 - needs improvement"
+                    f"{category.replace('_', ' ').title()}: {data['score']}/100 - needs improvement"
                 )
 
         return weaknesses if weaknesses else ["All areas performing adequately"]
@@ -473,7 +473,7 @@ def calculate_aso_score(
     Returns:
         Complete ASO score report
     """
-    scorer = ASOScorer
+    scorer = ASOScorer()
     return scorer.calculate_overall_score(
         metadata,
         ratings,

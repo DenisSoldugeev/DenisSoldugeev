@@ -54,16 +54,16 @@ class AzureCostOptimizer:
         self.recommendations = []
         total_savings = 0.0
 
-        total_savings += self._analyze_virtual_machines
-        total_savings += self._analyze_sql_databases
-        total_savings += self._analyze_storage
-        total_savings += self._analyze_aks
-        total_savings += self._analyze_cosmos_db
-        total_savings += self._analyze_app_services
-        total_savings += self._analyze_networking
-        total_savings += self._analyze_general
+        total_savings += self._analyze_virtual_machines()
+        total_savings += self._analyze_sql_databases()
+        total_savings += self._analyze_storage()
+        total_savings += self._analyze_aks()
+        total_savings += self._analyze_cosmos_db()
+        total_savings += self._analyze_app_services()
+        total_savings += self._analyze_networking()
+        total_savings += self._analyze_general()
 
-        current_spend = self._estimate_current_spend
+        current_spend = self._estimate_current_spend()
 
         return {
             "current_monthly_usd": round(current_spend, 2),
@@ -71,7 +71,7 @@ class AzureCostOptimizer:
             "optimized_monthly_usd": round(current_spend - total_savings, 2),
             "savings_percentage": round((total_savings / current_spend) * 100, 2) if current_spend > 0 else 0,
             "recommendations": self.recommendations,
-            "priority_actions": self._top_priority,
+            "priority_actions": self._top_priority(),
         }
 
     # ------------------------------------------------------------------
@@ -436,7 +436,7 @@ def _format_text(report: Dict[str, Any]) -> str:
 
     lines.append("=== All Recommendations ===")
     for rec in report.get("recommendations", []):
-        lines.append(f"  [{rec['priority'].upper}] {rec['service']} — {rec['type']}")
+        lines.append(f"  [{rec['priority'].upper()}] {rec['service']} — {rec['type']}")
         lines.append(f"    Issue: {rec['issue']}")
         lines.append(f"    Action: {rec['recommendation']}")
         savings = rec.get("potential_savings_usd", 0)
@@ -447,7 +447,7 @@ def _format_text(report: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Azure Cost Optimizer — analyze Azure resources and recommend cost savings.",
         epilog="Examples:\n"
@@ -467,7 +467,7 @@ def main:
         help="Output as JSON instead of human-readable text",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         with open(args.config, "r") as f:
@@ -480,7 +480,7 @@ def main:
         sys.exit(1)
 
     optimizer = AzureCostOptimizer(resources)
-    report = optimizer.analyze
+    report = optimizer.analyze()
 
     if args.json_output:
         print(json.dumps(report, indent=2))
@@ -489,4 +489,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -42,10 +42,10 @@ def _has_any(text: str, patterns) -> bool:
 
 
 def score_prompt(prompt: str) -> int:
-    p = prompt.strip
+    p = prompt.strip()
     verb_hits = min(sum(1 for v in _CLARITY_VERBS if re.search(rf"\b{v}\b", p, re.IGNORECASE)), 2)
     ends_q = p.endswith("?")
-    word_count = len(p.split)
+    word_count = len(p.split())
     is_vague_open = ends_q and word_count < 8
     clarity = max(0, min(3, verb_hits + (0 if is_vague_open else 1) + (1 if word_count >= 6 else 0)))
     constraint = 2 if _has_any(p, _LENGTH_TOKENS) or _has_any(p, _CONSTRAINT_EXTRA) else 0
@@ -164,7 +164,7 @@ def render_human(d: Decision) -> str:
     return "\n".join(out)
 
 
-def sample_run -> int:
+def sample_run(as_json: bool = False) -> int:
     cases = [
         ("Can you help me with my email?", False),
         ("Write a 200-word product description for a noise-cancelling headphone targeting remote workers, focused on the focus-time benefit, no marketing fluff.", False),
@@ -172,8 +172,11 @@ def sample_run -> int:
         ("Can you make this better?", True),
         ("stop with the tips, just rewrite it", False),
     ]
-    for prompt, prev in cases:
-        d = classify(prompt, previous_tip_given=prev)
+    decisions = [classify(prompt, previous_tip_given=prev) for prompt, prev in cases]
+    if as_json:
+        print(json.dumps([asdict(d) for d in decisions], indent=2))
+        return 0
+    for d in decisions:
         print(render_human(d))
         print("-" * 60)
     return 0
@@ -188,7 +191,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.sample:
-        return sample_run
+        return sample_run(args.json)
 
     if not args.prompt:
         parser.error("--prompt is required unless --sample is passed")
@@ -202,4 +205,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

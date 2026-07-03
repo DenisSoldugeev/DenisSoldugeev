@@ -248,7 +248,7 @@ PERMISSION_TEMPLATES = {
 def generate_space_structure(team_info: Dict[str, Any]) -> Dict[str, Any]:
     """Generate Confluence space structure from team information."""
     team_name = team_info.get("name", "Team")
-    team_type = team_info.get("type", "project").lower
+    team_type = team_info.get("type", "project").lower()
     team_size = team_info.get("size", 5)
     projects = team_info.get("projects", [])
 
@@ -292,7 +292,7 @@ def generate_space_structure(team_info: Dict[str, Any]) -> Dict[str, Any]:
     permissions = PERMISSION_TEMPLATES.get(team_type, PERMISSION_TEMPLATES["project"])
 
     # Generate label taxonomy
-    all_labels = set
+    all_labels = set()
     _collect_labels(page_tree, all_labels)
 
     # Build recommendations
@@ -326,12 +326,12 @@ def _deep_copy_section(section: Dict[str, Any]) -> Dict[str, Any]:
 
 def _slugify(text: str) -> str:
     """Convert text to a URL-safe slug."""
-    return text.lower.replace(" ", "-").replace("_", "-")
+    return text.lower().replace(" ", "-").replace("_", "-")
 
 
 def _generate_space_key(team_name: str) -> str:
     """Generate a space key from team name."""
-    words = team_name.upper.split
+    words = team_name.upper().split()
     if len(words) == 1:
         return words[0][:10]
     return "".join(w[0] for w in words[:5])
@@ -426,7 +426,7 @@ def format_text_output(result: Dict[str, Any]) -> str:
     lines.append("-" * 30)
     lines.append(f"Space Name: {result['space_name']}")
     lines.append(f"Space Key: {result['space_key']}")
-    lines.append(f"Team Type: {result['team_type'].title}")
+    lines.append(f"Team Type: {result['team_type'].title()}")
     lines.append(f"Team Size: {result['team_size']}")
     lines.append(f"Total Pages: {result['total_pages']}")
     lines.append("")
@@ -471,7 +471,7 @@ def format_json_output(result: Dict[str, Any]) -> Dict[str, Any]:
 # CLI Interface
 # ---------------------------------------------------------------------------
 
-def main -> int:
+def main() -> int:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Generate Confluence space hierarchy from team/project description"
@@ -487,7 +487,7 @@ def main -> int:
         help="Output format (default: text)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         with open(args.team_file, "r") as f:
@@ -514,4 +514,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

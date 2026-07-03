@@ -311,7 +311,7 @@ def _wrap(text: str, indent: int, width: int = 70) -> List[str]:
     return textwrap.wrap(text, width=width, initial_indent=" " * indent, subsequent_indent=" " * indent) or [" " * indent + text]
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="API vs self-hosted inference breakeven + sensitivity analysis.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -319,7 +319,7 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to workload JSON (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
@@ -347,4 +347,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -33,7 +33,7 @@ def check_contrast(fg, bg):
     ratio = (l1 + 0.05) / (l2 + 0.05)
     return round(ratio, 2)
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Apple HIG Compliance Checker")
     subparsers = parser.add_subparsers(dest="command", help="Compliance command")
     
@@ -51,7 +51,7 @@ def main:
     batch_parser = subparsers.add_parser("batch", help="Batch check from JSON")
     batch_parser.add_argument("file", help="Path to JSON file")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     results = {"score": 100, "violations": []}
     
@@ -91,7 +91,7 @@ def main:
             sys.exit(1)
             
     else:
-        parser.print_help
+        parser.print_help()
 
 if __name__ == "__main__":
-    main
+    main()

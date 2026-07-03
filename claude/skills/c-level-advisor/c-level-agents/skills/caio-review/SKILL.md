@@ -1,6 +1,6 @@
 ---
 name: "caio-review"
-description: "/ds:caio-review <plan> — Eval-demanding Chief AI Officer interrogation of any plan that involves AI: model selection, risk classification, cost economics, or AI hiring."
+description: "/ds:caio-review <plan> — Eval-demanding Chief AI Officer interrogation of any plan that involves AI: model selection, risk classification, cost economics, or AI hiring. Use when shipping an AI feature without an eval set, choosing between API, fine-tune, and self-hosted, or classifying a use case under the EU AI Act."
 ---
 
 # /ds:caio-review — CAIO Forcing Questions
@@ -68,13 +68,13 @@ The eval-demanding CAIO pressure-tests any plan that involves AI. Six questions 
 
 ```bash
 # 1. Model selection check
-python ../../../skills/chief-ai-officer-advisor/scripts/model_buildvsbuy_calculator.py use_case.json
+python ../../../chief-ai-officer-advisor/scripts/model_buildvsbuy_calculator.py use_case.json
 
 # 2. Regulatory classification
-python ../../../skills/chief-ai-officer-advisor/scripts/ai_risk_classifier.py use_case.json
+python ../../../chief-ai-officer-advisor/scripts/ai_risk_classifier.py use_case.json
 
 # 3. Cost projection
-python ../../../skills/chief-ai-officer-advisor/scripts/ai_cost_economics.py workload.json
+python ../../../chief-ai-officer-advisor/scripts/ai_cost_economics.py workload.json
 ```
 
 ## Output Format
@@ -125,7 +125,7 @@ python ../../../skills/chief-ai-officer-advisor/scripts/ai_cost_economics.py wor
 - `/ds:gc-review` — for AI vendor contracts, output liability, training-data licensing
 - `/ds:ciso-review` — for prompt injection / jailbreak / training-data poisoning threat model
 - `/ds:cfo-review` — for multi-year vendor or GPU commitment TCO
-- `/ds:chro-review` — for AI team hires (comp, ladder, leveling)
+- `ds-chro-advisor` agent — for AI team hires (comp, ladder, leveling)
 - `/ds:decide` — log the verdict
 - `/ds:freeze 60` — on multi-year AI commitments
 
@@ -133,7 +133,7 @@ python ../../../skills/chief-ai-officer-advisor/scripts/ai_cost_economics.py wor
 
 - Agent: [`ds-caio-advisor`](../../agents/ds-caio-advisor.md)
 - Skill: [`chief-ai-officer-advisor`](../../../chief-ai-officer-advisor/SKILL.md)
-- Adjacent: `../../../skills/chief-data-officer-advisor/` (training data rights, data strategy)
+- Adjacent: `../../../chief-data-officer-advisor/` (training data rights, data strategy)
 
 ---
 

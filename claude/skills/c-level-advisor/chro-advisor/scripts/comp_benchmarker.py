@@ -209,7 +209,7 @@ def pay_equity_audit(analyses: list[dict], employees: list[Employee]) -> dict:
                 groups[key] = []
             groups[key].append(a["compa_ratio"])
         return {k: {"n": len(v), "avg_cr": round(sum(v)/len(v), 3), "min_cr": round(min(v), 3), "max_cr": round(max(v), 3)}
-                for k, v in groups.items if v}
+                for k, v in groups.items() if v}
 
     gender_stats = group_stats(lambda e: e.gender)
     ethnicity_stats = group_stats(lambda e: e.ethnicity)
@@ -218,9 +218,9 @@ def pay_equity_audit(analyses: list[dict], employees: list[Employee]) -> dict:
     def compute_gap(stats: dict) -> dict[str, float]:
         if not stats:
             return {}
-        largest = max(stats.items, key=lambda x: x[1]["n"])
+        largest = max(stats.items(), key=lambda x: x[1]["n"])
         ref_cr = largest[1]["avg_cr"]
-        return {k: round((v["avg_cr"] - ref_cr) / ref_cr * 100, 1) for k, v in stats.items}
+        return {k: round((v["avg_cr"] - ref_cr) / ref_cr * 100, 1) for k, v in stats.items()}
 
     gender_gaps = compute_gap(gender_stats)
     ethnicity_gaps = compute_gap(ethnicity_stats)
@@ -306,7 +306,7 @@ def print_report(roster: CompRoster):
         print(f"\n[ COMPA-RATIO DISTRIBUTION ]")
         print(sep)
         total_n = cr_dist["n"]
-        for label, count in cr_dist["distribution"].items:
+        for label, count in cr_dist["distribution"].items():
             pct = count / total_n if total_n else 0
             bar_str = bar(pct, 25)
             print(f"  {label:<30} {bar_str}  {count:3d} ({pct*100:4.0f}%)")
@@ -316,14 +316,14 @@ def print_report(roster: CompRoster):
     print(sep)
 
     print(f"  By Gender:")
-    for group, stats in equity_audit["gender"].items:
+    for group, stats in equity_audit["gender"].items():
         gap = equity_audit["gender_gaps_pct"].get(group, 0.0)
         gap_str = f"  gap: {gap:+.1f}%" if gap != 0 else "  (reference group)"
         flag = " ⚠" if abs(gap) > 5 else ""
         print(f"    {group:<15} n={stats['n']}  avg_CR={stats['avg_cr']:.3f}{gap_str}{flag}")
 
     print(f"\n  By Ethnicity:")
-    for group, stats in equity_audit["ethnicity"].items:
+    for group, stats in equity_audit["ethnicity"].items():
         gap = equity_audit["ethnicity_gaps_pct"].get(group, 0.0)
         gap_str = f"  gap: {gap:+.1f}%" if gap != 0 else "  (reference group)"
         flag = " ⚠" if abs(gap) > 5 else ""
@@ -414,7 +414,7 @@ def print_report(roster: CompRoster):
 
 def export_csv(roster: CompRoster) -> str:
     analyses = [analyze_employee(e, roster) for e in roster.employees]
-    output = io.StringIO
+    output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow(["ID", "Name", "Role", "Level", "Function", "Zone",
                      "Base", "Bonus Target", "Equity Annual", "Benefits", "Total Comp",
@@ -429,17 +429,17 @@ def export_csv(roster: CompRoster) -> str:
                          a["compa_ratio"], a["band_position"], a["vs_market_p50"],
                          a["performance"], a["tenure_years"], a["last_raise_months"],
                          e.gender, e.ethnicity, critical_flags, high_flags])
-    return output.getvalue
+    return output.getvalue()
 
 
 # ---------------------------------------------------------------------------
 # Sample data
 # ---------------------------------------------------------------------------
 
-def build_sample_roster -> CompRoster:
+def build_sample_roster() -> CompRoster:
     roster = CompRoster(
         company="AcmeTech (Series A)",
-        as_of_date=date.today.isoformat,
+        as_of_date=date.today().isoformat(),
         funding_stage="Series A",
         comp_philosophy_target="P50",
         preferred_stock_price=8.50,
@@ -575,7 +575,7 @@ def load_roster_from_json(path: str) -> CompRoster:
     return roster
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Compensation Benchmarker — salary analysis and pay equity audit",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -590,12 +590,12 @@ Examples:
     parser.add_argument("--config", help="Path to JSON roster file")
     parser.add_argument("--export-csv", action="store_true", help="Export analysis as CSV")
     parser.add_argument("--export-json", action="store_true", help="Export sample roster as JSON template")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.config:
         roster = load_roster_from_json(args.config)
     else:
-        roster = build_sample_roster
+        roster = build_sample_roster()
 
     if args.export_json:
         data = asdict(roster)
@@ -610,4 +610,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

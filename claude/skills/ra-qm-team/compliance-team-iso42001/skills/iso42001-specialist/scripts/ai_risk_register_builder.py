@@ -201,7 +201,7 @@ def render_text(r: Dict[str, Any], source: str) -> str:
 
     for risk in r["risks"]:
         lines.append(f"  [{risk['id']}] {risk['event']}")
-        lines.append(f"      Source: {risk['source']}  |  L={risk['likelihood']} × I={risk['impact']} = {risk['severity_score']}  →  {risk['severity'].upper}")
+        lines.append(f"      Source: {risk['source']}  |  L={risk['likelihood']} × I={risk['impact']} = {risk['severity_score']}  →  {risk['severity'].upper()}")
         lines.append(f"      Consequence: {risk['consequence']}")
         if risk["controls_applied"]:
             ctrl_str = ", ".join(c["id"] for c in risk["controls_applied"])
@@ -220,7 +220,7 @@ def render_text(r: Dict[str, Any], source: str) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="ISO/IEC 42001 Annex A risk register builder with ISO 23894 treatment options.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -228,7 +228,7 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to risks JSON (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
@@ -254,4 +254,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -205,7 +205,7 @@ DEMO_DATA = {
 # Main
 # ---------------------------------------------------------------------------
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="ROAS calculator — paid ads performance metrics and recommendations."
     )
@@ -218,7 +218,7 @@ def main:
     parser.add_argument("--clicks",      type=int,   default=0, help="Total clicks")
     parser.add_argument("--file",        help="JSON file with campaign data")
     parser.add_argument("--json",        action="store_true", help="Output as JSON")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.file:
         with open(args.file, "r") as f:
@@ -266,7 +266,7 @@ def main:
     if inp["impressions"]:print(f"  Impressions:{inp['impressions']:>10,}")
     if inp["clicks"]:     print(f"  Clicks:     {inp['clicks']:>10,}")
 
-    print
+    print()
     print("  METRICS")
     print("  " + "─" * 58)
 
@@ -292,7 +292,7 @@ def main:
             except Exception:
                 pass
 
-    print
+    print()
     print("  RECOMMENDATIONS")
     print("  " + "─" * 58)
     for rec in recs:
@@ -301,4 +301,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

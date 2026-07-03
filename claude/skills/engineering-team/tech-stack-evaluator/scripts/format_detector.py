@@ -20,7 +20,7 @@ class FormatDetector:
         Args:
             input_data: Raw input string from user
         """
-        self.raw_input = input_data.strip
+        self.raw_input = input_data.strip()
         self.detected_format = None
         self.parsed_data = None
 
@@ -32,17 +32,17 @@ class FormatDetector:
             Format type: 'json', 'yaml', 'url', 'text'
         """
         # Try JSON first
-        if self._is_json:
+        if self._is_json():
             self.detected_format = 'json'
             return 'json'
 
         # Try YAML
-        if self._is_yaml:
+        if self._is_yaml():
             self.detected_format = 'yaml'
             return 'yaml'
 
         # Check for URLs
-        if self._contains_urls:
+        if self._contains_urls():
             self.detected_format = 'url'
             return 'url'
 
@@ -73,7 +73,7 @@ class FormatDetector:
         ]
 
         # Must not be JSON
-        if self._is_json:
+        if self._is_json():
             return False
 
         # Check for YAML patterns
@@ -105,16 +105,16 @@ class FormatDetector:
             Parsed data dictionary
         """
         if self.detected_format is None:
-            self.detect_format
+            self.detect_format()
 
         if self.detected_format == 'json':
-            self.parsed_data = self._parse_json
+            self.parsed_data = self._parse_json()
         elif self.detected_format == 'yaml':
-            self.parsed_data = self._parse_yaml
+            self.parsed_data = self._parse_yaml()
         elif self.detected_format == 'url':
-            self.parsed_data = self._parse_urls
+            self.parsed_data = self._parse_urls()
         else:  # text
-            self.parsed_data = self._parse_text
+            self.parsed_data = self._parse_text()
 
         return self.parsed_data
 
@@ -140,15 +140,15 @@ class FormatDetector:
         lines = self.raw_input.split('\n')
 
         for line in lines:
-            stripped = line.strip
+            stripped = line.strip()
             if not stripped or stripped.startswith('#'):
                 continue
 
             # Key-value pair
             if ':' in stripped:
                 key, value = stripped.split(':', 1)
-                key = key.strip
-                value = value.strip
+                key = key.strip()
+                value = value.strip()
 
                 # Empty value might indicate nested structure
                 if not value:
@@ -163,7 +163,7 @@ class FormatDetector:
 
             # List item
             elif stripped.startswith('-'):
-                item = stripped[1:].strip
+                item = stripped[1:].strip()
                 if current_section:
                     if current_list is None:
                         current_list = []
@@ -182,12 +182,12 @@ class FormatDetector:
         Returns:
             Parsed value (str, int, float, bool)
         """
-        value = value.strip
+        value = value.strip()
 
         # Boolean
-        if value.lower in ['true', 'yes']:
+        if value.lower() in ['true', 'yes']:
             return True
-        if value.lower in ['false', 'no']:
+        if value.lower() in ['false', 'no']:
             return False
 
         # Number
@@ -218,7 +218,7 @@ class FormatDetector:
         other_urls = [u for u in urls if u not in github_urls and u not in npm_urls]
 
         # Also extract any text context
-        text_without_urls = re.sub(url_pattern, '', self.raw_input).strip
+        text_without_urls = re.sub(url_pattern, '', self.raw_input).strip()
 
         result = {
             'format': 'url',
@@ -234,7 +234,7 @@ class FormatDetector:
 
     def _parse_text(self) -> Dict[str, Any]:
         """Parse conversational text input."""
-        text = self.raw_input.lower
+        text = self.raw_input.lower()
 
         # Extract technologies being compared
         technologies = self._extract_technologies(text)
@@ -290,7 +290,7 @@ class FormatDetector:
                     'node.js': 'Node.js',
                     'k8s': 'Kubernetes',
                     'gcp': 'Google Cloud Platform'
-                }.get(tech, tech.title)
+                }.get(tech, tech.title())
 
                 if normalized not in found:
                     found.append(normalized)
@@ -318,7 +318,7 @@ class FormatDetector:
             'enterprise': 'Enterprise application'
         }
 
-        for keyword, description in use_case_keywords.items:
+        for keyword, description in use_case_keywords.items():
             if keyword in text:
                 return description
 
@@ -346,7 +346,7 @@ class FormatDetector:
         }
 
         priorities = []
-        for keyword, priority in priority_keywords.items:
+        for keyword, priority in priority_keywords.items():
             if keyword in text:
                 priorities.append(priority)
 
@@ -374,7 +374,7 @@ class FormatDetector:
             'evaluate': 'evaluation'
         }
 
-        for keyword, analysis_type in type_keywords.items:
+        for keyword, analysis_type in type_keywords.items():
             if keyword in text:
                 return analysis_type
 
@@ -399,7 +399,7 @@ class FormatDetector:
             'format'
         ]
 
-        normalized = data.copy
+        normalized = data.copy()
 
         for key in standard_keys:
             if key not in normalized:

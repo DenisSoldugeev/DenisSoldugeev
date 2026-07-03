@@ -5,6 +5,8 @@ Migration Planner - Generate comprehensive migration plans with risk assessment
 This tool analyzes migration specifications and generates detailed, phased migration plans
 including pre-migration checklists, validation gates, rollback triggers, timeline estimates,
 and risk matrices.
+
+Author: Migration Architect Skill
 Version: 1.0.0
 License: MIT
 """
@@ -101,8 +103,8 @@ class MigrationPlanner:
     """Main migration planner class"""
     
     def __init__(self):
-        self.migration_patterns = self._load_migration_patterns
-        self.risk_templates = self._load_risk_templates
+        self.migration_patterns = self._load_migration_patterns()
+        self.risk_templates = self._load_risk_templates()
         
     def _load_migration_patterns(self) -> Dict[str, Any]:
         """Load predefined migration patterns"""
@@ -353,7 +355,7 @@ class MigrationPlanner:
         template = phase_templates.get(phase_name, {
             "description": f"Execute {phase_name} phase",
             "tasks": [f"Complete {phase_name} activities"],
-            "validation_criteria": [f"{phase_name.title} phase completed successfully"],
+            "validation_criteria": [f"{phase_name.title()} phase completed successfully"],
             "risk_level": "medium"
         })
         
@@ -464,7 +466,7 @@ class MigrationPlanner:
     
     def generate_plan(self, spec: Dict[str, Any]) -> MigrationPlan:
         """Generate complete migration plan from specification"""
-        migration_id = hashlib.md5(json.dumps(spec, sort_keys=True).encode).hexdigest[:12]
+        migration_id = hashlib.md5(json.dumps(spec, sort_keys=True).encode()).hexdigest()[:12]
         complexity = self._calculate_complexity(spec)
         phases = self._generate_phases(spec)
         risks = self._assess_risks(spec)
@@ -501,7 +503,7 @@ class MigrationPlanner:
             success_criteria=success_criteria,
             rollback_plan=rollback_plan,
             stakeholders=stakeholders,
-            created_at=datetime.datetime.now.isoformat
+            created_at=datetime.datetime.now().isoformat()
         )
     
     def generate_human_readable_plan(self, plan: MigrationPlan) -> str:
@@ -512,8 +514,8 @@ class MigrationPlanner:
         output.append("=" * 80)
         output.append(f"Source System: {plan.source_system}")
         output.append(f"Target System: {plan.target_system}")
-        output.append(f"Migration Type: {plan.migration_type.upper}")
-        output.append(f"Complexity Level: {plan.complexity.upper}")
+        output.append(f"Migration Type: {plan.migration_type.upper()}")
+        output.append(f"Complexity Level: {plan.complexity.upper()}")
         output.append(f"Estimated Duration: {plan.estimated_duration_hours} hours ({plan.estimated_duration_hours/24:.1f} days)")
         output.append(f"Created: {plan.created_at}")
         output.append("")
@@ -522,9 +524,9 @@ class MigrationPlanner:
         output.append("MIGRATION PHASES")
         output.append("-" * 40)
         for i, phase in enumerate(plan.phases, 1):
-            output.append(f"{i}. {phase.name.upper} ({phase.duration_hours}h)")
+            output.append(f"{i}. {phase.name.upper()} ({phase.duration_hours}h)")
             output.append(f"   Description: {phase.description}")
-            output.append(f"   Risk Level: {phase.risk_level.upper}")
+            output.append(f"   Risk Level: {phase.risk_level.upper()}")
             if phase.dependencies:
                 output.append(f"   Dependencies: {', '.join(phase.dependencies)}")
             output.append("   Tasks:")
@@ -546,7 +548,7 @@ class MigrationPlanner:
         
         for severity in ["critical", "high", "medium", "low"]:
             if severity in risk_by_severity:
-                output.append(f"{severity.upper} SEVERITY RISKS:")
+                output.append(f"{severity.upper()} SEVERITY RISKS:")
                 for risk in risk_by_severity[severity]:
                     output.append(f"  • {risk.description}")
                     output.append(f"    Category: {risk.category}")
@@ -565,7 +567,7 @@ class MigrationPlanner:
         
         output.append("Rollback Phases:")
         for rb_phase in plan.rollback_plan["rollback_phases"]:
-            output.append(f"  {rb_phase['phase'].upper}:")
+            output.append(f"  {rb_phase['phase'].upper()}:")
             for action in rb_phase["rollback_actions"]:
                 output.append(f"    - {action}")
             output.append(f"    Estimated Time: {rb_phase['estimated_time_minutes']} minutes")
@@ -588,7 +590,7 @@ class MigrationPlanner:
         return "\n".join(output)
 
 
-def main:
+def main():
     """Main function with command line interface"""
     parser = argparse.ArgumentParser(description="Generate comprehensive migration plans")
     parser.add_argument("--input", "-i", required=True, help="Input migration specification file (JSON)")
@@ -597,7 +599,7 @@ def main:
                        help="Output format")
     parser.add_argument("--validate", action="store_true", help="Validate migration specification only")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Load migration specification
@@ -616,7 +618,7 @@ def main:
             return 0
         
         # Generate migration plan
-        planner = MigrationPlanner
+        planner = MigrationPlanner()
         plan = planner.generate_plan(spec)
         
         # Output results
@@ -656,4 +658,4 @@ def main:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

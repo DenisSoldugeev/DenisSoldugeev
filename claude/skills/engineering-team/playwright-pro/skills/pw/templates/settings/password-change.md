@@ -14,7 +14,7 @@ Tests current password verification, new password validation, and success flow.
 ```typescript
 import { test, expect } from '@playwright/test';
 
-test.describe('Password Change',  => {
+test.describe('Password Change', () => {
   test.use({ storageState: '{{authStorageStatePath}}' });
 
   test.beforeEach(async ({ page }) => {
@@ -26,7 +26,7 @@ test.describe('Password Change',  => {
     await page.getByRole('textbox', { name: /current password/i }).fill('{{currentPassword}}');
     await page.getByRole('textbox', { name: /^new password$/i }).fill('{{newPassword}}');
     await page.getByRole('textbox', { name: /confirm.*password/i }).fill('{{newPassword}}');
-    await page.getByRole('button', { name: /change.*password|update password/i }).click;
+    await page.getByRole('button', { name: /change.*password|update password/i }).click();
     await expect(page.getByRole('alert')).toContainText(/password.*changed|updated successfully/i);
   });
 
@@ -36,14 +36,14 @@ test.describe('Password Change',  => {
     await page.getByRole('textbox', { name: /current password/i }).fill('{{currentPassword}}');
     await page.getByRole('textbox', { name: /^new password$/i }).fill('{{newPassword}}');
     await page.getByRole('textbox', { name: /confirm.*password/i }).fill('{{newPassword}}');
-    await page.getByRole('button', { name: /change.*password/i }).click;
+    await page.getByRole('button', { name: /change.*password/i }).click();
     await expect(page.getByRole('alert')).toContainText(/changed/i);
     // Log out and back in
-    await page.getByRole('button', { name: /user menu/i }).click;
-    await page.getByRole('menuitem', { name: /sign out/i }).click;
+    await page.getByRole('button', { name: /user menu/i }).click();
+    await page.getByRole('menuitem', { name: /sign out/i }).click();
     await page.getByRole('textbox', { name: /email/i }).fill('{{username}}');
     await page.getByRole('textbox', { name: /password/i }).fill('{{newPassword}}');
-    await page.getByRole('button', { name: /sign in/i }).click;
+    await page.getByRole('button', { name: /sign in/i }).click();
     await expect(page).toHaveURL('{{baseUrl}}/dashboard');
   });
 
@@ -52,7 +52,7 @@ test.describe('Password Change',  => {
     await page.getByRole('textbox', { name: /current password/i }).fill('wrong-password');
     await page.getByRole('textbox', { name: /^new password$/i }).fill('{{newPassword}}');
     await page.getByRole('textbox', { name: /confirm.*password/i }).fill('{{newPassword}}');
-    await page.getByRole('button', { name: /change.*password/i }).click;
+    await page.getByRole('button', { name: /change.*password/i }).click();
     await expect(page.getByRole('alert')).toContainText(/current password.*incorrect|wrong password/i);
   });
 
@@ -61,16 +61,16 @@ test.describe('Password Change',  => {
     await page.getByRole('textbox', { name: /current password/i }).fill('{{currentPassword}}');
     await page.getByRole('textbox', { name: /^new password$/i }).fill('{{newPassword}}');
     await page.getByRole('textbox', { name: /confirm.*password/i }).fill('mismatch');
-    await page.getByRole('button', { name: /change.*password/i }).click;
-    await expect(page.getByText(/passwords.*do not match/i)).toBeVisible;
+    await page.getByRole('button', { name: /change.*password/i }).click();
+    await expect(page.getByText(/passwords.*do not match/i)).toBeVisible();
   });
 
   // Error case: new password too weak
   test('shows strength error for weak new password', async ({ page }) => {
     await page.getByRole('textbox', { name: /current password/i }).fill('{{currentPassword}}');
     await page.getByRole('textbox', { name: /^new password$/i }).fill('123');
-    await page.getByRole('textbox', { name: /^new password$/i }).blur;
-    await expect(page.getByText(/too weak|at least \d+ characters/i)).toBeVisible;
+    await page.getByRole('textbox', { name: /^new password$/i }).blur();
+    await expect(page.getByText(/too weak|at least \d+ characters/i)).toBeVisible();
   });
 
   // Error case: new password same as current
@@ -78,8 +78,8 @@ test.describe('Password Change',  => {
     await page.getByRole('textbox', { name: /current password/i }).fill('{{currentPassword}}');
     await page.getByRole('textbox', { name: /^new password$/i }).fill('{{currentPassword}}');
     await page.getByRole('textbox', { name: /confirm.*password/i }).fill('{{currentPassword}}');
-    await page.getByRole('button', { name: /change.*password/i }).click;
-    await expect(page.getByText(/same as.*current|choose.*different/i)).toBeVisible;
+    await page.getByRole('button', { name: /change.*password/i }).click();
+    await expect(page.getByText(/same as.*current|choose.*different/i)).toBeVisible();
   });
 
   // Edge case: password strength meter updates on input
@@ -99,7 +99,7 @@ test.describe('Password Change',  => {
 ```javascript
 const { test, expect } = require('@playwright/test');
 
-test.describe('Password Change',  => {
+test.describe('Password Change', () => {
   test.use({ storageState: '{{authStorageStatePath}}' });
 
   test('changes password with valid inputs', async ({ page }) => {
@@ -107,7 +107,7 @@ test.describe('Password Change',  => {
     await page.getByRole('textbox', { name: /current password/i }).fill('{{currentPassword}}');
     await page.getByRole('textbox', { name: /^new password$/i }).fill('{{newPassword}}');
     await page.getByRole('textbox', { name: /confirm.*password/i }).fill('{{newPassword}}');
-    await page.getByRole('button', { name: /change.*password/i }).click;
+    await page.getByRole('button', { name: /change.*password/i }).click();
     await expect(page.getByRole('alert')).toContainText(/changed|updated/i);
   });
 
@@ -116,7 +116,7 @@ test.describe('Password Change',  => {
     await page.getByRole('textbox', { name: /current password/i }).fill('wrong');
     await page.getByRole('textbox', { name: /^new password$/i }).fill('{{newPassword}}');
     await page.getByRole('textbox', { name: /confirm.*password/i }).fill('{{newPassword}}');
-    await page.getByRole('button', { name: /change.*password/i }).click;
+    await page.getByRole('button', { name: /change.*password/i }).click();
     await expect(page.getByRole('alert')).toContainText(/incorrect|wrong/i);
   });
 
@@ -125,8 +125,8 @@ test.describe('Password Change',  => {
     await page.getByRole('textbox', { name: /current password/i }).fill('{{currentPassword}}');
     await page.getByRole('textbox', { name: /^new password$/i }).fill('{{newPassword}}');
     await page.getByRole('textbox', { name: /confirm.*password/i }).fill('nope');
-    await page.getByRole('button', { name: /change.*password/i }).click;
-    await expect(page.getByText(/do not match/i)).toBeVisible;
+    await page.getByRole('button', { name: /change.*password/i }).click();
+    await expect(page.getByText(/do not match/i)).toBeVisible();
   });
 });
 ```

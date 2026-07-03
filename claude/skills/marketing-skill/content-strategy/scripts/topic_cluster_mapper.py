@@ -29,7 +29,7 @@ STOP_WORDS = {
 
 def simple_stem(word: str) -> str:
     """Very simple suffix-stripping stemmer."""
-    w = word.lower
+    w = word.lower()
     if len(w) <= 3:
         return w
     # Order matters — try longer suffixes first
@@ -48,7 +48,7 @@ def simple_stem(word: str) -> str:
 
 
 def extract_stems(topic: str) -> set:
-    words = re.findall(r"\b[a-zA-Z]+\b", topic.lower)
+    words = re.findall(r"\b[a-zA-Z]+\b", topic.lower())
     return {simple_stem(w) for w in words if w not in STOP_WORDS and len(w) > 2}
 
 
@@ -125,7 +125,7 @@ def build_output(topics: list, clusters: list) -> dict:
             "pillar_topic": c["pillar"],
             "size": len(c["topics"]),
             "supporting_topics": supporting,
-            "suggested_url_slug": re.sub(r"[^a-z0-9]+", "-", c["pillar"].lower).strip("-"),
+            "suggested_url_slug": re.sub(r"[^a-z0-9]+", "-", c["pillar"].lower()).strip("-"),
         })
 
     # Sort by cluster size desc
@@ -191,7 +191,7 @@ DEMO_TOPICS = [
 # Main
 # ---------------------------------------------------------------------------
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Topic cluster mapper — groups keywords into content clusters."
     )
@@ -199,11 +199,11 @@ def main:
     parser.add_argument("--threshold", type=float, default=0.15,
                         help="Similarity threshold for clustering (default: 0.15)")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.file:
         with open(args.file, "r", encoding="utf-8") as f:
-            topics = [line.strip for line in f if line.strip]
+            topics = [line.strip() for line in f if line.strip()]
     else:
         topics = DEMO_TOPICS
         if not args.json:
@@ -236,8 +236,8 @@ def main:
     print("=" * 62)
     for rec in output["recommendations"]:
         print(f"  • {rec}")
-    print
+    print()
 
 
 if __name__ == "__main__":
-    main
+    main()

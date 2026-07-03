@@ -80,21 +80,21 @@ def check_file(workspace: Path, filename: str) -> Dict[str, Any]:
     p = workspace / "Email" / filename
     return {
         "filename": filename,
-        "exists": p.exists and p.is_file,
+        "exists": p.exists() and p.is_file(),
         "path": str(p),
-        "size": p.stat.st_size if p.exists and p.is_file else 0,
+        "size": p.stat().st_size if p.exists() and p.is_file() else 0,
     }
 
 
 def check_h1(workspace: Path, filename: str) -> Optional[str]:
     p = workspace / "Email" / filename
-    if not p.exists or not p.is_file:
+    if not p.exists() or not p.is_file():
         return None
     try:
-        for line in p.read_text(encoding="utf-8").splitlines:
+        for line in p.read_text(encoding="utf-8").splitlines():
             m = re.match(r"^#\s+(.+?)\s*$", line)
             if m:
-                return m.group(1).strip
+                return m.group(1).strip()
         return None
     except OSError:
         return None
@@ -102,7 +102,7 @@ def check_h1(workspace: Path, filename: str) -> Optional[str]:
 
 def has_section(workspace: Path, filename: str, section_header: str) -> bool:
     p = workspace / "Email" / filename
-    if not p.exists or not p.is_file:
+    if not p.exists() or not p.is_file():
         return False
     try:
         text = p.read_text(encoding="utf-8")
@@ -122,10 +122,10 @@ def validate(
         findings.append({"rule": rule, "level": level, "message": message})
 
     email_dir = workspace / "Email"
-    if not email_dir.exists:
+    if not email_dir.exists():
         add("workspace-email-dir", "FAIL", f"{email_dir} does not exist. Run inbox-setup first.")
         return finalize(findings)
-    if not email_dir.is_dir:
+    if not email_dir.is_dir():
         add("workspace-email-dir", "FAIL", f"{email_dir} is not a directory.")
         return finalize(findings)
     add("workspace-email-dir", "PASS", f"{email_dir} exists.")
@@ -142,7 +142,7 @@ def validate(
 
     # H1 check on core files that exist
     for fn in CORE_REQUIRED:
-        if not (workspace / "Email" / fn).exists:
+        if not (workspace / "Email" / fn).exists():
             continue
         h1 = check_h1(workspace, fn)
         if h1:
@@ -151,7 +151,7 @@ def validate(
             add(f"h1:{fn}", "FAIL", f"Email/{fn} has no H1.")
 
     # email-taxonomy.md must have both required subsections
-    if (workspace / "Email" / "email-taxonomy.md").exists:
+    if (workspace / "Email" / "email-taxonomy.md").exists():
         if has_section(workspace, "email-taxonomy.md", "Categories"):
             add("taxonomy-categories", "PASS", "email-taxonomy.md has '## Categories' section.")
         else:
@@ -162,7 +162,7 @@ def validate(
             add("taxonomy-report-prefs", "WARN", "email-taxonomy.md missing '## Report Preferences' section (added at end of S7).")
 
     # email-patterns.md must have Voice Calibration Status
-    if (workspace / "Email" / "email-patterns.md").exists:
+    if (workspace / "Email" / "email-patterns.md").exists():
         if has_section(workspace, "email-patterns.md", "Voice Calibration Status"):
             add("patterns-calibration", "PASS", "email-patterns.md has '## Voice Calibration Status' section.")
         else:
@@ -183,9 +183,9 @@ def validate(
 
     # triage-log/ must be a directory
     triage_log = workspace / "Email" / LOG_DIR
-    if not triage_log.exists:
+    if not triage_log.exists():
         add("triage-log-dir", "FAIL", f"Email/{LOG_DIR}/ missing. Must be created as empty directory at end of S6.")
-    elif not triage_log.is_dir:
+    elif not triage_log.is_dir():
         add("triage-log-dir", "FAIL", f"Email/{LOG_DIR} exists but is not a directory.")
     else:
         add("triage-log-dir", "PASS", f"Email/{LOG_DIR}/ exists as directory.")
@@ -219,15 +219,15 @@ def render_human(result: Dict[str, Any]) -> str:
     return "\n".join(out)
 
 
-def run_sample -> Dict[str, Any]:
+def run_sample() -> Dict[str, Any]:
     import tempfile
-    with tempfile.TemporaryDirectory as td:
+    with tempfile.TemporaryDirectory() as td:
         ws = Path(td)
         email_dir = ws / "Email"
         email_dir.mkdir(parents=True)
-        for name, content in SAMPLE_KB.items:
+        for name, content in SAMPLE_KB.items():
             (email_dir / name).write_text(content, encoding="utf-8")
-        (email_dir / LOG_DIR).mkdir
+        (email_dir / LOG_DIR).mkdir()
         return validate(ws, expect_evaluation=True, expect_rate_card=False)
 
 
@@ -241,15 +241,15 @@ def main(argv: List[str]) -> int:
     args = parser.parse_args(argv)
 
     if args.sample:
-        result = run_sample
+        result = run_sample()
     elif args.workspace:
         ws = Path(args.workspace)
-        if not ws.exists:
+        if not ws.exists():
             print(f"error: {args.workspace} not found", file=sys.stderr)
             return 2
         result = validate(ws, args.expect_evaluation, args.expect_rate_card)
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     if args.output == "json":

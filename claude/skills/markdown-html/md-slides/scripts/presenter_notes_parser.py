@@ -53,7 +53,7 @@ def extract_notes_from_slide(slide: dict[str, Any]) -> dict[str, Any]:
     body = slide.get("body_markdown", "")
     found: list[str] = []
     def _capture(m: re.Match) -> str:
-        found.append(m.group(1).strip)
+        found.append(m.group(1).strip())
         return ""  # remove the block from body
     cleaned = NOTES_BLOCK_RE.sub(_capture, body)
     # Tidy up: collapse runs of >2 blank lines, trim trailing whitespace
@@ -89,14 +89,14 @@ def main(argv: list[str]) -> int:
     args = p.parse_args(argv)
 
     if args.sample:
-        sys.path.insert(0, str(Path(__file__).resolve.parent))
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
         import slide_splitter
         slides_payload = slide_splitter.split_slides(slide_splitter.SAMPLE_MARKDOWN)
     elif args.slides:
-        raw = sys.stdin.read if args.slides == "-" else Path(args.slides).read_text(encoding="utf-8")
+        raw = sys.stdin.read() if args.slides == "-" else Path(args.slides).read_text(encoding="utf-8")
         slides_payload = json.loads(raw)
     else:
-        p.print_help
+        p.print_help()
         return 0
 
     result = attach_notes(slides_payload)

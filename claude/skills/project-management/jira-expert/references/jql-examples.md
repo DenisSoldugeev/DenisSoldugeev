@@ -4,7 +4,7 @@
 
 **Current sprint issues:**
 ```jql
-sprint IN openSprints ORDER BY rank
+sprint IN openSprints() ORDER BY rank
 ```
 
 **Issues in specific sprint:**
@@ -26,7 +26,7 @@ AND status != Done ORDER BY priority DESC
 
 **Spillover from last sprint:**
 ```jql
-sprint IN closedSprints AND sprint NOT IN (latestReleasedVersion) 
+sprint IN closedSprints() AND sprint NOT IN (latestReleasedVersion()) 
 AND status != Done ORDER BY created DESC
 ```
 
@@ -39,7 +39,7 @@ sprint = "Sprint 23" AND status = Done
 
 **My open issues:**
 ```jql
-assignee = currentUser AND status != Done 
+assignee = currentUser() AND status != Done 
 ORDER BY priority DESC, created ASC
 ```
 
@@ -51,7 +51,7 @@ ORDER BY priority DESC
 
 **Issues I'm watching:**
 ```jql
-watcher = currentUser AND status != Done
+watcher = currentUser() AND status != Done
 ```
 
 **Team workload:**
@@ -62,19 +62,19 @@ ORDER BY assignee, priority DESC
 
 **Issues I reported that are still open:**
 ```jql
-reporter = currentUser AND status != Done ORDER BY created DESC
+reporter = currentUser() AND status != Done ORDER BY created DESC
 ```
 
 **Issues commented on by me:**
 ```jql
-comment ~ currentUser AND status != Done
+comment ~ currentUser() AND status != Done
 ```
 
 ## Date Range Queries
 
 **Created today:**
 ```jql
-created >= startOfDay ORDER BY created DESC
+created >= startOfDay() ORDER BY created DESC
 ```
 
 **Updated in last 7 days:**
@@ -84,12 +84,12 @@ updated >= -7d ORDER BY updated DESC
 
 **Created this week:**
 ```jql
-created >= startOfWeek AND created <= endOfWeek
+created >= startOfWeek() AND created <= endOfWeek()
 ```
 
 **Created this month:**
 ```jql
-created >= startOfMonth AND created <= endOfMonth
+created >= startOfMonth() AND created <= endOfMonth()
 ```
 
 **Not updated in 30 days:**
@@ -99,17 +99,17 @@ status != Done AND updated <= -30d ORDER BY updated ASC
 
 **Resolved yesterday:**
 ```jql
-resolved >= startOfDay(-1d) AND resolved < startOfDay
+resolved >= startOfDay(-1d) AND resolved < startOfDay()
 ```
 
 **Due this week:**
 ```jql
-duedate >= startOfWeek AND duedate <= endOfWeek AND status != Done
+duedate >= startOfWeek() AND duedate <= endOfWeek() AND status != Done
 ```
 
 **Overdue:**
 ```jql
-duedate < now AND status != Done ORDER BY duedate ASC
+duedate < now() AND status != Done ORDER BY duedate ASC
 ```
 
 ## Status & Workflow Queries
@@ -144,7 +144,7 @@ ORDER BY resolved DESC
 
 **Status changed today:**
 ```jql
-status CHANGED AFTER startOfDay ORDER BY updated DESC
+status CHANGED AFTER startOfDay() ORDER BY updated DESC
 ```
 
 **Long-running in progress:**
@@ -185,7 +185,7 @@ labels = tech-debt AND status != Done ORDER BY priority DESC
 
 **My team's sprint work:**
 ```jql
-sprint IN openSprints 
+sprint IN openSprints() 
 AND assignee IN membersOf("engineering-team") 
 AND status != Done
 ORDER BY assignee, priority DESC
@@ -194,7 +194,7 @@ ORDER BY assignee, priority DESC
 **Bugs created this month, not in sprint:**
 ```jql
 issuetype = Bug 
-AND created >= startOfMonth 
+AND created >= startOfMonth() 
 AND sprint IS EMPTY 
 AND status != Done
 ORDER BY priority DESC, created DESC
@@ -241,7 +241,7 @@ fixVersion = "v2.0" ORDER BY status, priority DESC
 
 **Released versions:**
 ```jql
-fixVersion IN releasedVersions ORDER BY fixVersion DESC
+fixVersion IN releasedVersions() ORDER BY fixVersion DESC
 ```
 
 ## Label & Text Search Queries
@@ -275,17 +275,17 @@ description IS EMPTY AND issuetype = Story
 
 **Good - Specific project first:**
 ```jql
-project = ABC AND status = "In Progress" AND assignee = currentUser
+project = ABC AND status = "In Progress" AND assignee = currentUser()
 ```
 
 **Bad - User filter first:**
 ```jql
-assignee = currentUser AND status = "In Progress" AND project = ABC
+assignee = currentUser() AND status = "In Progress" AND project = ABC
 ```
 
 **Good - Use functions:**
 ```jql
-sprint IN openSprints AND status != Done
+sprint IN openSprints() AND status != Done
 ```
 
 **Bad - Hardcoded sprint:**
@@ -295,7 +295,7 @@ sprint = "Sprint 23" AND status != Done
 
 **Good - Specific date:**
 ```jql
-created >= 2024-01-01 AND created <= 2024-01-31
+created >= 2026-01-01 AND created <= 2026-01-31
 ```
 
 **Bad - Relative with high cost:**
@@ -313,26 +313,26 @@ sprint = "Sprint 23" AND status = Done
 
 **Bug rate:**
 ```jql
-project = ABC AND issuetype = Bug AND created >= startOfMonth
+project = ABC AND issuetype = Bug AND created >= startOfMonth()
 ```
 
 **Average cycle time:**
 ```jql
-project = ABC AND resolved >= startOfMonth 
-AND resolved <= endOfMonth
+project = ABC AND resolved >= startOfMonth() 
+AND resolved <= endOfMonth()
 ```
 *Calculate time from In Progress to Done*
 
 **Stories delivered this quarter:**
 ```jql
 project = ABC AND issuetype = Story 
-AND resolved >= startOfYear AND resolved <= endOfQuarter
+AND resolved >= startOfYear() AND resolved <= endOfQuarter()
 ```
 
 **Team capacity:**
 ```jql
 assignee IN membersOf("engineering-team") 
-AND sprint IN openSprints
+AND sprint IN openSprints()
 ```
 *Sum original estimates*
 
@@ -340,18 +340,18 @@ AND sprint IN openSprints
 
 **Issues I need to review:**
 ```jql
-status = "Pending Review" AND assignee = currentUser
+status = "Pending Review" AND assignee = currentUser()
 ```
 
 **Issues assigned to me, high priority:**
 ```jql
-assignee = currentUser AND priority IN (Highest, High) 
+assignee = currentUser() AND priority IN (Highest, High) 
 AND status != Done
 ```
 
 **Issues created by me, not resolved:**
 ```jql
-reporter = currentUser AND status != Done 
+reporter = currentUser() AND status != Done 
 ORDER BY created DESC
 ```
 
@@ -360,12 +360,12 @@ ORDER BY created DESC
 **Issues changed from status:**
 ```jql
 status WAS "In Progress" AND status = "Done" 
-AND status CHANGED AFTER startOfWeek
+AND status CHANGED AFTER startOfWeek()
 ```
 
 **Assignee changed:**
 ```jql
-assignee CHANGED BY currentUser AFTER -7d
+assignee CHANGED BY currentUser() AFTER -7d
 ```
 
 **Issues re-opened:**
@@ -387,13 +387,13 @@ parent = ABC-123 ORDER BY rank
 
 **Daily Standup Filter:**
 ```jql
-assignee = currentUser AND sprint IN openSprints 
+assignee = currentUser() AND sprint IN openSprints() 
 AND status != Done ORDER BY priority DESC
 ```
 
 **Team Sprint Board Filter:**
 ```jql
-project = ABC AND sprint IN openSprints ORDER BY rank
+project = ABC AND sprint IN openSprints() ORDER BY rank
 ```
 
 **Bugs Dashboard Filter:**

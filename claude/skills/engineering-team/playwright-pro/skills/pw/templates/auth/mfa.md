@@ -16,12 +16,12 @@ Tests 2FA TOTP code entry, backup codes, and MFA enrollment flow.
 import { test, expect } from '@playwright/test';
 import { authenticator } from 'otplib'; // npm i otplib
 
-test.describe('MFA',  => {
+test.describe('MFA', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('{{baseUrl}}/login');
     await page.getByRole('textbox', { name: /email/i }).fill('{{mfaUsername}}');
     await page.getByRole('textbox', { name: /password/i }).fill('{{mfaPassword}}');
-    await page.getByRole('button', { name: /sign in/i }).click;
+    await page.getByRole('button', { name: /sign in/i }).click();
     await expect(page).toHaveURL(/\/mfa|\/two-factor/);
   });
 
@@ -29,15 +29,15 @@ test.describe('MFA',  => {
   test('accepts valid TOTP code', async ({ page }) => {
     const token = authenticator.generate('{{totpSecret}}');
     await page.getByRole('textbox', { name: /code|token/i }).fill(token);
-    await page.getByRole('button', { name: /verify/i }).click;
+    await page.getByRole('button', { name: /verify/i }).click();
     await expect(page).toHaveURL('{{baseUrl}}/dashboard');
   });
 
   // Happy path: backup code
   test('accepts backup code', async ({ page }) => {
-    await page.getByRole('link', { name: /use backup code/i }).click;
+    await page.getByRole('link', { name: /use backup code/i }).click();
     await page.getByRole('textbox', { name: /backup code/i }).fill('{{backupCode}}');
-    await page.getByRole('button', { name: /verify/i }).click;
+    await page.getByRole('button', { name: /verify/i }).click();
     await expect(page).toHaveURL('{{baseUrl}}/dashboard');
     // Backup code consumed — warning shown
     await expect(page.getByRole('alert')).toContainText(/backup code used/i);
@@ -46,7 +46,7 @@ test.describe('MFA',  => {
   // Error case: wrong TOTP code
   test('rejects invalid TOTP code', async ({ page }) => {
     await page.getByRole('textbox', { name: /code|token/i }).fill('000000');
-    await page.getByRole('button', { name: /verify/i }).click;
+    await page.getByRole('button', { name: /verify/i }).click();
     await expect(page.getByRole('alert')).toContainText(/invalid.*code/i);
     await expect(page).toHaveURL(/\/mfa|\/two-factor/);
   });
@@ -57,21 +57,21 @@ test.describe('MFA',  => {
     // Advance time simulation via clock if supported, else use a fixed stale code
     await page.getByRole('textbox', { name: /code|token/i }).fill(expiredToken);
     await page.clock.fastForward(60_000); // advance 60s past TOTP window
-    await page.getByRole('button', { name: /verify/i }).click;
+    await page.getByRole('button', { name: /verify/i }).click();
     await expect(page.getByRole('alert')).toContainText(/expired|invalid.*code/i);
   });
 
   // Edge case: MFA enrollment for new user
   test('enrolls MFA via QR code scan', async ({ page: enrollPage }) => {
     await enrollPage.goto('{{baseUrl}}/settings/security');
-    await enrollPage.getByRole('button', { name: /enable.*two-factor/i }).click;
-    await expect(enrollPage.getByRole('img', { name: /qr code/i })).toBeVisible;
-    await expect(enrollPage.getByText(/scan.*authenticator/i)).toBeVisible;
+    await enrollPage.getByRole('button', { name: /enable.*two-factor/i }).click();
+    await expect(enrollPage.getByRole('img', { name: /qr code/i })).toBeVisible();
+    await expect(enrollPage.getByText(/scan.*authenticator/i)).toBeVisible();
     // User scans QR → enters token
     const token = authenticator.generate('{{totpSecret}}');
     await enrollPage.getByRole('textbox', { name: /verification code/i }).fill(token);
-    await enrollPage.getByRole('button', { name: /activate/i }).click;
-    await expect(enrollPage.getByRole('heading', { name: /backup codes/i })).toBeVisible;
+    await enrollPage.getByRole('button', { name: /activate/i }).click();
+    await expect(enrollPage.getByRole('heading', { name: /backup codes/i })).toBeVisible();
   });
 });
 ```
@@ -84,32 +84,32 @@ test.describe('MFA',  => {
 const { test, expect } = require('@playwright/test');
 const { authenticator } = require('otplib');
 
-test.describe('MFA',  => {
+test.describe('MFA', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('{{baseUrl}}/login');
     await page.getByRole('textbox', { name: /email/i }).fill('{{mfaUsername}}');
     await page.getByRole('textbox', { name: /password/i }).fill('{{mfaPassword}}');
-    await page.getByRole('button', { name: /sign in/i }).click;
+    await page.getByRole('button', { name: /sign in/i }).click();
     await expect(page).toHaveURL(/\/mfa|\/two-factor/);
   });
 
   test('accepts valid TOTP code', async ({ page }) => {
     const token = authenticator.generate('{{totpSecret}}');
     await page.getByRole('textbox', { name: /code|token/i }).fill(token);
-    await page.getByRole('button', { name: /verify/i }).click;
+    await page.getByRole('button', { name: /verify/i }).click();
     await expect(page).toHaveURL('{{baseUrl}}/dashboard');
   });
 
   test('accepts backup code', async ({ page }) => {
-    await page.getByRole('link', { name: /use backup code/i }).click;
+    await page.getByRole('link', { name: /use backup code/i }).click();
     await page.getByRole('textbox', { name: /backup code/i }).fill('{{backupCode}}');
-    await page.getByRole('button', { name: /verify/i }).click;
+    await page.getByRole('button', { name: /verify/i }).click();
     await expect(page).toHaveURL('{{baseUrl}}/dashboard');
   });
 
   test('rejects invalid TOTP code', async ({ page }) => {
     await page.getByRole('textbox', { name: /code|token/i }).fill('000000');
-    await page.getByRole('button', { name: /verify/i }).click;
+    await page.getByRole('button', { name: /verify/i }).click();
     await expect(page.getByRole('alert')).toContainText(/invalid.*code/i);
   });
 });

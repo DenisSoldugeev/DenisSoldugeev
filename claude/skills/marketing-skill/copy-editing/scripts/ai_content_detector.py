@@ -88,14 +88,14 @@ def extract_sentences(text):
     body = re.sub(r"`[^`]+`", "", body)
     body = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", body)
     sentences = SENTENCE_RE.findall(body)
-    return [s.strip for s in sentences if len(s.strip.split) >= 3]
+    return [s.strip() for s in sentences if len(s.strip().split()) >= 3]
 
 
 def burstiness_score(sentences):
     """Compute burstiness (sentence length variance). High = human, low = AI."""
     if len(sentences) < 5:
         return {"score": 50, "mean": 0, "std": 0, "cv": 0, "note": "too few sentences"}
-    lengths = [len(s.split) for s in sentences]
+    lengths = [len(s.split()) for s in sentences]
     mean = sum(lengths) / len(lengths)
     variance = sum((l - mean) ** 2 for l in lengths) / len(lengths)
     std = math.sqrt(variance)
@@ -123,7 +123,7 @@ def burstiness_score(sentences):
 def vocabulary_diversity(text):
     """Type-Token Ratio. Low TTR = repetitive vocabulary (AI-like)."""
     body = re.sub(r"^---.*?---\s*", "", text, count=1, flags=re.DOTALL)
-    words = [w.lower for w in WORD_RE.findall(body) if len(w) > 2]
+    words = [w.lower() for w in WORD_RE.findall(body) if len(w) > 2]
     if len(words) < 50:
         return {"score": 50, "ttr": 0, "unique": 0, "total": len(words), "note": "too few words"}
     # Use a sliding window TTR for length-independence
@@ -165,14 +165,14 @@ def vocabulary_diversity(text):
 def phrase_detection(text):
     """Count known AI phrases."""
     found = []
-    text_lower = text.lower
+    text_lower = text.lower()
     for i, pattern in enumerate(AI_PHRASE_RES):
         matches = pattern.findall(text_lower)
         if matches:
             found.append({"phrase": AI_PHRASES[i], "count": len(matches)})
 
     total_matches = sum(f["count"] for f in found)
-    word_count = len(text.split)
+    word_count = len(text.split())
     density = (total_matches / (word_count / 1000)) if word_count > 0 else 0
 
     # 0-2 per 1K words = normal; 3-5 = suspect; 6+ = likely AI
@@ -236,7 +236,7 @@ def _recommendations(burst, vocab, phrases):
     return recs
 
 
-def main:
+def main():
     p = argparse.ArgumentParser(
         description="Detect AI-generated content via burstiness, vocabulary diversity, and phrase analysis.",
         epilog="Score 0-20 = likely human, 21-50 = mixed, 51-100 = likely AI. Run with --demo.",
@@ -244,18 +244,18 @@ def main:
     p.add_argument("file", nargs="?", help="Markdown/text file to analyze")
     p.add_argument("--json", action="store_true", help="JSON output")
     p.add_argument("--demo", action="store_true", help="Run with AI-heavy demo text")
-    args = p.parse_args
+    args = p.parse_args()
 
     if args.demo:
         text = DEMO_CONTENT
     elif args.file:
         path = Path(args.file)
-        if not path.exists:
+        if not path.exists():
             print(f"[error] {path} not found", file=sys.stderr)
             sys.exit(1)
         text = path.read_text(encoding="utf-8", errors="replace")
     else:
-        p.print_help
+        p.print_help()
         sys.exit(0)
 
     result = analyze(text)
@@ -265,7 +265,7 @@ def main:
         return
 
     print(f"AI Content Detection — Composite: {result['composite_score']}/100 ({result['verdict']})")
-    print
+    print()
     b = result["burstiness"]
     print(f"  Burstiness:  {b['score']}/100 — CV={b['coefficient_of_variation']} ({b['note']})")
     v = result["vocabulary"]
@@ -275,11 +275,11 @@ def main:
     if ph["matches"]:
         for m in ph["matches"][:5]:
             print(f"    → \"{m['phrase']}\" (×{m['count']})")
-    print
+    print()
     print("Recommendations:")
     for r in result["recommendations"]:
         print(f"  → {r}")
 
 
 if __name__ == "__main__":
-    main
+    main()

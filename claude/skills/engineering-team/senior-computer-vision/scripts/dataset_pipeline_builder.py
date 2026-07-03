@@ -50,9 +50,9 @@ COCO_CATEGORIES_TEMPLATE = {
     "info": {
         "description": "Custom Dataset",
         "version": "1.0",
-        "year": datetime.now.year,
+        "year": datetime.now().year,
         "contributor": "Dataset Pipeline Builder",
-        "date_created": datetime.now.isoformat
+        "date_created": datetime.now().isoformat()
     },
     "licenses": [{"id": 1, "name": "Unknown", "url": ""}],
     "images": [],
@@ -176,11 +176,11 @@ class DatasetAnalyzer:
         logger.info(f"Analyzing dataset at: {self.dataset_path}")
 
         # Detect format
-        detected_format = self._detect_format
+        detected_format = self._detect_format()
         self.stats['format'] = detected_format
 
         # Count images
-        images = self._find_images
+        images = self._find_images()
         self.stats['total_images'] = len(images)
 
         # Analyze images
@@ -188,16 +188,16 @@ class DatasetAnalyzer:
 
         # Analyze annotations based on format
         if detected_format == 'coco':
-            self.stats['annotations'] = self._analyze_coco
+            self.stats['annotations'] = self._analyze_coco()
         elif detected_format == 'yolo':
-            self.stats['annotations'] = self._analyze_yolo
+            self.stats['annotations'] = self._analyze_yolo()
         elif detected_format == 'voc':
-            self.stats['annotations'] = self._analyze_voc
+            self.stats['annotations'] = self._analyze_voc()
         else:
             self.stats['annotations'] = {'error': 'Unknown format'}
 
         # Dataset quality checks
-        self.stats['quality'] = self._quality_checks
+        self.stats['quality'] = self._quality_checks()
 
         return self.stats
 
@@ -222,9 +222,9 @@ class DatasetAnalyzer:
                     continue
                 try:
                     with open(txt_file) as f:
-                        line = f.readline.strip
+                        line = f.readline().strip()
                     if line:
-                        parts = line.split
+                        parts = line.split()
                         if len(parts) == 5 and all(self._is_float(p) for p in parts):
                             return 'yolo'
                 except:
@@ -235,7 +235,7 @@ class DatasetAnalyzer:
         for xml_file in xml_files[:5]:
             try:
                 tree = ET.parse(xml_file)
-                root = tree.getroot
+                root = tree.getroot()
                 if root.tag == 'annotation' and root.find('object') is not None:
                     return 'voc'
             except:
@@ -256,7 +256,7 @@ class DatasetAnalyzer:
         images = []
         for ext in SUPPORTED_IMAGE_EXTENSIONS:
             images.extend(self.dataset_path.rglob(f'*{ext}'))
-            images.extend(self.dataset_path.rglob(f'*{ext.upper}'))
+            images.extend(self.dataset_path.rglob(f'*{ext.upper()}'))
         return images
 
     def _analyze_images(self, images: List[Path]) -> Dict:
@@ -269,8 +269,8 @@ class DatasetAnalyzer:
         }
 
         for img in images:
-            stats['extensions'][img.suffix.lower] += 1
-            stats['sizes'].append(img.stat.st_size)
+            stats['extensions'][img.suffix.lower()] += 1
+            stats['sizes'].append(img.stat().st_size)
             # Track which subdirectory
             rel_path = img.relative_to(self.dataset_path)
             if len(rel_path.parts) > 1:
@@ -338,7 +338,7 @@ class DatasetAnalyzer:
 
                 stats['images_with_annotations'] = len(img_annotations)
                 if img_annotations:
-                    counts = list(img_annotations.values)
+                    counts = list(img_annotations.values())
                     stats['annotations_per_image'] = {
                         'min': min(counts),
                         'max': max(counts),
@@ -371,10 +371,10 @@ class DatasetAnalyzer:
         # Find classes.txt if exists
         class_names = {}
         classes_file = self.dataset_path / 'classes.txt'
-        if classes_file.exists:
+        if classes_file.exists():
             with open(classes_file) as f:
                 for i, line in enumerate(f):
-                    class_names[i] = line.strip
+                    class_names[i] = line.strip()
 
         bbox_widths = []
         bbox_heights = []
@@ -385,13 +385,13 @@ class DatasetAnalyzer:
 
             try:
                 with open(txt_file) as f:
-                    lines = f.readlines
+                    lines = f.readlines()
 
                 if lines:
                     stats['images_with_annotations'] += 1
 
                 for line in lines:
-                    parts = line.strip.split
+                    parts = line.strip().split()
                     if len(parts) >= 5:
                         stats['total_annotations'] += 1
                         class_id = int(parts[0])
@@ -431,7 +431,7 @@ class DatasetAnalyzer:
         for xml_file in self.dataset_path.rglob('*.xml'):
             try:
                 tree = ET.parse(xml_file)
-                root = tree.getroot
+                root = tree.getroot()
 
                 if root.tag != 'annotation':
                     continue
@@ -470,7 +470,7 @@ class DatasetAnalyzer:
         if 'annotations' in self.stats and 'classes' in self.stats['annotations']:
             classes = self.stats['annotations']['classes']
             if classes:
-                counts = list(classes.values)
+                counts = list(classes.values())
                 max_count = max(counts)
                 min_count = min(counts)
 
@@ -526,7 +526,7 @@ class FormatConverter:
         # Auto-detect source format if not specified
         if source_format is None:
             analyzer = DatasetAnalyzer(str(self.input_path))
-            analyzer.analyze
+            analyzer.analyze()
             source_format = analyzer.stats.get('format', 'unknown')
 
         logger.info(f"Converting from {source_format} to {target_format}")
@@ -544,7 +544,7 @@ class FormatConverter:
         if conversion_key not in converters:
             return {'error': f"Unsupported conversion: {source_format} -> {target_format}"}
 
-        return convertersconversion_key
+        return converters[conversion_key]()
 
     def _coco_to_yolo(self) -> Dict:
         """Convert COCO format to YOLO format."""
@@ -585,7 +585,7 @@ class FormatConverter:
                     annotations_by_image[ann['image_id']].append(ann)
 
                 # Write YOLO format labels
-                for img_id, annotations in annotations_by_image.items:
+                for img_id, annotations in annotations_by_image.items():
                     if img_id not in img_map:
                         continue
 
@@ -624,7 +624,7 @@ class FormatConverter:
 
                 # Write data.yaml for YOLO training
                 yaml_content = YOLO_DATA_YAML_TEMPLATE.format(
-                    dataset_path=str(self.output_path.absolute),
+                    dataset_path=str(self.output_path.absolute()),
                     train_path='images/train',
                     val_path='images/val',
                     test_path='images/test',
@@ -643,7 +643,7 @@ class FormatConverter:
         """Convert YOLO format to COCO format."""
         results = {'converted_images': 0, 'converted_annotations': 0}
 
-        coco_data = COCO_CATEGORIES_TEMPLATE.copy
+        coco_data = COCO_CATEGORIES_TEMPLATE.copy()
         coco_data['images'] = []
         coco_data['annotations'] = []
         coco_data['categories'] = []
@@ -651,9 +651,9 @@ class FormatConverter:
         # Read classes
         classes_file = self.input_path / 'classes.txt'
         class_names = []
-        if classes_file.exists:
+        if classes_file.exists():
             with open(classes_file) as f:
-                class_names = [line.strip for line in f.readlines]
+                class_names = [line.strip() for line in f.readlines()]
 
         for i, name in enumerate(class_names):
             coco_data['categories'].append({
@@ -683,14 +683,14 @@ class FormatConverter:
 
             # Find corresponding label
             label_path = img_path.with_suffix('.txt')
-            if not label_path.exists:
+            if not label_path.exists():
                 # Try labels subdirectory
                 label_path = img_path.parent.parent / 'labels' / (img_path.stem + '.txt')
 
-            if label_path.exists:
+            if label_path.exists():
                 with open(label_path) as f:
                     for line in f:
-                        parts = line.strip.split
+                        parts = line.strip().split()
                         if len(parts) >= 5:
                             class_id = int(parts[0])
                             x_center = float(parts[1]) * width
@@ -724,7 +724,7 @@ class FormatConverter:
         """Convert Pascal VOC format to COCO format."""
         results = {'converted_images': 0, 'converted_annotations': 0}
 
-        coco_data = COCO_CATEGORIES_TEMPLATE.copy
+        coco_data = COCO_CATEGORIES_TEMPLATE.copy()
         coco_data['images'] = []
         coco_data['annotations'] = []
         coco_data['categories'] = []
@@ -735,7 +735,7 @@ class FormatConverter:
         for img_id, xml_file in enumerate(self.input_path.rglob('*.xml'), 1):
             try:
                 tree = ET.parse(xml_file)
-                root = tree.getroot
+                root = tree.getroot()
 
                 if root.tag != 'annotation':
                     continue
@@ -803,10 +803,10 @@ class FormatConverter:
         temp_coco = self.output_path / '_temp_coco'
 
         converter1 = FormatConverter(str(self.input_path), str(temp_coco))
-        converter1._voc_to_coco
+        converter1._voc_to_coco()
 
         converter2 = FormatConverter(str(temp_coco), str(self.output_path))
-        results = converter2._coco_to_yolo
+        results = converter2._coco_to_yolo()
 
         # Clean up temp
         shutil.rmtree(temp_coco, ignore_errors=True)
@@ -838,7 +838,7 @@ class FormatConverter:
                 for ann in coco_data['annotations']:
                     ann_by_image[ann['image_id']].append(ann)
 
-                for img_id, annotations in ann_by_image.items:
+                for img_id, annotations in ann_by_image.items():
                     if img_id not in img_map:
                         continue
 
@@ -904,7 +904,7 @@ class DatasetSplitter:
 
         # Detect format and find images
         analyzer = DatasetAnalyzer(str(self.dataset_path))
-        analyzer.analyze
+        analyzer.analyze()
         detected_format = analyzer.stats.get('format', 'unknown')
 
         images = []
@@ -950,14 +950,14 @@ class DatasetSplitter:
         for img in images:
             if format == 'yolo':
                 label_path = img.with_suffix('.txt')
-                if not label_path.exists:
+                if not label_path.exists():
                     label_path = img.parent.parent / 'labels' / (img.stem + '.txt')
 
-                if label_path.exists:
+                if label_path.exists():
                     with open(label_path) as f:
-                        line = f.readline
+                        line = f.readline()
                     if line:
-                        class_id = int(line.split[0])
+                        class_id = int(line.split()[0])
                         image_classes[img] = class_id
                 else:
                     image_classes[img] = -1  # No annotation
@@ -966,13 +966,13 @@ class DatasetSplitter:
 
         # Group by class
         class_images = defaultdict(list)
-        for img, class_id in image_classes.items:
+        for img, class_id in image_classes.items():
             class_images[class_id].append(img)
 
         # Split each class proportionally
         splits = {'train': [], 'val': [], 'test': []}
 
-        for class_id, class_imgs in class_images.items:
+        for class_id, class_imgs in class_images.items():
             random.shuffle(class_imgs)
             n = len(class_imgs)
             train_end = int(n * train)
@@ -1007,9 +1007,9 @@ class DatasetSplitter:
             for img_path in splits[split_name]:
                 # Create symlink for image
                 dst_img = images_dir / img_path.name
-                if not dst_img.exists:
+                if not dst_img.exists():
                     try:
-                        dst_img.symlink_to(img_path.absolute)
+                        dst_img.symlink_to(img_path.absolute())
                     except OSError:
                         # Fall back to copy if symlink fails
                         shutil.copy2(img_path, dst_img)
@@ -1017,14 +1017,14 @@ class DatasetSplitter:
                 # Handle label file
                 if format == 'yolo':
                     label_path = img_path.with_suffix('.txt')
-                    if not label_path.exists:
+                    if not label_path.exists():
                         label_path = img_path.parent.parent / 'labels' / (img_path.stem + '.txt')
 
-                    if label_path.exists:
+                    if label_path.exists():
                         dst_label = labels_dir / (img_path.stem + '.txt')
-                        if not dst_label.exists:
+                        if not dst_label.exists():
                             try:
-                                dst_label.symlink_to(label_path.absolute)
+                                dst_label.symlink_to(label_path.absolute())
                             except OSError:
                                 shutil.copy2(label_path, dst_label)
 
@@ -1033,12 +1033,12 @@ class DatasetSplitter:
             # Read classes
             classes_file = self.dataset_path / 'classes.txt'
             class_names = []
-            if classes_file.exists:
+            if classes_file.exists():
                 with open(classes_file) as f:
-                    class_names = [line.strip for line in f.readlines]
+                    class_names = [line.strip() for line in f.readlines()]
 
             yaml_content = YOLO_DATA_YAML_TEMPLATE.format(
-                dataset_path=str(self.output_path.absolute),
+                dataset_path=str(self.output_path.absolute()),
                 train_path='images/train',
                 val_path='images/val',
                 test_path='images/test',
@@ -1085,7 +1085,7 @@ class AugmentationConfigGenerator:
         """Convert to Albumentations format."""
         transforms = []
 
-        for aug_name, params in config.items:
+        for aug_name, params in config.items():
             if aug_name == 'horizontal_flip':
                 transforms.append({
                     'type': 'HorizontalFlip',
@@ -1176,11 +1176,11 @@ from albumentations.pytorch import ToTensorV2
 transform = A.Compose([
 """
         for t in transforms:
-            params = ', '.join(f"{k}={v}" for k, v in t.items if k != 'type')
+            params = ', '.join(f"{k}={v}" for k, v in t.items() if k != 'type')
             code += f"    A.{t['type']}({params}),\n"
 
         code += "    A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),\n"
-        code += "    ToTensorV2,\n"
+        code += "    ToTensorV2(),\n"
         code += "]"
 
         if task == 'detection':
@@ -1195,7 +1195,7 @@ transform = A.Compose([
         """Convert to torchvision transforms format."""
         transforms = []
 
-        for aug_name, params in config.items:
+        for aug_name, params in config.items():
             if aug_name == 'horizontal_flip':
                 transforms.append({
                     'type': 'RandomHorizontalFlip',
@@ -1276,7 +1276,7 @@ class DatasetValidator:
         # Auto-detect format if not specified
         if self.format is None:
             analyzer = DatasetAnalyzer(str(self.dataset_path))
-            analyzer.analyze
+            analyzer.analyze()
             self.format = analyzer.stats.get('format', 'unknown')
 
         results['format'] = self.format
@@ -1363,10 +1363,10 @@ class DatasetValidator:
 
             try:
                 with open(txt_file) as f:
-                    lines = f.readlines
+                    lines = f.readlines()
 
                 for line_num, line in enumerate(lines, 1):
-                    parts = line.strip.split
+                    parts = line.strip().split()
                     if not parts:
                         continue
 
@@ -1413,7 +1413,7 @@ class DatasetValidator:
         for xml_file in xml_files:
             try:
                 tree = ET.parse(xml_file)
-                root = tree.getroot
+                root = tree.getroot()
 
                 if root.tag != 'annotation':
                     continue
@@ -1464,12 +1464,12 @@ class DatasetValidator:
         results['stats']['total_images'] = len(images)
 
         # Check for empty images
-        empty_images = [img for img in images if img.stat.st_size == 0]
+        empty_images = [img for img in images if img.stat().st_size == 0]
         if empty_images:
             results['errors'].append(f"Found {len(empty_images)} empty image files")
 
         # Check for very small images
-        small_images = [img for img in images if img.stat.st_size < 1000]
+        small_images = [img for img in images if img.stat().st_size < 1000]
         if small_images:
             results['warnings'].append(f"Found {len(small_images)} very small images (<1KB)")
 
@@ -1485,7 +1485,7 @@ class DatasetValidator:
         for img in images:
             try:
                 with open(img, 'rb') as f:
-                    file_hash = hashlib.md5(f.read).hexdigest
+                    file_hash = hashlib.md5(f.read()).hexdigest()
 
                 if file_hash in hashes:
                     duplicates.append((img, hashes[file_hash]))
@@ -1503,7 +1503,7 @@ class DatasetValidator:
 # Main CLI
 # ============================================================================
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Dataset Pipeline Builder for Computer Vision",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -1575,16 +1575,16 @@ Examples:
                                 help='Dataset format (auto-detected if not specified)')
     validate_parser.add_argument('--json', action='store_true', help='Output as JSON')
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.command is None:
-        parser.print_help
+        parser.print_help()
         sys.exit(1)
 
     try:
         if args.command == 'analyze':
             analyzer = DatasetAnalyzer(args.input)
-            results = analyzer.analyze
+            results = analyzer.analyze()
 
             if args.json:
                 print(json.dumps(results, indent=2, default=str))
@@ -1609,7 +1609,7 @@ Examples:
                     print(f"  Images with annotations: {ann.get('images_with_annotations', 0)}")
                     if 'classes' in ann:
                         print(f"  Classes: {len(ann['classes'])}")
-                        for cls, count in sorted(ann['classes'].items, key=lambda x: -x[1])[:10]:
+                        for cls, count in sorted(ann['classes'].items(), key=lambda x: -x[1])[:10]:
                             print(f"    - {cls}: {count}")
 
                 if 'quality' in results:
@@ -1658,7 +1658,7 @@ Examples:
 
         elif args.command == 'validate':
             validator = DatasetValidator(args.input, args.format)
-            results = validator.validate
+            results = validator.validate()
 
             if args.json:
                 print(json.dumps(results, indent=2))
@@ -1685,7 +1685,7 @@ Examples:
 
                 if results.get('stats'):
                     print(f"\nStatistics:")
-                    for key, value in results['stats'].items:
+                    for key, value in results['stats'].items():
                         print(f"  {key}: {value}")
 
         sys.exit(0)
@@ -1696,4 +1696,4 @@ Examples:
 
 
 if __name__ == '__main__':
-    main
+    main()

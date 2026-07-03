@@ -52,20 +52,20 @@ _COMMIT_SUGGESTION = "Replace with commit SHA + URL (e.g., `[abc1234](https://gi
 
 
 def _match_header_in_line(line: str, line_no: int, header: str, kind: str, suggestion: str) -> Optional[Dict[str, Any]]:
-    if header in line.lower and ("#" in line or ":" in line):
-        return _make_finding(line_no, kind, header, line.strip, suggestion)
+    if header in line.lower() and ("#" in line or ":" in line):
+        return _make_finding(line_no, kind, header, line.strip(), suggestion)
     return None
 
 
 def _match_field_in_line(line: str, line_no: int, field: str, kind: str, suggestion: str) -> Optional[Dict[str, Any]]:
-    if field in line.lower:
-        return _make_finding(line_no, kind, field, line.strip, suggestion)
+    if field in line.lower():
+        return _make_finding(line_no, kind, field, line.strip(), suggestion)
     return None
 
 
 def find_prd_content(text: str) -> List[Dict[str, Any]]:
     findings: List[Dict[str, Any]] = []
-    for line_no, line in enumerate(text.splitlines, start=1):
+    for line_no, line in enumerate(text.splitlines(), start=1):
         for header in PRD_HEADERS:
             f = _match_header_in_line(line, line_no, header, "prd_content", _PRD_SUGGESTION)
             if f:
@@ -76,7 +76,7 @@ def find_prd_content(text: str) -> List[Dict[str, Any]]:
 
 def find_adr_content(text: str) -> List[Dict[str, Any]]:
     findings: List[Dict[str, Any]] = []
-    for line_no, line in enumerate(text.splitlines, start=1):
+    for line_no, line in enumerate(text.splitlines(), start=1):
         for field in ADR_FIELDS:
             f = _match_field_in_line(line, line_no, field, "adr_content", _ADR_SUGGESTION)
             if f:
@@ -87,7 +87,7 @@ def find_adr_content(text: str) -> List[Dict[str, Any]]:
 
 def find_issue_content(text: str) -> List[Dict[str, Any]]:
     findings: List[Dict[str, Any]] = []
-    for line_no, line in enumerate(text.splitlines, start=1):
+    for line_no, line in enumerate(text.splitlines(), start=1):
         for field in ISSUE_FIELDS:
             f = _match_field_in_line(line, line_no, field, "issue_content", _ISSUE_SUGGESTION)
             if f:
@@ -98,11 +98,11 @@ def find_issue_content(text: str) -> List[Dict[str, Any]]:
 
 def find_commit_style(text: str) -> List[Dict[str, Any]]:
     findings: List[Dict[str, Any]] = []
-    for line_no, line in enumerate(text.splitlines, start=1):
-        stripped = line.strip.lower
+    for line_no, line in enumerate(text.splitlines(), start=1):
+        stripped = line.strip().lower()
         for prefix in COMMIT_PREFIXES:
             if stripped.startswith(prefix):
-                findings.append(_make_finding(line_no, "commit_style", prefix, line.strip, _COMMIT_SUGGESTION))
+                findings.append(_make_finding(line_no, "commit_style", prefix, line.strip(), _COMMIT_SUGGESTION))
                 break
     return findings
 
@@ -128,8 +128,8 @@ def find_long_code_blocks(text: str, threshold: int = 20) -> List[Dict[str, Any]
     in_block = False
     block_start = 0
     block_lines = 0
-    for line_no, line in enumerate(text.splitlines, start=1):
-        is_fence = line.strip.startswith("```")
+    for line_no, line in enumerate(text.splitlines(), start=1):
+        is_fence = line.strip().startswith("```")
         if is_fence and in_block:
             if block_lines > threshold:
                 findings.append(_record_long_block(block_start, line_no, block_lines))
@@ -212,7 +212,7 @@ This change adds OAuth2 to the auth middleware.
 """
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Detect duplicated artifact content in a handoff draft.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -220,12 +220,12 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to handoff markdown (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
             with open(args.path, "r", encoding="utf-8") as f:
-                text = f.read
+                text = f.read()
         except (IOError, OSError) as e:
             print(f"error: {e}", file=sys.stderr)
             return 1
@@ -241,4 +241,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

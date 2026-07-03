@@ -38,11 +38,11 @@ def generate_merge(
     update_sets = ",\n        ".join(
         f"t.{col} = s.{col}" for col in merge_cols
     )
-    update_sets += ",\n        t.updated_at = CURRENT_TIMESTAMP"
+    update_sets += ",\n        t.updated_at = CURRENT_TIMESTAMP()"
 
     insert_cols = ", ".join([key] + merge_cols + ["updated_at"])
     insert_vals = ", ".join(
-        [f"s.{key}"] + [f"s.{col}" for col in merge_cols] + ["CURRENT_TIMESTAMP"]
+        [f"s.{key}"] + [f"s.{col}" for col in merge_cols] + ["CURRENT_TIMESTAMP()"]
     )
 
     return textwrap.dedent(f"""\
@@ -82,8 +82,8 @@ def generate_dynamic_table(
 
         -- Verify refresh mode (incremental is preferred):
         -- SELECT name, refresh_mode, refresh_mode_reason
-        -- FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLES)
-        -- WHERE name = '{name.upper}';""")
+        -- FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLES())
+        -- WHERE name = '{name.upper()}';""")
 
 
 def generate_grants(
@@ -107,7 +107,7 @@ def generate_grants(
         lines.append(f"GRANT USAGE ON SCHEMA {fq_schema} TO ROLE {role};")
 
         for priv in privileges:
-            p = priv.strip.upper
+            p = priv.strip().upper()
             if p == "USAGE":
                 continue  # Already granted above
             elif p == "SELECT":
@@ -147,7 +147,7 @@ def generate_grants(
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Generate common Snowflake SQL patterns",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -200,26 +200,26 @@ def main:
         help="Comma-separated privileges (SELECT, INSERT, UPDATE, DELETE, CREATE TABLE, etc.)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if not args.command:
-        parser.print_help
+        parser.print_help()
         sys.exit(1)
 
     if args.command == "merge":
-        cols = [c.strip for c in args.columns.split(",")]
+        cols = [c.strip() for c in args.columns.split(",")]
         sql = generate_merge(args.target, args.source, args.key, cols, args.schema)
     elif args.command == "dynamic-table":
-        cols = [c.strip for c in args.columns.split(",")] if args.columns else None
+        cols = [c.strip() for c in args.columns.split(",")] if args.columns else None
         sql = generate_dynamic_table(
             args.name, args.warehouse, args.lag, args.source, cols, args.schema
         )
     elif args.command == "grant":
-        schemas = [s.strip for s in args.schemas.split(",")]
-        privs = [p.strip for p in args.privileges.split(",")]
+        schemas = [s.strip() for s in args.schemas.split(",")]
+        privs = [p.strip() for p in args.privileges.split(",")]
         sql = generate_grants(args.role, args.database, schemas, privs)
     else:
-        parser.print_help
+        parser.print_help()
         sys.exit(1)
 
     if args.json:
@@ -230,4 +230,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

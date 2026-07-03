@@ -1,24 +1,13 @@
 ---
-Name: code-to-prd
-Tier: STANDARD
-Category: product
-Dependencies: none
-Version: 2.1.2
 name: code-to-prd
-description: |
-  Reverse-engineer any codebase into a complete Product Requirements Document (PRD).
-  Analyzes routes, components, state management, API integrations, and user interactions to produce
-  business-readable documentation detailed enough for engineers or AI agents to fully reconstruct
-  every page and endpoint. Works with frontend frameworks (React, Vue, Angular, Svelte, Next.js, Nuxt),
-  backend frameworks (NestJS, Django, Express, FastAPI), and fullstack applications.
-
-  Trigger when users mention: generate PRD, reverse-engineer requirements, code to documentation,
-  extract product specs from code, document page logic, analyze page fields and interactions,
-  create a functional inventory, write requirements from an existing codebase, document API endpoints,
-  or analyze backend routes.
+description: "Reverse-engineer any codebase into a complete Product Requirements Document (PRD). Analyzes routes, components, state management, API integrations, and user interactions to produce business-readable documentation detailed enough for engineers or AI agents to fully reconstruct every page and endpoint. Works with frontend frameworks (React, Vue, Angular, Svelte, Next.js, Nuxt), backend frameworks (NestJS, Django, Express, FastAPI), and fullstack applications. Use when users mention: generate PRD, reverse-engineer requirements, code to documentation, extract product specs from code, document page logic, analyze page fields and interactions, create a functional inventory, write requirements from an existing codebase, document API endpoints, or analyze backend routes."
 license: MIT
 metadata:
   updated: 2026-03-17
+  tier: STANDARD
+  category: product
+  dependencies: none
+  version: 2.1.2
 ---
 
 ## Name
@@ -255,7 +244,7 @@ Describe as **"user action → system response"**:
 
 **Case 2: API not integrated** (mock/hardcoded data)
 
-When the page uses mock data, hardcoded fixtures, `setTimeout` simulations, or `Promise.resolve` stubs — the API isn't real yet. **Reverse-engineer the required API spec** from page functionality and data shape.
+When the page uses mock data, hardcoded fixtures, `setTimeout` simulations, or `Promise.resolve()` stubs — the API isn't real yet. **Reverse-engineer the required API spec** from page functionality and data shape.
 
 For each needed API, document:
 - Method, suggested path, trigger
@@ -264,7 +253,7 @@ For each needed API, document:
 - Core business logic description
 
 **Detection signals:**
-- `setTimeout` / `Promise.resolve` returning data → mock
+- `setTimeout` / `Promise.resolve()` returning data → mock
 - Data defined in component or `*.mock.*` files → mock
 - Real HTTP calls (`axios`, `fetch`, service layer) with real paths → integrated
 - `__mocks__` directory → mock

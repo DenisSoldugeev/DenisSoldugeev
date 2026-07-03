@@ -139,7 +139,7 @@ def score_plan(study: dict, profile: dict, phase: int) -> dict:
             blockers.append("budget: planned budget < 75% of benchmark cost")
     breakdown["budget_fit"] = round(budget, 1)
 
-    composite = sum(breakdown[d] * w for d, w in WEIGHTS.items)
+    composite = sum(breakdown[d] * w for d, w in WEIGHTS.items())
     verdict = _verdict(composite, blockers)
     return {
         "study_id": study.get("study_id", "UNSPECIFIED"),
@@ -188,7 +188,7 @@ def _render_human(r: dict) -> str:
     lines = [f"!! {BANNER}", "", f"Study: {r['study_id']}  (Phase {r['phase']})",
              f"Composite feasibility: {r['composite']}/100", f"Verdict: {r['verdict']}", ""]
     lines.append("Dimension breakdown:")
-    for d, s in r["breakdown"].items:
+    for d, s in r["breakdown"].items():
         lines.append(f"  {d:26s} {s}")
     lines.append("")
     if r["blockers"]:
@@ -211,7 +211,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--sample", action="store_true", help="use the embedded sample")
     args = p.parse_args(argv)
 
-    conf = _cfg.load_config if _cfg else {}
+    conf = _cfg.load_config() if _cfg else {}
     profile = args.profile or conf.get("default_profile", "drug")
     study = SAMPLE if (args.sample or not args.input) else json.load(open(args.input))
     phase = study.get("phase", args.phase) if (args.sample or not args.input) else args.phase
@@ -231,4 +231,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

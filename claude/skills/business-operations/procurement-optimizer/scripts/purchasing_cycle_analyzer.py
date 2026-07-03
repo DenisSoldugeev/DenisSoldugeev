@@ -42,7 +42,7 @@ class PORecord:
         if isinstance(d, date):
             return d
         try:
-            return datetime.strptime(str(d)[:10], "%Y-%m-%d").date
+            return datetime.strptime(str(d)[:10], "%Y-%m-%d").date()
         except ValueError:
             return None
 
@@ -100,7 +100,7 @@ def per_category_stats(records: list[PORecord]) -> dict[str, CategoryStats]:
         by_cat.setdefault(r.category, []).append(r)
 
     result: dict[str, CategoryStats] = {}
-    for cat, recs in by_cat.items:
+    for cat, recs in by_cat.items():
         r2po = [d for d in (_days(r.request_date, r.po_issued_date) for r in recs) if d is not None]
         po2pay = [d for d in (_days(r.po_issued_date, r.payment_date) for r in recs) if d is not None]
         hops = [r.approver_hops for r in recs if r.approver_hops >= 0]
@@ -118,7 +118,7 @@ def per_category_stats(records: list[PORecord]) -> dict[str, CategoryStats]:
 
 def overall_median_r2po(stats: dict[str, CategoryStats]) -> float:
     """Cross-category median of request->PO median (used as the bottleneck baseline)."""
-    medians = [s.request_to_po_median for s in stats.values if s.request_to_po_median is not None]
+    medians = [s.request_to_po_median for s in stats.values() if s.request_to_po_median is not None]
     if not medians:
         return 0.0
     return statistics.median(medians)
@@ -144,7 +144,7 @@ def render_markdown(stats: dict[str, CategoryStats]) -> str:
     lines.append("|---|---:|---:|---:|---:|---:|---:|---|")
 
     sorted_cats = sorted(
-        stats.values,
+        stats.values(),
         key=lambda s: -(s.request_to_po_median or 0),
     )
     for s in sorted_cats:
@@ -164,7 +164,7 @@ def render_markdown(stats: dict[str, CategoryStats]) -> str:
 
     # Goldratt commentary
     bottlenecks = [
-        s for s in stats.values
+        s for s in stats.values()
         if threshold is not None
         and s.request_to_po_median is not None
         and s.request_to_po_median > threshold
@@ -266,12 +266,12 @@ def main(argv: list[str] | None = None) -> int:
         data = SAMPLE_INPUT
     elif args.input:
         try:
-            data = json.loads(Path(args.input).read_text)
+            data = json.loads(Path(args.input).read_text())
         except Exception as e:
             print(f"error reading {args.input}: {e}", file=sys.stderr)
             return 2
     else:
-        p.print_help
+        p.print_help()
         return 0
 
     records = [PORecord.from_dict(d) for d in data]
@@ -287,4 +287,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

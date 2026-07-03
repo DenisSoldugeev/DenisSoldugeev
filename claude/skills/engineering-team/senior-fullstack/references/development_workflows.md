@@ -119,10 +119,10 @@ import { z } from "zod";
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]),
-  DATABASE_URL: z.string.url,
-  REDIS_URL: z.string.url.optional,
-  JWT_SECRET: z.string.min(32),
-  PORT: z.coerce.number.default(3000),
+  DATABASE_URL: z.string().url(),
+  REDIS_URL: z.string().url().optional(),
+  JWT_SECRET: z.string().min(32),
+  PORT: z.coerce.number().default(3000),
 });
 
 export const env = envSchema.parse(process.env);
@@ -376,9 +376,9 @@ jobs:
 import { render, screen, fireEvent } from "@testing-library/react";
 import { UserForm } from "./UserForm";
 
-describe("UserForm",  => {
-  it("submits form with valid data", async  => {
-    const onSubmit = vi.fn;
+describe("UserForm", () => {
+  it("submits form with valid data", async () => {
+    const onSubmit = vi.fn();
     render(<UserForm onSubmit={onSubmit} />);
 
     fireEvent.change(screen.getByLabelText(/email/i), {
@@ -389,7 +389,7 @@ describe("UserForm",  => {
     });
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
 
-    await waitFor( => {
+    await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({
         email: "test@example.com",
         name: "John Doe",
@@ -397,15 +397,15 @@ describe("UserForm",  => {
     });
   });
 
-  it("shows validation error for invalid email", async  => {
-    render(<UserForm onSubmit={vi.fn} />);
+  it("shows validation error for invalid email", async () => {
+    render(<UserForm onSubmit={vi.fn()} />);
 
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: "invalid" },
     });
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
 
-    expect(await screen.findByText(/invalid email/i)).toBeInTheDocument;
+    expect(await screen.findByText(/invalid email/i)).toBeInTheDocument();
   });
 });
 ```
@@ -417,13 +417,13 @@ describe("UserForm",  => {
 import { createTestClient } from "./test-utils";
 import { db } from "@/lib/db";
 
-describe("POST /api/users",  => {
-  beforeEach(async  => {
-    await db.user.deleteMany;
+describe("POST /api/users", () => {
+  beforeEach(async () => {
+    await db.user.deleteMany();
   });
 
-  it("creates user with valid data", async  => {
-    const client = createTestClient;
+  it("creates user with valid data", async () => {
+    const client = createTestClient();
 
     const response = await client.post("/api/users", {
       email: "new@example.com",
@@ -437,15 +437,15 @@ describe("POST /api/users",  => {
     const user = await db.user.findUnique({
       where: { email: "new@example.com" },
     });
-    expect(user).toBeTruthy;
+    expect(user).toBeTruthy();
   });
 
-  it("returns 409 for duplicate email", async  => {
+  it("returns 409 for duplicate email", async () => {
     await db.user.create({
       data: { email: "existing@example.com", name: "Existing" },
     });
 
-    const client = createTestClient;
+    const client = createTestClient();
 
     const response = await client.post("/api/users", {
       email: "existing@example.com",
@@ -464,7 +464,7 @@ describe("POST /api/users",  => {
 // e2e/auth.spec.ts
 import { test, expect } from "@playwright/test";
 
-test.describe("Authentication",  => {
+test.describe("Authentication", () => {
   test("user can log in and access dashboard", async ({ page }) => {
     await page.goto("/login");
 
@@ -637,22 +637,22 @@ const logger = pino({
 
 // Request logging middleware
 app.use((req, res, next) => {
-  const start = Date.now;
-  const requestId = req.headers["x-request-id"] || crypto.randomUUID;
+  const start = Date.now();
+  const requestId = req.headers["x-request-id"] || crypto.randomUUID();
 
-  res.on("finish",  => {
+  res.on("finish", () => {
     logger.info({
       type: "request",
       requestId,
       method: req.method,
       path: req.path,
       statusCode: res.statusCode,
-      duration: Date.now - start,
+      duration: Date.now() - start,
       userAgent: req.headers["user-agent"],
     });
   });
 
-  next;
+  next();
 });
 
 // Application logging
@@ -685,16 +685,16 @@ app.use((req, res, next) => {
     path: req.route?.path || req.path,
   });
 
-  res.on("finish",  => {
+  res.on("finish", () => {
     httpRequestsTotal.inc({
       method: req.method,
       path: req.route?.path || req.path,
       status: res.statusCode,
     });
-    end;
+    end();
   });
 
-  next;
+  next();
 });
 ```
 
@@ -703,9 +703,9 @@ app.use((req, res, next) => {
 ```typescript
 app.get("/health", async (req, res) => {
   const checks = {
-    database: await checkDatabase,
-    redis: await checkRedis,
-    memory: checkMemory,
+    database: await checkDatabase(),
+    redis: await checkRedis(),
+    memory: checkMemory(),
   };
 
   const healthy = Object.values(checks).every((c) => c.status === "healthy");
@@ -713,11 +713,11 @@ app.get("/health", async (req, res) => {
   res.status(healthy ? 200 : 503).json({
     status: healthy ? "healthy" : "unhealthy",
     checks,
-    timestamp: new Date.toISOString,
+    timestamp: new Date().toISOString(),
   });
 });
 
-async function checkDatabase {
+async function checkDatabase() {
   try {
     await db.$queryRaw`SELECT 1`;
     return { status: "healthy" };
@@ -726,8 +726,8 @@ async function checkDatabase {
   }
 }
 
-function checkMemory {
-  const used = process.memoryUsage;
+function checkMemory() {
+  const used = process.memoryUsage();
   const heapUsedMB = Math.round(used.heapUsed / 1024 / 1024);
   const heapTotalMB = Math.round(used.heapTotal / 1024 / 1024);
 

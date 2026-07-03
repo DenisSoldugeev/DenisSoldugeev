@@ -41,7 +41,7 @@ from typing import Any
 
 # Bridge to design-system config
 _DESIGN_SYSTEM_SCRIPTS = (
-    Path(__file__).resolve.parent.parent.parent / "design-system" / "scripts"
+    Path(__file__).resolve().parent.parent.parent / "design-system" / "scripts"
 )
 sys.path.insert(0, str(_DESIGN_SYSTEM_SCRIPTS))
 try:
@@ -51,7 +51,7 @@ except ImportError:
 
 # Reuse md-document's markdown parser for slide-body rendering
 _MD_DOCUMENT_SCRIPTS = (
-    Path(__file__).resolve.parent.parent.parent / "md-document" / "scripts"
+    Path(__file__).resolve().parent.parent.parent / "md-document" / "scripts"
 )
 sys.path.insert(0, str(_MD_DOCUMENT_SCRIPTS))
 try:
@@ -75,7 +75,7 @@ def _palette_to_css(palette: dict[str, str]) -> str:
             "--md-link": "#00D4AA", "--md-link-hover": "#08FECE",
             "--md-success": "#10A85C", "--md-warn": "#C87C10",
         }
-    return "\n".join(f"    {k}: {v};" for k, v in palette.items)
+    return "\n".join(f"    {k}: {v};" for k, v in palette.items())
 
 
 def _font_url(heading: str, body: str) -> str:
@@ -133,13 +133,13 @@ def _render_block(block: dict[str, Any]) -> str:
         ) + "</tbody>"
         return f"<table>{thead}{tbody}</table>"
     if t == "callout":
-        kind = (block.get("kind") or "NOTE").upper
+        kind = (block.get("kind") or "NOTE").upper()
         icon = CALLOUT_ICONS.get(kind, "i")
         body = "<br>".join(
             _mp.render_inline_html(ln) if _mp else html.escape(ln)
             for ln in (block.get("body_lines") or []) if ln
         )
-        klass = kind.lower
+        klass = kind.lower()
         return (
             f'<aside class="callout callout-{klass}" role="note">'
             f'<div class="callout-label"><span class="callout-icon" aria-hidden="true">{icon}</span>'
@@ -158,7 +158,7 @@ def _render_block(block: dict[str, Any]) -> str:
 
 def _render_slide_body(body_markdown: str) -> str:
     """Parse a slide's markdown body and render it as HTML blocks."""
-    if not body_markdown.strip:
+    if not body_markdown.strip():
         return ""
     if _mp is None:
         return f'<pre>{html.escape(body_markdown)}</pre>'
@@ -363,7 +363,7 @@ body.presenter .presenter-panel { display: flex; }
 
 # Inline vanilla-JS payload
 JS_PAYLOAD = r"""
-(function  {
+(function () {
     "use strict";
     var slides = document.querySelectorAll(".slide");
     var total = slides.length;
@@ -382,21 +382,21 @@ JS_PAYLOAD = r"""
         if (location.hash !== "#" + (current + 1)) {
             history.replaceState(null, "", "#" + (current + 1));
         }
-        updatePresenterPanel;
+        updatePresenterPanel();
     }
 
-    function next { show(current + 1); }
-    function prev { show(current - 1); }
-    function first { show(0); }
-    function last { show(total - 1); }
+    function next() { show(current + 1); }
+    function prev() { show(current - 1); }
+    function first() { show(0); }
+    function last() { show(total - 1); }
 
-    function togglePresenter {
+    function togglePresenter() {
         presenter = !presenter;
         document.body.classList.toggle("presenter", presenter);
-        updatePresenterPanel;
+        updatePresenterPanel();
     }
 
-    function updatePresenterPanel {
+    function updatePresenterPanel() {
         var panel = document.querySelector(".presenter-panel");
         if (!panel) return;
         var notes = slides[current].getAttribute("data-notes") || "(no notes for this slide)";
@@ -413,11 +413,11 @@ JS_PAYLOAD = r"""
         }
     }
 
-    function tickClock {
-        var now = new Date;
-        var hh = String(now.getHours).padStart(2, "0");
-        var mm = String(now.getMinutes).padStart(2, "0");
-        var ss = String(now.getSeconds).padStart(2, "0");
+    function tickClock() {
+        var now = new Date();
+        var hh = String(now.getHours()).padStart(2, "0");
+        var mm = String(now.getMinutes()).padStart(2, "0");
+        var ss = String(now.getSeconds()).padStart(2, "0");
         var el = document.querySelector(".presenter-panel .clock");
         if (el) el.textContent = hh + ":" + mm + ":" + ss;
     }
@@ -428,17 +428,17 @@ JS_PAYLOAD = r"""
             case "ArrowRight":
             case "PageDown":
             case " ":
-                e.preventDefault; next; break;
+                e.preventDefault(); next(); break;
             case "ArrowLeft":
             case "PageUp":
-                e.preventDefault; prev; break;
-            case "Home": e.preventDefault; first; break;
-            case "End":  e.preventDefault; last;  break;
+                e.preventDefault(); prev(); break;
+            case "Home": e.preventDefault(); first(); break;
+            case "End":  e.preventDefault(); last();  break;
             case "p":
             case "P":
-                e.preventDefault; togglePresenter; break;
+                e.preventDefault(); togglePresenter(); break;
             case "Escape":
-                if (presenter) { e.preventDefault; togglePresenter; }
+                if (presenter) { e.preventDefault(); togglePresenter(); }
                 break;
         }
     });
@@ -451,8 +451,8 @@ JS_PAYLOAD = r"""
     }
     show(initial);
     setInterval(tickClock, 1000);
-    tickClock;
-});
+    tickClock();
+})();
 """
 
 
@@ -518,7 +518,7 @@ def render(deck_payload: dict[str, Any], config: dict[str, Any],
 </aside>
 
 <div class="chrome">
-    <a href="#" onclick="event.preventDefault; document.dispatchEvent(new KeyboardEvent('keydown', {{key:'P'}}))">P · presenter</a>
+    <a href="#" onclick="event.preventDefault(); document.dispatchEvent(new KeyboardEvent('keydown', {{key:'P'}}))">P · presenter</a>
     <span id="counter">1 / {len(slides)}</span>
 </div>
 
@@ -544,7 +544,7 @@ def main(argv: list[str]) -> int:
     args = p.parse_args(argv)
 
     if args.sample:
-        sys.path.insert(0, str(Path(__file__).resolve.parent))
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
         import presenter_notes_parser
         import slide_splitter
         slides_payload = slide_splitter.split_slides(slide_splitter.SAMPLE_MARKDOWN)
@@ -552,9 +552,9 @@ def main(argv: list[str]) -> int:
         title = "Sample Deck — The Case for Single-File HTML"
     else:
         if not args.slides:
-            p.print_help
+            p.print_help()
             return 0
-        raw = sys.stdin.read if args.slides == "-" else Path(args.slides).read_text(encoding="utf-8")
+        raw = sys.stdin.read() if args.slides == "-" else Path(args.slides).read_text(encoding="utf-8")
         deck_payload = json.loads(raw)
         title = args.title
 
@@ -571,7 +571,7 @@ def main(argv: list[str]) -> int:
     if args.no_config or os.environ.get("MARKDOWN_HTML_NO_CONFIG") == "1":
         config = _cfg.DEFAULTS if _cfg else {}
     else:
-        config = _cfg.load_config if _cfg else {}
+        config = _cfg.load_config() if _cfg else {}
 
     output = render(deck_payload, config, title=title, enable_syntax=args.syntax)
 

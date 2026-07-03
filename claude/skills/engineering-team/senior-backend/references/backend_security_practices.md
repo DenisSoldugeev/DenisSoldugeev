@@ -93,7 +93,7 @@ const passwordResetLimiter = rateLimit({
 });
 
 app.post('/forgot-password', passwordResetLimiter, async (req, res) => {
-  const startTime = Date.now;
+  const startTime = Date.now();
 
   try {
     const user = await db.users.findByEmail(req.body.email);
@@ -105,7 +105,7 @@ app.post('/forgot-password', passwordResetLimiter, async (req, res) => {
   }
 
   // Consistent response time prevents timing attacks
-  const elapsed = Date.now - startTime;
+  const elapsed = Date.now() - startTime;
   const minDelay = 500;
   if (elapsed < minDelay) {
     await sleep(minDelay - elapsed);
@@ -193,7 +193,7 @@ app.post('/login', async (req, res) => {
     if (err) return next(err);
 
     req.session.userId = user.id;
-    req.session.createdAt = Date.now;
+    req.session.createdAt = Date.now();
 
     req.session.save((err) => {
       if (err) return next(err);
@@ -257,7 +257,7 @@ function logSecurityEvent(event: {
   logger.info({
     security: true,
     ...event,
-    timestamp: new Date.toISOString,
+    timestamp: new Date().toISOString(),
   }, `Security event: ${event.type}`);
 }
 
@@ -290,7 +290,7 @@ app.post('/login', async (req, res) => {
 // BAD: Unvalidated URL fetch
 app.post('/fetch-url', async (req, res) => {
   const response = await fetch(req.body.url); // SSRF vulnerability!
-  res.json({ data: await response.text });
+  res.json({ data: await response.text() });
 });
 
 // GOOD: URL allowlist and validation
@@ -344,7 +344,7 @@ app.post('/fetch-url', async (req, res) => {
     follow: 0, // Don't follow redirects
   });
 
-  res.json({ data: await response.text });
+  res.json({ data: await response.text() });
 });
 ```
 
@@ -359,20 +359,20 @@ import { z } from 'zod';
 
 // Define schemas
 const CreateUserSchema = z.object({
-  email: z.string.email.max(255).toLowerCase,
-  password: z.string
+  email: z.string().email().max(255).toLowerCase(),
+  password: z.string()
     .min(8, 'Password must be at least 8 characters')
     .max(72, 'Password must be at most 72 characters') // bcrypt limit
     .regex(/[A-Z]/, 'Password must contain uppercase letter')
     .regex(/[a-z]/, 'Password must contain lowercase letter')
     .regex(/[0-9]/, 'Password must contain number'),
-  name: z.string.min(1).max(100).trim,
-  age: z.number.int.min(18).max(120).optional,
+  name: z.string().min(1).max(100).trim(),
+  age: z.number().int().min(18).max(120).optional(),
 });
 
 const PaginationSchema = z.object({
-  limit: z.coerce.number.int.min(1).max(100).default(20),
-  offset: z.coerce.number.int.min(0).default(0),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).default(0),
   sort: z.enum(['asc', 'desc']).default('desc'),
 });
 
@@ -398,7 +398,7 @@ function validate<T>(schema: z.ZodSchema<T>) {
     }
 
     req.body = result.data;
-    next;
+    next();
   };
 }
 
@@ -572,7 +572,7 @@ app.use(helmet.contentSecurityPolicy({
 app.use((req, res, next) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  next;
+  next();
 });
 
 // Disable JSONP (if not needed)
@@ -606,7 +606,7 @@ async function verifyPassword(password: string, hash: string): Promise<boolean> 
 }
 
 // For password reset tokens
-function generateSecureToken: string {
+function generateSecureToken(): string {
   return randomBytes(32).toString('hex');
 }
 
@@ -701,8 +701,8 @@ async function elevateSession(req: Request): Promise<void> {
       if (err) return reject(err);
       req.session.userId = userId;
       req.session.elevated = true;
-      req.session.elevatedAt = Date.now;
-      resolve;
+      req.session.elevatedAt = Date.now();
+      resolve();
     });
   });
 }
@@ -738,7 +738,7 @@ function requirePermission(permission: Permission) {
         error: { code: 'FORBIDDEN', message: 'Insufficient permissions' },
       });
     }
-    next;
+    next();
   };
 }
 
@@ -783,7 +783,7 @@ const policies: Policy[] = [
   {
     name: 'no-sensitive-outside-hours',
     condition: (ctx) => {
-      const hour = ctx.environment.time.getHours;
+      const hour = ctx.environment.time.getHours();
       return ctx.resource.sensitivity !== 'high' || (hour >= 9 && hour <= 17);
     },
   },
@@ -861,7 +861,7 @@ app.use(cors({
 | `X-Content-Type-Options` | Prevent MIME sniffing | `nosniff` |
 | `X-Frame-Options` | Prevent clickjacking | `DENY` |
 | `Referrer-Policy` | Control referrer info | `strict-origin-when-cross-origin` |
-| `Permissions-Policy` | Feature restrictions | `geolocation=, microphone=` |
+| `Permissions-Policy` | Feature restrictions | `geolocation=(), microphone=()` |
 
 ---
 
@@ -874,13 +874,13 @@ app.use(cors({
 import { z } from 'zod';
 
 const SecretsSchema = z.object({
-  DATABASE_URL: z.string.url,
-  JWT_SECRET: z.string.min(32),
-  JWT_PRIVATE_KEY: z.string,
-  JWT_PUBLIC_KEY: z.string,
-  REDIS_URL: z.string.url,
-  STRIPE_SECRET_KEY: z.string.startsWith('sk_'),
-  STRIPE_WEBHOOK_SECRET: z.string.startsWith('whsec_'),
+  DATABASE_URL: z.string().url(),
+  JWT_SECRET: z.string().min(32),
+  JWT_PRIVATE_KEY: z.string(),
+  JWT_PUBLIC_KEY: z.string(),
+  REDIS_URL: z.string().url(),
+  STRIPE_SECRET_KEY: z.string().startsWith('sk_'),
+  STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
 });
 
 // Validate on startup
@@ -931,17 +931,17 @@ async function getSecret(path: string): Promise<string> {
 }
 
 // Cache secrets with TTL
-const secretsCache = new Map<string, { value: string; expiresAt: number }>;
+const secretsCache = new Map<string, { value: string; expiresAt: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 async function getCachedSecret(path: string): Promise<string> {
   const cached = secretsCache.get(path);
-  if (cached && cached.expiresAt > Date.now) {
+  if (cached && cached.expiresAt > Date.now()) {
     return cached.value;
   }
 
   const value = await getSecret(path);
-  secretsCache.set(path, { value, expiresAt: Date.now + CACHE_TTL });
+  secretsCache.set(path, { value, expiresAt: Date.now() + CACHE_TTL });
   return value;
 }
 ```
@@ -996,7 +996,7 @@ function logSecurityEvent(event: SecurityEvent): void {
   logger.info({
     security: true,
     ...event,
-    timestamp: new Date.toISOString,
+    timestamp: new Date().toISOString(),
   }, `Security: ${event.type}`);
 }
 ```
@@ -1008,7 +1008,7 @@ import pinoHttp from 'pino-http';
 
 app.use(pinoHttp({
   logger,
-  genReqId: (req) => req.headers['x-request-id'] || crypto.randomUUID,
+  genReqId: (req) => req.headers['x-request-id'] || crypto.randomUUID(),
   serializers: {
     req: (req) => ({
       id: req.id,

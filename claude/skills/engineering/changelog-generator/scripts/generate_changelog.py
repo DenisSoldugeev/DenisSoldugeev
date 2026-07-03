@@ -58,7 +58,7 @@ class ChangelogEntry:
     bump: str = "patch"
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate changelog from conventional commits.")
     parser.add_argument("--input", help="Text file with one commit subject per line.")
     parser.add_argument("--from-tag", help="Git tag start (exclusive).")
@@ -66,24 +66,24 @@ def parse_args -> argparse.Namespace:
     parser.add_argument("--from-ref", help="Git ref start (exclusive).")
     parser.add_argument("--to-ref", help="Git ref end (inclusive).")
     parser.add_argument("--next-version", default="Unreleased", help="Version label for the generated entry.")
-    parser.add_argument("--date", dest="entry_date", default=str(date.today), help="Release date (YYYY-MM-DD).")
+    parser.add_argument("--date", dest="entry_date", default=str(date.today()), help="Release date (YYYY-MM-DD).")
     parser.add_argument("--format", choices=["markdown", "json"], default="markdown", help="Output format.")
     parser.add_argument("--write", help="Prepend generated markdown entry into this changelog file.")
-    return parser.parse_args
+    return parser.parse_args()
 
 
 def read_lines_from_file(path: str) -> List[str]:
     try:
-        return [line.strip for line in Path(path).read_text(encoding="utf-8").splitlines if line.strip]
+        return [line.strip() for line in Path(path).read_text(encoding="utf-8").splitlines() if line.strip()]
     except Exception as exc:
         raise CLIError(f"Failed reading --input file: {exc}") from exc
 
 
-def read_lines_from_stdin -> List[str]:
-    if sys.stdin.isatty:
+def read_lines_from_stdin() -> List[str]:
+    if sys.stdin.isatty():
         return []
-    payload = sys.stdin.read
-    return [line.strip for line in payload.splitlines if line.strip]
+    payload = sys.stdin.read()
+    return [line.strip() for line in payload.splitlines() if line.strip()]
 
 
 def read_lines_from_git(args: argparse.Namespace) -> List[str]:
@@ -109,16 +109,16 @@ def read_lines_from_git(args: argparse.Namespace) -> List[str]:
             check=True,
         )
     except subprocess.CalledProcessError as exc:
-        raise CLIError(f"git log failed for range '{range_spec}': {exc.stderr.strip}") from exc
+        raise CLIError(f"git log failed for range '{range_spec}': {exc.stderr.strip()}") from exc
 
-    return [line.strip for line in proc.stdout.splitlines if line.strip]
+    return [line.strip() for line in proc.stdout.splitlines() if line.strip()]
 
 
 def load_commits(args: argparse.Namespace) -> List[str]:
     if args.input:
         return read_lines_from_file(args.input)
 
-    stdin_lines = read_lines_from_stdin
+    stdin_lines = read_lines_from_stdin()
     if stdin_lines:
         return stdin_lines
 
@@ -170,7 +170,7 @@ def build_entry(commits: List[ParsedCommit], version: str, entry_date: str) -> C
             line = commit.summary if not commit.scope else f"{commit.scope}: {commit.summary}"
             sections[section].append(line)
 
-    sections = {k: v for k, v in sections.items if v}
+    sections = {k: v for k, v in sections.items() if v}
     return ChangelogEntry(
         version=version,
         release_date=entry_date,
@@ -197,11 +197,11 @@ def render_markdown(entry: ChangelogEntry) -> str:
         lines.append("")
 
     lines.append(f"<!-- recommended-semver-bump: {entry.bump} -->")
-    return "\n".join(lines).strip + "\n"
+    return "\n".join(lines).strip() + "\n"
 
 
 def prepend_changelog(path: Path, entry_md: str) -> None:
-    if path.exists:
+    if path.exists():
         original = path.read_text(encoding="utf-8")
     else:
         original = "# Changelog\n\nAll notable changes to this project will be documented in this file.\n\n"
@@ -216,8 +216,8 @@ def prepend_changelog(path: Path, entry_md: str) -> None:
     path.write_text(combined, encoding="utf-8")
 
 
-def main -> int:
-    args = parse_args
+def main() -> int:
+    args = parse_args()
     lines = load_commits(args)
     parsed = parse_commits(lines)
     if not parsed:
@@ -241,7 +241,7 @@ def main -> int:
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(main)
+        raise SystemExit(main())
     except CLIError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         raise SystemExit(2)

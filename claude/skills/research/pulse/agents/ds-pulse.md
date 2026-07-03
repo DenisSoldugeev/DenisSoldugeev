@@ -33,7 +33,7 @@ Relentless on specificity, depth-first on the intake tree, graceful on platform 
 The ds-pulse agent orchestrates the `pulse` skill across multi-source recency briefings:
 
 1. **Grill-me intake (Q1 → Q4, dependency-ordered)** — topic, angle, window, scope. One at a time. Refuse vague answers.
-2. **Pre-flight** — compute window timestamps with `scripts/time_window_calculator.py`, generate output slug with `scripts/topic_slug_generator.py`, start three-count audit with `scripts/citation_tracker.py`.
+2. **Pre-flight** — compute window timestamps with `skills/pulse/scripts/time_window_calculator.py`, generate output slug with `skills/pulse/scripts/topic_slug_generator.py`, start three-count audit with `skills/pulse/scripts/citation_tracker.py`.
 3. **Phases 1–3 in parallel** — Reddit (top + new), HN (Algolia stories + comments), Web (2–3 targeted queries). 1 q/sec per platform; sequential within.
 4. **Phase 4 (optional)** — X/Twitter if available; skip with note otherwise.
 5. **Synthesis** — cross-platform pattern detection (consensus, controversy, pain, excitement, gaps).
@@ -65,7 +65,7 @@ Differentiates clearly:
 1. **Time Window Calculator**
    - Path: `../skills/pulse/scripts/time_window_calculator.py`
    - Usage: `python time_window_calculator.py --window 30d`
-   - Computes Unix timestamps for HN's `created_at_i>` filter and Reddit's `t=` parameter (`hour|day|week|month|year|all`). Deterministic from `datetime.now`.
+   - Computes Unix timestamps for HN's `created_at_i>` filter and Reddit's `t=` parameter (`hour|day|week|month|year|all`). Deterministic from `datetime.now()`.
 
 2. **Citation Tracker**
    - Path: `../skills/pulse/scripts/citation_tracker.py`

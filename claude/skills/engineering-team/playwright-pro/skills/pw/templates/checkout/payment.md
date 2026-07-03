@@ -27,7 +27,7 @@ async function fillCardForm(page: Page, card: {
   await page.getByRole('textbox', { name: /cardholder name/i }).fill(card.name);
 }
 
-test.describe('Payment',  => {
+test.describe('Payment', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('{{baseUrl}}/checkout/payment');
   });
@@ -40,9 +40,9 @@ test.describe('Payment',  => {
       cvc: '123',
       name: '{{cardholderName}}',
     });
-    await page.getByRole('button', { name: /pay|place order/i }).click;
+    await page.getByRole('button', { name: /pay|place order/i }).click();
     await expect(page).toHaveURL(/\/order-confirmation|\/success/);
-    await expect(page.getByRole('heading', { name: /order confirmed|thank you/i })).toBeVisible;
+    await expect(page.getByRole('heading', { name: /order confirmed|thank you/i })).toBeVisible();
   });
 
   // Happy path: processing state shown
@@ -54,9 +54,9 @@ test.describe('Payment',  => {
       name: '{{cardholderName}}',
     });
     const payBtn = page.getByRole('button', { name: /pay|place order/i });
-    await payBtn.click;
-    await expect(payBtn).toBeDisabled;
-    await expect(page.getByText(/processing|please wait/i)).toBeVisible;
+    await payBtn.click();
+    await expect(payBtn).toBeDisabled();
+    await expect(page.getByText(/processing|please wait/i)).toBeVisible();
   });
 
   // Error case: declined card
@@ -67,7 +67,7 @@ test.describe('Payment',  => {
       cvc: '123',
       name: '{{cardholderName}}',
     });
-    await page.getByRole('button', { name: /pay|place order/i }).click;
+    await page.getByRole('button', { name: /pay|place order/i }).click();
     await expect(page.getByRole('alert')).toContainText(/declined|card.*not accepted/i);
     await expect(page).toHaveURL(/\/checkout\/payment/);
   });
@@ -76,8 +76,8 @@ test.describe('Payment',  => {
   test('shows inline error for invalid card number', async ({ page }) => {
     const cardFrame = page.frameLocator('[data-testid="card-number-frame"]');
     await cardFrame.getByRole('textbox', { name: /card number/i }).fill('1234');
-    await page.getByRole('button', { name: /pay|place order/i }).click;
-    await expect(page.getByText(/invalid.*card number/i)).toBeVisible;
+    await page.getByRole('button', { name: /pay|place order/i }).click();
+    await expect(page.getByText(/invalid.*card number/i)).toBeVisible();
   });
 
   // Error case: expired card
@@ -88,7 +88,7 @@ test.describe('Payment',  => {
       cvc: '123',
       name: '{{cardholderName}}',
     });
-    await page.getByRole('button', { name: /pay|place order/i }).click;
+    await page.getByRole('button', { name: /pay|place order/i }).click();
     await expect(page.getByRole('alert')).toContainText(/expired|invalid.*expiry/i);
   });
 
@@ -100,10 +100,10 @@ test.describe('Payment',  => {
       cvc: '123',
       name: '{{cardholderName}}',
     });
-    await page.getByRole('button', { name: /pay|place order/i }).click;
+    await page.getByRole('button', { name: /pay|place order/i }).click();
     // 3DS modal appears
     const challengeFrame = page.frameLocator('[data-testid="3ds-challenge-frame"]');
-    await challengeFrame.getByRole('button', { name: /complete authentication/i }).click;
+    await challengeFrame.getByRole('button', { name: /complete authentication/i }).click();
     await expect(page).toHaveURL(/\/order-confirmation|\/success/);
   });
 });
@@ -116,7 +116,7 @@ test.describe('Payment',  => {
 ```javascript
 const { test, expect } = require('@playwright/test');
 
-test.describe('Payment',  => {
+test.describe('Payment', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('{{baseUrl}}/checkout/payment');
   });
@@ -124,14 +124,14 @@ test.describe('Payment',  => {
   test('completes payment with valid card', async ({ page }) => {
     const cardFrame = page.frameLocator('[data-testid="card-number-frame"]');
     await cardFrame.getByRole('textbox', { name: /card number/i }).fill('{{testCardNumber}}');
-    await page.getByRole('button', { name: /pay|place order/i }).click;
+    await page.getByRole('button', { name: /pay|place order/i }).click();
     await expect(page).toHaveURL(/\/order-confirmation/);
   });
 
   test('shows decline error for rejected card', async ({ page }) => {
     const cardFrame = page.frameLocator('[data-testid="card-number-frame"]');
     await cardFrame.getByRole('textbox', { name: /card number/i }).fill('{{declinedCardNumber}}');
-    await page.getByRole('button', { name: /pay|place order/i }).click;
+    await page.getByRole('button', { name: /pay|place order/i }).click();
     await expect(page.getByRole('alert')).toContainText(/declined/i);
   });
 });

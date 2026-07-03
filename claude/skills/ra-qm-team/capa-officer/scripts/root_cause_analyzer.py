@@ -141,7 +141,7 @@ class RootCauseAnalyzer:
         # Analyze depth and quality
         depth = len(steps)
         has_root = any(
-            s.answer and ("system" in s.answer.lower or "policy" in s.answer.lower or "process" in s.answer.lower)
+            s.answer and ("system" in s.answer.lower() or "policy" in s.answer.lower() or "process" in s.answer.lower())
             for s in steps
         )
 
@@ -188,7 +188,7 @@ class RootCauseAnalyzer:
             "categories": categories,
             "total_causes": len(fishbone_causes),
             "root_causes_identified": len(root_causes),
-            "categories_covered": list(categories.keys),
+            "categories_covered": list(categories.keys()),
             "recommended_categories": [c.value for c in RootCauseCategory],
             "missing_categories": [c.value for c in RootCauseCategory if c.value.split(" (")[0] not in categories]
         }
@@ -208,8 +208,8 @@ class RootCauseAnalyzer:
                 )
 
         # Find basic events (root causes)
-        basic_events = {eid: ev for eid, ev in fault_events.items if ev.is_basic}
-        intermediate_events = {eid: ev for eid, ev in fault_events.items if not ev.is_basic}
+        basic_events = {eid: ev for eid, ev in fault_events.items() if ev.is_basic}
+        intermediate_events = {eid: ev for eid, ev in fault_events.items() if not ev.is_basic}
 
         return {
             "method": "Fault Tree Analysis",
@@ -217,7 +217,7 @@ class RootCauseAnalyzer:
             "total_events": len(fault_events),
             "basic_events": len(basic_events),
             "intermediate_events": len(intermediate_events),
-            "basic_event_details": [asdict(e) for e in basic_events.values],
+            "basic_event_details": [asdict(e) for e in basic_events.values()],
             "cut_sets": self._find_cut_sets(fault_events)
         }
 
@@ -225,7 +225,7 @@ class RootCauseAnalyzer:
         """Find minimal cut sets (combinations of basic events that cause top event)."""
         # Simplified cut set analysis
         cut_sets = []
-        for eid, event in events.items:
+        for eid, event in events.items():
             if not event.is_basic and event.gate_type == "AND":
                 cut_sets.append(event.children)
         return cut_sets[:5]  # Return top 5
@@ -275,9 +275,9 @@ class RootCauseAnalyzer:
         return recommendations
 
     def _assess_priority(self, cause: RootCauseFinding) -> str:
-        if cause.systemic or "safety" in cause.description.lower:
+        if cause.systemic or "safety" in cause.description.lower():
             return "High"
-        elif "quality" in cause.description.lower:
+        elif "quality" in cause.description.lower():
             return "Medium"
         return "Low"
 
@@ -309,7 +309,7 @@ class RootCauseAnalyzer:
         analysis_data: Dict = None
     ) -> RootCauseAnalysis:
         """Perform complete root cause analysis."""
-        investigation_id = f"RCA-{datetime.now.strftime('%Y%m%d-%H%M')}"
+        investigation_id = f"RCA-{datetime.now().strftime('%Y%m%d-%H%M')}"
         analysis_details = {}
         root_causes = []
 
@@ -431,7 +431,7 @@ def format_rca_text(rca: RootCauseAnalysis) -> str:
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Root Cause Analyzer for CAPA Investigations")
     parser.add_argument("--problem", type=str, help="Problem statement")
     parser.add_argument("--method", choices=["5why", "fishbone", "fault-tree", "kt"],
@@ -440,9 +440,9 @@ def main:
     parser.add_argument("--output", choices=["text", "json"], default="text", help="Output format")
     parser.add_argument("--interactive", action="store_true", help="Interactive mode")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    analyzer = RootCauseAnalyzer
+    analyzer = RootCauseAnalyzer()
 
     if args.data:
         with open(args.data) as f:
@@ -483,4 +483,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

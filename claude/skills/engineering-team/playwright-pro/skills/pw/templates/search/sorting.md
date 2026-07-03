@@ -13,7 +13,7 @@ Tests sorting results by name, date, and price.
 ```typescript
 import { test, expect } from '@playwright/test';
 
-test.describe('Search Sorting',  => {
+test.describe('Search Sorting', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('{{baseUrl}}/search?q={{searchQuery}}');
   });
@@ -23,8 +23,8 @@ test.describe('Search Sorting',  => {
     await page.getByRole('combobox', { name: /sort by/i }).selectOption('name_asc');
     await expect(page).toHaveURL(/sort=name_asc/);
     const names = page.getByTestId('result-name');
-    const first = await names.first.textContent;
-    const second = await names.nth(1).textContent;
+    const first = await names.first().textContent();
+    const second = await names.nth(1).textContent();
     expect(first!.localeCompare(second!)).toBeLessThanOrEqual(0);
   });
 
@@ -32,8 +32,8 @@ test.describe('Search Sorting',  => {
   test('sorts results alphabetically Z-A', async ({ page }) => {
     await page.getByRole('combobox', { name: /sort by/i }).selectOption('name_desc');
     const names = page.getByTestId('result-name');
-    const first = await names.first.textContent;
-    const second = await names.nth(1).textContent;
+    const first = await names.first().textContent();
+    const second = await names.nth(1).textContent();
     expect(first!.localeCompare(second!)).toBeGreaterThanOrEqual(0);
   });
 
@@ -42,17 +42,17 @@ test.describe('Search Sorting',  => {
     await page.getByRole('combobox', { name: /sort by/i }).selectOption('date_desc');
     await expect(page).toHaveURL(/sort=date_desc/);
     const dates = page.getByTestId('result-date');
-    const firstDate = new Date(await dates.first.getAttribute('datetime') ?? '');
+    const firstDate = new Date(await dates.first().getAttribute('datetime') ?? '');
     const secondDate = new Date(await dates.nth(1).getAttribute('datetime') ?? '');
-    expect(firstDate.getTime).toBeGreaterThanOrEqual(secondDate.getTime);
+    expect(firstDate.getTime()).toBeGreaterThanOrEqual(secondDate.getTime());
   });
 
   // Happy path: sort by price low-high
   test('sorts by price low to high', async ({ page }) => {
     await page.getByRole('combobox', { name: /sort by/i }).selectOption('price_asc');
     const prices = page.getByTestId('result-price');
-    const firstText = await prices.first.textContent ?? '';
-    const secondText = await prices.nth(1).textContent ?? '';
+    const firstText = await prices.first().textContent() ?? '';
+    const secondText = await prices.nth(1).textContent() ?? '';
     const first = parseFloat(firstText.replace(/[^0-9.]/g, ''));
     const second = parseFloat(secondText.replace(/[^0-9.]/g, ''));
     expect(first).toBeLessThanOrEqual(second);
@@ -62,8 +62,8 @@ test.describe('Search Sorting',  => {
   test('sorts by price high to low', async ({ page }) => {
     await page.getByRole('combobox', { name: /sort by/i }).selectOption('price_desc');
     const prices = page.getByTestId('result-price');
-    const firstText = await prices.first.textContent ?? '';
-    const secondText = await prices.nth(1).textContent ?? '';
+    const firstText = await prices.first().textContent() ?? '';
+    const secondText = await prices.nth(1).textContent() ?? '';
     const first = parseFloat(firstText.replace(/[^0-9.]/g, ''));
     const second = parseFloat(secondText.replace(/[^0-9.]/g, ''));
     expect(first).toBeGreaterThanOrEqual(second);
@@ -72,7 +72,7 @@ test.describe('Search Sorting',  => {
   // Happy path: sort persists with filters
   test('sort selection persists when filter applied', async ({ page }) => {
     await page.getByRole('combobox', { name: /sort by/i }).selectOption('price_asc');
-    await page.getByRole('checkbox', { name: '{{filterCategory}}' }).check;
+    await page.getByRole('checkbox', { name: '{{filterCategory}}' }).check();
     await expect(page).toHaveURL(/sort=price_asc/);
     await expect(page.getByRole('combobox', { name: /sort by/i })).toHaveValue('price_asc');
   });
@@ -91,7 +91,7 @@ test.describe('Search Sorting',  => {
 ```javascript
 const { test, expect } = require('@playwright/test');
 
-test.describe('Search Sorting',  => {
+test.describe('Search Sorting', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('{{baseUrl}}/search?q={{searchQuery}}');
   });
@@ -100,16 +100,16 @@ test.describe('Search Sorting',  => {
     await page.getByRole('combobox', { name: /sort by/i }).selectOption('name_asc');
     await expect(page).toHaveURL(/sort=name_asc/);
     const names = page.getByTestId('result-name');
-    const first = await names.first.textContent;
-    const second = await names.nth(1).textContent;
+    const first = await names.first().textContent();
+    const second = await names.nth(1).textContent();
     expect(first.localeCompare(second)).toBeLessThanOrEqual(0);
   });
 
   test('sorts by price low to high', async ({ page }) => {
     await page.getByRole('combobox', { name: /sort by/i }).selectOption('price_asc');
     const prices = page.getByTestId('result-price');
-    const a = parseFloat((await prices.first.textContent).replace(/[^0-9.]/g, ''));
-    const b = parseFloat((await prices.nth(1).textContent).replace(/[^0-9.]/g, ''));
+    const a = parseFloat((await prices.first().textContent()).replace(/[^0-9.]/g, ''));
+    const b = parseFloat((await prices.nth(1).textContent()).replace(/[^0-9.]/g, ''));
     expect(a).toBeLessThanOrEqual(b);
   });
 

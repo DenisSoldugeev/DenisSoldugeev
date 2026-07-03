@@ -78,32 +78,32 @@ def extract_frontmatter(text: str) -> Dict[str, str]:
     end = text.find("\n---", 3)
     if end == -1:
         return {}
-    block = text[3:end].strip
+    block = text[3:end].strip()
     out: Dict[str, str] = {}
     current_key: Optional[str] = None
     buffer: List[str] = []
-    for line in block.splitlines:
+    for line in block.splitlines():
         if ":" in line and not line.startswith(" ") and not line.startswith("\t"):
             # Flush previous
             if current_key:
-                out[current_key] = " ".join(buffer).strip
+                out[current_key] = " ".join(buffer).strip()
                 buffer = []
             key, _, val = line.partition(":")
-            current_key = key.strip
-            val = val.strip
+            current_key = key.strip()
+            val = val.strip()
             if val and val != ">":
                 buffer.append(val)
-        elif current_key and line.strip:
-            buffer.append(line.strip)
+        elif current_key and line.strip():
+            buffer.append(line.strip())
     if current_key:
-        out[current_key] = " ".join(buffer).strip
+        out[current_key] = " ".join(buffer).strip()
     return out
 
 
 def check_present(desc: str) -> Dict[str, Any]:
     return {
         "rule": "description_present",
-        "pass": bool(desc and desc.strip),
+        "pass": bool(desc and desc.strip()),
         "detail": f"Length: {len(desc)} chars" if desc else "Missing or empty description field",
     }
 
@@ -118,7 +118,7 @@ def check_length(desc: str, max_chars: int = 1024) -> Dict[str, Any]:
 
 
 def check_third_person(desc: str) -> Dict[str, Any]:
-    words = re.findall(r"\b[a-zA-Z]+\b", desc.lower)
+    words = re.findall(r"\b[a-zA-Z]+\b", desc.lower())
     flagged_first = [w for w in words if w in FIRST_PERSON]
     flagged_second = [w for w in words if w in SECOND_PERSON]
     flagged = flagged_first + flagged_second
@@ -221,7 +221,7 @@ def render_text(r: Dict[str, Any], source: str) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Validate a SKILL.md description per Matt Pocock's rules.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -229,12 +229,12 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to SKILL.md (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
             with open(args.path, "r", encoding="utf-8") as f:
-                text = f.read
+                text = f.read()
             source = args.path
         except (IOError, OSError) as e:
             print(f"error: could not read {args.path}: {e}", file=sys.stderr)
@@ -252,4 +252,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

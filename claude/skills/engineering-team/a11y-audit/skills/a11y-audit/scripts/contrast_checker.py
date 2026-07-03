@@ -3,7 +3,7 @@
 
 Checks foreground/background color pairs against WCAG 2.2 contrast ratio
 thresholds for normal text, large text, and UI components. Supports hex,
-rgb, and named CSS colors.
+rgb(), and named CSS colors.
 
 Usage:
     python contrast_checker.py "#ffffff" "#000000"
@@ -69,7 +69,7 @@ def parse_color(color_str: str) -> tuple:
       - rgb(r, g, b)  with values 0-255
       - Named CSS colors
     """
-    s = color_str.strip.lower
+    s = color_str.strip().lower()
 
     # Named color
     if s in NAMED_COLORS:
@@ -164,7 +164,7 @@ def suggest_backgrounds(fg_rgb: tuple, target_ratio: float = 4.5, count: int = 8
         candidates.append((min(255, v + 40), v, min(255, v + 20)))
         candidates.append((min(255, v + 20), min(255, v + 40), v))
 
-    seen = set
+    seen = set()
     scored = []
     for c in candidates:
         cr = contrast_ratio(fg_rgb, c)
@@ -196,7 +196,7 @@ def extract_css_pairs(css_text: str) -> list:
     # Split into rule blocks
     block_re = re.compile(r"([^{}]+)\{([^}]+)\}", re.DOTALL)
     for m in block_re.finditer(css_text):
-        selector = m.group(1).strip
+        selector = m.group(1).strip()
         body = m.group(2)
 
         fg = bg = None
@@ -209,20 +209,20 @@ def extract_css_pairs(css_text: str) -> list:
         )
 
         if fg_match:
-            val = fg_match.group(1).strip
+            val = fg_match.group(1).strip()
             c = _COLOR_RE.search(val)
             if c:
                 fg = c.group(1)
-            elif val.lower in NAMED_COLORS:
-                fg = val.lower
+            elif val.lower() in NAMED_COLORS:
+                fg = val.lower()
 
         if bg_match:
-            val = bg_match.group(1).strip
+            val = bg_match.group(1).strip()
             c = _COLOR_RE.search(val)
             if c:
                 bg = c.group(1)
-            elif val.lower in NAMED_COLORS:
-                bg = val.lower
+            elif val.lower() in NAMED_COLORS:
+                bg = val.lower()
 
         if fg and bg:
             pairs.append({"selector": selector, "foreground": fg, "background": bg})
@@ -294,14 +294,14 @@ def run_demo(as_json: bool) -> None:
         print("WCAG 2.2 Contrast Checker - Demo")
         print("=" * 60)
         for entry in all_results:
-            print
+            print()
             print(
                 format_result_human(
                     entry["foreground"], entry["background"],
                     entry["ratio"], entry["results"],
                 )
             )
-        print
+        print()
         print("-" * 60)
         print("Suggestion demo for foreground #336699:")
         suggestions = suggest_backgrounds(parse_color("#336699"))
@@ -311,7 +311,7 @@ def run_demo(as_json: bool) -> None:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
-def build_parser -> argparse.ArgumentParser:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="WCAG 2.2 Color Contrast Checker. "
         "Checks foreground/background pairs against AA and AAA thresholds.",
@@ -353,15 +353,20 @@ def build_parser -> argparse.ArgumentParser:
         action="store_true",
         help="Show example output with sample color pairs",
     )
+    parser.add_argument(
+        "--sample",
+        action="store_true",
+        help="Run with embedded sample color pairs (alias for --demo)",
+    )
     return parser
 
 
-def main -> int:
-    parser = build_parser
-    args = parser.parse_args
+def main() -> int:
+    parser = build_parser()
+    args = parser.parse_args()
 
-    # --demo mode
-    if args.demo:
+    # --demo / --sample mode
+    if args.demo or args.sample:
         run_demo(args.json_output)
         return 0
 
@@ -388,7 +393,7 @@ def main -> int:
     if args.batch:
         try:
             with open(args.batch, "r", encoding="utf-8") as fh:
-                css_text = fh.read
+                css_text = fh.read()
         except FileNotFoundError:
             print(f"Error: file not found: {args.batch}", file=sys.stderr)
             return 1
@@ -452,7 +457,7 @@ def main -> int:
                             entry["ratio"], entry["results"],
                         )
                     )
-            print
+            print()
             summary_pass = sum(1 for e in all_results if "ratio" in e and e["results"][0]["pass"])
             summary_total = sum(1 for e in all_results if "ratio" in e)
             print(f"Summary: {summary_pass}/{summary_total} pairs pass AA Normal Text")
@@ -496,4 +501,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

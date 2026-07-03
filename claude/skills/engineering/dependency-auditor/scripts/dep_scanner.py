@@ -5,6 +5,8 @@ Dependency Scanner - Multi-language dependency vulnerability and analysis tool.
 This script parses dependency files from various package managers, extracts direct
 and transitive dependencies, checks against built-in vulnerability databases,
 and provides comprehensive security analysis with actionable recommendations.
+
+Author: Claude Skills Engineering Team
 License: MIT
 """
 
@@ -52,7 +54,7 @@ class DependencyScanner:
     """Main dependency scanner class."""
     
     def __init__(self):
-        self.known_vulnerabilities = self._load_vulnerability_database
+        self.known_vulnerabilities = self._load_vulnerability_database()
         self.supported_files = {
             'package.json': self._parse_package_json,
             'package-lock.json': self._parse_package_lock,
@@ -195,24 +197,24 @@ class DependencyScanner:
         """Scan a project directory for dependencies and vulnerabilities."""
         project_path = Path(project_path)
         
-        if not project_path.exists:
+        if not project_path.exists():
             raise FileNotFoundError(f"Project path does not exist: {project_path}")
         
         scan_results = {
-            'timestamp': datetime.now.isoformat,
+            'timestamp': datetime.now().isoformat(),
             'project_path': str(project_path),
             'dependencies': [],
             'vulnerabilities_found': 0,
             'high_severity_count': 0,
             'medium_severity_count': 0,
             'low_severity_count': 0,
-            'ecosystems': set,
+            'ecosystems': set(),
             'scan_summary': {},
             'recommendations': []
         }
         
         # Find and parse dependency files
-        for file_pattern, parser in self.supported_files.items:
+        for file_pattern, parser in self.supported_files.items():
             matching_files = list(project_path.rglob(file_pattern))
             
             for dep_file in matching_files:
@@ -252,7 +254,7 @@ class DependencyScanner:
         vulnerabilities = []
         
         # Check package name (exact match and common variations)
-        package_names = [dependency.name, dependency.name.lower]
+        package_names = [dependency.name, dependency.name.lower()]
         
         for pkg_name in package_names:
             if pkg_name in self.known_vulnerabilities:
@@ -269,13 +271,13 @@ class DependencyScanner:
             # Handle common patterns like "<4.17.21", ">=1.0.0 <1.6.0"
             if '<' in affected_pattern and '>' not in affected_pattern:
                 # Pattern like "<4.17.21"
-                max_version = affected_pattern.replace('<', '').strip
+                max_version = affected_pattern.replace('<', '').strip()
                 return self._compare_versions(version, max_version) < 0
             elif '>=' in affected_pattern and '<' in affected_pattern:
                 # Pattern like ">=1.0.0 <1.6.0"
                 parts = affected_pattern.split('<')
-                min_part = parts[0].replace('>=', '').strip
-                max_part = parts[1].strip
+                min_part = parts[0].replace('>=', '').strip()
+                max_part = parts[1].strip()
                 return (self._compare_versions(version, min_part) >= 0 and 
                        self._compare_versions(version, max_part) < 0)
         except:
@@ -314,7 +316,7 @@ class DependencyScanner:
             # Parse dependencies
             for dep_type in ['dependencies', 'devDependencies']:
                 if dep_type in data:
-                    for name, version in data[dep_type].items:
+                    for name, version in data[dep_type].items():
                         dep = Dependency(
                             name=name,
                             version=version.replace('^', '').replace('~', '').replace('>=', '').replace('<=', ''),
@@ -337,7 +339,7 @@ class DependencyScanner:
                 data = json.load(f)
             
             if 'packages' in data:
-                for path, pkg_info in data['packages'].items:
+                for path, pkg_info in data['packages'].items():
                     if path == '':  # Skip root package
                         continue
                     
@@ -364,7 +366,7 @@ class DependencyScanner:
         
         try:
             with open(file_path, 'r') as f:
-                content = f.read
+                content = f.read()
             
             # Simple yarn.lock parsing
             packages = re.findall(r'^([^#\s][^:]+):\s*\n(?:\s+.*\n)*?\s+version\s+"([^"]+)"', content, re.MULTILINE)
@@ -392,15 +394,15 @@ class DependencyScanner:
         
         try:
             with open(file_path, 'r') as f:
-                lines = f.readlines
+                lines = f.readlines()
             
             for line in lines:
-                line = line.strip
+                line = line.strip()
                 if line and not line.startswith('#') and not line.startswith('-'):
                     # Parse package==version or package>=version patterns
                     match = re.match(r'^([a-zA-Z0-9_-]+)([><=!]+)(.+)$', line)
                     if match:
-                        name, operator, version = match.groups
+                        name, operator, version = match.groups()
                         dep = Dependency(
                             name=name,
                             version=version,
@@ -420,15 +422,15 @@ class DependencyScanner:
         
         try:
             with open(file_path, 'r') as f:
-                content = f.read
+                content = f.read()
             
             # Simple TOML parsing for dependencies
             dep_section = re.search(r'\[tool\.poetry\.dependencies\](.*?)(?=\[|\Z)', content, re.DOTALL)
             if dep_section:
                 for line in dep_section.group(1).split('\n'):
-                    match = re.match(r'^([a-zA-Z0-9_-]+)\s*=\s*["\']([^"\']+)["\']', line.strip)
+                    match = re.match(r'^([a-zA-Z0-9_-]+)\s*=\s*["\']([^"\']+)["\']', line.strip())
                     if match:
-                        name, version = match.groups
+                        name, version = match.groups()
                         if name != 'python':
                             dep = Dependency(
                                 name=name,
@@ -453,7 +455,7 @@ class DependencyScanner:
             
             for section in ['default', 'develop']:
                 if section in data:
-                    for name, info in data[section].items:
+                    for name, info in data[section].items():
                         version = info.get('version', '').replace('==', '')
                         dep = Dependency(
                             name=name,
@@ -474,7 +476,7 @@ class DependencyScanner:
         
         try:
             with open(file_path, 'r') as f:
-                content = f.read
+                content = f.read()
             
             # Extract package entries from TOML
             packages = re.findall(r'\[\[package\]\]\nname\s*=\s*"([^"]+)"\nversion\s*=\s*"([^"]+)"', content)
@@ -499,16 +501,16 @@ class DependencyScanner:
         
         try:
             with open(file_path, 'r') as f:
-                content = f.read
+                content = f.read()
             
             # Parse require block
             require_match = re.search(r'require\s*\((.*?)\)', content, re.DOTALL)
             if require_match:
                 requires = require_match.group(1)
                 for line in requires.split('\n'):
-                    match = re.match(r'\s*([^\s]+)\s+v?([^\s]+)', line.strip)
+                    match = re.match(r'\s*([^\s]+)\s+v?([^\s]+)', line.strip())
                     if match:
-                        name, version = match.groups
+                        name, version = match.groups()
                         dep = Dependency(
                             name=name,
                             version=version,
@@ -532,15 +534,15 @@ class DependencyScanner:
         
         try:
             with open(file_path, 'r') as f:
-                content = f.read
+                content = f.read()
             
             # Parse [dependencies] section
             dep_section = re.search(r'\[dependencies\](.*?)(?=\[|\Z)', content, re.DOTALL)
             if dep_section:
                 for line in dep_section.group(1).split('\n'):
-                    match = re.match(r'^([a-zA-Z0-9_-]+)\s*=\s*["\']([^"\']+)["\']', line.strip)
+                    match = re.match(r'^([a-zA-Z0-9_-]+)\s*=\s*["\']([^"\']+)["\']', line.strip())
                     if match:
-                        name, version = match.groups
+                        name, version = match.groups()
                         dep = Dependency(
                             name=name,
                             version=version,
@@ -560,7 +562,7 @@ class DependencyScanner:
         
         try:
             with open(file_path, 'r') as f:
-                content = f.read
+                content = f.read()
             
             # Parse [[package]] entries
             packages = re.findall(r'\[\[package\]\]\nname\s*=\s*"([^"]+)"\nversion\s*=\s*"([^"]+)"', content)
@@ -585,7 +587,7 @@ class DependencyScanner:
         
         try:
             with open(file_path, 'r') as f:
-                content = f.read
+                content = f.read()
             
             # Parse gem declarations
             gems = re.findall(r'gem\s+["\']([^"\']+)["\'](?:\s*,\s*["\']([^"\']+)["\'])?', content)
@@ -613,7 +615,7 @@ class DependencyScanner:
         
         try:
             with open(file_path, 'r') as f:
-                content = f.read
+                content = f.read()
             
             # Extract GEM section
             gem_section = re.search(r'GEM\s*\n(.*?)(?=\n\S|\Z)', content, re.DOTALL)
@@ -681,7 +683,7 @@ class DependencyScanner:
         """Generate a human-readable or JSON report."""
         if format == 'json':
             # Convert Dependency objects to dicts for JSON serialization
-            serializable_results = scan_results.copy
+            serializable_results = scan_results.copy()
             serializable_results['dependencies'] = [
                 {
                     'name': dep.name,
@@ -742,7 +744,7 @@ class DependencyScanner:
         report.append("=" * 60)
         return '\n'.join(report)
 
-def main:
+def main():
     """Main entry point for the dependency scanner."""
     parser = argparse.ArgumentParser(
         description='Scan project dependencies for vulnerabilities and security issues',
@@ -766,10 +768,10 @@ Examples:
     parser.add_argument('--quick-scan', action='store_true',
                        help='Perform quick scan (skip transitive dependencies)')
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
-        scanner = DependencyScanner
+        scanner = DependencyScanner()
         results = scanner.scan_project(args.project_path)
         report = scanner.generate_report(results, args.format)
         
@@ -789,4 +791,4 @@ Examples:
         sys.exit(1)
 
 if __name__ == '__main__':
-    main
+    main()

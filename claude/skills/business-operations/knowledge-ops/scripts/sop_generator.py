@@ -120,7 +120,7 @@ class SOPMetadata:
         return errs
 
 
-def _sample_metadata -> dict:
+def _sample_metadata() -> dict:
     return {
         "sop_name": "Vendor Offboarding",
         "process_owner": "alex@company.com (Vendor Management Lead)",
@@ -288,7 +288,7 @@ def _build_how_much(meta: SOPMetadata) -> str:
     )
 
 
-def _build_regulated_footer -> str:
+def _build_regulated_footer() -> str:
     return (
         "\n---\n\n"
         "## Document control (regulated profile)\n\n"
@@ -304,7 +304,7 @@ def _build_regulated_footer -> str:
     )
 
 
-def _build_finance_footer -> str:
+def _build_finance_footer() -> str:
     return (
         "\n---\n\n"
         "## Controls section (finance profile)\n\n"
@@ -318,7 +318,7 @@ def _build_finance_footer -> str:
     )
 
 
-def _build_hr_footer -> str:
+def _build_hr_footer() -> str:
     return (
         "\n---\n\n"
         "## Privacy & sensitive-data handling (HR profile)\n\n"
@@ -332,7 +332,7 @@ def _build_hr_footer -> str:
     )
 
 
-def _build_it_footer -> str:
+def _build_it_footer() -> str:
     return (
         "\n---\n\n"
         "## Change management (IT profile)\n\n"
@@ -344,7 +344,7 @@ def _build_it_footer -> str:
     )
 
 
-def _build_support_footer -> str:
+def _build_support_footer() -> str:
     return (
         "\n---\n\n"
         "## Customer impact & escalation (support profile)\n\n"
@@ -363,11 +363,11 @@ def _build_support_footer -> str:
 
 PROFILE_FOOTER = {
     "ops": "",
-    "support": _build_support_footer,
-    "finance": _build_finance_footer,
-    "hr": _build_hr_footer,
-    "it": _build_it_footer,
-    "regulated": _build_regulated_footer,
+    "support": _build_support_footer(),
+    "finance": _build_finance_footer(),
+    "hr": _build_hr_footer(),
+    "it": _build_it_footer(),
+    "regulated": _build_regulated_footer(),
 }
 
 
@@ -433,21 +433,21 @@ def main(argv=None) -> int:
     args = p.parse_args(argv)
 
     if args.sample:
-        data = _sample_metadata
+        data = _sample_metadata()
     elif args.input:
         path = Path(args.input)
-        if not path.exists:
+        if not path.exists():
             print(f"ERROR: input file not found: {args.input}",
                   file=sys.stderr)
             return 2
-        data = json.loads(path.read_text)
+        data = json.loads(path.read_text())
     else:
         print("ERROR: provide --input <metadata.json> or --sample",
               file=sys.stderr)
         return 2
 
     meta = SOPMetadata(**data)
-    errs = meta.validate
+    errs = meta.validate()
     if errs:
         print("VALIDATION ERRORS:", file=sys.stderr)
         for e in errs:
@@ -462,4 +462,4 @@ def main(argv=None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

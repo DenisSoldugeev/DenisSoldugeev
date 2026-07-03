@@ -111,7 +111,7 @@ Do NOT treat all assets as the same size. Establish a hierarchy:
 - **Accents/particles are tiny** (1–5vw) — depth-5
 - **Background fills** cover the full section — depth-0
 
-Position companions relative to the hero using calc:
+Position companions relative to the hero using calc():
 `right: calc(50% - [hero-half-width] - [gap])` to sit close to its edge.
 
 When the hero grows or exits on scroll, companions should scatter outward —
@@ -252,7 +252,6 @@ These are MANDATORY in every output:
 | File | What's Inside | When to Read |
 |------|--------------|--------------|
 | `references/asset-pipeline.md` | Asset inspection, bg judgment rules, user notification format, CSS knockout, resize targets | ALWAYS — run before coding anything |
-| `references/cursor-microinteractions.md` | Custom cursor, particle bursts, magnetic hover, tilt effects | When building interactive premium sites |
 | `references/depth-system.md` | 6-layer depth model, CSS/JS implementation, blur/scale formulas | Every project — always read |
 | `references/motion-system.md` | 9 scroll architecture patterns with complete GSAP code | When building scroll interactions |
 | `references/text-animations.md` | 13 text techniques with full implementation code | When animating any text |

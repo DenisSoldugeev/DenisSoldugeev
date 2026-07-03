@@ -328,7 +328,7 @@ Pricing: $40/TiB for message delivery
 from google.cloud import pubsub_v1
 import json
 
-publisher = pubsub_v1.PublisherClient
+publisher = pubsub_v1.PublisherClient()
 topic_path = publisher.topic_path('my-project', 'events')
 
 def publish_event(event_type, payload):
@@ -338,7 +338,7 @@ def publish_event(event_type, payload):
         data,
         event_type=event_type
     )
-    return future.result
+    return future.result()
 ```
 
 ### Cloud Tasks
@@ -537,7 +537,7 @@ gcloud projects add-iam-policy-binding my-project \
 from google.cloud import secretmanager
 
 def get_secret(project_id, secret_id, version="latest"):
-    client = secretmanager.SecretManagerServiceClient
+    client = secretmanager.SecretManagerServiceClient()
     name = f"projects/{project_id}/secrets/{secret_id}/versions/{version}"
     response = client.access_secret_version(request={"name": name})
     return response.payload.data.decode("UTF-8")

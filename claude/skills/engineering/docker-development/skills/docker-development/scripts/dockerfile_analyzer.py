@@ -186,8 +186,8 @@ def parse_dockerfile(content):
     instructions = []
     current = ""
 
-    for line in content.splitlines:
-        stripped = line.strip
+    for line in content.splitlines():
+        stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
         if stripped.endswith("\\"):
@@ -195,12 +195,12 @@ def parse_dockerfile(content):
             continue
         current += stripped
         # Parse instruction
-        match = re.match(r"^(\w+)\s+(.*)", current.strip)
+        match = re.match(r"^(\w+)\s+(.*)", current.strip())
         if match:
             instructions.append({
-                "instruction": match.group(1).upper,
+                "instruction": match.group(1).upper(),
                 "args": match.group(2),
-                "raw": current.strip,
+                "raw": current.strip(),
             })
         current = ""
 
@@ -228,7 +228,7 @@ def analyze_base_image(instructions):
     if not from_instructions:
         return {"image": "unknown", "tag": "unknown", "estimated_size_mb": 0}
 
-    last_from = from_instructions[-1]["args"].split[0]
+    last_from = from_instructions[-1]["args"].split()[0]
     parts = last_from.split(":")
     image = parts[0]
     tag = parts[1] if len(parts) > 1 else "latest"
@@ -236,7 +236,7 @@ def analyze_base_image(instructions):
     # Estimate size
     size = 0
     image_base = image.split("/")[-1]
-    for key, val in BASE_IMAGE_SIZES.items:
+    for key, val in BASE_IMAGE_SIZES.items():
         if key in f"{image_base}-{tag}" or key == image_base:
             size = val
             break
@@ -263,7 +263,7 @@ def run_pattern_checks(content, instructions):
                     "severity": rule["severity"],
                     "message": rule["message"],
                     "fix": rule["fix"],
-                    "line": match.group(0).strip[:80],
+                    "line": match.group(0).strip()[:80],
                 })
 
     # Custom checks
@@ -313,7 +313,7 @@ def generate_report(content, output_format="text", security_focus=False):
         findings = [f for f in findings if f["id"] in security_ids or f["severity"] in security_severities]
 
     # Deduplicate findings by id
-    seen_ids = set
+    seen_ids = set()
     unique_findings = []
     for f in findings:
         key = (f["id"], f["line"])
@@ -355,7 +355,7 @@ def generate_report(content, output_format="text", security_focus=False):
     print(f"  Base: {base['image']}:{base['tag']} (~{base['estimated_size_mb']}MB)")
     print(f"  Layers: {layers['total_layers']} | Stages: {layers['stages']} | Multi-stage: {'Yes' if layers['is_multistage'] else 'No'}")
     print(f"  RUN: {layers['run_count']} | COPY: {layers['copy_count']} | ADD: {layers['add_count']}")
-    print
+    print()
 
     counts = result["finding_counts"]
     print(f"  Findings: {counts['critical']} critical | {counts['high']} high | {counts['medium']} medium | {counts['low']} low")
@@ -363,7 +363,7 @@ def generate_report(content, output_format="text", security_focus=False):
 
     for f in findings:
         icon = {"critical": "!!!", "high": "!!", "medium": "!", "low": "~"}.get(f["severity"], "?")
-        print(f"\n  [{f['id']}] {icon} {f['severity'].upper}")
+        print(f"\n  [{f['id']}] {icon} {f['severity'].upper()}")
         print(f"  {f['message']}")
         print(f"  Line: {f['line']}")
         print(f"  Fix:  {f['fix']}")
@@ -375,7 +375,7 @@ def generate_report(content, output_format="text", security_focus=False):
     return result
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="docker-development: Dockerfile static analyzer"
     )
@@ -391,11 +391,11 @@ def main:
         action="store_true",
         help="Security-focused analysis only",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.dockerfile:
         path = Path(args.dockerfile)
-        if not path.exists:
+        if not path.exists():
             print(f"Error: File not found: {args.dockerfile}", file=sys.stderr)
             sys.exit(1)
         content = path.read_text(encoding="utf-8")
@@ -407,4 +407,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

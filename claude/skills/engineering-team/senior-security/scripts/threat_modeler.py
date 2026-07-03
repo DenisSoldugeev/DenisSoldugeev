@@ -370,21 +370,21 @@ COMPONENT_MAPPING = {
 
 def get_threats_for_component(component: str) -> List[Threat]:
     """Get applicable threats for a component."""
-    component_lower = component.lower
+    component_lower = component.lower()
 
     # Find matching categories
     categories = []
-    for key, value in COMPONENT_MAPPING.items:
+    for key, value in COMPONENT_MAPPING.items():
         if key in component_lower:
             categories.extend(value)
 
     # If no specific match, return all threats
     if not categories:
-        categories = list(THREAT_DATABASE.keys)
+        categories = list(THREAT_DATABASE.keys())
 
     # Collect unique threats
     threats = []
-    seen = set
+    seen = set()
     for category in set(categories):
         if category in THREAT_DATABASE:
             for threat in THREAT_DATABASE[category]:
@@ -402,7 +402,7 @@ def calculate_dread_score(threat: Threat) -> Dict:
     damage = threat.severity * 2
     reproducibility = 8 if threat.likelihood >= 4 else (5 if threat.likelihood >= 2 else 3)
     exploitability = threat.likelihood * 2
-    affected_users = 8 if "mass" in threat.impact.lower or "full" in threat.impact.lower else 5
+    affected_users = 8 if "mass" in threat.impact.lower() or "full" in threat.impact.lower() else 5
     discoverability = 7 if threat.likelihood >= 3 else 4
 
     dread = {
@@ -412,7 +412,7 @@ def calculate_dread_score(threat: Threat) -> Dict:
         "affected_users": affected_users,
         "discoverability": discoverability
     }
-    dread["total"] = sum(dread.values) / 5
+    dread["total"] = sum(dread.values()) / 5
     return dread
 
 
@@ -420,7 +420,7 @@ def format_threat_report(component: str, threats: List[Threat]) -> str:
     """Format threats as a readable report."""
     lines = []
     lines.append("=" * 70)
-    lines.append(f"THREAT MODEL: {component.upper}")
+    lines.append(f"THREAT MODEL: {component.upper()}")
     lines.append("=" * 70)
     lines.append("")
 
@@ -440,7 +440,7 @@ def format_threat_report(component: str, threats: List[Threat]) -> str:
         category_threats = [t for t in threats if t.category == stride.value]
         if category_threats:
             lines.append("-" * 70)
-            lines.append(f"[{stride.value.upper}]")
+            lines.append(f"[{stride.value.upper()}]")
             lines.append("-" * 70)
 
             for threat in category_threats:
@@ -465,7 +465,7 @@ def format_json_report(component: str, threats: List[Threat]) -> Dict:
     """Format threats as JSON structure."""
     return {
         "component": component,
-        "analysis_date": __import__('datetime').datetime.now.isoformat,
+        "analysis_date": __import__('datetime').datetime.now().isoformat(),
         "summary": {
             "total_threats": len(threats),
             "by_risk_level": {
@@ -494,13 +494,13 @@ def format_json_report(component: str, threats: List[Threat]) -> Dict:
     }
 
 
-def interactive_mode:
+def interactive_mode():
     """Run interactive threat modeling session."""
     print("\n" + "=" * 50)
     print("STRIDE THREAT MODELER - Interactive Mode")
     print("=" * 50)
 
-    component = input("\nEnter component name (e.g., 'User Authentication'): ").strip
+    component = input("\nEnter component name (e.g., 'User Authentication'): ").strip()
     if not component:
         print("Component name required.")
         return
@@ -514,19 +514,19 @@ def interactive_mode:
     print(format_threat_report(component, threats))
 
 
-def list_all_threats:
+def list_all_threats():
     """List all threats in the database."""
     print("\n" + "=" * 50)
     print("THREAT DATABASE")
     print("=" * 50)
 
-    for category, threats in THREAT_DATABASE.items:
-        print(f"\n[{category.upper}]")
+    for category, threats in THREAT_DATABASE.items():
+        print(f"\n[{category.upper()}]")
         for threat in threats:
             print(f"  - {threat.category}: {threat.name} (Risk: {threat.risk_level})")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="STRIDE Threat Modeler - Analyze security threats",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -577,14 +577,14 @@ Examples:
         help="Output file path"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.interactive:
-        interactive_mode
+        interactive_mode()
         return
 
     if args.list_threats:
-        list_all_threats
+        list_all_threats()
         return
 
     if not args.component:
@@ -606,4 +606,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

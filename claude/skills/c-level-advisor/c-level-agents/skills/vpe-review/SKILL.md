@@ -1,6 +1,6 @@
 ---
 name: "vpe-review"
-description: "/ds:vpe-review <plan> — Throughput-first VP of Engineering interrogation of any plan that touches delivery, eng hiring, team structure, or production discipline."
+description: "/ds:vpe-review <plan> — Throughput-first VP of Engineering interrogation of any plan that touches delivery, eng hiring, team structure, or production discipline. Use when cycle time balloons, DORA metrics slide, or before committing to an eng hiring wave or a reorg."
 ---
 
 # /ds:vpe-review — VPE Forcing Questions
@@ -61,13 +61,13 @@ The throughput-first VPE pressure-tests any plan touching eng operations. Six qu
 
 ```bash
 # 1. Delivery throughput
-python ../../../skills/vpe-advisor/scripts/delivery_throughput_analyzer.py sprint_metrics.json
+python ../../../vpe-advisor/scripts/delivery_throughput_analyzer.py sprint_metrics.json
 
 # 2. Hiring funnel
-python ../../../skills/vpe-advisor/scripts/eng_hiring_funnel_calculator.py funnel.json
+python ../../../vpe-advisor/scripts/eng_hiring_funnel_calculator.py funnel.json
 
 # 3. Team structure
-python ../../../skills/vpe-advisor/scripts/eng_team_structure_designer.py team.json
+python ../../../vpe-advisor/scripts/eng_team_structure_designer.py team.json
 ```
 
 ## Output Format
@@ -112,7 +112,7 @@ python ../../../skills/vpe-advisor/scripts/eng_team_structure_designer.py team.j
 ## Routing
 
 - `/ds:cto-review` — for architectural causes of throughput problems
-- `/ds:chro-review` — for hiring funnel comp/leveling issues
+- `ds-chro-advisor` agent — for hiring funnel comp/leveling issues
 - `/ds:cfo-review` — for cost-per-hire envelope and eng budget
 - `/ds:ciso-review` — for production discipline + compliance overlap
 - `/ds:decide` — log the verdict

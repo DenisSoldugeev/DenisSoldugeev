@@ -604,7 +604,7 @@ def get_clause_checklist(clause: str) -> dict:
 def get_process_checklist(process: str) -> dict:
     """Get audit checklist for a specific process."""
     if process not in PROCESS_MAPPING:
-        available = ", ".join(sorted(PROCESS_MAPPING.keys))
+        available = ", ".join(sorted(PROCESS_MAPPING.keys()))
         return {"error": f"Process '{process}' not found. Available: {available}"}
 
     clauses = PROCESS_MAPPING[process]
@@ -628,11 +628,11 @@ def get_process_checklist(process: str) -> dict:
     }
 
 
-def get_system_audit_checklist -> dict:
+def get_system_audit_checklist() -> dict:
     """Get complete system audit checklist covering all clauses."""
     all_questions = []
 
-    for clause, data in sorted(ISO13485_CLAUSES.items):
+    for clause, data in sorted(ISO13485_CLAUSES.items()):
         for q in data["questions"]:
             all_questions.append({
                 "clause": clause,
@@ -642,7 +642,7 @@ def get_system_audit_checklist -> dict:
 
     return {
         "audit_type": "system",
-        "clauses_covered": list(ISO13485_CLAUSES.keys),
+        "clauses_covered": list(ISO13485_CLAUSES.keys()),
         "questions": all_questions,
         "question_count": len(all_questions)
     }
@@ -657,7 +657,7 @@ def format_checklist_text(checklist: dict) -> str:
 
     lines.append("=" * 70)
     lines.append("ISO 13485:2016 INTERNAL AUDIT CHECKLIST")
-    lines.append(f"Generated: {datetime.now.strftime('%Y-%m-%d %H:%M')}")
+    lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     lines.append("=" * 70)
 
     if "clause" in checklist:
@@ -670,7 +670,7 @@ def format_checklist_text(checklist: dict) -> str:
             lines.append("   Notes: ____________________________________")
 
     elif "process" in checklist:
-        lines.append(f"\nProcess: {checklist['process'].replace('-', ' ').title}")
+        lines.append(f"\nProcess: {checklist['process'].replace('-', ' ').title()}")
         lines.append(f"Clauses Covered: {', '.join(checklist['clauses_covered'])}")
         lines.append("-" * 50)
 
@@ -715,7 +715,7 @@ def format_checklist_text(checklist: dict) -> str:
     return "\n".join(lines)
 
 
-def interactive_mode:
+def interactive_mode():
     """Run interactive audit checklist generator."""
     print("\n" + "=" * 50)
     print("QMS INTERNAL AUDIT CHECKLIST GENERATOR")
@@ -729,7 +729,7 @@ def interactive_mode:
     print("5. List all clauses")
     print("6. Exit")
 
-    choice = input("\nEnter choice (1-6): ").strip
+    choice = input("\nEnter choice (1-6): ").strip()
 
     if choice == "1":
         print("\nAvailable clause sections:")
@@ -739,28 +739,28 @@ def interactive_mode:
         print("  7.x - Product Realization")
         print("  8.x - Measurement, Analysis, Improvement")
 
-        clause = input("\nEnter clause number (e.g., 7.3.1): ").strip
+        clause = input("\nEnter clause number (e.g., 7.3.1): ").strip()
         checklist = get_clause_checklist(clause)
         print(format_checklist_text(checklist))
 
     elif choice == "2":
-        processes = sorted(PROCESS_MAPPING.keys)
+        processes = sorted(PROCESS_MAPPING.keys())
         print("\nAvailable processes:")
         for i, p in enumerate(processes, 1):
             clauses = PROCESS_MAPPING[p]
             print(f"  {i}. {p} (clauses: {', '.join(clauses)})")
 
-        process = input("\nEnter process name: ").strip.lower
+        process = input("\nEnter process name: ").strip().lower()
         checklist = get_process_checklist(process)
         print(format_checklist_text(checklist))
 
     elif choice == "3":
         print("\nGenerating full system audit checklist...")
-        checklist = get_system_audit_checklist
+        checklist = get_system_audit_checklist()
         print(format_checklist_text(checklist))
 
     elif choice == "4":
-        processes = sorted(PROCESS_MAPPING.keys)
+        processes = sorted(PROCESS_MAPPING.keys())
         print("\nAvailable QMS Processes:")
         print("-" * 50)
         for p in processes:
@@ -771,7 +771,7 @@ def interactive_mode:
     elif choice == "5":
         print("\nISO 13485:2016 Clauses:")
         print("-" * 50)
-        for clause, data in sorted(ISO13485_CLAUSES.items):
+        for clause, data in sorted(ISO13485_CLAUSES.items()):
             print(f"  {clause}: {data['title']} ({len(data['questions'])} questions)")
 
     elif choice == "6":
@@ -782,7 +782,7 @@ def interactive_mode:
         print("Invalid choice.")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Generate ISO 13485:2016 internal audit checklists",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -832,14 +832,14 @@ Examples:
         help="Run in interactive mode"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.interactive:
-        interactive_mode
+        interactive_mode()
         return
 
     if args.list_processes:
-        processes = sorted(PROCESS_MAPPING.keys)
+        processes = sorted(PROCESS_MAPPING.keys())
         if args.output == "json":
             result = {p: PROCESS_MAPPING[p] for p in processes}
             print(json.dumps(result, indent=2))
@@ -854,12 +854,12 @@ Examples:
     if args.list_clauses:
         if args.output == "json":
             result = {c: {"title": d["title"], "question_count": len(d["questions"])}
-                     for c, d in sorted(ISO13485_CLAUSES.items)}
+                     for c, d in sorted(ISO13485_CLAUSES.items())}
             print(json.dumps(result, indent=2))
         else:
             print("\nISO 13485:2016 Clauses:")
             print("-" * 50)
-            for clause, data in sorted(ISO13485_CLAUSES.items):
+            for clause, data in sorted(ISO13485_CLAUSES.items()):
                 print(f"  {clause}: {data['title']} ({len(data['questions'])} questions)")
         return
 
@@ -870,9 +870,9 @@ Examples:
     elif args.process:
         checklist = get_process_checklist(args.process)
     elif args.audit_type == "system":
-        checklist = get_system_audit_checklist
+        checklist = get_system_audit_checklist()
     else:
-        parser.print_help
+        parser.print_help()
         return
 
     if checklist:
@@ -883,4 +883,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

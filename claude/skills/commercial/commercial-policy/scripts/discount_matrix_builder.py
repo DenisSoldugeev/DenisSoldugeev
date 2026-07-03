@@ -230,7 +230,7 @@ def render_markdown(matrix: dict[str, Any]) -> str:
     out.append(f"# Discount Matrix — profile: `{matrix['profile']}`")
     out.append("")
     out.append("## Constraints")
-    for k, v in matrix["constraints"].items:
+    for k, v in matrix["constraints"].items():
         out.append(f"- **{k}**: {v}")
     out.append("")
     out.append(f"## Cells ({matrix['n_cells']}) — backed by {matrix['n_observed_deals']} observed deals")
@@ -263,7 +263,7 @@ def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description="Design a data-backed discount matrix.")
     ap.add_argument("--input", help="Path to policy intake JSON.")
     ap.add_argument("--profile", default="saas",
-                    choices=list(PROFILES.keys),
+                    choices=list(PROFILES.keys()),
                     help="Industry profile (default: saas).")
     ap.add_argument("--output", default="markdown", choices=["markdown", "json"],
                     help="Output format (default: markdown).")
@@ -282,7 +282,7 @@ def main(argv: list[str]) -> int:
             return 1
         profile = args.profile or payload.get("industry", "saas")
     else:
-        ap.print_help
+        ap.print_help()
         return 0
 
     matrix = build_matrix(payload, profile)

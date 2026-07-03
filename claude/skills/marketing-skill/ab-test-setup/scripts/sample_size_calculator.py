@@ -255,14 +255,14 @@ def pretty_print(result: dict, score: dict) -> None:
     for issue in score["issues"]:
         print(f"  ⚠  {issue}")
 
-    print
+    print()
 
 
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
-def parse_args:
+def parse_args():
     parser = argparse.ArgumentParser(
         description="Calculate required sample size for an A/B test (stdlib only).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -280,7 +280,7 @@ def parse_args:
                         help="Total daily visitors across both variants (for duration estimate)")
     parser.add_argument("--json",           action="store_true",
                         help="Output results as JSON")
-    return parser.parse_args
+    return parser.parse_args()
 
 
 DEMO_SCENARIOS = [
@@ -293,8 +293,8 @@ DEMO_SCENARIOS = [
 ]
 
 
-def main:
-    args = parse_args
+def main():
+    args = parse_args()
     demo_mode = (args.baseline is None and args.mde is None)
 
     if demo_mode:
@@ -334,4 +334,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

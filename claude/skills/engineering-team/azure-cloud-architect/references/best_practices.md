@@ -228,7 +228,7 @@ Action Groups (email, Teams, PagerDuty, webhook)
 ```kql
 requests
 | where duration > 2000
-| summarize count, avg(duration), percentile(duration, 95) by name
+| summarize count(), avg(duration), percentile(duration, 95) by name
 | order by count_ desc
 | take 10
 ```
@@ -237,7 +237,7 @@ requests
 ```kql
 dependencies
 | where success == false
-| summarize count by type, target, resultCode
+| summarize count() by type, target, resultCode
 | order by count_ desc
 ```
 
@@ -245,7 +245,7 @@ dependencies
 ```kql
 KubePodInventory
 | where PodStatus != "Running" and PodStatus != "Succeeded"
-| summarize count by PodStatus, Namespace, Name
+| summarize count() by PodStatus, Namespace, Name
 | order by count_ desc
 ```
 

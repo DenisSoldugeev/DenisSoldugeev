@@ -1,6 +1,6 @@
 ---
 name: "cfo-review"
-description: "/ds:cfo-review <plan> — Numerate-skeptic interrogation of any plan that touches money. Unit economics, runway, dilution, capital allocation."
+description: "/ds:cfo-review <plan> — Numerate-skeptic interrogation of any plan that touches money. Unit economics, runway, dilution, capital allocation. Use when a plan commits meaningful spend — e.g. a hiring wave, a fundraise decision, or a new channel budget."
 ---
 
 # /ds:cfo-review — CFO Forcing Questions
@@ -53,9 +53,9 @@ The numerate skeptic stress-tests anything that touches money. Six questions bef
 
 1. **Run the numbers:**
    ```bash
-   python ../../../skills/cfo-advisor/scripts/burn_rate_calculator.py
-   python ../../../skills/cfo-advisor/scripts/unit_economics_analyzer.py
-   python ../../../skills/cfo-advisor/scripts/fundraising_model.py
+   python ../../../cfo-advisor/scripts/burn_rate_calculator.py
+   python ../../../cfo-advisor/scripts/unit_economics_analyzer.py
+   python ../../../cfo-advisor/scripts/fundraising_model.py
    ```
 2. **Answer all six questions** with numbers, not adjectives.
 3. **Apply the verdict:**

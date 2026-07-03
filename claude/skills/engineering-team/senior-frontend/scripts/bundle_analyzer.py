@@ -101,7 +101,7 @@ DEV_ONLY_PACKAGES = [
 def load_package_json(project_dir: Path) -> Optional[Dict]:
     """Load and parse package.json."""
     package_path = project_dir / "package.json"
-    if not package_path.exists:
+    if not package_path.exists():
         return None
 
     try:
@@ -121,7 +121,7 @@ def analyze_dependencies(package_json: Dict) -> Dict:
     optimizations = []
 
     # Check for heavy packages
-    for pkg, info in HEAVY_PACKAGES.items:
+    for pkg, info in HEAVY_PACKAGES.items():
         if pkg in deps:
             issues.append({
                 "package": pkg,
@@ -132,7 +132,7 @@ def analyze_dependencies(package_json: Dict) -> Dict:
             })
 
     # Check for dev dependencies in production
-    for pkg in deps.keys:
+    for pkg in deps.keys():
         for dev_pattern in DEV_ONLY_PACKAGES:
             if dev_pattern in pkg:
                 warnings.append({
@@ -142,8 +142,8 @@ def analyze_dependencies(package_json: Dict) -> Dict:
                 })
 
     # Check for optimization opportunities
-    for pkg in deps.keys:
-        for opt_pkg, opt_tip in PACKAGE_OPTIMIZATIONS.items:
+    for pkg in deps.keys():
+        for opt_pkg, opt_tip in PACKAGE_OPTIMIZATIONS.items():
             if opt_pkg in pkg:
                 optimizations.append({
                     "package": pkg,
@@ -186,9 +186,9 @@ def check_nextjs_config(project_dir: Path) -> Dict:
     ]
 
     for config_path in config_paths:
-        if config_path.exists:
+        if config_path.exists():
             try:
-                content = config_path.read_text
+                content = config_path.read_text()
                 suggestions = []
 
                 # Check for image optimization
@@ -230,7 +230,7 @@ def analyze_imports(project_dir: Path) -> Dict:
 
     files_checked = 0
     for src_dir in src_dirs:
-        if not src_dir.exists:
+        if not src_dir.exists():
             continue
 
         for ext in ["*.ts", "*.tsx", "*.js", "*.jsx"]:
@@ -240,7 +240,7 @@ def analyze_imports(project_dir: Path) -> Dict:
 
                 files_checked += 1
                 try:
-                    content = file_path.read_text
+                    content = file_path.read_text()
                     for pattern, message in patterns_to_check:
                         if re.search(pattern, content):
                             issues.append({
@@ -353,7 +353,7 @@ def print_report(analysis: Dict) -> None:
     print("\n" + "=" * 60)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Analyze frontend project for bundle optimization opportunities"
     )
@@ -374,10 +374,10 @@ def main:
         help="Include detailed import analysis"
     )
 
-    args = parser.parse_args
-    project_dir = Path(args.project_dir).resolve
+    args = parser.parse_args()
+    project_dir = Path(args.project_dir).resolve()
 
-    if not project_dir.exists:
+    if not project_dir.exists():
         print(f"Error: Directory not found: {project_dir}", file=sys.stderr)
         sys.exit(1)
 
@@ -404,4 +404,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

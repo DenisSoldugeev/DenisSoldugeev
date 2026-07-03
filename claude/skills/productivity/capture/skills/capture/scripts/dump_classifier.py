@@ -74,7 +74,7 @@ Do my Q3 OKRs before launch.
 
 
 def classify_line(raw: str) -> str:
-    line = raw.strip
+    line = raw.strip()
     if not line:
         return "blank"
 
@@ -86,13 +86,13 @@ def classify_line(raw: str) -> str:
             return label
 
     # Project-component heuristic: short noun-phrase containing a hint word
-    if len(stripped.split) <= 6:
+    if len(stripped.split()) <= 6:
         for hint in PROJECT_COMPONENT_HINTS:
             if re.search(rf"\b{hint}s?\b", stripped, re.IGNORECASE):
                 return "project-component"
 
     # Single-noun-phrase or short fragment without verb → likely context or component
-    if len(stripped.split) <= 4 and not stripped.endswith("?"):
+    if len(stripped.split()) <= 4 and not stripped.endswith("?"):
         return "project-component"
 
     # Default: treat as context (the skill folds this into project framing)
@@ -102,13 +102,13 @@ def classify_line(raw: str) -> str:
 def classify(text: str) -> Dict[str, Any]:
     items: List[Dict[str, Any]] = []
     counts: Dict[str, int] = {}
-    for line_no, raw in enumerate(text.splitlines, start=1):
-        if not raw.strip:
+    for line_no, raw in enumerate(text.splitlines(), start=1):
+        if not raw.strip():
             continue
         label = classify_line(raw)
         if label == "blank":
             continue
-        items.append({"line": line_no, "label": label, "text": raw.strip})
+        items.append({"line": line_no, "label": label, "text": raw.strip()})
         counts[label] = counts.get(label, 0) + 1
     return {"item_count": len(items), "by_label": counts, "items": items}
 
@@ -117,7 +117,7 @@ def render_human(result: Dict[str, Any]) -> str:
     out: List[str] = []
     out.append(f"Dump classification ({result['item_count']} non-empty items)")
     out.append("By label:")
-    for label, n in sorted(result["by_label"].items, key=lambda kv: -kv[1]):
+    for label, n in sorted(result["by_label"].items(), key=lambda kv: -kv[1]):
         out.append(f"  {label:<20s} {n}")
     out.append("")
     out.append("Per-line labels:")
@@ -137,12 +137,12 @@ def main(argv: List[str]) -> int:
         text = SAMPLE_DUMP
     elif args.path:
         p = Path(args.path)
-        if not p.exists:
+        if not p.exists():
             print(f"error: {args.path} not found", file=sys.stderr)
             return 2
         text = p.read_text(encoding="utf-8")
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     result = classify(text)

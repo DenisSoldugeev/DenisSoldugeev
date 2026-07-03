@@ -367,6 +367,7 @@ INCIDENT POST-MORTEM REPORT
 
 Incident ID: INC-[YYYY]-[###]
 Date: [Report date]
+Author: [Name]
 Classification: [Internal/Confidential]
 
 EXECUTIVE SUMMARY

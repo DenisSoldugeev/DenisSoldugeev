@@ -192,7 +192,7 @@ def lint(matrix: dict[str, Any]) -> dict[str, Any]:
         except ValueError:
             return None
 
-    for key, c in by_key.items:
+    for key, c in by_key.items():
         arr, term, pay, strat = key
         for dim, order, axis in [(arr, ARR_ORDER, "arr"), (term, TERM_ORDER, "term"), (pay, PAY_ORDER, "payment")]:
             nxt = _adj(order, dim)
@@ -234,7 +234,7 @@ def lint(matrix: dict[str, Any]) -> dict[str, Any]:
     by_arr: dict[str, list[float]] = {}
     for c in cells:
         by_arr.setdefault(c["arr_band"], []).append(c["margin_floor_pct"])
-    for arr_band, floors in by_arr.items:
+    for arr_band, floors in by_arr.items():
         if floors and (max(floors) - min(floors)) > 5:
             findings.append({
                 "rule_id": "L07", "severity": "MAJOR",
@@ -345,7 +345,7 @@ def main(argv: list[str]) -> int:
             print(f"ERROR: could not read {args.input}: {e}", file=sys.stderr)
             return 1
     else:
-        ap.print_help
+        ap.print_help()
         return 0
 
     report = lint(matrix)

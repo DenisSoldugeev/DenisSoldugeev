@@ -69,10 +69,10 @@ The ISO 13485 QMS auditor pressure-tests any medical-device QMS work. Six tracea
 
 ```bash
 # 1. Audit programme optimization
-python ../../ra-qm-team/skills/qms-audit-expert/scripts/audit_schedule_optimizer.py audit_scope.json
+python ra-qm-team/skills/qms-audit-expert/scripts/audit_schedule_optimizer.py audit_scope.json
 
 # 2. Mock audit for readiness check
-python ../../skills/compliance-os/scripts/audit_simulator.py iso13485_scope.json
+python ../../compliance-os/scripts/audit_simulator.py iso13485_scope.json
 
 # 3. CAPA system review
 # Route to ra-qm-team/skills/capa-officer/ tools
@@ -148,8 +148,8 @@ python ../../skills/compliance-os/scripts/audit_simulator.py iso13485_scope.json
 ## Related
 
 - Agent: [`ds-cqm-iso13485`](../../agents/ds-cqm-iso13485.md)
-- Skill: [`qms-audit-expert`](../../ra-qm-team/qms-audit-expert/SKILL.md)
-- Playbook: [iso13485_audit_playbook.md](../../ra-qm-team/qms-audit-expert/references/iso13485_audit_playbook.md)
+- Skill: [`qms-audit-expert`](../../../ra-qm-team/skills/qms-audit-expert/SKILL.md)
+- Playbook: [iso13485_audit_playbook.md](../../../ra-qm-team/skills/qms-audit-expert/references/iso13485_audit_playbook.md)
 - Adjacent: `../fda-qsr-audit-prep/`, `../aims-audit/`, `../compliance-readiness/`
 
 ---

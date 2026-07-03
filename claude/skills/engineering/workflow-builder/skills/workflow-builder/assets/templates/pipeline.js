@@ -37,7 +37,7 @@ const results = await pipeline(
     agent(`Triage:\n${item}`, { label: `triage:${i + 1}`, phase: 'Triage', model: 'haiku', schema: FINDINGS_SCHEMA }),
   // Stage 2 — verify / refine each finding (fewer items, more judgement).
   (prev) =>
-    parallel((prev?.findings ?? []).map(f =>  =>
+    parallel((prev?.findings ?? []).map(f => () =>
       agent(`Verify and refine: ${f.title}`, { phase: 'Verify', model: 'sonnet' })))
 )
 

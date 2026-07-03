@@ -36,9 +36,9 @@ def _parse_results(path):
     if not os.path.isfile(path):
         return {"_raw_text": ""}
     with open(path, "r", encoding="utf-8", errors="replace") as f:
-        text = f.read
+        text = f.read()
     parsed = {}
-    for line in text.splitlines:
+    for line in text.splitlines():
         m = re.match(r"^\s*([\w_.\-]+)\s*=\s*(.+?)\s*$", line)
         if m:
             parsed[m.group(1)] = m.group(2)
@@ -48,7 +48,7 @@ def _parse_results(path):
 
 def _check_blame(text):
     found = []
-    low = text.lower
+    low = text.lower()
     for phrase in BLAME_PHRASES:
         if phrase in low:
             found.append(phrase)
@@ -61,7 +61,7 @@ def build_postmortem(plan, results, follow_ups):
     pm = {
         "experiment_id": plan.get("experiment_id", "?"),
         "target": plan.get("target", "?"),
-        "created": datetime.now(timezone.utc).isoformat,
+        "created": datetime.now(timezone.utc).isoformat(),
         "hypothesis": plan.get("hypothesis", "?"),
         "outcome": results.get("outcome", "<UNRECORDED — must record>"),
         "aborted": results.get("aborted", "<unrecorded>"),
@@ -118,13 +118,13 @@ def render_markdown(pm):
     return "\n".join(lines)
 
 
-def main:
+def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--plan", required=True, help="Path to experiment plan JSON (from experiment_designer.py --format json)")
     ap.add_argument("--result-log", required=True, help="Path to result log (free-form text OR key=value lines)")
     ap.add_argument("--follow-up", action="append", default=[], help="A follow-up action; repeat for multiple")
     ap.add_argument("--format", choices=["markdown", "json"], default="markdown")
-    args = ap.parse_args
+    args = ap.parse_args()
 
     if not os.path.isfile(args.plan):
         print(f"ERROR: plan not found: {args.plan}", file=sys.stderr)
@@ -141,4 +141,4 @@ def main:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

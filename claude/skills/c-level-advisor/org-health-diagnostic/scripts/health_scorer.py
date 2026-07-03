@@ -104,7 +104,7 @@ class Metric:
                 return 4.0 + (2.0 * position)
 
     def traffic_light(self) -> Optional[TrafficLight]:
-        s = self.score
+        s = self.score()
         if s is None:
             return None
         if s >= 7:
@@ -126,13 +126,13 @@ class Dimension:
 
     def score(self) -> Optional[float]:
         """Average of available metric scores."""
-        scores = [m.score for m in self.metrics if m.score is not None]
+        scores = [m.score() for m in self.metrics if m.score() is not None]
         if not scores:
             return None
         return round(sum(scores) / len(scores), 1)
 
     def traffic_light(self) -> TrafficLight:
-        s = self.score
+        s = self.score()
         if s is None:
             return TrafficLight.YELLOW  # Unknown = watch
         if s >= 7:
@@ -311,7 +311,7 @@ def calculate_overall(dimensions: List[Dimension], stage: Stage) -> Optional[flo
     total_weight = 0.0
     weighted_sum = 0.0
     for dim in dimensions:
-        score = dim.score
+        score = dim.score()
         w = weights.get(dim.key, 0.0)
         if score is not None and w > 0:
             weighted_sum += score * w
@@ -338,8 +338,8 @@ def print_dashboard(dimensions: List[Dimension], overall: Optional[float],
                     stage: Stage, company: str = "Company") -> None:
     """Print the full health dashboard."""
     print("\n" + "=" * 65)
-    print(f"ORG HEALTH DIAGNOSTIC — {company.upper}")
-    print(f"Stage: {stage.value.replace('_', ' ').title}")
+    print(f"ORG HEALTH DIAGNOSTIC — {company.upper()}")
+    print(f"Stage: {stage.value.replace('_', ' ').title()}")
     if overall is not None:
         overall_tl = TrafficLight.GREEN if overall >= 7 else (TrafficLight.YELLOW if overall >= 4 else TrafficLight.RED)
         print(f"Overall: {traffic_light_icon(overall_tl)} {overall}/10")
@@ -352,11 +352,11 @@ def print_dashboard(dimensions: List[Dimension], overall: Optional[float],
     priority_yellows = []
 
     for dim in dimensions:
-        score = dim.score
-        tl = dim.traffic_light
+        score = dim.score()
+        tl = dim.traffic_light()
         icon = traffic_light_icon(tl)
         trend = trend_arrow(dim.trend)
-        coverage = int(dim.coverage * 100)
+        coverage = int(dim.coverage() * 100)
 
         score_str = f"{score:.1f}" if score is not None else "N/A"
         cov_str = f"({coverage}% data)" if coverage < 100 else ""
@@ -375,26 +375,26 @@ def print_dashboard(dimensions: List[Dimension], overall: Optional[float],
 
         idx = 1
         for dim in priority_reds[:3]:
-            print(f"\n🔴 [{idx}] {dim.name} — Score: {dim.score:.1f}/10")
+            print(f"\n🔴 [{idx}] {dim.name} — Score: {dim.score():.1f}/10")
             # Show worst metric
             worst = min(
-                [m for m in dim.metrics if m.score is not None],
-                key=lambda m: m.score,
+                [m for m in dim.metrics if m.score() is not None],
+                key=lambda m: m.score(),
                 default=None
             )
             if worst:
                 print(f"   Worst metric: {worst.name} = {worst.value}{worst.unit}")
-            missing = dim.missing_metrics
+            missing = dim.missing_metrics()
             if missing:
                 print(f"   Missing data: {', '.join(missing)}")
             idx += 1
 
         for dim in priority_yellows[:2]:
-            print(f"\n🟡 [{idx}] {dim.name} — Score: {dim.score:.1f}/10 — {trend_arrow(dim.trend)}")
+            print(f"\n🟡 [{idx}] {dim.name} — Score: {dim.score():.1f}/10 — {trend_arrow(dim.trend)}")
             idx += 1
 
     # Data gaps
-    all_missing = [(dim.name, dim.missing_metrics) for dim in dimensions if dim.missing_metrics]
+    all_missing = [(dim.name, dim.missing_metrics()) for dim in dimensions if dim.missing_metrics()]
     if all_missing:
         print(f"\n{'─' * 65}")
         print("DATA GAPS (fill to improve diagnostic accuracy)")
@@ -404,7 +404,7 @@ def print_dashboard(dimensions: List[Dimension], overall: Optional[float],
     # Cascade warnings
     print(f"\n{'─' * 65}")
     print("CASCADE RISK")
-    red_keys = {d.key for d in dimensions if d.traffic_light == TrafficLight.RED}
+    red_keys = {d.key for d in dimensions if d.traffic_light() == TrafficLight.RED}
     if "people" in red_keys:
         print("  ⚠️  People RED → Engineering velocity drop expected in 60-90 days")
     if "engineering" in red_keys:
@@ -436,18 +436,18 @@ def to_json(dimensions: List[Dimension], overall: Optional[float], stage: Stage)
         result["dimensions"][dim.key] = {
             "name": dim.name,
             "owner": dim.owner,
-            "score": dim.score,
-            "traffic_light": dim.traffic_light.value,
+            "score": dim.score(),
+            "traffic_light": dim.traffic_light().value,
             "trend": dim.trend.value,
-            "coverage_pct": round(dim.coverage * 100),
-            "missing_metrics": dim.missing_metrics,
+            "coverage_pct": round(dim.coverage() * 100),
+            "missing_metrics": dim.missing_metrics(),
             "metrics": [
                 {
                     "name": m.name,
                     "value": m.value,
                     "unit": m.unit,
-                    "score": m.score,
-                    "traffic_light": m.traffic_light.value if m.traffic_light else None,
+                    "score": m.score(),
+                    "traffic_light": m.traffic_light().value if m.traffic_light() else None,
                 }
                 for m in dim.metrics
             ]
@@ -491,7 +491,7 @@ def interactive_mode(stage: Stage) -> Dict:
     data = {}
 
     def ask(prompt: str, key: str, default=None):
-        val = input(f"  {prompt}: ").strip
+        val = input(f"  {prompt}: ").strip()
         if val:
             try:
                 data[key] = float(val)
@@ -538,7 +538,7 @@ def interactive_mode(stage: Stage) -> Dict:
     return data
 
 
-def main:
+def main():
     print("\n🏥 ORG HEALTH DIAGNOSTIC")
     print("Multi-dimension organizational health scorer\n")
 
@@ -548,12 +548,12 @@ def main:
         "b": Stage.SERIES_B, "series_b": Stage.SERIES_B,
         "c": Stage.SERIES_C, "series_c": Stage.SERIES_C,
     }
-    stage_arg = next((a for a in sys.argv[1:] if a.lower in stage_map), None)
-    stage = stage_map.get(stage_arg.lower, Stage.SERIES_A) if stage_arg else Stage.SERIES_A
+    stage_arg = next((a for a in sys.argv[1:] if a.lower() in stage_map), None)
+    stage = stage_map.get(stage_arg.lower(), Stage.SERIES_A) if stage_arg else Stage.SERIES_A
 
     if "--interactive" in sys.argv or "-i" in sys.argv:
-        company = input("Company name: ").strip or "Company"
-        stage_input = input("Stage (seed/a/b/c): ").strip.lower
+        company = input("Company name: ").strip() or "Company"
+        stage_input = input("Stage (seed/a/b/c): ").strip().lower()
         stage = stage_map.get(stage_input, Stage.SERIES_A)
         data = interactive_mode(stage)
     else:
@@ -582,4 +582,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

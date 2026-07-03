@@ -132,7 +132,7 @@ def jaccard_similarity(set1: Set[str], set2: Set[str]) -> float:
 
 def normalize_name(name: str) -> str:
     """Normalize assignee/inventor names for comparison."""
-    return name.lower.strip.replace(",", "").replace(".", "")
+    return name.lower().strip().replace(",", "").replace(".", "")
 
 
 def resolve_families(hits: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -157,12 +157,12 @@ def resolve_families(hits: List[Dict[str, Any]]) -> Dict[str, Any]:
             else:
                 unmatched.append(h)
         # Add to family map using priority_number as fallback ID
-        for pn, group in by_priority.items:
+        for pn, group in by_priority.items():
             by_family[f"PRI:{pn}"] = group
         # Pass 3: heuristic clustering for unmatched (priority_date + applicant + inventor overlap)
         for h in unmatched:
             matched = False
-            for fid, group in list(by_family.items):
+            for fid, group in list(by_family.items()):
                 rep = group[0]
                 if (h.get("priority_date") == rep.get("priority_date")
                     and jaccard_similarity({normalize_name(h.get("assignee", ""))}, {normalize_name(rep.get("assignee", ""))}) >= 0.8
@@ -176,7 +176,7 @@ def resolve_families(hits: List[Dict[str, Any]]) -> Dict[str, Any]:
 
     # For each family: pick representative (earliest priority date, prefer US member if available)
     families: List[Dict[str, Any]] = []
-    for fid, members in by_family.items:
+    for fid, members in by_family.items():
         sorted_members = sorted(members, key=lambda m: (m.get("priority_date", "9999"), 0 if m.get("jurisdiction") == "US" else 1))
         rep = sorted_members[0]
         jurisdictions = sorted({m.get("jurisdiction", "?") for m in members})
@@ -239,7 +239,7 @@ def main(argv: List[str]) -> int:
         result = resolve_families(SAMPLE_HITS)
     elif args.hits_file:
         p = Path(args.hits_file)
-        if not p.exists:
+        if not p.exists():
             print(f"error: {args.hits_file} not found", file=sys.stderr); return 2
         try:
             hits = json.loads(p.read_text(encoding="utf-8"))
@@ -247,7 +247,7 @@ def main(argv: List[str]) -> int:
             print(f"error: invalid JSON: {e}", file=sys.stderr); return 2
         result = resolve_families(hits)
     else:
-        parser.print_help; return 0
+        parser.print_help(); return 0
 
     if args.output == "json":
         print(json.dumps(result, indent=2, default=str))

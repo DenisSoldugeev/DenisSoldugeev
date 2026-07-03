@@ -31,9 +31,9 @@ def _load_yaml_minimal(path):
     regex rather than fully parse. Crude but enough for the structural
     checks below; a full YAML parser would be the upgrade path."""
     with open(path, "r", encoding="utf-8", errors="replace") as f:
-        text = f.read
+        text = f.read()
     docs = re.split(r"^---\s*$", text, flags=re.MULTILINE)
-    return [d for d in docs if d.strip]
+    return [d for d in docs if d.strip()]
 
 
 def _is_crd_doc(doc):
@@ -55,7 +55,7 @@ def _check_one(doc, path):
         findings.append(("FAIL", "schema_present", "no openAPIV3Schema declared"))
     if re.search(r"x-kubernetes-preserve-unknown-fields:\s*true", doc):
         findings.append(("WARN", "schema_typed", "x-kubernetes-preserve-unknown-fields: true present (defeats validation)"))
-    if "conditions" not in doc.lower:
+    if "conditions" not in doc.lower():
         findings.append(("WARN", "conditions_array", "no conditions array referenced (Karpathy: declare an explicit shape)"))
     if "additionalPrinterColumns" not in doc:
         findings.append(("WARN", "printer_columns", "no additionalPrinterColumns (kubectl get UX is poor)"))
@@ -114,11 +114,11 @@ def render_text(results):
     return 1 if fails else 0
 
 
-def main:
+def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--crd", required=True, help="Path to a CRD YAML file or a directory of YAMLs")
     ap.add_argument("--format", choices=["text", "json"], default="text")
-    args = ap.parse_args
+    args = ap.parse_args()
 
     if not os.path.exists(args.crd):
         print(f"ERROR: not found: {args.crd}", file=sys.stderr)
@@ -131,4 +131,4 @@ def main:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -220,7 +220,7 @@ def print_report(params, projection, summary, break_even, min_traffic):
     months = params["months_to_model"]
 
     print("\n" + "=" * 65)
-    print(f"FREE TOOL ROI ESTIMATOR — {tool_name.upper}")
+    print(f"FREE TOOL ROI ESTIMATOR — {tool_name.upper()}")
     print("=" * 65)
 
     print("\n📊 INPUT PARAMETERS")
@@ -329,7 +329,7 @@ DEFAULT_PARAMS = {
 # Main
 # ---------------------------------------------------------------------------
 
-def main:
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -342,7 +342,7 @@ def main:
         help="Path to a JSON file with tool parameters. "
              "If omitted, reads from stdin or runs embedded sample."
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     params = None
 
@@ -353,8 +353,8 @@ def main:
         except Exception as e:
             print(f"Error reading file: {e}", file=sys.stderr)
             sys.exit(1)
-    elif not sys.stdin.isatty:
-        raw = sys.stdin.read.strip
+    elif not sys.stdin.isatty():
+        raw = sys.stdin.read().strip()
         if raw:
             try:
                 params = json.loads(raw)
@@ -369,7 +369,7 @@ def main:
         params = DEFAULT_PARAMS
 
     # Fill defaults for any missing keys
-    for k, v in DEFAULT_PARAMS.items:
+    for k, v in DEFAULT_PARAMS.items():
         params.setdefault(k, v)
 
     projection = build_projection(params)
@@ -398,4 +398,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

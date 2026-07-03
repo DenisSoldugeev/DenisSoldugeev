@@ -65,13 +65,13 @@ The ISO 27001 ISMS auditor pressure-tests any ISMS work. Six sample-driven quest
 
 ```bash
 # 1. Audit programme planning
-python ../../ra-qm-team/skills/isms-audit-expert/scripts/isms_audit_scheduler.py audit_scope.json
+python ra-qm-team/skills/isms-audit-expert/scripts/isms_audit_scheduler.py audit_scope.json
 
 # 2. Mock audit for readiness check
-python ../../skills/compliance-os/scripts/audit_simulator.py iso27001_scope.json
+python ../../compliance-os/scripts/audit_simulator.py iso27001_scope.json
 
 # 3. Cross-framework reuse (SOC 2 = 75% overlap; ISO 42001 = 60% reuse)
-python ../../skills/compliance-os/scripts/cross_framework_mapper.py program.json
+python ../../compliance-os/scripts/cross_framework_mapper.py program.json
 ```
 
 ## Output Format
@@ -129,8 +129,8 @@ python ../../skills/compliance-os/scripts/cross_framework_mapper.py program.json
 ## Related
 
 - Agent: [`ds-ciso-iso27001`](../../agents/ds-ciso-iso27001.md)
-- Skill: [`isms-audit-expert`](../../ra-qm-team/isms-audit-expert/SKILL.md)
-- Playbook: [iso27001_audit_playbook.md](../../ra-qm-team/isms-audit-expert/references/iso27001_audit_playbook.md)
+- Skill: [`isms-audit-expert`](../../../ra-qm-team/skills/isms-audit-expert/SKILL.md)
+- Playbook: [iso27001_audit_playbook.md](../../../ra-qm-team/skills/isms-audit-expert/references/iso27001_audit_playbook.md)
 - Adjacent: `../soc2-audit-prep/`, `../aims-audit/`, `../gdpr-audit-prep/`, `../compliance-readiness/`
 
 ---

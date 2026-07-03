@@ -39,6 +39,7 @@ class DocumentVersion:
     title: str
     version: str
     revision_date: str
+    author: str
     status: str  # "Draft", "Under Review", "Approved", "Obsolete"
     change_summary: str = ""
     next_review_date: str = ""
@@ -80,16 +81,16 @@ class DocumentVersionControl:
         self.doc_store = Path(doc_store_path)
         self.doc_store.mkdir(parents=True, exist_ok=True)
         self.metadata_file = self.doc_store / "metadata.json"
-        self.documents = self._load_metadata
+        self.documents = self._load_metadata()
 
     def _load_metadata(self) -> Dict[str, DocumentVersion]:
         """Load document metadata from storage."""
-        if self.metadata_file.exists:
+        if self.metadata_file.exists():
             with open(self.metadata_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             return {
                 doc_id: DocumentVersion(**doc_data)
-                for doc_id, doc_data in data.items
+                for doc_id, doc_data in data.items()
             }
         return {}
 
@@ -98,22 +99,22 @@ class DocumentVersionControl:
         with open(self.metadata_file, 'w', encoding='utf-8') as f:
             json.dump({
                 doc_id: asdict(doc)
-                for doc_id, doc in self.documents.items
+                for doc_id, doc in self.documents.items()
             }, f, indent=2, ensure_ascii=False)
 
     def _generate_doc_id(self, title: str, doc_type: str) -> str:
         """Generate unique document ID."""
         # Extract first letters of words, append type code
-        words = re.findall(r'\b\w', title.upper)
+        words = re.findall(r'\b\w', title.upper())
         prefix = ''.join(words[:3]) if words else 'DOC'
-        timestamp = datetime.now.strftime('%y%m%d%H%M')
+        timestamp = datetime.now().strftime('%y%m%d%H%M')
         return f"{prefix}-{doc_type}-{timestamp}"
 
     def _parse_version(self, version: str) -> Tuple[int, int, int]:
         """Parse semantic version string."""
         match = self.VERSION_PATTERN.match(version)
         if match:
-            return tuple(int(x) for x in match.groups)
+            return tuple(int(x) for x in match.groups())
         raise ValueError(f"Invalid version format: {version}")
 
     def _increment_version(self, current: str, change_type: str) -> str:
@@ -129,24 +130,25 @@ class DocumentVersionControl:
     def _calculate_checksum(self, filepath: Path) -> str:
         """Calculate SHA256 checksum of document file."""
         with open(filepath, 'rb') as f:
-            return hashlib.sha256(f.read).hexdigest
+            return hashlib.sha256(f.read()).hexdigest()
 
     def create_document(
         self,
         title: str,
         content: str,
+        author: str,
         doc_type: str,
         change_summary: str = "Initial release",
         attachments: List[str] = None
     ) -> DocumentVersion:
         """Create a new document version."""
         if doc_type not in self.DOCUMENT_TYPES:
-            raise ValueError(f"Invalid document type. Choose from: {list(self.DOCUMENT_TYPES.keys)}")
+            raise ValueError(f"Invalid document type. Choose from: {list(self.DOCUMENT_TYPES.keys())}")
 
         doc_id = self._generate_doc_id(title, doc_type)
         version = "1.0.0"
-        revision_date = datetime.now.strftime('%Y-%m-%d')
-        next_review = (datetime.now + timedelta(days=365)).strftime('%Y-%m-%d')
+        revision_date = datetime.now().strftime('%Y-%m-%d')
+        next_review = (datetime.now() + timedelta(days=365)).strftime('%Y-%m-%d')
 
         # Save document content
         doc_path = self.doc_store / f"{doc_id}_v{version}.md"
@@ -167,7 +169,7 @@ class DocumentVersionControl:
         )
 
         self.documents[doc_id] = doc
-        self._save_metadata
+        self._save_metadata()
         return doc
 
     def revise_document(
@@ -185,13 +187,13 @@ class DocumentVersionControl:
 
         old_doc = self.documents[doc_id]
         new_version = self._increment_version(old_doc.version, change_type)
-        revision_date = datetime.now.strftime('%Y-%m-%d')
+        revision_date = datetime.now().strftime('%Y-%m-%d')
 
         # Archive old version
         old_path = self.doc_store / f"{doc_id}_v{old_doc.version}.md"
         archive_path = self.doc_store / "archive" / f"{doc_id}_v{old_doc.version}_{revision_date}.md"
         archive_path.parent.mkdir(exist_ok=True)
-        if old_path.exists:
+        if old_path.exists():
             os.rename(old_path, archive_path)
 
         # Save new content
@@ -208,13 +210,13 @@ class DocumentVersionControl:
             author=change_author,
             status="Draft",  # Needs re-approval
             change_summary=change_summary or f"Revision {new_version}",
-            next_review_date=(datetime.now + timedelta(days=365)).strftime('%Y-%m-%d'),
+            next_review_date=(datetime.now() + timedelta(days=365)).strftime('%Y-%m-%d'),
             attachments=attachments or old_doc.attachments,
             checksum=self._calculate_checksum(doc_path)
         )
 
         self.documents[doc_id] = new_doc
-        self._save_metadata
+        self._save_metadata()
         return new_doc
 
     def approve_document(
@@ -235,9 +237,9 @@ class DocumentVersionControl:
         signature = {
             "name": approver_name,
             "title": approver_title,
-            "date": datetime.now.strftime('%Y-%m-%d %H:%M'),
+            "date": datetime.now().strftime('%Y-%m-%d %H:%M'),
             "comments": comments,
-            "signature_hash": hashlib.sha256(f"{doc_id}{doc.version}{approver_name}".encode).hexdigest[:16]
+            "signature_hash": hashlib.sha256(f"{doc_id}{doc.version}{approver_name}".encode()).hexdigest()[:16]
         }
 
         doc.approved_by.append(approver_name)
@@ -245,7 +247,7 @@ class DocumentVersionControl:
 
         # Approve if enough approvers (simplified: 1 is enough for demo)
         doc.status = "Approved"
-        self._save_metadata
+        self._save_metadata()
         return True
 
     def withdraw_document(self, doc_id: str, reason: str, withdrawn_by: str) -> bool:
@@ -261,13 +263,13 @@ class DocumentVersionControl:
         signature = {
             "name": withdrawn_by,
             "title": "QMS Manager",
-            "date": datetime.now.strftime('%Y-%m-%d %H:%M'),
+            "date": datetime.now().strftime('%Y-%m-%d %H:%M'),
             "comments": reason,
-            "signature_hash": hashlib.sha256(f"{doc_id}OB{withdrawn_by}".encode).hexdigest[:16]
+            "signature_hash": hashlib.sha256(f"{doc_id}OB{withdrawn_by}".encode()).hexdigest()[:16]
         }
         doc.signed_by.append(signature)
 
-        self._save_metadata
+        self._save_metadata()
         return True
 
     def get_document_history(self, doc_id: str) -> List[Dict]:
@@ -278,7 +280,7 @@ class DocumentVersionControl:
             match = re.search(r'_v(\d+\.\d+\.\d+)\.md$', file.name)
             if match:
                 version = match.group(1)
-                stat = file.stat
+                stat = file.stat()
                 history.append({
                     "version": version,
                     "filename": file.name,
@@ -290,7 +292,7 @@ class DocumentVersionControl:
         for file in (self.doc_store / "archive").glob(f"{doc_id}_v*.md"):
             match = re.search(r'_v(\d+\.\d+\.\d+)_(\d{4}-\d{2}-\d{2})\.md$', file.name)
             if match:
-                version, date = match.groups
+                version, date = match.groups()
                 history.append({
                     "version": version,
                     "filename": file.name,
@@ -309,7 +311,7 @@ class DocumentVersionControl:
             "documents": []
         }
 
-        for doc in self.documents.values:
+        for doc in self.documents.values():
             # By status
             matrix["by_status"][doc.status] = matrix["by_status"].get(doc.status, 0) + 1
 
@@ -344,7 +346,7 @@ def format_matrix_text(matrix: Dict) -> str:
         "BY STATUS",
         "-" * 40,
     ]
-    for status, count in matrix["by_status"].items:
+    for status, count in matrix["by_status"].items():
         lines.append(f"  {status}: {count}")
 
     lines.extend([
@@ -352,7 +354,7 @@ def format_matrix_text(matrix: Dict) -> str:
         "BY TYPE",
         "-" * 40,
     ])
-    for dtype, count in matrix["by_type"].items:
+    for dtype, count in matrix["by_type"].items():
         lines.append(f"  {dtype}: {count}")
 
     lines.extend([
@@ -370,11 +372,11 @@ def format_matrix_text(matrix: Dict) -> str:
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Document Version Control for Quality Documentation")
     parser.add_argument("--create", type=str, help="Create new document from template")
     parser.add_argument("--title", type=str, help="Document title (required with --create)")
-    parser.add_argument("--type", choices=list(DocumentVersionControl.DOCUMENT_TYPES.keys), help="Document type")
+    parser.add_argument("--type", choices=list(DocumentVersionControl.DOCUMENT_TYPES.keys()), help="Document type")
     parser.add_argument("--author", type=str, default="QMS Manager", help="Document author")
     parser.add_argument("--revise", type=str, help="Revise existing document (doc_id)")
     parser.add_argument("--reason", type=str, help="Reason for revision")
@@ -387,8 +389,8 @@ def main:
     parser.add_argument("--output", choices=["text", "json"], default="text")
     parser.add_argument("--interactive", action="store_true", help="Interactive mode")
 
-    args = parser.parse_args
-    dvc = DocumentVersionControl
+    args = parser.parse_args()
+    dvc = DocumentVersionControl()
 
     if args.create and args.title and args.type:
         # Create new document with default content
@@ -396,7 +398,7 @@ def main:
 
 **Document ID:** [auto-generated]
 **Version:** 1.0.0
-**Date:** {datetime.now.strftime('%Y-%m-%d')}
+**Date:** {datetime.now().strftime('%Y-%m-%d')}
 **Author:** {args.author}
 
 ## Purpose
@@ -414,7 +416,7 @@ def main:
 ## Revision History
 | Version | Date | Author | Change Summary |
 |---------|------|--------|----------------|
-| 1.0.0 | {datetime.now.strftime('%Y-%m-%d')} | {args.author} | Initial release |
+| 1.0.0 | {datetime.now().strftime('%Y-%m-%d')} | {args.author} | Initial release |
 """
         doc = dvc.create_document(
             title=args.title,
@@ -436,14 +438,14 @@ def main:
         success = dvc.withdraw_document(args.withdraw, args.withdraw_reason, "QMS Manager")
         print(f"{'✅ Withdrawn' if success else '❌ Failed'} document {args.withdraw}")
     elif args.matrix:
-        matrix = dvc.generate_document_matrix
+        matrix = dvc.generate_document_matrix()
         if args.output == "json":
             print(json.dumps(matrix, indent=2))
         else:
             print(format_matrix_text(matrix))
     elif args.status:
         print("📋 Document Status:")
-        for doc_id, doc in dvc.documents.items:
+        for doc_id, doc in dvc.documents.items():
             print(f"  {doc_id} v{doc.version} - {doc.title} [{doc.status}]")
     else:
         # Demo
@@ -451,7 +453,7 @@ def main:
         print("   Repository contains", len(dvc.documents), "documents")
         if dvc.documents:
             print("\n   Existing documents:")
-            for doc in dvc.documents.values:
+            for doc in dvc.documents.values():
                 print(f"     {doc.doc_id} v{doc.version} - {doc.title} ({doc.status})")
 
         print("\n💡 Usage:")
@@ -461,4 +463,4 @@ def main:
         print("   --matrix --output text/json")
 
 if __name__ == "__main__":
-    main
+    main()

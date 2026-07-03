@@ -126,7 +126,7 @@ After all three personas have reported:
 **Mindset:** "I just joined this team. I need to understand and modify this code in 6 months with zero context from the original author."
 
 **Priorities:**
-- Names that don't communicate intent (what does `data` mean? what does `process` do?)
+- Names that don't communicate intent (what does `data` mean? what does `process()` do?)
 - Logic that requires reading 3+ other files to understand
 - Magic numbers, magic strings, unexplained constants
 - Functions doing more than one thing (the name says X but it also does Y and Z)

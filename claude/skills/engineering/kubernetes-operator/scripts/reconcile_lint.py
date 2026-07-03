@@ -17,7 +17,7 @@ CODE_EXTS = {".go"}
 
 CHECKS = [
     ("time_sleep", r"\btime\.Sleep\s*\(", "FAIL", "time.Sleep inside reconcile blocks the work queue. Use ctrl.Result{RequeueAfter: ...}."),
-    ("update_spec", r"r\.(?:Client\.)?Update\(\s*ctx\s*,\s*\w+\)", "WARN", "r.Client.Update on the reconciled object likely mutates spec. Use r.Status.Update for status."),
+    ("update_spec", r"r\.(?:Client\.)?Update\(\s*ctx\s*,\s*\w+\)", "WARN", "r.Client.Update on the reconciled object likely mutates spec. Use r.Status().Update for status."),
     ("missing_context_in_http", r"http\.(?:Get|Post|Do)\s*\(", "WARN", "HTTP calls without ctx-aware client; cannot cancel during shutdown."),
     ("os_exit", r"\bos\.Exit\s*\(", "FAIL", "os.Exit inside reconcile kills the controller; return an error instead."),
     ("panic_call", r"\bpanic\s*\(", "WARN", "panic inside reconcile crashes the controller; return an error so it requeues."),
@@ -28,7 +28,7 @@ CHECKS = [
 def _read(path):
     try:
         with open(path, "r", encoding="utf-8", errors="replace") as f:
-            return f.read
+            return f.read()
     except OSError:
         return ""
 
@@ -38,8 +38,8 @@ def _find_reconcile_blocks(src):
     blocks = []
     sig = re.compile(r"func\s+\([^)]*\)\s+Reconcile\s*\(", re.MULTILINE)
     for m in sig.finditer(src):
-        start = m.start
-        i = src.find("{", m.end)
+        start = m.start()
+        i = src.find("{", m.end())
         if i < 0:
             continue
         depth = 1
@@ -63,7 +63,7 @@ def _check_block(body, start_line):
     findings = []
     for key, pattern, level, msg in CHECKS:
         for m in re.finditer(pattern, body):
-            line_offset = body[: m.start].count("\n")
+            line_offset = body[: m.start()].count("\n")
             findings.append({
                 "level": level,
                 "key": key,
@@ -157,11 +157,11 @@ def render_text(results):
     return 1 if fails else 0
 
 
-def main:
+def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--controller", required=True, help="Path to a Go controller file or directory")
     ap.add_argument("--format", choices=["text", "json"], default="text")
-    args = ap.parse_args
+    args = ap.parse_args()
 
     if not os.path.exists(args.controller):
         print(f"ERROR: not found: {args.controller}", file=sys.stderr)
@@ -174,4 +174,4 @@ def main:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

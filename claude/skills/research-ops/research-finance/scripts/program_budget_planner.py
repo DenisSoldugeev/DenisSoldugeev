@@ -141,7 +141,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--sample", action="store_true", help="use the embedded sample")
     args = p.parse_args(argv)
 
-    conf = _cfg.load_config if _cfg else {}
+    conf = _cfg.load_config() if _cfg else {}
     profile = args.profile or conf.get("default_profile", "biotech")
     data = SAMPLE if (args.sample or not args.input) else json.load(open(args.input))
     periods = args.periods or int(data.get("periods", 4))
@@ -162,4 +162,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

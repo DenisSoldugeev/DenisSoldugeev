@@ -130,7 +130,7 @@ def find_tf_files(directory):
         if entry.endswith(".tf"):
             filepath = os.path.join(directory, entry)
             with open(filepath, encoding="utf-8") as f:
-                tf_files[entry] = f.read
+                tf_files[entry] = f.read()
     return tf_files
 
 
@@ -259,7 +259,7 @@ def check_variables(variables):
             })
         # Check if name suggests a secret
         secret_patterns = ["password", "secret", "token", "key", "api_key", "credentials"]
-        name_lower = v["name"].lower
+        name_lower = v["name"].lower()
         if any(p in name_lower for p in secret_patterns) and not v["is_sensitive"]:
             issues.append({
                 "severity": "high",
@@ -283,8 +283,8 @@ def check_outputs(outputs):
 def check_file_structure(tf_files):
     """Check if expected files are present."""
     issues = []
-    filenames = set(tf_files.keys)
-    for expected, purpose in EXPECTED_FILES.items:
+    filenames = set(tf_files.keys())
+    for expected, purpose in EXPECTED_FILES.items():
         if expected not in filenames:
             issues.append({
                 "severity": "medium" if expected != "versions.tf" else "high",
@@ -295,7 +295,7 @@ def check_file_structure(tf_files):
 
 def analyze_directory(tf_files):
     """Run full analysis on a set of .tf files."""
-    all_content = "\n".join(tf_files.values)
+    all_content = "\n".join(tf_files.values())
 
     resources = parse_resources(all_content)
     data_sources = parse_data_sources(all_content)
@@ -313,7 +313,7 @@ def analyze_directory(tf_files):
     # Check for backend configuration
     has_backend = any(
         re.search(r'\bbackend\s+"', content)
-        for content in tf_files.values
+        for content in tf_files.values()
     )
     if not has_backend:
         findings.append({
@@ -324,7 +324,7 @@ def analyze_directory(tf_files):
     # Check for terraform required_version
     has_tf_version = any(
         re.search(r'required_version\s*=', content)
-        for content in tf_files.values
+        for content in tf_files.values()
     )
     if not has_tf_version:
         findings.append({
@@ -333,7 +333,7 @@ def analyze_directory(tf_files):
         })
 
     # Providers in child modules check
-    for filename, content in tf_files.items:
+    for filename, content in tf_files.items():
         if filename not in ("providers.tf", "versions.tf", "backend.tf"):
             if re.search(r'^provider\s+"', content, re.MULTILINE):
                 findings.append({
@@ -349,7 +349,7 @@ def analyze_directory(tf_files):
     providers = sorted(set(r["provider"] for r in resources))
 
     return {
-        "files": sorted(tf_files.keys),
+        "files": sorted(tf_files.keys()),
         "file_count": len(tf_files),
         "resources": resources,
         "resource_count": len(resources),
@@ -405,16 +405,16 @@ def generate_report(analysis, output_format="text"):
     print(f"  Score: {score}/100")
     print(f"  Files: {', '.join(analysis['files'])}")
     print(f"  Providers: {', '.join(analysis['providers']) if analysis['providers'] else 'none detected'}")
-    print
+    print()
     print(f"  Resources: {analysis['resource_count']} | Data Sources: {analysis['data_source_count']}")
     print(f"  Variables: {analysis['variable_count']} | Outputs: {analysis['output_count']} | Modules: {analysis['module_count']}")
-    print
+    print()
     print(f"  Findings: {counts['critical']} critical | {counts['high']} high | {counts['medium']} medium | {counts['low']} low")
     print(f"{'─' * 60}")
 
     for f in findings:
         icon = {"critical": "!!!", "high": "!!", "medium": "!", "low": "~"}.get(f["severity"], "?")
-        print(f"\n  {icon} {f['severity'].upper}")
+        print(f"\n  {icon} {f['severity'].upper()}")
         print(f"  {f['message']}")
 
     if not findings:
@@ -424,7 +424,7 @@ def generate_report(analysis, output_format="text"):
     return result
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="terraform-patterns: Terraform module analyzer"
     )
@@ -438,11 +438,11 @@ def main:
         default="text",
         help="Output format (default: text)",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.directory:
         dirpath = Path(args.directory)
-        if not dirpath.is_dir:
+        if not dirpath.is_dir():
             print(f"Error: Not a directory: {args.directory}", file=sys.stderr)
             sys.exit(1)
         tf_files = find_tf_files(str(dirpath))
@@ -458,4 +458,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

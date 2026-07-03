@@ -34,8 +34,8 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 ## Security
 
 - Flag `reinterpret_cast` on user-controlled data — potential type confusion
-- Flag raw array indexing without bounds check — use `.at` or assert bounds
-- Flag `std::string` data passed to C APIs without null-termination guarantee — use `.c_str`
+- Flag raw array indexing without bounds check — use `.at()` or assert bounds
+- Flag `std::string` data passed to C APIs without null-termination guarantee — use `.c_str()`
 - Flag hardcoded buffer sizes — derive from `sizeof` or use `std::array<T, N>`
 - Flag `sscanf` / `sprintf` — use `std::istringstream` or `std::format` (C++20)
 - Flag user-controlled data used as a format string

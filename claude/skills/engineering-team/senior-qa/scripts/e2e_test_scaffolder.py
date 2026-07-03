@@ -85,17 +85,17 @@ class RouteScanner:
         self.source_path = source_path
         self.verbose = verbose
         self.routes: List[RouteInfo] = []
-        self.is_app_router = self._detect_router_type
+        self.is_app_router = self._detect_router_type()
 
     def _detect_router_type(self) -> bool:
         """Detect if using App Router or Pages Router"""
         # App Router: has 'app' directory with page.tsx files
         # Pages Router: has 'pages' directory with index.tsx files
         app_dir = self.source_path / 'app'
-        if app_dir.exists and list(app_dir.rglob('page.*')):
+        if app_dir.exists() and list(app_dir.rglob('page.*')):
             return True
 
-        return 'app' in str(self.source_path).lower
+        return 'app' in str(self.source_path).lower()
 
     def scan(self, filter_routes: Optional[List[str]] = None) -> List[RouteInfo]:
         """Scan for all routes"""
@@ -112,14 +112,14 @@ class RouteScanner:
 
     def _scan_directory(self, directory: Path, url_path: str = ''):
         """Recursively scan directory for routes"""
-        if not directory.exists:
+        if not directory.exists():
             return
 
-        for item in directory.iterdir:
+        for item in directory.iterdir():
             if item.name.startswith('.') or item.name == 'node_modules':
                 continue
 
-            if item.is_dir:
+            if item.is_dir():
                 # Handle route groups (parentheses) and dynamic routes
                 dir_name = item.name
 
@@ -142,7 +142,7 @@ class RouteScanner:
                     new_path = f"{url_path}/{dir_name}"
                     self._scan_directory(item, new_path)
 
-            elif item.is_file:
+            elif item.is_file():
                 self._process_file(item, url_path)
 
     def _process_file(self, file_path: Path, url_path: str):
@@ -175,7 +175,7 @@ class RouteScanner:
 
         # Detect interactions
         interactions = []
-        for interaction, pattern in self.INTERACTION_PATTERNS.items:
+        for interaction, pattern in self.INTERACTION_PATTERNS.items():
             if re.search(pattern, content):
                 interactions.append(interaction)
 
@@ -197,11 +197,11 @@ class RouteScanner:
 
     def _scan_api_directory(self, directory: Path, url_path: str):
         """Scan API routes (mark them differently)"""
-        for item in directory.iterdir:
-            if item.is_dir:
+        for item in directory.iterdir():
+            if item.is_dir():
                 new_path = f"{url_path}/{item.name}"
                 self._scan_api_directory(item, new_path)
-            elif item.is_file and item.suffix in {'.ts', '.tsx', '.js', '.jsx'}:
+            elif item.is_file() and item.suffix in {'.ts', '.tsx', '.js', '.jsx'}:
                 # API routes don't get E2E tests typically
                 pass
 
@@ -228,7 +228,7 @@ class TestGenerator:
 
         # Test describe block
         route_name = route.path if route.path != '/' else 'Home'
-        lines.append(f"test.describe('{route_name}',  => {{")
+        lines.append(f"test.describe('{route_name}', () => {{")
 
         # Generate test cases based on route features
         test_cases = self._generate_test_cases(route)
@@ -271,7 +271,7 @@ class TestGenerator:
 
   test('allows authenticated access', async ({{ page }}) => {{
     // TODO: Set up authentication
-    // await page.context.addCookies([{{ name: 'session', value: '...' }}]);
+    // await page.context().addCookies([{{ name: 'session', value: '...' }}]);
     await page.goto('{url}');
     await expect(page).toHaveURL(/{re.escape(route.path.replace('[', '').replace(']', '.*'))}/);
   }});''')
@@ -286,20 +286,20 @@ class TestGenerator:
     // await page.getByLabel('Password').fill('password123');
 
     // Submit form
-    // await page.getByRole('button', {{ name: 'Submit' }}).click;
+    // await page.getByRole('button', {{ name: 'Submit' }}).click();
 
     // TODO: Assert success state
-    // await expect(page.getByText('Success')).toBeVisible;
+    // await expect(page.getByText('Success')).toBeVisible();
   }});
 
   test('shows validation errors', async ({{ page }}) => {{
     await page.goto('{url}');
 
     // Submit without filling required fields
-    await page.getByRole('button', {{ name: /submit/i }}).click;
+    await page.getByRole('button', {{ name: /submit/i }}).click();
 
     // TODO: Assert validation errors shown
-    // await expect(page.getByText('Required')).toBeVisible;
+    // await expect(page.getByText('Required')).toBeVisible();
   }});''')
 
         # Click interaction tests
@@ -309,8 +309,8 @@ class TestGenerator:
 
     // TODO: Find and click interactive elements
     // const button = page.getByRole('button', {{ name: '...' }});
-    // await button.click;
-    // await expect(page.getByText('...')).toBeVisible;
+    // await button.click();
+    // await expect(page.getByText('...')).toBeVisible();
   }});''')
 
         # Navigation tests
@@ -319,7 +319,7 @@ class TestGenerator:
     await page.goto('{url}');
 
     // TODO: Click navigation links
-    // await page.getByRole('link', {{ name: '...' }}).click;
+    // await page.getByRole('link', {{ name: '...' }}).click();
     // await expect(page).toHaveURL('...');
   }});''')
 
@@ -329,12 +329,12 @@ class TestGenerator:
     await page.goto('{url}');
 
     // TODO: Open modal
-    // await page.getByRole('button', {{ name: 'Open' }}).click;
-    // await expect(page.getByRole('dialog')).toBeVisible;
+    // await page.getByRole('button', {{ name: 'Open' }}).click();
+    // await expect(page.getByRole('dialog')).toBeVisible();
 
     // TODO: Close modal
-    // await page.getByRole('button', {{ name: 'Close' }}).click;
-    // await expect(page.getByRole('dialog')).not.toBeVisible;
+    // await page.getByRole('button', {{ name: 'Close' }}).click();
+    // await expect(page.getByRole('dialog')).not.toBeVisible();
   }});''')
 
         # Dynamic route test
@@ -342,7 +342,7 @@ class TestGenerator:
             cases.append(f'''  test('handles dynamic parameters', async ({{ page }}) => {{
     // TODO: Test with different parameter values
     await page.goto('{url}');
-    await expect(page.locator('body')).toBeVisible;
+    await expect(page.locator('body')).toBeVisible();
   }});''')
 
         return cases
@@ -369,7 +369,7 @@ class TestGenerator:
         name = route_path.strip('/')
         name = re.sub(r'\[.*?\]', '', name)  # Remove dynamic segments
         parts = name.split('/')
-        return ''.join(p.title for p in parts if p) + 'Page'
+        return ''.join(p.title() for p in parts if p) + 'Page'
 
 
 class PageObjectGenerator:
@@ -423,7 +423,7 @@ class PageObjectGenerator:
             lines.append(f"  async goto({param_args}) {{")
             lines.append(f"    await this.page.goto(`{url_template}`);")
         else:
-            lines.append("  async goto {")
+            lines.append("  async goto() {")
             lines.append(f"    await this.page.goto('{route.path}');")
         lines.append("  }")
         lines.append('')
@@ -447,7 +447,7 @@ class PageObjectGenerator:
         name = route_path.strip('/')
         name = re.sub(r'\[.*?\]', '', name)
         parts = name.split('/')
-        return ''.join(p.title for p in parts if p) + 'Page'
+        return ''.join(p.title() for p in parts if p) + 'Page'
 
     def _get_locators(self, route: RouteInfo) -> List[Tuple[str, str, str]]:
         """Get common locators for a page"""
@@ -485,29 +485,29 @@ class PageObjectGenerator:
         methods = []
 
         # Wait for load method
-        methods.append(('waitForLoad', '''  async waitForLoad {
-    await expect(this.heading).toBeVisible;
+        methods.append(('waitForLoad', '''  async waitForLoad() {
+    await expect(this.heading).toBeVisible();
   }'''))
 
         if route.has_form:
-            methods.append(('submitForm', '''  async submitForm {
-    await this.submitButton.click;
+            methods.append(('submitForm', '''  async submitForm() {
+    await this.submitButton.click();
   }'''))
 
         if route.has_auth:
             methods.append(('login', '''  async login(email: string, password: string) {
     await this.emailInput.fill(email);
     await this.passwordInput.fill(password);
-    await this.submitButton.click;
+    await this.submitButton.click();
   }'''))
 
         if 'modal' in route.interactions:
-            methods.append(('waitForModal', '''  async waitForModal {
-    await expect(this.modal).toBeVisible;
+            methods.append(('waitForModal', '''  async waitForModal() {
+    await expect(this.modal).toBeVisible();
   }'''))
-            methods.append(('closeModal', '''  async closeModal {
+            methods.append(('closeModal', '''  async closeModal() {
     await this.page.keyboard.press('Escape');
-    await expect(this.modal).not.toBeVisible;
+    await expect(this.modal).not.toBeVisible();
   }'''))
 
         return methods
@@ -580,7 +580,7 @@ export const test = base.extend<AuthFixtures>({
     // await page.goto('/login');
     // await page.getByLabel('Email').fill(process.env.TEST_EMAIL || 'test@example.com');
     // await page.getByLabel('Password').fill(process.env.TEST_PASSWORD || 'password');
-    // await page.getByRole('button', { name: 'Sign in' }).click;
+    // await page.getByRole('button', { name: 'Sign in' }).click();
     // await page.waitForURL('/dashboard');
 
     // Option 2: Login via API
@@ -590,8 +590,8 @@ export const test = base.extend<AuthFixtures>({
     //     password: process.env.TEST_PASSWORD,
     //   },
     // });
-    // const { token } = await response.json;
-    // await page.context.addCookies([
+    // const { token } = await response.json();
+    // await page.context().addCookies([
     //   { name: 'auth-token', value: token, domain: 'localhost', path: '/' }
     // ]);
 
@@ -632,7 +632,7 @@ class E2ETestScaffolder:
         print(f"Scanning: {self.source_path}")
 
         # Validate source path
-        if not self.source_path.exists:
+        if not self.source_path.exists():
             raise ValueError(f"Source path does not exist: {self.source_path}")
 
         # Scan for routes
@@ -649,7 +649,7 @@ class E2ETestScaffolder:
         # Generate test files
         test_generator = TestGenerator(self.include_pom, self.verbose)
         pom_generator = PageObjectGenerator(self.verbose) if self.include_pom else None
-        config_generator = ConfigGenerator
+        config_generator = ConfigGenerator()
 
         # Generate tests for each route
         for route in routes:
@@ -686,8 +686,8 @@ class E2ETestScaffolder:
 
         # Generate config files if not exists
         config_path = Path('playwright.config.ts')
-        if not config_path.exists:
-            config_content = config_generator.generate_config
+        if not config_path.exists():
+            config_content = config_generator.generate_config()
             config_path.write_text(config_content, encoding='utf-8')
             self.results['generated_files'].append({
                 'type': 'config',
@@ -699,8 +699,8 @@ class E2ETestScaffolder:
         fixtures_dir = self.output_path / 'fixtures'
         fixtures_dir.mkdir(exist_ok=True)
         auth_fixture_path = fixtures_dir / 'auth.ts'
-        if not auth_fixture_path.exists:
-            auth_content = config_generator.generate_auth_fixture
+        if not auth_fixture_path.exists():
+            auth_content = config_generator.generate_auth_fixture()
             auth_fixture_path.write_text(auth_content, encoding='utf-8')
             self.results['generated_files'].append({
                 'type': 'fixture',
@@ -742,11 +742,11 @@ class E2ETestScaffolder:
         name = route_path.strip('/')
         name = re.sub(r'\[.*?\]', '', name)
         parts = name.split('/')
-        class_name = ''.join(p.title for p in parts if p) + 'Page'
+        class_name = ''.join(p.title() for p in parts if p) + 'Page'
         return f"{class_name}.ts"
 
 
-def main:
+def main():
     """Main entry point"""
     parser = argparse.ArgumentParser(
         description="Generate Playwright E2E tests from Next.js routes",
@@ -795,7 +795,7 @@ Examples:
         help='Output results as JSON'
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         scaffolder = E2ETestScaffolder(
@@ -806,7 +806,7 @@ Examples:
             verbose=args.verbose
         )
 
-        results = scaffolder.run
+        results = scaffolder.run()
 
         if args.json:
             print(json.dumps(results, indent=2))
@@ -817,4 +817,4 @@ Examples:
 
 
 if __name__ == '__main__':
-    main
+    main()

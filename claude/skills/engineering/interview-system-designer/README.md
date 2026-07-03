@@ -297,7 +297,7 @@ python3 hiring_calibrator.py --input assets/sample_interview_results.json
 
 To extend this skill:
 
-1. **New Roles**: Add competency frameworks in `_init_competency_frameworks`
+1. **New Roles**: Add competency frameworks in `_init_competency_frameworks()`
 2. **New Question Types**: Extend question templates in respective generators
 3. **New Analysis Types**: Add analysis methods to hiring calibrator
 4. **Custom Outputs**: Modify formatting functions for different output needs

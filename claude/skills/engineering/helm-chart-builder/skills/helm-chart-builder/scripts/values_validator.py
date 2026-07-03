@@ -85,8 +85,8 @@ def parse_values(content):
     indent_stack = [0]
     prev_comment = None
 
-    for line_num, line in enumerate(content.splitlines, 1):
-        stripped = line.strip
+    for line_num, line in enumerate(content.splitlines(), 1):
+        stripped = line.strip()
 
         # Track comments for documentation coverage
         if stripped.startswith("#"):
@@ -97,26 +97,26 @@ def parse_values(content):
             prev_comment = None
             continue
 
-        indent = len(line) - len(line.lstrip)
+        indent = len(line) - len(line.lstrip())
 
         # Pop stack for dedented lines
         while len(indent_stack) > 1 and indent <= indent_stack[-1]:
-            indent_stack.pop
+            indent_stack.pop()
             if key_stack:
-                key_stack.pop
+                key_stack.pop()
 
         # Parse key: value
         match = re.match(r"^(\S+)\s*:\s*(.*)", stripped)
         if match and not stripped.startswith("-"):
             key = match.group(1)
-            raw_value = match.group(2).strip
+            raw_value = match.group(2).strip()
 
             # Check for inline comment
             inline_comment = None
             if "#" in raw_value:
                 val_part, _, comment_part = raw_value.partition("#")
-                raw_value = val_part.strip
-                inline_comment = comment_part.strip
+                raw_value = val_part.strip()
+                inline_comment = comment_part.strip()
 
             # Build full key path
             full_path = ".".join(key_stack + [key])
@@ -185,12 +185,12 @@ def validate_naming(entries):
                 "fix": f"Rename to camelCase: {to_camel_case(key)}",
                 "line": entry["line"],
             })
-        elif UPPER_CASE_PATTERN.match(key) and not key.isupper:
+        elif UPPER_CASE_PATTERN.match(key) and not key.isupper():
             findings.append({
                 "severity": "medium",
                 "category": "naming",
                 "message": f"Key '{entry['full_path']}' starts with uppercase — use camelCase",
-                "fix": f"Rename: {key[0].lower + key[1:]}",
+                "fix": f"Rename: {key[0].lower() + key[1:]}",
                 "line": entry["line"],
             })
         elif "-" in key:
@@ -325,7 +325,7 @@ def validate_depth(entries):
 def to_camel_case(name):
     """Convert snake_case or kebab-case to camelCase."""
     parts = re.split(r"[-_]", name)
-    return parts[0].lower + "".join(p.capitalize for p in parts[1:])
+    return parts[0].lower() + "".join(p.capitalize() for p in parts[1:])
 
 
 def generate_report(content, output_format="text", strict=False):
@@ -388,13 +388,13 @@ def generate_report(content, output_format="text", strict=False):
     print(f"  Score: {score}/100")
     print(f"  Keys: {total_keys} | Documented: {documented} ({result['documentation_coverage']})")
     print(f"  Max Depth: {max_depth}")
-    print
+    print()
     print(f"  Findings: {counts['critical']} critical | {counts['high']} high | {counts['medium']} medium | {counts['low']} low")
     print(f"{'─' * 60}")
 
     for f in findings:
         icon = {"critical": "!!!", "high": "!!", "medium": "!", "low": "~"}.get(f["severity"], "?")
-        print(f"\n  {icon} {f['severity'].upper} [{f['category']}]")
+        print(f"\n  {icon} {f['severity'].upper()} [{f['category']}]")
         print(f"  {f['message']}")
         if f.get("line", 0) > 0:
             print(f"  Line: {f['line']}")
@@ -407,7 +407,7 @@ def generate_report(content, output_format="text", strict=False):
     return result
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="helm-chart-builder: values.yaml best-practice validator"
     )
@@ -423,11 +423,11 @@ def main:
         action="store_true",
         help="Strict mode — elevate warnings to higher severity",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.valuesfile:
         path = Path(args.valuesfile)
-        if not path.exists:
+        if not path.exists():
             print(f"Error: File not found: {args.valuesfile}", file=sys.stderr)
             sys.exit(1)
         content = path.read_text(encoding="utf-8")
@@ -439,4 +439,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

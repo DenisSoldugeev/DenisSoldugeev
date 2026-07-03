@@ -126,21 +126,21 @@ def print_report(result: dict):
     print("=" * 60)
     print(f"  Method: {result['method']}")
     print(f"  Confidence level: {conf_pct}%")
-    print
+    print()
 
     if result["type"] == "proportion":
         print(f"  Observed rate: {result['observed_rate']:.4%}  ({result['successes']}/{result['n']})")
-        print
+        print()
         print(f"  {conf_pct}% CI: [{result['lower']:.4%}, {result['upper']:.4%}]")
         print(f"  Margin of error: ±{result['margin_of_error']:.4%}")
-        print
+        print()
         norm = result.get("normal_approximation", {})
         print(f"  Normal approx CI (ref): [{norm.get('lower', 0):.4%}, {norm.get('upper', 0):.4%}]")
 
     elif result["type"] == "mean":
         print(f"  Observed mean: {result['observed_mean']}  (std={result['std']}, n={result['n']})")
         print(f"  Standard error: {result['standard_error']}")
-        print
+        print()
         print(f"  {conf_pct}% CI: [{result['lower']}, {result['upper']}]")
         print(f"  Margin of error: ±{result['margin_of_error']}")
         if result.get("relative_margin_of_error_pct") is not None:
@@ -148,7 +148,7 @@ def print_report(result: dict):
         if result.get("precision_note"):
             print(f"\n  ℹ️  {result['precision_note']}")
 
-    print
+    print()
     # Interpretation guide
     print(f"  Interpretation: If this experiment were repeated many times,")
     print(f"  {conf_pct}% of the computed intervals would contain the true value.")
@@ -157,7 +157,7 @@ def print_report(result: dict):
     print("=" * 60)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Compute confidence intervals for proportions and means."
     )
@@ -174,7 +174,7 @@ def main:
     parser.add_argument("--mean", type=float, help="Observed mean")
     parser.add_argument("--std", type=float, help="Observed standard deviation")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.type == "proportion":
         if args.n is None or args.x is None:
@@ -195,4 +195,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

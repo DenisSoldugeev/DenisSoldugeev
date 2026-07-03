@@ -1,18 +1,18 @@
 # Playwright Anti-Patterns Reference
 
-## 1. Using `waitForTimeout`
+## 1. Using `waitForTimeout()`
 
 **Bad:**
 ```typescript
 await page.click('.submit');
 await page.waitForTimeout(3000);
-await expect(page.locator('.result')).toBeVisible;
+await expect(page.locator('.result')).toBeVisible();
 ```
 
 **Good:**
 ```typescript
-await page.getByRole('button', { name: 'Submit' }).click;
-await expect(page.getByTestId('result')).toBeVisible;
+await page.getByRole('button', { name: 'Submit' }).click();
+await expect(page.getByTestId('result')).toBeVisible();
 ```
 
 **Why:** Arbitrary waits slow tests and cause flakiness. Web-first assertions auto-retry.
@@ -27,7 +27,7 @@ expect(text).toBe('Success');
 
 **Good:**
 ```typescript
-await expect(page.getByText('Success')).toBeVisible;
+await expect(page.getByText('Success')).toBeVisible();
 ```
 
 **Why:** `expect(locator)` auto-retries until timeout. `expect(value)` checks once and fails.
@@ -51,13 +51,13 @@ await page.goto('/login');
 **Bad:**
 ```typescript
 await page.click('#submit-btn');
-await page.locator('.nav-link.active').click;
+await page.locator('.nav-link.active').click();
 ```
 
 **Good:**
 ```typescript
-await page.getByRole('button', { name: 'Submit' }).click;
-await page.getByRole('link', { name: 'Dashboard' }).click;
+await page.getByRole('button', { name: 'Submit' }).click();
+await page.getByRole('link', { name: 'Dashboard' }).click();
 ```
 
 **Why:** Role-based locators survive CSS renames, class refactors, and component library changes.
@@ -67,13 +67,13 @@ await page.getByRole('link', { name: 'Dashboard' }).click;
 **Bad:**
 ```typescript
 page.goto('/dashboard');
-expect(page.getByText('Welcome')).toBeVisible;
+expect(page.getByText('Welcome')).toBeVisible();
 ```
 
 **Good:**
 ```typescript
 await page.goto('/dashboard');
-await expect(page.getByText('Welcome')).toBeVisible;
+await expect(page.getByText('Welcome')).toBeVisible();
 ```
 
 **Why:** Missing `await` causes race conditions. Tests pass sometimes, fail others.
@@ -98,7 +98,7 @@ test('edit user', async ({ page }) => {
 ```typescript
 test('edit user', async ({ page }) => {
   // Create user via API in this test's setup
-  const userId = await createUserViaAPI;
+  const userId = await createUserViaAPI();
   await page.goto(`/users/${userId}`);
 });
 ```
@@ -149,11 +149,11 @@ If you test the happy path, also test:
 - Permission denied
 - Timeout/loading state
 
-## 11. Using `page.evaluate` Unnecessarily
+## 11. Using `page.evaluate()` Unnecessarily
 
 **Bad:**
 ```typescript
-const text = await page.evaluate( => document.querySelector('.title')?.textContent);
+const text = await page.evaluate(() => document.querySelector('.title')?.textContent);
 ```
 
 **Good:**
@@ -163,7 +163,7 @@ await expect(page.getByRole('heading')).toHaveText('Expected Title');
 
 ## 12. Deep Nesting
 
-Keep `test.describe` to max 2 levels. More makes tests hard to find and maintain.
+Keep `test.describe()` to max 2 levels. More makes tests hard to find and maintain.
 
 ## 13. Generic Test Names
 
@@ -176,7 +176,7 @@ Keep `test.describe` to max 2 levels. More makes tests hard to find and maintain
 - No page objects for complex pages → create them
 - Inline data → use factories or fixtures
 - Missing a11y assertions → add `toHaveAttribute('role', ...)`
-- No visual regression → add `toHaveScreenshot` for key pages
+- No visual regression → add `toHaveScreenshot()` for key pages
 - Not checking console errors → add `page.on('console', ...)`
 - Using `networkidle` → use specific assertions instead
-- No `test.describe` → group related tests
+- No `test.describe()` → group related tests

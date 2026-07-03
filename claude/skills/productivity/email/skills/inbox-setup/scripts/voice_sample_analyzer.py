@@ -62,16 +62,16 @@ HEDGING_MARKERS = {
 def split_samples(text: str) -> List[str]:
     """Split combined samples text on `---` delimiters; trim each."""
     parts = SAMPLE_DELIMITER_RE.split(text)
-    return [p.strip for p in parts if p.strip]
+    return [p.strip() for p in parts if p.strip()]
 
 
 def first_n_tokens(text: str, n: int) -> str:
-    tokens = text.split
+    tokens = text.split()
     return " ".join(tokens[:n])
 
 
 def last_n_tokens(text: str, n: int) -> str:
-    tokens = text.split
+    tokens = text.split()
     return " ".join(tokens[-n:])
 
 
@@ -86,7 +86,7 @@ def count_word_occurrences(text_lower: str, words: set) -> int:
 
 def split_sentences(text: str) -> List[str]:
     parts = SENTENCE_END_RE.split(text)
-    return [s.strip for s in parts if s.strip]
+    return [s.strip() for s in parts if s.strip()]
 
 
 def length_bucket(word_count: int) -> str:
@@ -98,11 +98,11 @@ def length_bucket(word_count: int) -> str:
 
 
 def analyze_sample(sample: str) -> Dict[str, Any]:
-    text_lower = sample.lower
+    text_lower = sample.lower()
     sentences = split_sentences(sample)
-    length_dist = Counter
+    length_dist = Counter()
     for s in sentences:
-        words = s.split
+        words = s.split()
         length_dist[length_bucket(len(words))] += 1
     return {
         "opening": first_n_tokens(sample, 6),
@@ -127,7 +127,7 @@ def aggregate(per_sample: List[Dict[str, Any]]) -> Dict[str, Any]:
     openings = [s["opening"] for s in per_sample]
     sign_offs = [s["sign_off"] for s in per_sample]
     total_sentences = sum(s["sentence_count"] for s in per_sample)
-    total_lengths: Counter = Counter
+    total_lengths: Counter = Counter()
     for s in per_sample:
         total_lengths.update(s["length_distribution"])
     casual = sum(s["casual_marker_count"] for s in per_sample)
@@ -273,11 +273,11 @@ def main(argv: List[str]) -> int:
         text = SAMPLE_TEXT
     elif args.samples_file:
         p = Path(args.samples_file)
-        if not p.exists:
+        if not p.exists():
             print(f"error: {args.samples_file} not found", file=sys.stderr); return 2
         text = p.read_text(encoding="utf-8")
     else:
-        parser.print_help; return 0
+        parser.print_help(); return 0
 
     samples = split_samples(text)
     if not samples:

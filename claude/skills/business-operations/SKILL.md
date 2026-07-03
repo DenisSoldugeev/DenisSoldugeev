@@ -17,7 +17,7 @@ Business operations skills: knowledge ops, capacity planning, operational workfl
 | knowledge-ops | `knowledge-ops/SKILL.md` | Use when a Head of Ops, Knowledge Manager, or TPM-Internal needs to author, validate, or clean up company SOPs… |
 | process-mapper | `process-mapper/SKILL.md` | Use when a BizOps lead, COO, or process-improvement owner needs to document an end-to-end business process (pr… |
 | procurement-optimizer | `procurement-optimizer/SKILL.md` | Use when running an annual SaaS audit, doing category-level spend review, or rationalizing the supplier base —… |
-| vendor-management | `vendor-management/SKILL.md` | Use when reviewing, scoring, or auditing third-party SaaS / vendor relationships — running a vendor scorecard,… |
+| vendor-management | `vendor-management/SKILL.md` | Use when reviewing, scoring, or auditing third-party SaaS / vendor relationships — running a vendor scorecard … |
 
 ## Rules
 - Load only the specific skill SKILL.md you need.

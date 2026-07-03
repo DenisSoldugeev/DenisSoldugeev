@@ -35,20 +35,20 @@ from typing import Any
 SUPPORTED_LLMS = ["chatgpt", "perplexity", "claude", "gemini", "mistral", "copilot", "brave", "you", "other"]
 
 
-def _data_dir -> Path:
+def _data_dir() -> Path:
     """Return the local data directory, creating if needed."""
-    d = Path.home / ".aeo-data"
+    d = Path.home() / ".aeo-data"
     d.mkdir(parents=True, exist_ok=True)
     return d
 
 
-def _ledger_path -> Path:
-    return _data_dir / "citations.json"
+def _ledger_path() -> Path:
+    return _data_dir() / "citations.json"
 
 
-def _load_ledger -> dict:
-    path = _ledger_path
-    if not path.exists:
+def _load_ledger() -> dict:
+    path = _ledger_path()
+    if not path.exists():
         return {"schema_version": 1, "citations": []}
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -58,7 +58,7 @@ def _load_ledger -> dict:
 
 
 def _save_ledger(ledger: dict) -> Path:
-    path = _ledger_path
+    path = _ledger_path()
     path.write_text(json.dumps(ledger, indent=2), encoding="utf-8")
     return path
 
@@ -66,26 +66,26 @@ def _save_ledger(ledger: dict) -> Path:
 def add_citation(url: str, llm: str, query: str, date: str | None = None,
                  notes: str = "", position: str = "") -> dict:
     """Add a citation entry. Returns the saved entry."""
-    if llm.lower not in SUPPORTED_LLMS:
+    if llm.lower() not in SUPPORTED_LLMS:
         sys.stderr.write(f"[citation_tracker] WARN: unknown LLM '{llm}' (allowed: {SUPPORTED_LLMS})\n")
 
     entry = {
-        "id": _make_id,
+        "id": _make_id(),
         "url": url,
-        "llm": llm.lower,
+        "llm": llm.lower(),
         "query": query,
-        "date": date or datetime.now(timezone.utc).date.isoformat,
-        "logged_at": datetime.now(timezone.utc).isoformat,
+        "date": date or datetime.now(timezone.utc).date().isoformat(),
+        "logged_at": datetime.now(timezone.utc).isoformat(),
         "notes": notes,
         "position": position,
     }
-    ledger = _load_ledger
+    ledger = _load_ledger()
     ledger["citations"].append(entry)
     _save_ledger(ledger)
     return entry
 
 
-def _make_id -> str:
+def _make_id() -> str:
     """8-char ID from current timestamp."""
     return datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S-%f")[:21]
 
@@ -93,12 +93,12 @@ def _make_id -> str:
 def list_citations(url: str | None = None, llm: str | None = None,
                    since: str | None = None) -> list:
     """List citations matching filters."""
-    ledger = _load_ledger
+    ledger = _load_ledger()
     cits = ledger["citations"]
     if url:
         cits = [c for c in cits if c["url"] == url]
     if llm:
-        cits = [c for c in cits if c["llm"] == llm.lower]
+        cits = [c for c in cits if c["llm"] == llm.lower()]
     if since:
         cits = [c for c in cits if c["date"] >= since]
     return cits
@@ -107,7 +107,7 @@ def list_citations(url: str | None = None, llm: str | None = None,
 def report(url: str | None = None) -> dict:
     """Generate aggregate report. If URL specified, per-URL stats.
     Otherwise, full-ledger summary."""
-    cits = list_citations(url=url) if url else _load_ledger["citations"]
+    cits = list_citations(url=url) if url else _load_ledger()["citations"]
     if not cits:
         return {
             "url": url,
@@ -124,8 +124,8 @@ def report(url: str | None = None) -> dict:
         by_query[c["query"]] = by_query.get(c["query"], 0) + 1
         by_date[c["date"]] = by_date.get(c["date"], 0) + 1
 
-    top_queries = sorted(by_query.items, key=lambda kv: -kv[1])[:10]
-    dates = sorted(by_date.keys)
+    top_queries = sorted(by_query.items(), key=lambda kv: -kv[1])[:10]
+    dates = sorted(by_date.keys())
 
     # Velocity: citations per day, rolling 30 days
     velocity = 0.0
@@ -142,7 +142,7 @@ def report(url: str | None = None) -> dict:
     return {
         "url": url,
         "total_citations": len(cits),
-        "llms_covered": sorted(by_llm.keys),
+        "llms_covered": sorted(by_llm.keys()),
         "llm_coverage_count": len(by_llm),
         "citations_per_llm": by_llm,
         "top_queries": top_queries,
@@ -161,12 +161,12 @@ def report(url: str | None = None) -> dict:
 
 def export_csv(output_path: str) -> int:
     """Export the full citation ledger as CSV. Returns row count."""
-    ledger = _load_ledger
+    ledger = _load_ledger()
     cits = ledger["citations"]
     fieldnames = ["id", "url", "llm", "query", "date", "logged_at", "notes", "position"]
     with open(output_path, "w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fieldnames)
-        w.writeheader
+        w.writeheader()
         for c in cits:
             w.writerow({k: c.get(k, "") for k in fieldnames})
     return len(cits)
@@ -209,7 +209,7 @@ def render_human(action: str, data: Any) -> str:
             "",
             "   Citations per LLM:",
         ]
-        for llm, n in sorted(data["citations_per_llm"].items, key=lambda kv: -kv[1]):
+        for llm, n in sorted(data["citations_per_llm"].items(), key=lambda kv: -kv[1]):
             lines.append(f"     {llm:12s} {n}")
         lines.append("")
         lines.append("   Top queries:")
@@ -223,13 +223,13 @@ def render_human(action: str, data: Any) -> str:
     return json.dumps(data, indent=2, default=str)
 
 
-def _run_sample:
+def _run_sample():
     """Populate sample data + show all actions."""
-    sample_path = Path.home / ".aeo-data" / "citations.sample.json"
+    sample_path = Path.home() / ".aeo-data" / "citations.sample.json"
     # Use a separate sample file to avoid clobbering real data
-    actual_path = _ledger_path
+    actual_path = _ledger_path()
     backup = None
-    if actual_path.exists:
+    if actual_path.exists():
         backup = actual_path.read_text(encoding="utf-8")
 
     try:
@@ -263,19 +263,19 @@ def _run_sample:
         print(render_human("report", r))
         print("")
         print("=== Sample: export ===")
-        n = export_csv(str(Path.home / ".aeo-data" / "citations.sample.csv"))
+        n = export_csv(str(Path.home() / ".aeo-data" / "citations.sample.csv"))
         print(render_human("export", n))
-        print(f"  → wrote {Path.home / '.aeo-data' / 'citations.sample.csv'}")
+        print(f"  → wrote {Path.home() / '.aeo-data' / 'citations.sample.csv'}")
     finally:
         # Restore the user's real ledger
         if backup is not None:
             actual_path.write_text(backup, encoding="utf-8")
         else:
-            if actual_path.exists:
-                actual_path.unlink
+            if actual_path.exists():
+                actual_path.unlink()
 
 
-def main:
+def main():
     p = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -293,10 +293,10 @@ def main:
     p.add_argument("--output-format", choices=["human", "json"], default="human")
     p.add_argument("--sample", action="store_true",
                    help="Populate sample data + show all actions (preserves your real ledger)")
-    args = p.parse_args
+    args = p.parse_args()
 
     if args.sample:
-        _run_sample
+        _run_sample()
         return
 
     if not args.action:
@@ -312,7 +312,7 @@ def main:
         result = report(args.url)
     elif args.action == "export":
         if not args.output:
-            args.output = str(Path.home / ".aeo-data" / "citations.csv")
+            args.output = str(Path.home() / ".aeo-data" / "citations.csv")
         result = export_csv(args.output)
     else:
         p.error(f"unknown action {args.action}")
@@ -324,4 +324,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

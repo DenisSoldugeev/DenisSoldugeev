@@ -45,14 +45,14 @@ jobs:
           "
 
       - name: Upload Audit Report
-        if: always
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: a11y-audit-report
           path: a11y-results.json
 
       - name: Comment on PR
-        if: failure
+        if: failure()
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: a11y-audit
@@ -98,7 +98,7 @@ a11y-audit:
     arguments: './src --json --output $(Build.ArtifactStagingDirectory)/a11y-results.json'
 
 - task: PublishBuildArtifacts@1
-  condition: always
+  condition: always()
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)/a11y-results.json'
     ArtifactName: 'a11y-audit-report'

@@ -49,9 +49,9 @@ def cadence_to_hours(cadence: str, override_hours: int = None) -> int:
         if override_hours > 24 * 30:
             sys.stderr.write(f"warning: override-hours {override_hours} is > 30 days; triage is recurring-cadence-oriented.\n")
         return override_hours
-    key = cadence.lower.strip
+    key = cadence.lower().strip()
     if key not in CADENCE_DEFAULT_HOURS:
-        raise ValueError(f"Unknown cadence '{cadence}'. Expected one of {list(CADENCE_DEFAULT_HOURS.keys)} or use --override-hours.")
+        raise ValueError(f"Unknown cadence '{cadence}'. Expected one of {list(CADENCE_DEFAULT_HOURS.keys())} or use --override-hours.")
     return CADENCE_DEFAULT_HOURS[key]
 
 
@@ -70,11 +70,11 @@ def compute(cadence: str, now: datetime, override_hours: int = None) -> Dict[str
         "cadence": cadence,
         "override_hours": override_hours,
         "hours_back": hours,
-        "now": now.isoformat,
-        "window_start": window_start.isoformat,
-        "window_end": now.isoformat,
+        "now": now.isoformat(),
+        "window_start": window_start.isoformat(),
+        "window_end": now.isoformat(),
         "run_label": run_label(now.hour),
-        "search_filter_after_unix": int(window_start.timestamp),
+        "search_filter_after_unix": int(window_start.timestamp()),
     }
 
 
@@ -105,7 +105,7 @@ def main(argv: List[str]) -> int:
     args = parser.parse_args(argv)
 
     if not args.cadence and args.override_hours is None:
-        parser.print_help; return 0
+        parser.print_help(); return 0
 
     if args.now:
         try:

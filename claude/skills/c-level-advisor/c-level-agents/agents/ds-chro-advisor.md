@@ -25,23 +25,23 @@ Pairs with `ds-coo-advisor` (org design), `ds-cfo-advisor` (comp budget), and `d
 
 ## Skill Integration
 
-**Skill Location:** `../../skills/chro-advisor/`
+**Skill Location:** `../../chro-advisor/`
 
 ### Python Tools
 
 1. **Hiring Plan Modeler**
-   - Path: `../../skills/chro-advisor/scripts/hiring_plan_modeler.py`
+   - Path: `../../chro-advisor/scripts/hiring_plan_modeler.py`
    - Headcount plan by quarter, ramp-adjusted productivity, hiring funnel sensitivity
 
 2. **Comp Benchmarker**
-   - Path: `../../skills/chro-advisor/scripts/comp_benchmarker.py`
+   - Path: `../../chro-advisor/scripts/comp_benchmarker.py`
    - Stage-and-geo comp bands, equity refresh design, total-rewards composition
 
 ### Knowledge Bases
 
-- `../../skills/chro-advisor/references/hiring_systems.md` — sourcing channels, interview rubrics, scorecards, time-to-fill
-- `../../skills/chro-advisor/references/comp_philosophy.md` — band design, equity strategy, refresh policy
-- `../../skills/chro-advisor/references/leveling_ladders.md` — IC + manager tracks, level expectations, promotion criteria
+- `../../chro-advisor/references/people_strategy.md` — sourcing channels, interview rubrics, scorecards, time-to-fill
+- `../../chro-advisor/references/comp_frameworks.md` — band design, equity strategy, refresh policy
+- `../../chro-advisor/references/org_design.md` — IC + manager tracks, level expectations, promotion criteria
 
 ## Workflows
 
@@ -55,7 +55,7 @@ Pairs with `ds-coo-advisor` (org design), `ds-cfo-advisor` (comp budget), and `d
 4. Output: hiring plan with scorecards, time-to-productivity per role, kill candidates
 
 ```bash
-python ../../skills/chro-advisor/scripts/hiring_plan_modeler.py
+python ../../chro-advisor/scripts/hiring_plan_modeler.py
 ```
 
 ### Workflow 2: Comp Band Audit
@@ -90,9 +90,9 @@ python ../../skills/chro-advisor/scripts/hiring_plan_modeler.py
 
 ```bash
 echo "👥 CHRO Quarterly Review"
-python ../../skills/chro-advisor/scripts/hiring_plan_modeler.py
-python ../../skills/chro-advisor/scripts/comp_benchmarker.py
-echo "Ladder reference: ../../skills/chro-advisor/references/leveling_ladders.md"
+python ../../chro-advisor/scripts/hiring_plan_modeler.py
+python ../../chro-advisor/scripts/comp_benchmarker.py
+echo "Ladder reference: ../../chro-advisor/references/org_design.md"
 ```
 
 ## Success Metrics
@@ -107,12 +107,12 @@ echo "Ladder reference: ../../skills/chro-advisor/references/leveling_ladders.md
 
 - [ds-coo-advisor](ds-coo-advisor.md) — org design partner
 - [ds-cfo-advisor](ds-cfo-advisor.md) — comp budget
-- [ds-ceo-advisor](../../../../agents/c-level/ds-ceo-advisor.md) — exec team
-- [ds-workspace-admin](../../../../agents/engineering-team/ds-workspace-admin.md) — onboarding tooling
+- [ds-ceo-advisor](../../../agents/c-level/ds-ceo-advisor.md) — exec team
+- [ds-workspace-admin](../../../agents/engineering-team/ds-workspace-admin.md) — onboarding tooling
 
 ## References
 
-- Skill: [../../skills/chro-advisor/SKILL.md](../../chro-advisor/SKILL.md)
+- Skill: [../../chro-advisor/SKILL.md](../../chro-advisor/SKILL.md)
 - Voice spec: [../references/persona-voices.md](../references/persona-voices.md)
 
 ---

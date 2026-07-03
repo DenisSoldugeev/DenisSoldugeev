@@ -361,8 +361,8 @@ export async function sendEmail(to: string, payload: EmailPayload) {
 // emails/i18n/en.ts
 export const en = {
   welcome: {
-    preview: (name: "string-welcome-to-myapp-name"
-    heading: (name: "string-welcome-to-myapp-name"
+    preview: (name: string) => `Welcome to MyApp, ${name}!`,
+    heading: (name: string) => `Welcome to MyApp, ${name}!`,
     body: (days: number) => `You've got ${days} days to explore everything.`,
     cta: "Confirm Email Address",
   },
@@ -371,8 +371,8 @@ export const en = {
 // emails/i18n/de.ts
 export const de = {
   welcome: {
-    preview: (name: "string-willkommen-bei-myapp-name"
-    heading: (name: "string-willkommen-bei-myapp-name"
+    preview: (name: string) => `Willkommen bei MyApp, ${name}!`,
+    heading: (name: string) => `Willkommen bei MyApp, ${name}!`,
     body: (days: number) => `Du hast ${days} Tage Zeit, alles zu erkunden.`,
     cta: "E-Mail-Adresse bestätigen",
   },
@@ -417,7 +417,7 @@ export function addTrackingParams(html: string, params: TrackingParams): string 
     utm_source: params.source ?? "email",
     utm_medium: params.medium ?? "transactional",
     utm_campaign: params.campaign,
-  }).toString
+  }).toString()
 
   // Add UTM params to all links in the email
   return html.replace(/href="(https?:\/\/[^"]+)"/g, (match, url) => {

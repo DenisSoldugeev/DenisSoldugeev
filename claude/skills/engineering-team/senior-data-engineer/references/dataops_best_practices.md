@@ -23,7 +23,7 @@ import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 
 # Initialize context
-context = gx.get_context
+context = gx.get_context()
 
 # Create expectation suite
 suite = context.add_expectation_suite("orders_suite")
@@ -85,8 +85,8 @@ validator.expect_column_mean_to_be_between(
 # Freshness expectations
 validator.expect_column_max_to_be_between(
     column="created_at",
-    min_value={"$PARAMETER": "now - interval '24 hours'"},
-    max_value={"$PARAMETER": "now"}
+    min_value={"$PARAMETER": "now() - interval '24 hours'"},
+    max_value={"$PARAMETER": "now()"}
 )
 
 # Cross-table expectations (referential integrity)
@@ -117,7 +117,7 @@ checkpoint = context.add_or_update_checkpoint(
     ],
 )
 
-results = checkpoint.run
+results = checkpoint.run()
 print(f"Validation success: {results.success}")
 ```
 
@@ -258,14 +258,14 @@ class DataQualityValidator:
 
     # Built-in check generators
     def add_null_check(self, table: str, column: str, max_null_rate: float = 0.0):
-        def check_nulls:
+        def check_nulls():
             query = f"""
                 SELECT
                     COUNT(*) as total,
                     SUM(CASE WHEN {column} IS NULL THEN 1 ELSE 0 END) as nulls
                 FROM {table}
             """
-            result = self.conn.execute(query).fetchone
+            result = self.conn.execute(query).fetchone()
             null_rate = result[1] / result[0] if result[0] > 0 else 0
             return null_rate <= max_null_rate, null_rate
 
@@ -278,14 +278,14 @@ class DataQualityValidator:
         ))
 
     def add_uniqueness_check(self, table: str, column: str):
-        def check_unique:
+        def check_unique():
             query = f"""
                 SELECT
                     COUNT(*) as total,
                     COUNT(DISTINCT {column}) as distinct_count
                 FROM {table}
             """
-            result = self.conn.execute(query).fetchone
+            result = self.conn.execute(query).fetchone()
             is_unique = result[0] == result[1]
             duplicate_rate = 1 - (result[1] / result[0]) if result[0] > 0 else 0
             return is_unique, duplicate_rate
@@ -299,16 +299,16 @@ class DataQualityValidator:
         ))
 
     def add_freshness_check(self, table: str, timestamp_column: str, max_hours: int):
-        def check_freshness:
+        def check_freshness():
             query = f"""
                 SELECT MAX({timestamp_column}) as latest
                 FROM {table}
             """
-            result = self.conn.execute(query).fetchone
+            result = self.conn.execute(query).fetchone()
             if result[0] is None:
                 return False, float('inf')
 
-            hours_old = (datetime.now - result[0]).total_seconds / 3600
+            hours_old = (datetime.now() - result[0]).total_seconds() / 3600
             return hours_old <= max_hours, hours_old
 
         self.add_check(QualityCheck(
@@ -320,14 +320,14 @@ class DataQualityValidator:
         ))
 
     def add_range_check(self, table: str, column: str, min_val: float, max_val: float):
-        def check_range:
+        def check_range():
             query = f"""
                 SELECT
                     COUNT(*) as total,
                     SUM(CASE WHEN {column} < {min_val} OR {column} > {max_val} THEN 1 ELSE 0 END) as out_of_range
                 FROM {table}
             """
-            result = self.conn.execute(query).fetchone
+            result = self.conn.execute(query).fetchone()
             violation_rate = result[1] / result[0] if result[0] > 0 else 0
             return violation_rate == 0, violation_rate
 
@@ -341,14 +341,14 @@ class DataQualityValidator:
 
     def add_referential_integrity_check(self, child_table: str, child_column: str,
                                         parent_table: str, parent_column: str):
-        def check_referential:
+        def check_referential():
             query = f"""
                 SELECT COUNT(*)
                 FROM {child_table} c
                 LEFT JOIN {parent_table} p ON c.{child_column} = p.{parent_column}
                 WHERE p.{parent_column} IS NULL AND c.{child_column} IS NOT NULL
             """
-            result = self.conn.execute(query).fetchone
+            result = self.conn.execute(query).fetchone()
             orphan_count = result[0]
             return orphan_count == 0, orphan_count
 
@@ -366,14 +366,14 @@ class DataQualityValidator:
 
         for check in self.checks:
             try:
-                passed, actual_value = check.check_func
+                passed, actual_value = check.check_func()
                 result = QualityResult(
                     check_name=check.name,
                     passed=passed,
                     actual_value=actual_value,
                     threshold=check.threshold,
                     message=f"{'PASSED' if passed else 'FAILED'}: {check.description}",
-                    timestamp=datetime.now
+                    timestamp=datetime.now()
                 )
             except Exception as e:
                 result = QualityResult(
@@ -382,7 +382,7 @@ class DataQualityValidator:
                     actual_value=-1,
                     threshold=check.threshold,
                     message=f"ERROR: {str(e)}",
-                    timestamp=datetime.now
+                    timestamp=datetime.now()
                 )
 
             self.results.append(result)
@@ -605,9 +605,9 @@ class ContractValidator:
         if 'freshness' in quality:
             max_delay = quality['freshness']['max_delay_minutes']
             query = f"SELECT MAX(created_at) FROM {table_name}"
-            result = connection.execute(query).fetchone
+            result = connection.execute(query).fetchone()
             if result[0]:
-                age_minutes = (datetime.now - result[0]).total_seconds / 60
+                age_minutes = (datetime.now() - result[0]).total_seconds() / 60
                 if age_minutes > max_delay:
                     violations.append({
                         "type": "freshness_violation",
@@ -625,7 +625,7 @@ class ContractValidator:
                         SUM(CASE WHEN {field} IS NULL THEN 1 ELSE 0 END) as nulls
                     FROM {table_name}
                 """
-                result = connection.execute(query).fetchone
+                result = connection.execute(query).fetchone()
                 null_rate = result[1] / result[0] if result[0] > 0 else 0
                 max_rate = quality['completeness']['required_fields_null_rate']
                 if null_rate > max_rate:
@@ -639,7 +639,7 @@ class ContractValidator:
 
         # Uniqueness check
         if 'uniqueness' in quality:
-            for field, should_be_unique in quality['uniqueness'].items:
+            for field, should_be_unique in quality['uniqueness'].items():
                 if field == 'combination':
                     continue
                 if should_be_unique:
@@ -647,7 +647,7 @@ class ContractValidator:
                         SELECT COUNT(*) - COUNT(DISTINCT {field})
                         FROM {table_name}
                     """
-                    result = connection.execute(query).fetchone
+                    result = connection.execute(query).fetchone()
                     if result[0] > 0:
                         violations.append({
                             "type": "uniqueness_violation",
@@ -659,7 +659,7 @@ class ContractValidator:
         # Volume check
         if 'volume' in quality:
             query = f"SELECT COUNT(*) FROM {table_name} WHERE DATE(created_at) = CURRENT_DATE"
-            result = connection.execute(query).fetchone
+            result = connection.execute(query).fetchone()
             daily_count = result[0]
 
             if daily_count < quality['volume']['min_daily_records']:
@@ -689,7 +689,7 @@ class ContractValidator:
         return ContractValidationResult(
             contract_name=self.contract_name,
             version=self.version,
-            timestamp=datetime.now,
+            timestamp=datetime.now(),
             passed=len([v for v in violations if v.get('severity') == 'critical']) == 0,
             schema_valid=len(schema_violations) == 0,
             quality_checks_passed=len([v for v in quality_violations if v.get('severity') == 'critical']) == 0,
@@ -814,14 +814,14 @@ jobs:
           dbt test --target prod
 
       - name: Notify on success
-        if: success
+        if: success()
         run: |
           curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
             -H 'Content-type: application/json' \
             -d '{"text":"dbt production deployment successful!"}'
 
       - name: Notify on failure
-        if: failure
+        if: failure()
         run: |
           curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
             -H 'Content-type: application/json' \
@@ -936,7 +936,7 @@ class DataLineageEmitter:
     def emit_job_start(self, job_name: str, inputs: list, outputs: list,
                        sql: str = None) -> str:
         """Emit job start event."""
-        run_id = str(uuid.uuid4)
+        run_id = str(uuid.uuid4())
 
         # Build input datasets
         input_datasets = [
@@ -980,7 +980,7 @@ class DataLineageEmitter:
         # Create and emit event
         event = RunEvent(
             eventType=RunState.START,
-            eventTime=datetime.utcnow.isoformat + "Z",
+            eventTime=datetime.utcnow().isoformat() + "Z",
             run=Run(runId=run_id),
             job=Job(namespace=self.namespace, name=job_name, facets=job_facets),
             inputs=input_datasets,
@@ -1002,7 +1002,7 @@ class DataLineageEmitter:
 
         event = RunEvent(
             eventType=RunState.COMPLETE,
-            eventTime=datetime.utcnow.isoformat + "Z",
+            eventTime=datetime.utcnow().isoformat() + "Z",
             run=Run(runId=run_id),
             job=Job(namespace=self.namespace, name=job_name),
             inputs=[],
@@ -1015,7 +1015,7 @@ class DataLineageEmitter:
         """Emit job failure event."""
         event = RunEvent(
             eventType=RunState.FAIL,
-            eventTime=datetime.utcnow.isoformat + "Z",
+            eventTime=datetime.utcnow().isoformat() + "Z",
             run=Run(runId=run_id, facets={
                 "errorMessage": {"message": error_message}
             }),
@@ -1100,16 +1100,16 @@ def track_pipeline(pipeline_name: str):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            start_time = time.time
+            start_time = time.time()
             try:
                 result = func(*args, **kwargs)
-                PIPELINE_RUNS.labels(pipeline_name=pipeline_name, status='success').inc
+                PIPELINE_RUNS.labels(pipeline_name=pipeline_name, status='success').inc()
                 return result
             except Exception as e:
-                PIPELINE_RUNS.labels(pipeline_name=pipeline_name, status='failure').inc
+                PIPELINE_RUNS.labels(pipeline_name=pipeline_name, status='failure').inc()
                 raise
             finally:
-                duration = time.time - start_time
+                duration = time.time() - start_time
                 PIPELINE_DURATION.labels(pipeline_name=pipeline_name).observe(duration)
         return wrapper
     return decorator
@@ -1343,7 +1343,7 @@ SELECT
     total_bytes_processed / 1e12 * 5 as estimated_cost_usd,  -- $5/TB
     creation_time
 FROM `project.region-us.INFORMATION_SCHEMA.JOBS_BY_USER`
-WHERE creation_time > TIMESTAMP_SUB(CURRENT_TIMESTAMP, INTERVAL 7 DAY)
+WHERE creation_time > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)
 ORDER BY total_bytes_processed DESC
 LIMIT 20;
 ```
@@ -1387,7 +1387,7 @@ class CostOptimizer:
             GROUP BY query_text
             HAVING COUNT(*) > 10
             ORDER BY total_credits DESC
-        """).fetchall
+        """).fetchall()
 
         for query, count, avg_bytes, credits in full_scans:
             recommendations.append(CostRecommendation(
@@ -1414,7 +1414,7 @@ class CostOptimizer:
             WHERE last_accessed < DATEADD(day, -90, CURRENT_TIMESTAMP)
               AND bytes > 1e9  -- > 1GB
             ORDER BY bytes DESC
-        """).fetchall
+        """).fetchall()
 
         for table, size, last_accessed in unused_tables:
             monthly_cost = size * 0.023  # $0.023/GB/month for S3
@@ -1432,7 +1432,7 @@ class CostOptimizer:
             FROM table_metadata
             WHERE partition_column IS NULL
               AND bytes > 10e9  -- > 10GB
-        """).fetchall
+        """).fetchall()
 
         for table, size in unpartitioned:
             recommendations.append(CostRecommendation(
@@ -1459,7 +1459,7 @@ class CostOptimizer:
             FROM warehouse_metering_history
             WHERE start_time > DATEADD(day, -7, CURRENT_TIMESTAMP)
             GROUP BY warehouse_name, warehouse_size
-        """).fetchall
+        """).fetchall()
 
         for wh, size, avg_queries, avg_credits in warehouse_util:
             if avg_queries < 1 and size not in ['X-Small', 'Small']:
@@ -1476,9 +1476,9 @@ class CostOptimizer:
     def generate_report(self) -> Dict:
         """Generate comprehensive cost optimization report."""
         all_recommendations = (
-            self.analyze_query_costs +
-            self.analyze_storage_costs +
-            self.analyze_compute_costs
+            self.analyze_query_costs() +
+            self.analyze_storage_costs() +
+            self.analyze_compute_costs()
         )
 
         total_current = sum(r.current_cost for r in all_recommendations)

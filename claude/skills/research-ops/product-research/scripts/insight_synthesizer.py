@@ -53,7 +53,7 @@ def synthesize(data: dict, min_sources: int) -> dict:
         by_tag_notes[tag].append({"participant": part, "note": o.get("note", "")})
 
     candidates = []
-    for tag, parts in by_tag_participants.items:
+    for tag, parts in by_tag_participants.items():
         n_sources = len(parts)
         is_insight = n_sources >= min_sources
         candidates.append({
@@ -98,7 +98,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--sample", action="store_true", help="use the embedded sample")
     args = p.parse_args(argv)
 
-    conf = _cfg.load_config if _cfg else {}
+    conf = _cfg.load_config() if _cfg else {}
     min_sources = args.min_sources if args.min_sources is not None else int(conf.get("insight_min_sources", 3))
     data = SAMPLE if (args.sample or not args.input) else json.load(open(args.input))
     result = synthesize(data, min_sources)
@@ -110,4 +110,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

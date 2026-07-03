@@ -241,7 +241,7 @@ def render_text(result: Dict[str, Any], source: str) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Calculate CS team headcount per coverage model + 12-month hiring plan.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -249,7 +249,7 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to book JSON (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
@@ -277,4 +277,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

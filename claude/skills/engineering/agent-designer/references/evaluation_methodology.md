@@ -184,7 +184,7 @@ benchmark_categories:
 def run_benchmark_suite(agents, benchmark_tasks):
     results = {}
     
-    for category, tasks in benchmark_tasks.items:
+    for category, tasks in benchmark_tasks.items():
         category_results = []
         
         for task in tasks:
@@ -399,7 +399,7 @@ def calculate_descriptive_stats(data):
 #### Correlation Analysis
 ```python
 def analyze_metric_correlations(metrics_df):
-    correlation_matrix = metrics_df.corr
+    correlation_matrix = metrics_df.corr()
     
     # Identify strong correlations
     strong_correlations = []
@@ -462,12 +462,12 @@ def compare_systems(system_metrics_dict):
     for metric in metrics_to_compare:
         metric_values = {
             system: metrics[metric] 
-            for system, metrics in system_metrics_dict.items
+            for system, metrics in system_metrics_dict.items()
         }
         
         # Rank systems by metric
         ranked_systems = sorted(
-            metric_values.items, 
+            metric_values.items(), 
             key=lambda x: x[1],
             reverse=(metric in ["success_rate"])  # Higher is better for some metrics
         )
@@ -476,7 +476,7 @@ def compare_systems(system_metrics_dict):
         best_value = ranked_systems[0][1]
         relative_performance = {
             system: value / best_value if best_value > 0 else 0
-            for system, value in metric_values.items
+            for system, value in metric_values.items()
         }
         
         comparison_results[metric] = {
@@ -503,7 +503,7 @@ def validate_data_completeness(metrics_data):
     ]
     
     for field in required_fields:
-        missing_count = metrics_data[field].isnull.sum
+        missing_count = metrics_data[field].isnull().sum()
         total_count = len(metrics_data)
         completeness_percentage = (total_count - missing_count) / total_count * 100
         
@@ -526,14 +526,14 @@ def validate_data_consistency(metrics_data):
         consistency_issues.append("Timestamps are not in chronological order")
     
     # Check duration consistency
-    duration_negative = (metrics_data['duration_ms'] < 0).sum
+    duration_negative = (metrics_data['duration_ms'] < 0).sum()
     if duration_negative > 0:
         consistency_issues.append(f"Found {duration_negative} negative durations")
     
     # Check status-success consistency
     success_status_mismatch = (
         (metrics_data['status'] == 'success') != metrics_data['success']
-    ).sum
+    ).sum()
     if success_status_mismatch > 0:
         consistency_issues.append(f"Found {success_status_mismatch} status-success mismatches")
     
@@ -555,13 +555,13 @@ class ReproducibleEvaluation:
         np.random.seed(self.random_seed)
         
         # Configure logging
-        self.setup_evaluation_logging
+        self.setup_evaluation_logging()
         
         # Snapshot system state
-        self.snapshot_system_state
+        self.snapshot_system_state()
     
     def run_evaluation(self, test_suite):
-        self.setup_environment
+        self.setup_environment()
         
         # Execute evaluation with full logging
         results = self.execute_test_suite(test_suite)
@@ -716,7 +716,7 @@ evaluation_schedule:
 def update_performance_baselines(current_metrics, historical_baselines):
     updated_baselines = {}
     
-    for metric, current_value in current_metrics.items:
+    for metric, current_value in current_metrics.items():
         historical_values = historical_baselines.get(metric, [])
         historical_values.append(current_value)
         

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Scaffold a starter Claude Code workflow (.js) file for a chosen topology.
 
-Emits a runnable skeleton with the meta block, a schema, phase/log calls,
+Emits a runnable skeleton with the meta block, a schema, phase()/log() calls,
 a guarded loop where relevant, and the correct parallel-thunk / pipeline shape.
 Pipe to a file under .claude/workflows/ and then edit the agent prompts.
 
@@ -15,7 +15,7 @@ TOPOLOGIES = ("fan-out", "pipeline", "barrier", "loop", "judge-panel")
 
 
 def _slug(name):
-    s = re.sub(r"[^a-z0-9-]+", "-", name.strip.lower).strip("-")
+    s = re.sub(r"[^a-z0-9-]+", "-", name.strip().lower()).strip("-")
     return s or "my-workflow"
 
 
@@ -52,13 +52,13 @@ SCHEMA = """const FINDINGS_SCHEMA = {
 """
 
 
-def body_fan_out:
+def body_fan_out():
     return """// Fan-out: independent units in parallel, then one synthesis.
 const ITEMS = args?.items ?? ['item one', 'item two', 'item three']
 
 phase('Fan out')
 const results = await parallel(
-  ITEMS.map((item, i) =>  =>
+  ITEMS.map((item, i) => () =>
     agent(`Do the unit of work for:\\n${item}`,
           { label: `unit:${i + 1}`, model: 'haiku', schema: FINDINGS_SCHEMA }))
 )
@@ -74,7 +74,7 @@ return report
 """
 
 
-def body_pipeline:
+def body_pipeline():
     return """// Pipeline: each item flows through stages independently (no barrier).
 const ITEMS = args?.items ?? ['item one', 'item two', 'item three']
 
@@ -85,7 +85,7 @@ const results = await pipeline(
     agent(`Triage:\\n${item}`, { label: `triage:${i + 1}`, phase: 'Triage', model: 'haiku', schema: FINDINGS_SCHEMA }),
   // Stage 2 — verify / refine each finding (fewer items, more judgement).
   (prev) =>
-    parallel((prev?.findings ?? []).map(f =>  =>
+    parallel((prev?.findings ?? []).map(f => () =>
       agent(`Verify and refine: ${f.title}`, { phase: 'Verify', model: 'sonnet' })))
 )
 
@@ -94,17 +94,17 @@ return results.filter(Boolean)
 """
 
 
-def body_barrier:
+def body_barrier():
     return """// Barrier: collect the whole set first, then dedup/merge before the next step.
 const SOURCES = args?.sources ?? ['source A', 'source B', 'source C']
 
 phase('Collect')
-const all = await parallel(SOURCES.map((s, i) =>  =>
+const all = await parallel(SOURCES.map((s, i) => () =>
   agent(`Gather findings from:\\n${s}`, { label: `collect:${i + 1}`, model: 'haiku', schema: FINDINGS_SCHEMA })))
 
 // Merge across the full result set (this is why we need a barrier, not a pipeline).
 const merged = all.filter(Boolean).flatMap(r => r.findings ?? [])
-const seen = new Set
+const seen = new Set()
 const deduped = merged.filter(f => (seen.has(f.title) ? false : (seen.add(f.title), true)))
 
 phase('Synthesize')
@@ -117,10 +117,10 @@ return summary
 """
 
 
-def body_loop:
+def body_loop():
     return """// Loop: discover an unknown number of items. GUARDED against the agent cap.
 const found = []
-const seen = new Set
+const seen = new Set()
 let dryRounds = 0
 const HARD_CAP = 100
 
@@ -128,7 +128,7 @@ phase('Discover')
 while (
   dryRounds < 2 &&
   found.length < HARD_CAP &&
-  (!budget.total || budget.remaining > 50_000)
+  (!budget.total || budget.remaining() > 50_000)
 ) {
   const r = await agent(
     `Find items NOT already found:\\n${JSON.stringify([...seen])}`,
@@ -144,17 +144,17 @@ return found
 """
 
 
-def body_judge_panel:
+def body_judge_panel():
     return """// Judge panel: diverse drafts, scored in parallel, synthesize the winner.
 const ANGLES = args?.angles ?? ['conservative', 'aggressive', 'contrarian']
 
 phase('Draft')
-const drafts = (await parallel(ANGLES.map((a, i) =>  =>
+const drafts = (await parallel(ANGLES.map((a, i) => () =>
   agent(`Produce a plan. Take a strictly ${a} approach.`, { label: `draft:${i + 1}`, model: 'sonnet' })))).filter(Boolean)
 
 phase('Score')
 const SCORE_SCHEMA = { type: 'object', properties: { score: { type: 'number' } }, required: ['score'] }
-const scored = await parallel(drafts.map((d, i) =>  =>
+const scored = await parallel(drafts.map((d, i) => () =>
   agent(`Score this plan 1-10 with reasons:\\n${d}`, { label: `judge:${i + 1}`, model: 'haiku', schema: SCORE_SCHEMA })))
 
 let best = 0
@@ -184,7 +184,7 @@ BODIES = {
 
 
 def scaffold(topology, name, description):
-    parts = [_meta(name, description, PHASES[topology]), "", SCHEMA, "", BODIEStopology]
+    parts = [_meta(name, description, PHASES[topology]), "", SCHEMA, "", BODIES[topology]()]
     return "\n".join(parts)
 
 
@@ -208,4 +208,4 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

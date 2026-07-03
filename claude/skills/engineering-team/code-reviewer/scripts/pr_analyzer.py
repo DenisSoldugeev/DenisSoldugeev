@@ -153,7 +153,7 @@ def run_git_command(cmd: List[str], cwd: Path) -> Tuple[bool, str]:
             text=True,
             timeout=30
         )
-        return result.returncode == 0, result.stdout.strip
+        return result.returncode == 0, result.stdout.strip()
     except subprocess.TimeoutExpired:
         return False, "Command timed out"
     except Exception as e:
@@ -183,7 +183,7 @@ def get_changed_files(repo_path: Path, base: str, head: str) -> List[Dict]:
 
     files = []
     for line in output.split("\n"):
-        if not line.strip:
+        if not line.strip():
             continue
         parts = line.split("\t")
         if len(parts) >= 2:
@@ -220,9 +220,9 @@ def get_file_diff(repo_path: Path, filepath: str, base: str, head: str) -> str:
 
 def categorize_file(filepath: str) -> Tuple[str, int]:
     """Categorize a file based on its path and name."""
-    filepath_lower = filepath.lower
+    filepath_lower = filepath.lower()
 
-    for category, info in FILE_CATEGORIES.items:
+    for category, info in FILE_CATEGORIES.items():
         for pattern in info["patterns"]:
             if re.search(pattern, filepath_lower):
                 return category, info["weight"]
@@ -312,7 +312,7 @@ def analyze_commit_messages(repo_path: Path, base: str, head: str) -> Dict:
     if not success or not output:
         return {"commits": 0, "issues": []}
 
-    commits = output.strip.split("\n")
+    commits = output.strip().split("\n")
     issues = []
 
     for commit in commits:
@@ -474,12 +474,12 @@ def print_report(analysis: Dict) -> None:
     print("\n--- SUGGESTED REVIEW ORDER ---")
     for i, filepath in enumerate(analysis["review_order"], 1):
         file_info = next(f for f in analysis["files"] if f["path"] == filepath)
-        print(f"  {i}. [{file_info['category'].upper}] {filepath}")
+        print(f"  {i}. [{file_info['category'].upper()}] {filepath}")
 
     print("\n" + "=" * 60)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Analyze pull request for review complexity and risks"
     )
@@ -509,11 +509,11 @@ def main:
         help="Write output to file"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    repo_path = Path(args.repo_path).resolve
+    repo_path = Path(args.repo_path).resolve()
 
-    if not (repo_path / ".git").exists:
+    if not (repo_path / ".git").exists():
         print(f"Error: {repo_path} is not a git repository", file=sys.stderr)
         sys.exit(1)
 
@@ -532,4 +532,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

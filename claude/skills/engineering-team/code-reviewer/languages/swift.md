@@ -11,7 +11,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 
 ## PR Analyzer — Swift Risk Signals
 
-- `print` statements left in production code
+- `print()` statements left in production code
 - Force unwrap (`!`) on optionals outside of tests or justified init
 - Force cast (`as!`) without a safe fallback
 - Hardcoded credentials or API keys in source
@@ -58,7 +58,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 - Flag `try!` outside of guaranteed-safe contexts (test fixtures, constants) — crashes on failure
 - Flag `try?` discarding errors where the failure mode matters to the caller
 - Flag error types conforming to `Error` with no associated values or message — makes debugging hard
-- Flag throwing functions calling `fatalError` as a fallback — choose one error strategy
+- Flag throwing functions calling `fatalError()` as a fallback — choose one error strategy
 
 ---
 

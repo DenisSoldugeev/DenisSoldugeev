@@ -181,15 +181,15 @@ def churn_root_cause_summary(cohort_results: List[Dict[str, Any]]) -> Dict[str, 
     """Aggregate churn reasons across all cohorts; identify top drivers."""
     totals: Dict[str, int] = {k: 0 for k in CHURN_CATEGORIES}
     for r in cohort_results:
-        for cat, count in (r.get("churn_reasons") or {}).items:
+        for cat, count in (r.get("churn_reasons") or {}).items():
             if cat in totals:
                 totals[cat] += count
 
-    total_churn = sum(totals.values)
+    total_churn = sum(totals.values())
     if total_churn == 0:
         return {"total_churn_customers": 0, "top_drivers": [], "preventable_pct": 0.0}
 
-    ranked = sorted(totals.items, key=lambda x: -x[1])
+    ranked = sorted(totals.items(), key=lambda x: -x[1])
     top_drivers = [
         {
             "category": cat,
@@ -273,7 +273,7 @@ def render_text(result: Dict[str, Any], source: str) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Decompose retention honestly (GRR vs NRR) and categorize churn root causes.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -281,7 +281,7 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to cohorts JSON (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
@@ -309,4 +309,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

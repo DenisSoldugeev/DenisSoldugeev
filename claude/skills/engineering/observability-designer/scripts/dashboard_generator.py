@@ -153,10 +153,10 @@ class DashboardGenerator:
         
         dashboard_spec = {
             'metadata': {
-                'title': f"{service_name} - {target_role.upper} Dashboard",
+                'title': f"{service_name} - {target_role.upper()} Dashboard",
                 'service': service_def,
                 'target_role': target_role,
-                'generated_at': datetime.utcnow.isoformat + 'Z',
+                'generated_at': datetime.utcnow().isoformat() + 'Z',
                 'version': '1.0'
             },
             'configuration': {
@@ -988,7 +988,7 @@ class DashboardGenerator:
 ## Overview
 This dashboard provides comprehensive monitoring for {service['name']}, a {service['type']} service with {service['criticality']} criticality.
 
-**Target Audience:** {metadata['target_role'].upper} teams
+**Target Audience:** {metadata['target_role'].upper()} teams
 **Generated:** {metadata['generated_at']}
 
 ## Dashboard Sections
@@ -1032,7 +1032,7 @@ This dashboard provides comprehensive monitoring for {service['name']}, a {servi
 """
         
         drill_downs = dashboard_spec.get('drill_down_paths', {})
-        for path_name, path_config in drill_downs.items:
+        for path_name, path_config in drill_downs.items():
             doc_content += f"- **{path_name}**: From {path_config['from']} → {path_config['to']}\n"
         
         doc_content += f"""
@@ -1068,10 +1068,10 @@ Use appropriate time ranges for different investigation types:
     def export_specification(self, dashboard_spec: Dict[str, Any], output_file: str, 
                            format_type: str = 'json'):
         """Export dashboard specification."""
-        if format_type.lower == 'json':
+        if format_type.lower() == 'json':
             with open(output_file, 'w') as f:
                 json.dump(dashboard_spec, f, indent=2)
-        elif format_type.lower == 'grafana':
+        elif format_type.lower() == 'grafana':
             grafana_json = self.generate_grafana_json(dashboard_spec)
             with open(output_file, 'w') as f:
                 json.dump(grafana_json, f, indent=2)
@@ -1091,7 +1091,7 @@ Use appropriate time ranges for different investigation types:
         
         print(f"\nDashboard Details:")
         print(f"  Title: {metadata['title']}")
-        print(f"  Target Role: {metadata['target_role'].upper}")
+        print(f"  Target Role: {metadata['target_role'].upper()}")
         print(f"  Service: {service['name']} ({service['type']})")
         print(f"  Criticality: {service['criticality']}")
         print(f"  Generated: {metadata['generated_at']}")
@@ -1107,7 +1107,7 @@ Use appropriate time ranges for different investigation types:
             panel_type = panel['type']
             panel_types[panel_type] = panel_types.get(panel_type, 0) + 1
         
-        for panel_type, count in panel_types.items:
+        for panel_type, count in panel_types.items():
             print(f"  {panel_type}: {count}")
         
         variables = dashboard_spec.get('variables', [])
@@ -1128,7 +1128,7 @@ Use appropriate time ranges for different investigation types:
         print(f"\n{'='*60}\n")
 
 
-def main:
+def main():
     """Main function for CLI usage."""
     parser = argparse.ArgumentParser(
         description='Generate comprehensive dashboard specifications',
@@ -1175,12 +1175,12 @@ Examples:
     parser.add_argument('--summary-only', action='store_true',
                        help='Only display summary, do not save files')
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     if not args.input and not (args.service_type and args.name):
         parser.error("Must provide either --input file or --service-type and --name")
     
-    generator = DashboardGenerator
+    generator = DashboardGenerator()
     
     try:
         # Load or create service definition
@@ -1196,7 +1196,7 @@ Examples:
         
         # Output results
         if not args.summary_only:
-            output_file = args.output or f"{service_def['name'].replace(' ', '_').lower}_dashboard.json"
+            output_file = args.output or f"{service_def['name'].replace(' ', '_').lower()}_dashboard.json"
             generator.export_specification(dashboard_spec, output_file, args.format)
             print(f"Dashboard specification saved to: {output_file}")
             
@@ -1216,4 +1216,4 @@ Examples:
 
 
 if __name__ == '__main__':
-    main
+    main()

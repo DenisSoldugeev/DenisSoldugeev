@@ -27,6 +27,24 @@ def safe_divide(numerator: float, denominator: float, default: float = 0.0) -> f
     return numerator / denominator
 
 
+def resolve_input_section(
+    data: Dict[str, Any], section_key: str, flat_keys: Tuple[str, ...]
+) -> Dict[str, Any]:
+    """
+    Accept both supported input shapes:
+    1. Flat: the expected keys live at the top level of the JSON file.
+    2. Nested: the data lives under a per-tool section key, as in
+       assets/sample_financial_data.json (which bundles inputs for all
+       four financial-analyst scripts in one file).
+    """
+    if any(key in data for key in flat_keys):
+        return data
+    section = data.get(section_key)
+    if isinstance(section, dict):
+        return section
+    return data
+
+
 def simple_linear_regression(
     x_values: List[float], y_values: List[float]
 ) -> Tuple[float, float, float]:
@@ -338,9 +356,9 @@ class ForecastBuilder:
         self, scenarios: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """Run the complete forecast analysis."""
-        trends = self.analyze_trends
+        trends = self.analyze_trends()
         scenario_comparison = self.build_scenario_comparison(scenarios)
-        cash_flow = self.build_rolling_cash_flow
+        cash_flow = self.build_rolling_cash_flow()
 
         return {
             "trend_analysis": trends,
@@ -445,7 +463,7 @@ class ForecastBuilder:
         return "\n".join(lines)
 
 
-def main -> None:
+def main() -> None:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Driver-based revenue forecasting with scenario modeling"
@@ -467,7 +485,7 @@ def main -> None:
         help="Comma-separated list of scenarios (default: base,bull,bear)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         with open(args.input_file, "r") as f:
@@ -479,8 +497,24 @@ def main -> None:
         print(f"Error: Invalid JSON in '{args.input_file}': {e}", file=sys.stderr)
         sys.exit(1)
 
+    flat_keys = (
+        "historical_periods",
+        "drivers",
+        "assumptions",
+        "cash_flow_inputs",
+    )
+    data = resolve_input_section(data, "forecast", flat_keys)
+    if not any(data.get(key) for key in flat_keys):
+        print(
+            "Error: No forecast inputs found. Expected at least one of "
+            f"{', '.join(flat_keys)} at the top level or nested under "
+            "'forecast'.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     builder = ForecastBuilder(data)
-    scenarios = [s.strip for s in args.scenarios.split(",")]
+    scenarios = [s.strip() for s in args.scenarios.split(",")]
 
     results = builder.run_full_forecast(scenarios)
 
@@ -491,4 +525,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -103,8 +103,8 @@ class RevshareModel:
 
 def _validate(rev: dict) -> list[str]:
     errs: list[str] = []
-    tier = (rev.get("partner_tier") or "").upper
-    contrib = (rev.get("partner_contribution") or "").lower
+    tier = (rev.get("partner_tier") or "").upper()
+    contrib = (rev.get("partner_contribution") or "").lower()
     if tier not in VALID_TIERS:
         errs.append(f"partner_tier '{tier}' not in {VALID_TIERS}")
     if contrib not in VALID_CONTRIBUTIONS:
@@ -142,8 +142,8 @@ def model(rev: dict) -> RevshareModel:
         # Return a stub model with validation errors; nothing else computed.
         return RevshareModel(
             partner_name=str(rev.get("partner_name", "UNSPECIFIED")),
-            partner_tier=(rev.get("partner_tier") or "").upper,
-            partner_contribution=(rev.get("partner_contribution") or "").lower,
+            partner_tier=(rev.get("partner_tier") or "").upper(),
+            partner_contribution=(rev.get("partner_contribution") or "").lower(),
             deal_avg_size_usd=float(rev.get("deal_avg_size_usd", 0.0)),
             direct_margin_usd=0.0, direct_margin_pct=0.0,
             via_partner_margin_usd_at_low=0.0, via_partner_margin_pct_at_low=0.0,
@@ -161,8 +161,8 @@ def model(rev: dict) -> RevshareModel:
             validation_errors=errs,
         )
 
-    tier = (rev["partner_tier"] or "").upper
-    contrib = (rev["partner_contribution"] or "").lower
+    tier = (rev["partner_tier"] or "").upper()
+    contrib = (rev["partner_contribution"] or "").lower()
     deal_avg = float(rev.get("deal_avg_size_usd", 0.0))
     cts_direct = float(rev.get("our_cost_to_serve_direct_usd", 0.0))
     cts_partner = float(rev.get("our_cost_to_serve_via_partner_usd", 0.0))
@@ -404,4 +404,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

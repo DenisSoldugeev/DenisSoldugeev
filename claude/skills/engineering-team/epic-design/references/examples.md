@@ -62,14 +62,14 @@ Five complete implementation blueprints. Each describes exactly which techniques
 ```javascript
 // Glass starts in hero depth-3, floats between sections,
 // then descends into ingredients section
-initFloatingProduct; // from inter-section-effects.md
+initFloatingProduct(); // from inter-section-effects.md
 
 // On arrival in ingredients section, glass triggers
 // the ingredient words to light up one by one
 ScrollTrigger.create({
   trigger: '.ingredients-section',
   start: 'top 50%',
-  onEnter:  => {
+  onEnter: () => {
     initWordScrollLighting(
       '.ingredients-section',
       '.ingredients-tagline'

@@ -249,7 +249,7 @@ SECRET_PATTERNS = [
 def scan_file(file_path: Path, patterns: List[SecretPattern]) -> List[SecretFinding]:
     """Scan a single file for secrets."""
     findings = []
-    extension = file_path.suffix.lower
+    extension = file_path.suffix.lower()
 
     try:
         content = file_path.read_text(encoding='utf-8', errors='ignore')
@@ -266,7 +266,7 @@ def scan_file(file_path: Path, patterns: List[SecretPattern]) -> List[SecretFind
 
             for i, line in enumerate(lines, 1):
                 # Skip comments that explain patterns (like in this file)
-                if 'regex' in line.lower or 'pattern' in line.lower:
+                if 'regex' in line.lower() or 'pattern' in line.lower():
                     continue
 
                 match = regex.search(line)
@@ -303,21 +303,21 @@ def scan_directory(dir_path: Path, patterns: List[SecretPattern],
         ]
 
     findings = []
-    extensions = set
+    extensions = set()
     for pattern in patterns:
         extensions.update(pattern.file_extensions)
 
     for file_path in dir_path.rglob("*"):
-        if file_path.is_file:
+        if file_path.is_file():
             # Check exclusions
             if any(excluded in file_path.parts for excluded in exclude_dirs):
                 continue
 
             # Skip binary files and large files
-            if file_path.stat.st_size > 1_000_000:  # 1MB limit
+            if file_path.stat().st_size > 1_000_000:  # 1MB limit
                 continue
 
-            if file_path.suffix.lower in extensions or file_path.name in ['.env', '.env.local', '.env.production']:
+            if file_path.suffix.lower() in extensions or file_path.name in ['.env', '.env.local', '.env.production']:
                 findings.extend(scan_file(file_path, patterns))
 
     return sorted(findings, key=lambda f: (
@@ -347,7 +347,7 @@ def format_text_report(findings: List[SecretFinding], path: str) -> str:
     for sev in ["critical", "high", "medium", "low"]:
         count = by_severity.get(sev, 0)
         if count > 0:
-            lines.append(f"  {sev.upper}: {count}")
+            lines.append(f"  {sev.upper()}: {count}")
     lines.append("")
 
     if not findings:
@@ -361,7 +361,7 @@ def format_text_report(findings: List[SecretFinding], path: str) -> str:
         if finding.severity != current_severity:
             current_severity = finding.severity
             lines.append("-" * 70)
-            lines.append(f"[{current_severity.value.upper}]")
+            lines.append(f"[{current_severity.value.upper()}]")
             lines.append("-" * 70)
 
         lines.append("")
@@ -381,7 +381,7 @@ def format_json_report(findings: List[SecretFinding], path: str) -> Dict:
     """Format findings as JSON."""
     return {
         "target": path,
-        "scan_date": __import__('datetime').datetime.now.isoformat,
+        "scan_date": __import__('datetime').datetime.now().isoformat(),
         "summary": {
             "total": len(findings),
             "by_severity": {
@@ -404,7 +404,7 @@ def format_json_report(findings: List[SecretFinding], path: str) -> Dict:
     }
 
 
-def list_patterns:
+def list_patterns():
     """List all secret patterns."""
     print("\n" + "=" * 60)
     print("SECRET DETECTION PATTERNS")
@@ -412,11 +412,11 @@ def list_patterns:
 
     for pattern in sorted(SECRET_PATTERNS, key=lambda p: p.pattern_id):
         print(f"\n[{pattern.pattern_id}] {pattern.name}")
-        print(f"  Severity: {pattern.severity.value.upper}")
+        print(f"  Severity: {pattern.severity.value.upper()}")
         print(f"  Description: {pattern.description}")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Secret Scanner - Detect hardcoded secrets in code",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -465,17 +465,17 @@ Examples:
         help="Minimum severity to report"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.list_patterns:
-        list_patterns
+        list_patterns()
         return
 
     if not args.path:
         parser.error("path is required (or use --list-patterns)")
 
     path = Path(args.path)
-    if not path.exists:
+    if not path.exists():
         print(f"Error: Path does not exist: {path}")
         sys.exit(1)
 
@@ -488,7 +488,7 @@ Examples:
         patterns = [p for p in patterns if p.severity in allowed]
 
     # Scan
-    if path.is_file:
+    if path.is_file():
         findings = scan_file(path, patterns)
     else:
         findings = scan_directory(path, patterns)
@@ -513,4 +513,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

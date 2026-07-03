@@ -234,25 +234,25 @@ class TestShoppingCart:
 
     def test_add_single_item_successfully(self):
         """Should add single item with quantity."""
-        cart = ShoppingCart
+        cart = ShoppingCart()
         cart.add_item('apple', quantity=3, price=1.50)
 
         assert len(cart.items) == 1
         assert cart.items['apple']['quantity'] == 3
-        assert cart.get_total == 4.50
+        assert cart.get_total() == 4.50
 
     def test_update_quantity_for_existing_item(self):
         """Should update quantity if item already exists."""
-        cart = ShoppingCart
+        cart = ShoppingCart()
         cart.add_item('apple', quantity=3, price=1.50)
         cart.add_item('apple', quantity=2, price=1.50)
 
         assert cart.items['apple']['quantity'] == 5
-        assert cart.get_total == 7.50
+        assert cart.get_total() == 7.50
 
     def test_reject_negative_quantity(self):
         """Should validate quantity is positive."""
-        cart = ShoppingCart
+        cart = ShoppingCart()
 
         with pytest.raises(ValueError, match="Quantity must be positive"):
             cart.add_item('apple', quantity=-1, price=1.50)
@@ -339,10 +339,10 @@ Write a failing test that describes desired email validation behavior
 ### Test Template (Jest)
 
 ```typescript
-describe('EmailValidator',  => {
-  it('should accept valid email format',  => {
+describe('EmailValidator', () => {
+  it('should accept valid email format', () => {
     // Arrange
-    const validator = new EmailValidator;
+    const validator = new EmailValidator();
 
     // Act
     const result = validator.validate('user@example.com');
@@ -351,8 +351,8 @@ describe('EmailValidator',  => {
     expect(result).toBe(true);
   });
 
-  it('should reject email without @ symbol',  => {
-    const validator = new EmailValidator;
+  it('should reject email without @ symbol', () => {
+    const validator = new EmailValidator();
     const result = validator.validate('userexample.com');
     expect(result).toBe(false);
   });
@@ -373,7 +373,7 @@ describe('EmailValidator',  => {
 
 Review test quality:
 
-def test_user_login:
+def test_user_login():
     result = login("admin", "password123")
     assert result
     assert result["status"] == "success"
@@ -410,7 +410,7 @@ def test_user_login:
 
 ```python
 @pytest.fixture
-def admin_user:
+def admin_user():
     return {"username": "admin", "password": "password123"}
 
 def test_successful_login_returns_success_status(admin_user):

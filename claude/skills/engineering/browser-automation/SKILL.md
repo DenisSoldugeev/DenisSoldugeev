@@ -22,7 +22,7 @@ The Browser Automation skill provides comprehensive tools and knowledge for buil
 - Load testing or performance benchmarking — use **performance-profiler** instead
 
 **Why Playwright over Selenium or Puppeteer:**
-- **Auto-wait built in** — no explicit `sleep` or `waitForElement` needed for most actions
+- **Auto-wait built in** — no explicit `sleep()` or `waitForElement()` needed for most actions
 - **Multi-browser from one API** — Chromium, Firefox, WebKit with zero config changes
 - **Network interception** — block ads, mock responses, capture API calls natively
 - **Browser contexts** — isolated sessions without spinning up new browser instances
@@ -38,7 +38,7 @@ The Browser Automation skill provides comprehensive tools and knowledge for buil
 2. `#id` selectors — unique but may change between deploys
 3. Semantic selectors: `article`, `nav`, `main`, `section` — resilient to CSS changes
 4. Class-based: `.product-card`, `.price` — brittle if classes are generated (e.g., CSS modules)
-5. Positional: `nth-child`, `nth-of-type` — last resort, breaks on layout changes
+5. Positional: `nth-child()`, `nth-of-type()` — last resort, breaks on layout changes
 
 Use XPath only when CSS cannot express the relationship (e.g., ancestor traversal, text-based selection).
 
@@ -48,7 +48,7 @@ Use XPath only when CSS cannot express the relationship (e.g., ancestor traversa
 
 Break multi-step forms into discrete functions per step. Each function fills fields, clicks "Next"/"Continue", and waits for the next step to load (URL change or DOM element).
 
-Key patterns: login flows, multi-page forms, file uploads (including drag-and-drop zones), native and custom dropdown handling. See [playwright_browser_api.md](references/playwright_browser_api.md) for complete API reference on `fill`, `select_option`, `set_input_files`, and `expect_file_chooser`.
+Key patterns: login flows, multi-page forms, file uploads (including drag-and-drop zones), native and custom dropdown handling. See [playwright_browser_api.md](references/playwright_browser_api.md) for complete API reference on `fill()`, `select_option()`, `set_input_files()`, and `expect_file_chooser()`.
 
 ### 3. Screenshot & PDF Capture
 
@@ -63,14 +63,14 @@ See [playwright_browser_api.md](references/playwright_browser_api.md) for full s
 
 Core extraction patterns:
 - **Tables to JSON** — Extract `<thead>` headers and `<tbody>` rows into dictionaries
-- **Listings to arrays** — Map repeating card elements using a field-selector map (supports `::attr` for attributes)
+- **Listings to arrays** — Map repeating card elements using a field-selector map (supports `::attr()` for attributes)
 - **Nested/threaded data** — Recursive extraction for comments with replies, category trees
 
 See [data_extraction_recipes.md](references/data_extraction_recipes.md) for complete extraction functions, price parsing, data cleaning utilities, and output format helpers (JSON, CSV, JSONL).
 
 ### 5. Cookie & Session Management
 
-- **Save/restore cookies:** `context.cookies` and `context.add_cookies`
+- **Save/restore cookies:** `context.cookies()` and `context.add_cookies()`
 - **Full storage state** (cookies + localStorage): `context.storage_state(path="state.json")` to save, `browser.new_context(storage_state="state.json")` to restore
 
 **Best practice:** Save state after login, reuse across scraping sessions. Check session validity before starting a long job — make a lightweight request to a protected page and verify you are not redirected to login. See [playwright_browser_api.md](references/playwright_browser_api.md) for cookie and storage state API details.
@@ -82,7 +82,7 @@ Modern websites detect automation through multiple vectors. Apply these in prior
 1. **WebDriver flag removal** — Remove `navigator.webdriver = true` via init script (critical)
 2. **Custom user agent** — Rotate through real browser UAs; never use the default headless UA
 3. **Realistic viewport** — Set 1920x1080 or similar real-world dimensions (default 800x600 is a red flag)
-4. **Request throttling** — Add `random.uniform` delays between actions
+4. **Request throttling** — Add `random.uniform()` delays between actions
 5. **Proxy support** — Per-browser or per-context proxy configuration
 
 See [anti_detection_patterns.md](references/anti_detection_patterns.md) for the complete stealth stack: navigator property hardening, WebGL/canvas fingerprint evasion, behavioral simulation (mouse movement, typing speed, scroll patterns), proxy rotation strategies, and detection self-test URLs.
@@ -92,7 +92,7 @@ See [anti_detection_patterns.md](references/anti_detection_patterns.md) for the 
 - **SPA rendering:** Wait for content selectors (`wait_for_selector`), not the page load event
 - **AJAX/Fetch waiting:** Use `page.expect_response("**/api/data*")` to intercept and wait for specific API calls
 - **Shadow DOM:** Playwright pierces open Shadow DOM with `>>` operator: `page.locator("custom-element >> .inner-class")`
-- **Lazy-loaded images:** Scroll elements into view with `scroll_into_view_if_needed` to trigger loading
+- **Lazy-loaded images:** Scroll elements into view with `scroll_into_view_if_needed()` to trigger loading
 
 See [playwright_browser_api.md](references/playwright_browser_api.md) for wait strategies, network interception, and Shadow DOM details.
 
@@ -120,16 +120,16 @@ See [anti_detection_patterns.md](references/anti_detection_patterns.md) for the 
 
 ```python
 async def extract_single_page(url, selectors):
-    async with async_playwright as p:
+    async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(
             viewport={"width": 1920, "height": 1080},
             user_agent="Mozilla/5.0 ..."
         )
-        page = await context.new_page
+        page = await context.new_page()
         await page.goto(url, wait_until="networkidle")
         data = await extract_listings(page, selectors["container"], selectors["fields"])
-        await browser.close
+        await browser.close()
     return data
 ```
 
@@ -150,9 +150,9 @@ async def extract_single_page(url, selectors):
 ```python
 async def scrape_paginated(base_url, selectors, max_pages=100):
     all_data = []
-    async with async_playwright as p:
+    async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
-        page = await (await browser.new_context).new_page
+        page = await (await browser.new_context()).new_page()
         await page.goto(base_url)
 
         for page_num in range(max_pages):
@@ -160,14 +160,14 @@ async def scrape_paginated(base_url, selectors, max_pages=100):
             all_data.extend(items)
 
             next_btn = page.locator(selectors["next_button"])
-            if await next_btn.count == 0 or await next_btn.is_disabled:
+            if await next_btn.count() == 0 or await next_btn.is_disabled():
                 break
 
-            await next_btn.click
+            await next_btn.click()
             await page.wait_for_selector(selectors["container"])
             await human_delay(800, 2000)
 
-        await browser.close
+        await browser.close()
     return all_data
 ```
 
@@ -185,7 +185,7 @@ async def scrape_paginated(base_url, selectors, max_pages=100):
 
 ```python
 async def authenticated_workflow(credentials, form_data, download_dir):
-    async with async_playwright as p:
+    async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         state_file = "session_state.json"
 
@@ -193,12 +193,12 @@ async def authenticated_workflow(credentials, form_data, download_dir):
         if os.path.exists(state_file):
             context = await browser.new_context(storage_state=state_file)
         else:
-            context = await browser.new_context
-            page = await context.new_page
+            context = await browser.new_context()
+            page = await context.new_page()
             await login(page, credentials["url"], credentials["user"], credentials["pass"])
             await context.storage_state(path=state_file)
 
-        page = await context.new_page
+        page = await context.new_page()
         await page.goto(form_data["target_url"])
 
         # Fill form steps
@@ -206,12 +206,12 @@ async def authenticated_workflow(credentials, form_data, download_dir):
             await step_fn(page, form_data)
 
         # Handle download
-        async with page.expect_download as dl_info:
+        async with page.expect_download() as dl_info:
             await page.click("button:has-text('Download Report')")
         download = await dl_info.value
         await download.save_as(os.path.join(download_dir, download.suggested_filename))
 
-        await browser.close
+        await browser.close()
 ```
 
 ## Tools Reference
@@ -252,7 +252,7 @@ All scripts are stdlib-only. Run `python3 <script> --help` for full usage.
 
 ### Not Cleaning Up Browser Instances
 **Bad:** Launching browsers without closing them, leading to resource leaks.
-**Good:** Always use `try/finally` or async context managers to ensure `browser.close` is called.
+**Good:** Always use `try/finally` or async context managers to ensure `browser.close()` is called.
 
 ### Running Headed in Production
 **Bad:** Using `headless=False` in production/CI.

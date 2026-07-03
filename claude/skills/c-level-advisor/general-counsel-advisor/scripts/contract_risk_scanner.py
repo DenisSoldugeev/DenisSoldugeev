@@ -293,7 +293,7 @@ def scan(text: str) -> List[Finding]:
     findings: List[Finding] = []
     for rule in RULES:
         for match in rule["pattern"].finditer(text):
-            excerpt = match.group(0).strip
+            excerpt = match.group(0).strip()
             # truncate long excerpts
             if len(excerpt) > 300:
                 excerpt = excerpt[:297] + "..."
@@ -362,7 +362,7 @@ def _wrap(text: str, indent: int, width: int = 68) -> List[str]:
     return textwrap.wrap(text, width=width, initial_indent=" " * indent, subsequent_indent=" " * indent) or [" " * indent + text]
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Scan a contract for the 12 most common founder-killer clauses.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -370,12 +370,12 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to contract text file (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
             with open(args.path, "r", encoding="utf-8") as f:
-                text = f.read
+                text = f.read()
             source = args.path
         except (IOError, OSError) as e:
             print(f"error: could not read {args.path}: {e}", file=sys.stderr)
@@ -400,4 +400,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -157,7 +157,7 @@ def render_markdown(report: CycleTimeReport) -> str:
     return "\n".join(lines)
 
 
-def sample_process -> dict:
+def sample_process() -> dict:
     return {
         "process_name": "Procurement Intake (Sample)",
         "wip": 12,
@@ -178,14 +178,14 @@ def sample_process -> dict:
     }
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Analyze cycle time, value-add ratio, and throughput of a process."
     )
     parser.add_argument("--input", type=Path, help="Path to process JSON file.")
     parser.add_argument(
         "--profile",
-        choices=sorted(PROFILES.keys),
+        choices=sorted(PROFILES.keys()),
         default="saas",
         help="Industry profile for verdict band (default: saas).",
     )
@@ -200,14 +200,14 @@ def main -> int:
         action="store_true",
         help="Use a built-in sample process and exit.",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.sample:
-        raw = sample_process
+        raw = sample_process()
     else:
         if not args.input:
             parser.error("--input is required unless --sample is given")
-        if not args.input.exists:
+        if not args.input.exists():
             parser.error(f"input file not found: {args.input}")
         with args.input.open("r", encoding="utf-8") as f:
             raw = json.load(f)
@@ -239,4 +239,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

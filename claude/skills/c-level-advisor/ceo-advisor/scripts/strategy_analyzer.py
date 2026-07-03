@@ -49,7 +49,7 @@ class StrategyAnalyzer:
     def analyze_strategic_position(self, company_data: Dict) -> Dict:
         """Comprehensive strategic analysis"""
         results = {
-            'timestamp': datetime.now.isoformat,
+            'timestamp': datetime.now().isoformat(),
             'company': company_data.get('name', 'Company'),
             'strategic_health_score': 0,
             'pillar_analysis': {},
@@ -62,7 +62,7 @@ class StrategyAnalyzer:
         
         # Analyze strategic pillars
         total_score = 0
-        for pillar, config in self.strategic_pillars.items:
+        for pillar, config in self.strategic_pillars.items():
             pillar_score = self._analyze_pillar(
                 company_data.get(pillar, {}),
                 config['factors']
@@ -127,7 +127,7 @@ class StrategyAnalyzer:
         for factor in factors:
             score = pillar_data.get(factor, 50)
             details.append({
-                'factor': factor.replace('_', ' ').title,
+                'factor': factor.replace('_', ' ').title(),
                 'score': score,
                 'status': 'Strong' if score >= 70 else 'Adequate' if score >= 40 else 'Weak'
             })
@@ -486,7 +486,7 @@ class StrategyAnalyzer:
             recommendations.append('Consider industry disruption or category creation')
         
         # Based on specific weaknesses
-        for pillar, analysis in results['pillar_analysis'].items:
+        for pillar, analysis in results['pillar_analysis'].items():
             if analysis['score'] < 50:
                 if pillar == 'market_position':
                     recommendations.append(f'Strengthen {pillar}: Launch competitive differentiation program')
@@ -507,7 +507,7 @@ class StrategyAnalyzer:
 
 def analyze_strategy(company_data: Dict) -> str:
     """Main function to analyze strategy"""
-    analyzer = StrategyAnalyzer
+    analyzer = StrategyAnalyzer()
     results = analyzer.analyze_strategic_position(company_data)
     
     # Format output
@@ -521,8 +521,8 @@ def analyze_strategy(company_data: Dict) -> str:
         "Strategic Pillars:"
     ]
     
-    for pillar, analysis in results['pillar_analysis'].items:
-        output.append(f"  {pillar.replace('_', ' ').title}: {analysis['score']:.1f} ({analysis['level']})")
+    for pillar, analysis in results['pillar_analysis'].items():
+        output.append(f"  {pillar.replace('_', ' ').title()}: {analysis['score']:.1f} ({analysis['level']})")
         for factor in analysis['factors'][:2]:  # Show top 2 factors
             output.append(f"    • {factor['factor']}: {factor['status']}")
     

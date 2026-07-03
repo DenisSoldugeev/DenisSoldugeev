@@ -205,7 +205,7 @@ import hashlib
 def get_variant(user_id: str, experiment: str, control_pct: float = 0.5) -> str:
     """Deterministic traffic splitting based on user ID."""
     hash_input = f"{user_id}:{experiment}"
-    hash_value = int(hashlib.md5(hash_input.encode).hexdigest, 16)
+    hash_value = int(hashlib.md5(hash_input.encode()).hexdigest(), 16)
     bucket = (hash_value % 100) / 100.0
 
     return "control" if bucket < control_pct else "treatment"
@@ -251,15 +251,15 @@ import mlflow
 
 def register_model(model, metrics: dict, model_name: str):
     """Register trained model with MLflow."""
-    with mlflow.start_run:
+    with mlflow.start_run():
         # Log metrics
-        for name, value in metrics.items:
+        for name, value in metrics.items():
             mlflow.log_metric(name, value)
 
         # Log model
         mlflow.sklearn.log_model(model, "model")
 
         # Register in model registry
-        model_uri = f"runs:/{mlflow.active_run.info.run_id}/model"
+        model_uri = f"runs:/{mlflow.active_run().info.run_id}/model"
         mlflow.register_model(model_uri, model_name)
 ```

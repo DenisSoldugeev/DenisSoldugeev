@@ -133,7 +133,7 @@ def detect_path_siblings(urls: list) -> list:
             slug_to_paths[slug].append(url)
 
     duplicates = []
-    for slug, paths in slug_to_paths.items:
+    for slug, paths in slug_to_paths.items():
         if len(paths) > 1:
             # Only flag if they're in different directories
             parents = set("/".join(urlparse(p).path.strip("/").split("/")[:-1]) for p in paths)
@@ -174,9 +174,9 @@ def parse_sitemap(content: str) -> list:
 
         if loc_el is not None and loc_el.text:
             urls.append({
-                "url": loc_el.text.strip,
-                "lastmod": lastmod_el.text.strip if lastmod_el is not None and lastmod_el.text else None,
-                "priority": float(priority_el.text.strip) if priority_el is not None and priority_el.text else None,
+                "url": loc_el.text.strip(),
+                "lastmod": lastmod_el.text.strip() if lastmod_el is not None and lastmod_el.text else None,
+                "priority": float(priority_el.text.strip()) if priority_el is not None and priority_el.text else None,
             })
 
     return urls
@@ -201,7 +201,7 @@ def analyze_urls(urls: list) -> dict:
     deep_urls = [(u, get_depth(urlparse(u).path)) for u in raw_urls if get_depth(urlparse(u).path) >= 4]
 
     # Extract top-level directories
-    top_dirs = Counter
+    top_dirs = Counter()
     for p in paths:
         parts = p.strip("/").split("/")
         if parts and parts[0]:
@@ -209,7 +209,7 @@ def analyze_urls(urls: list) -> dict:
 
     return {
         "total_urls": len(urls),
-        "depth_distribution": dict(sorted(depth_counter.items)),
+        "depth_distribution": dict(sorted(depth_counter.items())),
         "top_directories": dict(top_dirs.most_common(15)),
         "dynamic_urls": dynamic_urls,
         "deep_pages": deep_urls,
@@ -221,8 +221,8 @@ def analyze_urls(urls: list) -> dict:
 # ─── Report Printer ──────────────────────────────────────────────────────────
 
 def grade_depth_distribution(dist: dict) -> str:
-    deep = sum(v for k, v in dist.items if k >= 4)
-    total = sum(dist.values)
+    deep = sum(v for k, v in dist.items() if k >= 4)
+    total = sum(dist.values())
     if total == 0:
         return "N/A"
     pct = deep / total * 100
@@ -242,20 +242,20 @@ def print_report(analysis: dict) -> None:
     print("\n── Depth Distribution ──")
     dist = analysis["depth_distribution"]
     total = analysis["total_urls"]
-    for depth, count in sorted(dist.items):
+    for depth, count in sorted(dist.items()):
         pct = count / total * 100 if total else 0
         bar = "█" * int(pct / 2)
         label = "homepage" if depth == 0 else f"{'  ' * min(depth, 3)}/{'…/' * (depth - 1)}page"
         print(f"   Depth {depth}: {count:4d} pages ({pct:5.1f}%)  {bar}  {label}")
 
     print(f"\n   Rating: {grade_depth_distribution(dist)}")
-    deep_pct = sum(v for k, v in dist.items if k >= 4) / total * 100 if total else 0
+    deep_pct = sum(v for k, v in dist.items() if k >= 4) / total * 100 if total else 0
     if deep_pct >= 5:
         print("   ⚠️  More than 5% of pages are 4+ levels deep.")
         print("      Consider flattening structure or adding shortcut links.")
 
     print("\n── Top-Level Directories ──")
-    for d, count in analysis["top_directories"].items:
+    for d, count in analysis["top_directories"].items():
         pct = count / total * 100 if total else 0
         print(f"   /{d:<30s}  {count:4d} URLs ({pct:.1f}%)")
 
@@ -314,20 +314,20 @@ def load_content(source: str) -> str:
     if source.startswith("http://") or source.startswith("https://"):
         try:
             with urllib.request.urlopen(source, timeout=10) as resp:
-                return resp.read.decode("utf-8")
+                return resp.read().decode("utf-8")
         except urllib.error.URLError as e:
             print(f"Error fetching URL: {e}", file=sys.stderr)
             sys.exit(1)
     else:
         try:
             with open(source, "r", encoding="utf-8") as f:
-                return f.read
+                return f.read()
         except FileNotFoundError:
             print(f"Error: File not found: {source}", file=sys.stderr)
             sys.exit(1)
 
 
-def main:
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -339,11 +339,11 @@ def main:
         help="Path to a sitemap.xml file or URL (https://...). "
              "Use '-' to read from stdin. If omitted, runs embedded sample."
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.file:
         if args.file == "-":
-            content = sys.stdin.read
+            content = sys.stdin.read()
         else:
             content = load_content(args.file)
     else:
@@ -372,4 +372,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

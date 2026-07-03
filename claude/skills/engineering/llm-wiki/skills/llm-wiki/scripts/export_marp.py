@@ -34,10 +34,10 @@ def strip_frontmatter(text: str) -> str:
 
 
 def to_marp(text: str, theme: str) -> str:
-    body = strip_frontmatter(text).strip
+    body = strip_frontmatter(text).strip()
     # Turn each "## " into a new slide separator.
     # First H1 → title slide. Subsequent H2 → slide breaks.
-    lines = body.splitlines
+    lines = body.splitlines()
     out: list[str] = []
     seen_h1 = False
     for line in lines:
@@ -51,7 +51,7 @@ def to_marp(text: str, theme: str) -> str:
             out.append(line)
             continue
         out.append(line)
-    return MARP_HEADER.format(theme=theme) + "\n".join(out).strip + "\n"
+    return MARP_HEADER.format(theme=theme) + "\n".join(out).strip() + "\n"
 
 
 def render_one(src, out_path, theme, verbose=True):
@@ -78,7 +78,7 @@ def _error(message, as_json=False):
     sys.exit(1)
 
 
-def main:
+def main():
     p = argparse.ArgumentParser(
         description="Render a wiki page (or subtree) to a Marp slide deck.",
         epilog="Marp is a Markdown-based slide format supported by an Obsidian plugin.",
@@ -98,21 +98,21 @@ def main:
     p.add_argument(
         "--json", action="store_true", help="Emit result as JSON instead of human-readable"
     )
-    args = p.parse_args
+    args = p.parse_args()
 
-    vault = Path(args.vault).expanduser.resolve
-    if not vault.exists:
+    vault = Path(args.vault).expanduser().resolve()
+    if not vault.exists():
         _error(f"vault does not exist: {vault}", args.json)
 
-    src = (vault / args.page).resolve
-    if not src.exists:
+    src = (vault / args.page).resolve()
+    if not src.exists():
         _error(f"page not found: {src}", args.json)
 
     out_root = vault / args.out
     rendered = []
 
     try:
-        if src.is_file:
+        if src.is_file():
             dest = out_root / src.name.replace(".md", ".marp.md")
             render_one(src, dest, args.theme, verbose=not args.json)
             rendered.append(str(dest.relative_to(vault)))
@@ -143,4 +143,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -99,9 +99,9 @@ class ActionItem:
         self.id: str = data.get("id", "")
         self.description: str = data.get("description", "")
         self.owner: str = data.get("owner", "")
-        self.priority: str = data.get("priority", "medium").lower
+        self.priority: str = data.get("priority", "medium").lower()
         self.due_date: Optional[str] = data.get("due_date")
-        self.status: str = data.get("status", "not_started").lower
+        self.status: str = data.get("status", "not_started").lower()
         self.created_sprint: int = data.get("created_sprint", 0)
         self.completed_sprint: Optional[int] = data.get("completed_sprint")
         self.category: str = data.get("category", "")
@@ -118,9 +118,9 @@ class ActionItem:
     
     def _normalize_status(self, status: str) -> str:
         """Normalize status to standard categories."""
-        status_lower = status.lower.strip
+        status_lower = status.lower().strip()
         
-        for category, statuses in COMPLETION_STATUS_MAPPING.items:
+        for category, statuses in COMPLETION_STATUS_MAPPING.items():
             if any(s in status_lower for s in statuses):
                 return category
         
@@ -128,9 +128,9 @@ class ActionItem:
     
     def _infer_priority(self, description: str) -> str:
         """Infer priority from description text."""
-        description_lower = description.lower
+        description_lower = description.lower()
         
-        for priority, keywords in ACTION_PRIORITY_KEYWORDS.items:
+        for priority, keywords in ACTION_PRIORITY_KEYWORDS.items():
             if any(keyword in description_lower for keyword in keywords):
                 return priority
         
@@ -147,7 +147,7 @@ class ActionItem:
         
         try:
             due_date = datetime.strptime(self.due_date, "%Y-%m-%d")
-            return datetime.now > due_date and not self.is_completed
+            return datetime.now() > due_date and not self.is_completed
         except ValueError:
             return False
 
@@ -174,7 +174,7 @@ class RetrospectiveData:
         ]
         
         # Calculate metrics
-        self._calculate_metrics
+        self._calculate_metrics()
     
     def _calculate_metrics(self):
         """Calculate retrospective session metrics."""
@@ -183,22 +183,22 @@ class RetrospectiveData:
         self.attendance_rate = len(self.attendees) / max(1, 5)  # Assume team of 5
         
         # Sentiment analysis
-        self.sentiment_scores = self._analyze_sentiment
+        self.sentiment_scores = self._analyze_sentiment()
         
         # Theme analysis
-        self.themes = self._extract_themes
+        self.themes = self._extract_themes()
     
     def _analyze_sentiment(self) -> Dict[str, float]:
         """Analyze sentiment of retrospective items."""
-        all_text = " ".join(self.went_well + self.to_improve).lower
+        all_text = " ".join(self.went_well + self.to_improve).lower()
         
         sentiment_scores = {}
-        for sentiment, keywords in SENTIMENT_KEYWORDS.items:
+        for sentiment, keywords in SENTIMENT_KEYWORDS.items():
             count = sum(1 for keyword in keywords if keyword in all_text)
             sentiment_scores[sentiment] = count
         
         # Normalize to percentages
-        total_sentiment = sum(sentiment_scores.values)
+        total_sentiment = sum(sentiment_scores.values())
         if total_sentiment > 0:
             for sentiment in sentiment_scores:
                 sentiment_scores[sentiment] = sentiment_scores[sentiment] / total_sentiment
@@ -207,10 +207,10 @@ class RetrospectiveData:
     
     def _extract_themes(self) -> Dict[str, int]:
         """Extract themes from retrospective items."""
-        all_text = " ".join(self.went_well + self.to_improve).lower
+        all_text = " ".join(self.went_well + self.to_improve).lower()
         
         theme_counts = {}
-        for theme, keywords in THEME_CATEGORIES.items:
+        for theme, keywords in THEME_CATEGORIES.items():
             count = sum(1 for keyword in keywords if keyword in all_text)
             if count > 0:
                 theme_counts[theme] = count
@@ -313,18 +313,18 @@ def analyze_recurring_themes(retros: List[RetrospectiveData]) -> Dict[str, Any]:
         sprint = retro.sprint_number
         
         # Theme tracking
-        for theme, count in retro.themes.items:
+        for theme, count in retro.themes.items():
             theme_evolution[theme].append((sprint, count))
         
         # Sentiment tracking
-        for sentiment, score in retro.sentiment_scores.items:
+        for sentiment, score in retro.sentiment_scores.items():
             sentiment_evolution[sentiment].append((sprint, score))
     
     # Identify recurring themes (appear in >50% of retros)
     recurring_threshold = len(retros) * 0.5
     recurring_themes = {}
     
-    for theme, occurrences in theme_evolution.items:
+    for theme, occurrences in theme_evolution.items():
         if len(occurrences) >= recurring_threshold:
             sprints, counts = zip(*occurrences)
             recurring_themes[theme] = {
@@ -338,7 +338,7 @@ def analyze_recurring_themes(retros: List[RetrospectiveData]) -> Dict[str, Any]:
     
     # Sentiment trend analysis
     sentiment_trends = {}
-    for sentiment, scores_by_sprint in sentiment_evolution.items:
+    for sentiment, scores_by_sprint in sentiment_evolution.items():
         if len(scores_by_sprint) >= 3:  # Need at least 3 data points
             _, scores = zip(*scores_by_sprint)
             sentiment_trends[sentiment] = {
@@ -349,7 +349,7 @@ def analyze_recurring_themes(retros: List[RetrospectiveData]) -> Dict[str, Any]:
     
     # Identify persistent issues (negative themes that recur)
     persistent_issues = []
-    for theme, data in recurring_themes.items:
+    for theme, data in recurring_themes.items():
         if theme in ["technical", "process", "external"] and data["frequency"] > 0.6:
             if data["trend"]["direction"] in ["stable", "increasing"]:
                 persistent_issues.append({
@@ -388,7 +388,7 @@ def analyze_improvement_trends(retros: List[RetrospectiveData]) -> Dict[str, Any
     
     # Calculate trends for each metric
     trend_analysis = {}
-    for metric_name, values in metrics_over_time.items:
+    for metric_name, values in metrics_over_time.items():
         if len(values) >= 3:
             trend_analysis[metric_name] = {
                 "values": values,
@@ -522,7 +522,7 @@ def _calculate_team_maturity(retros: List[RetrospectiveData]) -> Dict[str, Any]:
         maturity_indicators["follow_through"] = 60
     
     # Calculate overall maturity score
-    overall_score = sum(maturity_indicators.values) / len(maturity_indicators)
+    overall_score = sum(maturity_indicators.values()) / len(maturity_indicators)
     
     if overall_score >= 85:
         level = "high_performing"
@@ -599,13 +599,13 @@ def _calculate_improvement_velocity(retros: List[RetrospectiveData]) -> Dict[str
     # Look at theme evolution - are persistent issues being resolved?
     theme_counts = defaultdict(list)
     for retro in retros:
-        for theme, count in retro.themes.items:
+        for theme, count in retro.themes.items():
             theme_counts[theme].append(count)
     
     resolved_themes = 0
     persistent_themes = 0
     
-    for theme, counts in theme_counts.items:
+    for theme, counts in theme_counts.items():
         if len(counts) >= 3:
             recent_avg = statistics.mean(counts[-2:])
             early_avg = statistics.mean(counts[:2])
@@ -717,7 +717,7 @@ def generate_recommendations(result: RetroAnalysisResult) -> List[str]:
 
 def analyze_retrospectives(data: Dict[str, Any]) -> RetroAnalysisResult:
     """Perform comprehensive retrospective analysis."""
-    result = RetroAnalysisResult
+    result = RetroAnalysisResult()
     
     try:
         # Parse retrospective data
@@ -798,8 +798,8 @@ def format_text_output(result: RetroAnalysisResult) -> str:
     priority_analysis = action_analysis.get('priority_analysis', {})
     if priority_analysis:
         lines.append("Priority-based completion rates:")
-        for priority, data in priority_analysis.items:
-            lines.append(f"  {priority.title}: {data['completion_rate']:.1%} ({data['completed']}/{data['total']})")
+        for priority, data in priority_analysis.items():
+            lines.append(f"  {priority.title()}: {data['completion_rate']:.1%} ({data['completed']}/{data['total']})")
     lines.append("")
     
     # Theme analysis
@@ -809,15 +809,15 @@ def format_text_output(result: RetroAnalysisResult) -> str:
     recurring_themes = theme_analysis.get("recurring_themes", {})
     if recurring_themes:
         lines.append("Top recurring themes:")
-        sorted_themes = sorted(recurring_themes.items, key=lambda x: x[1]['frequency'], reverse=True)
+        sorted_themes = sorted(recurring_themes.items(), key=lambda x: x[1]['frequency'], reverse=True)
         for theme, data in sorted_themes[:5]:
-            lines.append(f"  {theme.replace('_', ' ').title}: {data['frequency']:.1%} frequency, {data['trend']['direction']} trend")
+            lines.append(f"  {theme.replace('_', ' ').title()}: {data['frequency']:.1%} frequency, {data['trend']['direction']} trend")
     
     persistent_issues = theme_analysis.get("persistent_issues", [])
     if persistent_issues:
         lines.append("Persistent issues requiring attention:")
         for issue in persistent_issues:
-            lines.append(f"  {issue['theme'].replace('_', ' ').title}: {issue['frequency']:.1%} frequency")
+            lines.append(f"  {issue['theme'].replace('_', ' ').title()}: {issue['frequency']:.1%} frequency")
     lines.append("")
     
     # Improvement trends
@@ -826,7 +826,7 @@ def format_text_output(result: RetroAnalysisResult) -> str:
         maturity = improvement_trends["team_maturity_score"]
         lines.append("TEAM MATURITY")
         lines.append("-"*30)
-        lines.append(f"Maturity Level: {maturity['level'].replace('_', ' ').title}")
+        lines.append(f"Maturity Level: {maturity['level'].replace('_', ' ').title()}")
         lines.append(f"Maturity Score: {maturity['score']:.0f}/100")
         lines.append("")
     
@@ -834,7 +834,7 @@ def format_text_output(result: RetroAnalysisResult) -> str:
         velocity = improvement_trends["improvement_velocity"]
         lines.append("IMPROVEMENT VELOCITY")
         lines.append("-"*30)
-        lines.append(f"Velocity: {velocity['velocity'].title}")
+        lines.append(f"Velocity: {velocity['velocity'].title()}")
         lines.append(f"Theme Resolution Rate: {velocity.get('theme_resolution_rate', 0):.1%}")
         lines.append("")
     
@@ -863,7 +863,7 @@ def format_json_output(result: RetroAnalysisResult) -> Dict[str, Any]:
 # CLI Interface
 # ---------------------------------------------------------------------------
 
-def main -> int:
+def main() -> int:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Analyze retrospective data for continuous improvement insights"
@@ -879,7 +879,7 @@ def main -> int:
         help="Output format (default: text)"
     )
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Load and validate data
@@ -911,4 +911,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

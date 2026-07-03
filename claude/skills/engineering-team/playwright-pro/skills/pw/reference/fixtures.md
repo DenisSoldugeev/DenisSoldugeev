@@ -21,7 +21,7 @@ export const test = base.extend<MyFixtures>({
   // Simple value fixture
   testUser: async ({}, use) => {
     await use({
-      email: `test-${Date.now}@example.com`,
+      email: `test-${Date.now()}@example.com`,
       password: 'Test123!',
     });
   },
@@ -32,7 +32,7 @@ export const test = base.extend<MyFixtures>({
     await page.goto('/login');
     await page.getByLabel('Email').fill(testUser.email);
     await page.getByLabel('Password').fill(testUser.password);
-    await page.getByRole('button', { name: 'Sign in' }).click;
+    await page.getByRole('button', { name: 'Sign in' }).click();
     await expect(page).toHaveURL('/dashboard');
 
     // Provide the authenticated page to the test
@@ -51,7 +51,7 @@ export const test = base.extend<MyFixtures>({
       },
     });
     await use(context);
-    await context.dispose;
+    await context.dispose();
   },
 });
 
@@ -65,14 +65,14 @@ import { test, expect } from './fixtures';
 
 test('should show dashboard for logged in user', async ({ authenticatedPage }) => {
   // authenticatedPage is already logged in
-  await expect(authenticatedPage.getByRole('heading', { name: 'Dashboard' })).toBeVisible;
+  await expect(authenticatedPage.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
 });
 
 test('should create item via API', async ({ apiClient }) => {
   const response = await apiClient.post('/api/items', {
     data: { name: 'Test Item' },
   });
-  expect(response.ok).toBeTruthy;
+  expect(response.ok()).toBeTruthy();
 });
 ```
 
@@ -88,9 +88,9 @@ setup('authenticate', async ({ page }) => {
   await page.goto('/login');
   await page.getByLabel('Email').fill('admin@example.com');
   await page.getByLabel('Password').fill('password');
-  await page.getByRole('button', { name: 'Sign in' }).click;
+  await page.getByRole('button', { name: 'Sign in' }).click();
   await page.waitForURL('/dashboard');
-  await page.context.storageState({ path: '.auth/user.json' });
+  await page.context().storageState({ path: '.auth/user.json' });
 });
 ```
 
@@ -117,5 +117,5 @@ export default defineConfig({
 | Shared login state | `storageState` + setup project |
 | Per-test data creation | Custom fixture with API calls |
 | Reusable page helpers | Custom fixture returning page |
-| Test data cleanup | Fixture teardown (after `use`) |
+| Test data cleanup | Fixture teardown (after `use()`) |
 | Config values | Simple value fixture |

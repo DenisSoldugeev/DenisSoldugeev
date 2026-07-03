@@ -115,7 +115,7 @@ def load_assets_from_csv(filepath: str) -> List[Dict[str, Any]]:
                     "name": row.get("name", "Unknown"),
                     "type": row.get("type", "Information"),
                     "owner": row.get("owner", "Unassigned"),
-                    "classification": row.get("classification", "medium").lower,
+                    "classification": row.get("classification", "medium").lower(),
                 }
                 assets.append(asset)
     except FileNotFoundError:
@@ -194,7 +194,7 @@ def assess_risks(
             level = get_risk_level(score)
 
             # Identify potential vulnerabilities
-            vuln_category = threat["category"].lower
+            vuln_category = threat["category"].lower()
             vulns = VULNERABILITY_PATTERNS.get("technical", ["Unknown vulnerability"])
             if "access" in vuln_category:
                 vulns = VULNERABILITY_PATTERNS["access"]
@@ -246,7 +246,7 @@ def generate_report(
     output_format: str
 ) -> str:
     """Generate risk assessment report."""
-    timestamp = datetime.now.isoformat
+    timestamp = datetime.now().isoformat()
 
     # Calculate summary statistics
     risk_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0, "minimal": 0}
@@ -310,7 +310,7 @@ def generate_report(
         for asset in assets:
             lines.append(
                 f"| {asset['id']} | {asset['name']} | {asset['type']} | "
-                f"{asset['owner']} | {asset['classification'].capitalize} |"
+                f"{asset['owner']} | {asset['classification'].capitalize()} |"
             )
 
         lines.extend([
@@ -324,7 +324,7 @@ def generate_report(
             lines.append(
                 f"| {risk['id']} | {risk['asset_name']} | {risk['threat_name']} | "
                 f"{risk['likelihood']} | {risk['impact']} | {risk['score']} | "
-                f"{risk['level'].capitalize} |"
+                f"{risk['level'].capitalize()} |"
             )
 
         lines.extend([
@@ -332,15 +332,15 @@ def generate_report(
             f"## Treatment Recommendations",
             f"",
         ])
-        for level, treatment in TREATMENT_OPTIONS.items:
+        for level, treatment in TREATMENT_OPTIONS.items():
             count = risk_counts[level]
             if count > 0:
-                lines.append(f"**{level.capitalize} ({count} risks):** {treatment}")
+                lines.append(f"**{level.capitalize()} ({count} risks):** {treatment}")
 
         return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Security Risk Assessment Tool - ISO 27001 Clause 6.1.2"
     )
@@ -370,7 +370,7 @@ def main:
         help="Output format (default: markdown)"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Load or generate assets
     if args.assets:
@@ -400,4 +400,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

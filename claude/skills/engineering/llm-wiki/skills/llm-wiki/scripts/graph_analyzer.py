@@ -23,9 +23,9 @@ WIKILINK_RE = re.compile(r"\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|[^\]]*)?\]\]")
 
 def build_graph(vault: Path):
     wiki = vault / "wiki"
-    if not wiki.exists:
+    if not wiki.exists():
         raise SystemExit(f"[error] {wiki} not found")
-    nodes: set[str] = set
+    nodes: set[str] = set()
     out: dict[str, set[str]] = defaultdict(set)
     inb: dict[str, set[str]] = defaultdict(set)
     stems: dict[str, str] = {}
@@ -47,7 +47,7 @@ def build_graph(vault: Path):
         key = str(rel).replace("\\", "/")[:-3]
         text = md.read_text(encoding="utf-8", errors="replace")
         for m in WIKILINK_RE.finditer(text):
-            target = m.group(1).strip
+            target = m.group(1).strip()
             if target.endswith(".md"):
                 target = target[:-3]
             if target in nodes:
@@ -64,17 +64,17 @@ def build_graph(vault: Path):
 def connected_components(nodes: set[str], out: dict[str, set[str]], inb: dict[str, set[str]]):
     adj: dict[str, set[str]] = defaultdict(set)
     for n in nodes:
-        adj[n] |= out.get(n, set)
-        adj[n] |= inb.get(n, set)
-    seen: set[str] = set
+        adj[n] |= out.get(n, set())
+        adj[n] |= inb.get(n, set())
+    seen: set[str] = set()
     components: list[set[str]] = []
     for n in nodes:
         if n in seen:
             continue
         stack = [n]
-        comp: set[str] = set
+        comp: set[str] = set()
         while stack:
-            v = stack.pop
+            v = stack.pop()
             if v in seen:
                 continue
             seen.add(v)
@@ -87,16 +87,16 @@ def connected_components(nodes: set[str], out: dict[str, set[str]], inb: dict[st
 
 def analyze(vault: Path, top: int) -> dict:
     nodes, out, inb = build_graph(vault)
-    hubs_out = sorted(nodes, key=lambda n: len(out.get(n, set)), reverse=True)[:top]
-    hubs_in = sorted(nodes, key=lambda n: len(inb.get(n, set)), reverse=True)[:top]
+    hubs_out = sorted(nodes, key=lambda n: len(out.get(n, set())), reverse=True)[:top]
+    hubs_in = sorted(nodes, key=lambda n: len(inb.get(n, set())), reverse=True)[:top]
     orphans = sorted(n for n in nodes if not inb.get(n))
     sinks = sorted(n for n in nodes if not out.get(n))
     comps = connected_components(nodes, out, inb)
     return {
         "total_pages": len(nodes),
-        "total_edges": sum(len(v) for v in out.values),
-        "top_outbound_hubs": [{"page": h, "outbound": len(out.get(h, set))} for h in hubs_out],
-        "top_inbound_hubs": [{"page": h, "inbound": len(inb.get(h, set))} for h in hubs_in],
+        "total_edges": sum(len(v) for v in out.values()),
+        "top_outbound_hubs": [{"page": h, "outbound": len(out.get(h, set()))} for h in hubs_out],
+        "top_inbound_hubs": [{"page": h, "inbound": len(inb.get(h, set()))} for h in hubs_in],
         "orphans": orphans,
         "sinks": sinks,
         "components": [
@@ -106,13 +106,13 @@ def analyze(vault: Path, top: int) -> dict:
     }
 
 
-def main -> None:
+def main() -> None:
     p = argparse.ArgumentParser(description="Analyze the wikilink graph of an LLM Wiki vault")
     p.add_argument("--vault", required=True)
     p.add_argument("--top", type=int, default=10)
     p.add_argument("--json", action="store_true")
-    args = p.parse_args
-    r = analyze(Path(args.vault).expanduser.resolve, args.top)
+    args = p.parse_args()
+    r = analyze(Path(args.vault).expanduser().resolve(), args.top)
 
     if args.json:
         print(json.dumps(r, indent=2, default=list))
@@ -120,23 +120,23 @@ def main -> None:
 
     print(f"LLM Wiki graph — {r['total_pages']} pages, {r['total_edges']} links")
     print(f"Connected components: {r['component_count']}")
-    print
+    print()
     print("Top outbound hubs (pages that link to many others):")
     for h in r["top_outbound_hubs"]:
         print(f"  - {h['page']}  ({h['outbound']} out)")
-    print
+    print()
     print("Top inbound hubs (pages many others link TO):")
     for h in r["top_inbound_hubs"]:
         print(f"  - {h['page']}  ({h['inbound']} in)")
-    print
+    print()
     print(f"Orphans (no inbound): {len(r['orphans'])}")
     for o in r["orphans"][:10]:
         print(f"  - {o}")
-    print
+    print()
     print(f"Sinks (no outbound): {len(r['sinks'])}")
     for s in r["sinks"][:10]:
         print(f"  - {s}")
 
 
 if __name__ == "__main__":
-    main
+    main()

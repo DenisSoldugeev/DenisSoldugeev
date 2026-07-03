@@ -72,6 +72,6 @@ page.getByRole('navigation').getByRole('link', { name: 'Settings' })
 
 // Nth match
 page.getByRole('listitem').nth(0)
-page.getByRole('listitem').first
-page.getByRole('listitem').last
+page.getByRole('listitem').first()
+page.getByRole('listitem').last()
 ```

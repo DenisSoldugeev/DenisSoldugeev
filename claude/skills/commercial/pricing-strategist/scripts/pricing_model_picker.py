@@ -88,7 +88,7 @@ def score_models(ctx: dict[str, Any], profile: str) -> list[ModelScore]:
     deal_size = float(ctx.get("deal_size_avg") or 0)
     customer_count = int(ctx.get("customer_count") or 0)
     value_drivers = ctx.get("value_drivers") or []
-    adoption = (ctx.get("adoption_curve") or "").lower
+    adoption = (ctx.get("adoption_curve") or "").lower()
     competitor_models = ctx.get("competitor_pricing_models") or []
 
     seat_signal = float(cp.get("seat-based") or 0)
@@ -112,7 +112,7 @@ def score_models(ctx: dict[str, Any], profile: str) -> list[ModelScore]:
     if deal_size > 0 and deal_size < 5000:
         s.score += 5
         s.rationale.append("SMB-friendly deal size — predictable seat math.")
-    if "subscription" in " ".join(competitor_models).lower:
+    if "subscription" in " ".join(competitor_models).lower():
         s.score += 5
         s.rationale.append("Competitors already train the market on subscription.")
     s.tradeoffs.append("Predictable revenue, but customers feel friction when adding seats.")
@@ -128,10 +128,10 @@ def score_models(ctx: dict[str, Any], profile: str) -> list[ModelScore]:
     if seat_signal > 0.6 and usage_signal < 0.3:
         s.score -= 15
         s.tradeoffs.append("Usage is flat per seat; usage-based adds billing complexity for no upside.")
-    if "api" in (ctx.get("industry") or "").lower or profile == "api":
+    if "api" in (ctx.get("industry") or "").lower() or profile == "api":
         s.score += 8
         s.rationale.append("API/infra products align naturally with usage metering.")
-    if "usage" in " ".join(competitor_models).lower or "consumption" in " ".join(competitor_models).lower:
+    if "usage" in " ".join(competitor_models).lower() or "consumption" in " ".join(competitor_models).lower():
         s.score += 5
         s.rationale.append("Competitive usage pricing trains the market.")
     s.tradeoffs.append("Aligned to value but introduces revenue unpredictability and bill-shock risk.")
@@ -139,7 +139,7 @@ def score_models(ctx: dict[str, Any], profile: str) -> list[ModelScore]:
     # --- Value-based ---
     s = scores["value_based"]
     measurable = any(
-        kw in " ".join(value_drivers).lower
+        kw in " ".join(value_drivers).lower()
         for kw in ["revenue", "cost saved", "time saved", "conversion", "fraud prevented", "downtime"]
     )
     if value_signal >= 0.6 and measurable:
@@ -196,17 +196,17 @@ def score_models(ctx: dict[str, Any], profile: str) -> list[ModelScore]:
 
     # Profile bias
     bias = PROFILES.get(profile, {})
-    for m, b in bias.items:
+    for m, b in bias.items():
         if m in scores:
             scores[m].score += b
             if b != 0:
                 scores[m].rationale.append(f"Industry profile '{profile}' adjustment: {b:+d}.")
 
     # Clamp
-    for s in scores.values:
+    for s in scores.values():
         s.score = clamp(s.score)
 
-    return sorted(scores.values, key=lambda x: -x.score)
+    return sorted(scores.values(), key=lambda x: -x.score)
 
 
 def render_markdown(ranked: list[ModelScore], ctx: dict[str, Any], profile: str) -> str:
@@ -222,7 +222,7 @@ def render_markdown(ranked: list[ModelScore], ctx: dict[str, Any], profile: str)
     lines.append("")
     for i, s in enumerate(ranked, 1):
         marker = " *(top recommendation)*" if i == 1 else ""
-        lines.append(f"### {i}. {s.model.replace('_', ' ').title} — fit-score **{s.score}/100**{marker}")
+        lines.append(f"### {i}. {s.model.replace('_', ' ').title()} — fit-score **{s.score}/100**{marker}")
         if s.rationale:
             lines.append("**Why it fits:**")
             for r in s.rationale:
@@ -239,7 +239,7 @@ def render_markdown(ranked: list[ModelScore], ctx: dict[str, Any], profile: str)
     return "\n".join(lines)
 
 
-def sample_context -> dict[str, Any]:
+def sample_context() -> dict[str, Any]:
     return {
         "industry": "B2B SaaS — sales intelligence",
         "deal_size_avg": 18000,
@@ -257,12 +257,12 @@ def sample_context -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(description=__doc__.splitlines[0])
+    p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--input", type=Path, help="Path to customer-context JSON.")
     p.add_argument(
         "--profile",
         default="saas",
-        choices=list(PROFILES.keys),
+        choices=list(PROFILES.keys()),
         help="Industry profile for default tuning.",
     )
     p.add_argument("--output", default="markdown", choices=["markdown", "json"], help="Output format.")
@@ -270,9 +270,9 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
 
     if args.sample:
-        ctx = sample_context
+        ctx = sample_context()
     elif args.input:
-        ctx = json.loads(args.input.read_text)
+        ctx = json.loads(args.input.read_text())
     else:
         p.error("Provide --input or --sample.")
         return 2
@@ -294,4 +294,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

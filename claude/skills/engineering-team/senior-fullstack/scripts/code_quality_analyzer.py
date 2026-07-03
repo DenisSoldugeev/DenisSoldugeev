@@ -112,7 +112,7 @@ def count_lines(filepath: Path) -> Tuple[int, int, int]:
     """Count total lines, code lines, and comment lines."""
     try:
         with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
-            lines = f.readlines
+            lines = f.readlines()
     except Exception:
         return 0, 0, 0
 
@@ -122,7 +122,7 @@ def count_lines(filepath: Path) -> Tuple[int, int, int]:
     in_block_comment = False
 
     for line in lines:
-        stripped = line.strip
+        stripped = line.strip()
         if not stripped:
             continue
 
@@ -179,7 +179,7 @@ def analyze_security(filepath: Path, content: str) -> List[Dict]:
     issues = []
     lines = content.split("\n")
 
-    for pattern_name, pattern_info in SECURITY_PATTERNS.items:
+    for pattern_name, pattern_info in SECURITY_PATTERNS.items():
         regex = re.compile(pattern_info["pattern"], re.IGNORECASE)
         for line_num, line in enumerate(lines, 1):
             if regex.search(line):
@@ -206,7 +206,7 @@ def analyze_dependencies(project_path: Path) -> Dict:
 
     # Check package.json
     package_json = project_path / "package.json"
-    if package_json.exists:
+    if package_json.exists():
         findings["package_managers"].append("npm")
         try:
             with open(package_json) as f:
@@ -214,7 +214,7 @@ def analyze_dependencies(project_path: Path) -> Dict:
             deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
             findings["total_deps"] += len(deps)
 
-            for dep, version in deps.items:
+            for dep, version in deps.items():
                 # Check against known vulnerabilities
                 if dep in KNOWN_VULNERABLE_DEPS:
                     vuln = KNOWN_VULNERABLE_DEPS[dep]
@@ -232,18 +232,18 @@ def analyze_dependencies(project_path: Path) -> Dict:
 
     # Check requirements.txt
     requirements = project_path / "requirements.txt"
-    if requirements.exists:
+    if requirements.exists():
         findings["package_managers"].append("pip")
         try:
             with open(requirements) as f:
-                lines = [l.strip for l in f if l.strip and not l.startswith("#")]
+                lines = [l.strip() for l in f if l.strip() and not l.startswith("#")]
             findings["total_deps"] += len(lines)
         except Exception:
             pass
 
     # Check go.mod
     go_mod = project_path / "go.mod"
-    if go_mod.exists:
+    if go_mod.exists():
         findings["package_managers"].append("go")
 
     return findings
@@ -255,11 +255,11 @@ def analyze_test_coverage(project_path: Path) -> Dict:
     source_files = []
 
     for filepath in project_path.rglob("*"):
-        if should_skip(filepath) or not filepath.is_file:
+        if should_skip(filepath) or not filepath.is_file():
             continue
 
         if filepath.suffix in ALL_CODE_EXTENSIONS:
-            name = filepath.stem.lower
+            name = filepath.stem.lower()
             if "test" in name or "spec" in name or "_test" in name:
                 test_files.append(filepath)
             elif not name.startswith("_"):
@@ -296,25 +296,25 @@ def analyze_documentation(project_path: Path) -> Dict:
 
     readme_patterns = ["README.md", "README.rst", "README.txt", "readme.md"]
     for pattern in readme_patterns:
-        if (project_path / pattern).exists:
+        if (project_path / pattern).exists():
             docs["has_readme"] = True
             docs["score"] += 30
             break
 
-    if (project_path / "CONTRIBUTING.md").exists:
+    if (project_path / "CONTRIBUTING.md").exists():
         docs["has_contributing"] = True
         docs["score"] += 15
 
     license_patterns = ["LICENSE", "LICENSE.md", "LICENSE.txt"]
     for pattern in license_patterns:
-        if (project_path / pattern).exists:
+        if (project_path / pattern).exists():
             docs["has_license"] = True
             docs["score"] += 15
             break
 
     changelog_patterns = ["CHANGELOG.md", "HISTORY.md", "CHANGES.md"]
     for pattern in changelog_patterns:
-        if (project_path / pattern).exists:
+        if (project_path / pattern).exists():
             docs["has_changelog"] = True
             docs["score"] += 10
             break
@@ -323,7 +323,7 @@ def analyze_documentation(project_path: Path) -> Dict:
     api_doc_dirs = ["docs", "documentation", "api-docs"]
     for doc_dir in api_doc_dirs:
         doc_path = project_path / doc_dir
-        if doc_path.is_dir:
+        if doc_path.is_dir():
             docs["api_docs"].append(str(doc_path))
             docs["score"] += 30
             break
@@ -364,7 +364,7 @@ def analyze_project(project_path: Path) -> Dict:
 
     # Analyze source files
     for filepath in project_path.rglob("*"):
-        if should_skip(filepath) or not filepath.is_file:
+        if should_skip(filepath) or not filepath.is_file():
             continue
 
         if filepath.suffix not in ALL_CODE_EXTENSIONS:
@@ -389,7 +389,7 @@ def analyze_project(project_path: Path) -> Dict:
         # Read file content
         try:
             with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
-                content = f.read
+                content = f.read()
         except Exception:
             continue
 
@@ -553,7 +553,7 @@ def print_report(analysis: Dict, verbose: bool = False) -> None:
     print("=" * 60)
     print("CODE QUALITY ANALYSIS REPORT")
     print("=" * 60)
-    print
+    print()
 
     # Summary
     summary = analysis["summary"]
@@ -562,13 +562,13 @@ def print_report(analysis: Dict, verbose: bool = False) -> None:
     print(f"Total Lines: {summary['total_lines']:,}")
     print(f"Code Lines: {summary['code_lines']:,}")
     print(f"Comment Lines: {summary['comment_lines']:,}")
-    print
+    print()
 
     # Languages
     print("--- LANGUAGES ---")
-    for lang, stats in analysis["languages"].items:
+    for lang, stats in analysis["languages"].items():
         print(f"  {lang}: {stats['files']} files, {stats['lines']:,} lines")
-    print
+    print()
 
     # Security
     sec = analysis["security"]
@@ -582,15 +582,15 @@ def print_report(analysis: Dict, verbose: bool = False) -> None:
         print("  Issues:")
         for severity in ["critical", "high", "medium"]:
             for issue in sec[severity][:3]:
-                print(f"    [{severity.upper}] {issue['file']}:{issue['line']} - {issue['message']}")
-    print
+                print(f"    [{severity.upper()}] {issue['file']}:{issue['line']} - {issue['message']}")
+    print()
 
     # Complexity
     cplx = analysis["complexity"]
     print("--- COMPLEXITY ---")
     print(f"  Average Complexity: {cplx['average_complexity']}")
     print(f"  High Complexity Files: {len(cplx['high_complexity_files'])}")
-    print
+    print()
 
     # Dependencies
     deps = analysis["dependencies"]
@@ -598,7 +598,7 @@ def print_report(analysis: Dict, verbose: bool = False) -> None:
     print(f"  Package Managers: {', '.join(deps.get('package_managers', ['none']))}")
     print(f"  Total Dependencies: {deps.get('total_deps', 0)}")
     print(f"  Vulnerable: {len(deps.get('vulnerable', []))}")
-    print
+    print()
 
     # Tests
     tests = analysis["tests"]
@@ -606,7 +606,7 @@ def print_report(analysis: Dict, verbose: bool = False) -> None:
     print(f"  Source Files: {tests.get('source_files', 0)}")
     print(f"  Test Files: {tests.get('test_files', 0)}")
     print(f"  Estimated Coverage: {tests.get('estimated_coverage', 0)}% ({tests.get('rating', 'unknown')})")
-    print
+    print()
 
     # Documentation
     docs = analysis["documentation"]
@@ -616,21 +616,21 @@ def print_report(analysis: Dict, verbose: bool = False) -> None:
     print(f"  CONTRIBUTING: {'Yes' if docs.get('has_contributing') else 'No'}")
     print(f"  CHANGELOG: {'Yes' if docs.get('has_changelog') else 'No'}")
     print(f"  Score: {docs.get('score', 0)}/100")
-    print
+    print()
 
     # Recommendations
     if analysis["recommendations"]:
         print("--- RECOMMENDATIONS ---")
         for i, rec in enumerate(analysis["recommendations"][:10], 1):
-            print(f"\n{i}. [{rec['priority']}] {rec['category'].upper}")
+            print(f"\n{i}. [{rec['priority']}] {rec['category'].upper()}")
             print(f"   Issue: {rec['issue']}")
             print(f"   Action: {rec['action']}")
 
-    print
+    print()
     print("=" * 60)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Analyze fullstack codebase for quality issues",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -662,10 +662,10 @@ Examples:
         help="Show detailed findings"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    project_path = Path(args.project_path).resolve
-    if not project_path.exists:
+    project_path = Path(args.project_path).resolve()
+    if not project_path.exists():
         print(f"Error: Path does not exist: {project_path}", file=sys.stderr)
         sys.exit(1)
 
@@ -688,4 +688,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -10,7 +10,7 @@ metadata:
 
 # Workflow Builder
 
-Author runnable workflow scripts for Claude Code's Workflow tool: deterministic multi-agent orchestration files (`.js`) that fan work out to fresh-context sub-agents under plain JavaScript control flow. Only leaf `agent` calls spend tokens, so the main session stays clean and the whole run is resumable.
+Author runnable workflow scripts for Claude Code's Workflow tool: deterministic multi-agent orchestration files (`.js`) that fan work out to fresh-context sub-agents under plain JavaScript control flow. Only leaf `agent()` calls spend tokens, so the main session stays clean and the whole run is resumable.
 
 ## ALWAYS start every session with intake (non-negotiable)
 
@@ -52,7 +52,7 @@ Workflows earn their cost when work is parallel or multi-stage, must be reproduc
    python scripts/scaffold_workflow.py --topology pipeline --name pr-triage \
      --description "Triage open PRs" > .claude/workflows/pr-triage.js
    ```
-2. **Edit** the file: `meta` block first (pure literal, first statement), then the async body using the injected globals — `agent`, `pipeline`, `parallel`, `phase`, `log`, `budget`, `args`, `workflow`. Full surface in [references/api_reference.md](references/api_reference.md); copy-paste shapes in [references/orchestration_patterns.md](references/orchestration_patterns.md).
+2. **Edit** the file: `meta` block first (pure literal, first statement), then the async body using the injected globals — `agent()`, `pipeline()`, `parallel()`, `phase()`, `log()`, `budget`, `args`, `workflow()`. Full surface in [references/api_reference.md](references/api_reference.md); copy-paste shapes in [references/orchestration_patterns.md](references/orchestration_patterns.md).
 3. **Validate** before running — catches the parser-fatal mistakes:
    ```bash
    python scripts/validate_workflow.py .claude/workflows/pr-triage.js
@@ -62,10 +62,10 @@ Workflows earn their cost when work is parallel or multi-stage, must be reproduc
 ## Hard rules (validator enforces these)
 
 - `meta` is a **pure literal** and the **first statement** — no variables, spreads, template strings, or function calls inside it.
-- **No non-determinism:** `Date.now`, `Math.random`, argless `new Date` break resume — pass timestamps via `args`.
-- **No filesystem / Node APIs** (`require`, `fs`, `process`, network) in the orchestrator — that work belongs *inside* `agent` prompts.
-- `parallel` takes **thunks** (` => agent(...)`), not bare promises. Default to `pipeline` unless a stage needs the whole prior result set.
-- **Guard every open-ended loop** with a counter or `budget.remaining` check — unguarded loops hit the 1000-agent cap.
+- **No non-determinism:** `Date.now()`, `Math.random()`, argless `new Date()` break resume — pass timestamps via `args`.
+- **No filesystem / Node APIs** (`require`, `fs`, `process`, network) in the orchestrator — that work belongs *inside* `agent()` prompts.
+- `parallel()` takes **thunks** (`() => agent(...)`), not bare promises. Default to `pipeline()` unless a stage needs the whole prior result set.
+- **Guard every open-ended loop** with a counter or `budget.remaining()` check — unguarded loops hit the 1000-agent cap.
 - Filter skipped/failed agents: `results.filter(Boolean)`.
 
 ## Tooling

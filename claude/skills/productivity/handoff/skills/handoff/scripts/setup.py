@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any
 
 # Import sibling helper without polluting sys.path long-term.
-sys.path.insert(0, str(Path(__file__).resolve.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import config_loader  # noqa: E402
 
 SAVE_LOCATION_OPTIONS = [
@@ -64,7 +64,7 @@ FILENAME_OPTIONS = [
 
 
 def _prompt_choice(question: str, options: list[tuple[Any, str]], current: Any = None) -> Any:
-    print
+    print()
     print(question)
     for i, (value, label) in enumerate(options, start=1):
         marker = " (current)" if current is not None and value == current else ""
@@ -75,7 +75,7 @@ def _prompt_choice(question: str, options: list[tuple[Any, str]], current: Any =
             prompt += " (press Enter to keep current)"
         prompt += ": "
         try:
-            raw = input(prompt).strip
+            raw = input(prompt).strip()
         except EOFError:
             print("\nAborted.", file=sys.stderr)
             sys.exit(2)
@@ -84,7 +84,7 @@ def _prompt_choice(question: str, options: list[tuple[Any, str]], current: Any =
             sys.exit(2)
         if raw == "" and current is not None:
             return current
-        if raw.isdigit:
+        if raw.isdigit():
             idx = int(raw)
             if 1 <= idx <= len(options):
                 return options[idx - 1][0]
@@ -95,7 +95,7 @@ def _prompt_text(question: str, current: str | None = None, allow_empty: bool = 
     while True:
         suffix = f" [{current}]" if current else ""
         try:
-            raw = input(f"{question}{suffix}: ").strip
+            raw = input(f"{question}{suffix}: ").strip()
         except (EOFError, KeyboardInterrupt):
             print("\nAborted.", file=sys.stderr)
             sys.exit(2)
@@ -109,7 +109,7 @@ def _prompt_text(question: str, current: str | None = None, allow_empty: bool = 
 
 
 def _resolve_custom_path(raw: str) -> Path:
-    path = Path(raw).expanduser.resolve
+    path = Path(raw).expanduser().resolve()
     return path
 
 
@@ -129,13 +129,13 @@ def _maybe_append_gitignore(project_root: Path) -> None:
     gitignore = project_root / ".gitignore"
     line = ".handoff/"
     try:
-        existing = gitignore.read_text(encoding="utf-8") if gitignore.exists else ""
+        existing = gitignore.read_text(encoding="utf-8") if gitignore.exists() else ""
     except OSError:
         existing = ""
-    if line in existing.splitlines:
+    if line in existing.splitlines():
         return
     try:
-        answer = input(f"  Append '{line}' to {gitignore}? (Y/n): ").strip.lower
+        answer = input(f"  Append '{line}' to {gitignore}? (Y/n): ").strip().lower()
     except (EOFError, KeyboardInterrupt):
         return
     if answer in ("", "y", "yes"):
@@ -153,12 +153,12 @@ def run_setup(scope: str = "global", reconfigure: bool = False) -> int:
     print("=" * 60)
     print("Handoff skill — first-run setup")
     print("=" * 60)
-    print
+    print()
     print("This walks you through 5 questions (~30 seconds). You can")
     print("rerun at any time with: /ds:handoff-setup")
-    print
+    print()
 
-    current = config_loader.load_config if reconfigure else dict(config_loader.DEFAULTS)
+    current = config_loader.load_config() if reconfigure else dict(config_loader.DEFAULTS)
 
     # Q1 — save location (no pre-selected default)
     save_mode = _prompt_choice(
@@ -178,14 +178,14 @@ def run_setup(scope: str = "global", reconfigure: bool = False) -> int:
                 save_path = str(resolved)
                 break
     elif save_mode == "project":
-        save_path = str((Path.cwd / ".handoff").resolve)
+        save_path = str((Path.cwd() / ".handoff").resolve())
         if _validate_writable_dir(Path(save_path)):
-            _maybe_append_gitignore(Path.cwd)
+            _maybe_append_gitignore(Path.cwd())
     elif save_mode == "home_visible":
-        save_path = str((Path.home / "handoffs").resolve)
+        save_path = str((Path.home() / "handoffs").resolve())
         _validate_writable_dir(Path(save_path))
     elif save_mode == "home_hidden":
-        save_path = str((Path.home / ".handoff").resolve)
+        save_path = str((Path.home() / ".handoff").resolve())
         _validate_writable_dir(Path(save_path))
 
     # Q2 — retention
@@ -234,7 +234,7 @@ def run_setup(scope: str = "global", reconfigure: bool = False) -> int:
         "include_git_context": include_git,
         "skill_recommendation_scope": rec_scope,
         "filename_style": filename_style,
-        "setup_completed_at": dt.datetime.utcnow.replace(microsecond=0).isoformat + "Z",
+        "setup_completed_at": dt.datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
     }
 
     if scope == "project":
@@ -242,7 +242,7 @@ def run_setup(scope: str = "global", reconfigure: bool = False) -> int:
     else:
         path = config_loader.write_global_config(config)
 
-    print
+    print()
     print("=" * 60)
     print(f"Config saved to {path}")
     print("Rerun with: /ds:handoff-setup")
@@ -250,8 +250,8 @@ def run_setup(scope: str = "global", reconfigure: bool = False) -> int:
     return 0
 
 
-def decline_setup -> int:
-    config_loader.mark_setup_declined
+def decline_setup() -> int:
+    config_loader.mark_setup_declined()
     print(
         "Setup skipped. Using defaults (OS temp dir, 7-day retention, strict redaction).\n"
         "Rerun at any time with: /ds:handoff-setup"
@@ -291,11 +291,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.decline:
-        return decline_setup
+        return decline_setup()
 
     scope = "project" if args.project else "global"
     return run_setup(scope=scope, reconfigure=args.reconfigure)
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

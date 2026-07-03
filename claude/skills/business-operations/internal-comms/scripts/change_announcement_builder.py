@@ -114,7 +114,7 @@ class Announcement:
 
 
 def _lower(s: str) -> str:
-    return (s or "").lower
+    return (s or "").lower()
 
 
 def validate_tone(raw: dict, magnitude: str) -> list[str]:
@@ -272,7 +272,7 @@ def render_markdown(a: Announcement) -> str:
     return "\n".join(lines)
 
 
-def sample_input -> dict:
+def sample_input() -> dict:
     return {
         "change_summary": "Migrating internal documentation from Confluence to Notion",
         "why_this_change": "Confluence search reliability and the cost of duplicate licenses with Notion (already used by product team) make consolidation the right move now",
@@ -291,7 +291,7 @@ def sample_input -> dict:
     }
 
 
-def main -> int:
+def main() -> int:
     p = argparse.ArgumentParser(
         description="Build a Kotter 8-step compliant internal change announcement."
     )
@@ -307,14 +307,14 @@ def main -> int:
         help="Output format (default: markdown).",
     )
     p.add_argument("--sample", action="store_true", help="Use built-in sample and exit.")
-    args = p.parse_args
+    args = p.parse_args()
 
     if args.sample:
-        raw = sample_input
+        raw = sample_input()
     else:
         if not args.input:
             p.error("--input is required unless --sample is given")
-        if not args.input.exists:
+        if not args.input.exists():
             p.error(f"input file not found: {args.input}")
         with args.input.open("r", encoding="utf-8") as f:
             raw = json.load(f)
@@ -328,4 +328,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -196,7 +196,7 @@ export default function RootLayout({
   );
 }
 ''',
-    "HOME_PAGE": '''export default function Home {
+    "HOME_PAGE": '''export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <h1 className="text-4xl font-bold">Welcome</h1>
@@ -396,9 +396,9 @@ export const QUERY_KEYS = {
 export function useDebounce<T>(value: T, delay: number = 500): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
-  useEffect( => {
-    const timer = setTimeout( => setDebouncedValue(value), delay);
-    return  => clearTimeout(timer);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
   }, [value, delay]);
 
   return debouncedValue;
@@ -410,7 +410,7 @@ export function useLocalStorage<T>(
   key: string,
   initialValue: T
 ): [T, (value: T | ((prev: T) => T)) => void] {
-  const [storedValue, setStoredValue] = useState<T>( => {
+  const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === 'undefined') return initialValue;
 
     try {
@@ -421,7 +421,7 @@ export function useLocalStorage<T>(
     }
   });
 
-  useEffect( => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(key, JSON.stringify(storedValue));
     }
@@ -453,16 +453,16 @@ export interface PaginatedResponse<T> {
 ''',
     "HEALTH_ROUTE": '''import { NextResponse } from 'next/server';
 
-export async function GET {
+export async function GET() {
   return NextResponse.json({
     status: 'ok',
-    timestamp: new Date.toISOString,
+    timestamp: new Date().toISOString(),
   });
 }
 ''',
     "AUTH_PAGE": ''''use client';
 
-export default function AuthPage {
+export default function AuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="w-full max-w-md p-8">
@@ -474,7 +474,7 @@ export default function AuthPage {
 ''',
     "LAYOUT_HEADER": '''import Link from 'next/link';
 
-export function Header {
+export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex h-14 items-center">
@@ -491,11 +491,11 @@ export function Header {
   );
 }
 ''',
-    "LAYOUT_FOOTER": '''export function Footer {
+    "LAYOUT_FOOTER": '''export function Footer() {
   return (
     <footer className="border-t py-6">
       <div className="container text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date.getFullYear} My App. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} My App. All rights reserved.</p>
       </div>
     </footer>
   );
@@ -515,7 +515,7 @@ export function Sidebar({ children }: SidebarProps) {
 ''',
     "REACT_APP": '''import { Button } from './components/ui';
 
-function App {
+function App() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <h1 className="text-4xl font-bold">Welcome</h1>
@@ -552,7 +552,7 @@ def generate_structure(
     """Generate directory structure recursively."""
     created_files = []
 
-    for name, content in structure.items:
+    for name, content in structure.items():
         current_path = base_path / name
 
         if isinstance(content, dict):
@@ -760,7 +760,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [react],
+  plugins: [react()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -843,7 +843,7 @@ def scaffold_project(
     features = features or []
     project_path = output_dir / name
 
-    if project_path.exists and not dry_run:
+    if project_path.exists() and not dry_run:
         return {"error": f"Directory already exists: {project_path}"}
 
     template_config = TEMPLATES.get(template)
@@ -869,7 +869,7 @@ def scaffold_project(
     # Add feature files
     for feature in features:
         if feature in FEATURES:
-            for file_path, content_key in FEATURES[feature]["files"].items:
+            for file_path, content_key in FEATURES[feature]["files"].items():
                 full_path = project_path / file_path
                 if not dry_run:
                     full_path.parent.mkdir(parents=True, exist_ok=True)
@@ -916,7 +916,7 @@ def print_result(result: Dict) -> None:
     print(f"{'='*60}\n")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Scaffold a frontend project with best practices"
     )
@@ -931,7 +931,7 @@ def main:
     )
     parser.add_argument(
         "--template", "-t",
-        choices=list(TEMPLATES.keys),
+        choices=list(TEMPLATES.keys()),
         default="nextjs",
         help="Project template (default: nextjs)"
     )
@@ -960,18 +960,18 @@ def main:
         help="Output in JSON format"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.list_templates:
         print("\nAvailable Templates:")
-        for key, template in TEMPLATES.items:
+        for key, template in TEMPLATES.items():
             print(f"  {key}: {template['name']}")
             print(f"    {template['description']}")
         return
 
     if args.list_features:
         print("\nAvailable Features:")
-        for key, feature in FEATURES.items:
+        for key, feature in FEATURES.items():
             print(f"  {key}: {feature['description']}")
             deps = ", ".join(feature.get("dependencies", []))
             if deps:
@@ -980,11 +980,11 @@ def main:
 
     features = []
     if args.features:
-        features = [f.strip for f in args.features.split(",")]
+        features = [f.strip() for f in args.features.split(",")]
         invalid = [f for f in features if f not in FEATURES]
         if invalid:
             print(f"Unknown features: {', '.join(invalid)}", file=sys.stderr)
-            print(f"Valid features: {', '.join(FEATURES.keys)}")
+            print(f"Valid features: {', '.join(FEATURES.keys())}")
             sys.exit(1)
 
     result = scaffold_project(
@@ -1002,4 +1002,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

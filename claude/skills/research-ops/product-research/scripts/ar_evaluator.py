@@ -34,7 +34,7 @@ METRIC = "validated_insights"
 
 
 def main(argv: list[str] | None = None) -> int:
-    c = cfg.load_config
+    c = cfg.load_config()
     p = argparse.ArgumentParser(description="Autoresearch evaluator: count of validated insights.")
     p.add_argument("--target", help="path to observations JSON (or env AR_TARGET)")
     p.add_argument("--min-sources", type=int, default=None, help="overrides onboarding insight_min_sources")
@@ -65,4 +65,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

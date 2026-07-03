@@ -15,7 +15,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 - `// eslint-disable` comments — verify they are justified
 - `any` type annotations — require explicit justification
 - `@ts-ignore` / `@ts-expect-error` — verify they are justified
-- `eval` with any dynamic or user-controlled input
+- `eval()` with any dynamic or user-controlled input
 - Hardcoded API keys or tokens in source
 
 ---
@@ -26,16 +26,16 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 - Non-null assertion (`!`) used without justification
 - `var` declarations — prefer `const` / `let`
 - Missing `await` on async function calls
-- Floating promises (no `.catch` and no `await`)
+- Floating promises (no `.catch()` and no `await`)
 - `==` used instead of `===`
 
 ---
 
 ## Security
 
-- Flag `innerHTML`, `outerHTML`, `document.write` with user-controlled data — use `textContent` or a sanitizer
+- Flag `innerHTML`, `outerHTML`, `document.write()` with user-controlled data — use `textContent` or a sanitizer
 - Flag `dangerouslySetInnerHTML` in React without a sanitizer
-- Flag `eval` / `new Function` with dynamic input
+- Flag `eval()` / `new Function()` with dynamic input
 - Flag JWT decoded without signature verification
 - Flag missing `httpOnly` / `secure` flags on cookies
 
@@ -43,9 +43,9 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 
 ## Async / Promises
 
-- Flag floating promises — async calls not `await`-ed and without `.catch`
-- Flag `Promise.all` where `Promise.allSettled` is safer (one failure should not cancel siblings)
-- Flag `async` functions inside `forEach` — `forEach` does not await; use `for...of` or `Promise.all`
+- Flag floating promises — async calls not `await`-ed and without `.catch()`
+- Flag `Promise.all()` where `Promise.allSettled()` is safer (one failure should not cancel siblings)
+- Flag `async` functions inside `forEach` — `forEach` does not await; use `for...of` or `Promise.all()`
 - Flag unhandled promise rejection (no global `unhandledRejection` handler in Node.js services)
 
 ---
@@ -63,7 +63,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 
 - Flag `catch (e) {}` (empty catch) — swallowed error
 - Flag `catch (e)` where `e` is used as `any` without narrowing — type the error properly
-- Flag `Promise` rejection not handled — `.catch` or `try/await/catch` required
+- Flag `Promise` rejection not handled — `.catch()` or `try/await/catch` required
 - Flag re-throwing a new `Error` without wrapping the original — loses stack context
 - Use `Error` subclasses for domain errors rather than plain strings or object literals
 
@@ -74,7 +74,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 - Flag `Array.prototype.find` / `filter` / `map` chained multiple times over the same array — combine into one pass
 - Flag DOM queries (`document.querySelector`) inside loops — cache the result
 - Flag `JSON.parse` / `JSON.stringify` in a hot path on large objects — consider streaming or partial parsing
-- Flag `async` functions called sequentially in a loop where `Promise.all` would parallelize them
+- Flag `async` functions called sequentially in a loop where `Promise.all()` would parallelize them
 
 ---
 
@@ -89,7 +89,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 ### Modern JavaScript / TypeScript
 - Prefer `const` by default; `let` only when reassignment is needed
 - Prefer optional chaining (`?.`) and nullish coalescing (`??`) over manual null guards
-- Prefer `structuredClone` over manual deep-copy patterns
+- Prefer `structuredClone()` over manual deep-copy patterns
 - Prefer named exports over default exports for better refactoring support
 
 ### Null / Undefined Safety

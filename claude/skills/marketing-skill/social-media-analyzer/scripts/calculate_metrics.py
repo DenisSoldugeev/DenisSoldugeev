@@ -87,7 +87,7 @@ class SocialMediaMetricsCalculator:
 
     def calculate_roi_metrics(self) -> Dict[str, float]:
         """Calculate ROI and cost efficiency metrics."""
-        campaign_metrics = self.calculate_campaign_metrics
+        campaign_metrics = self.calculate_campaign_metrics()
 
         total_engagements = campaign_metrics['total_engagements']
         total_clicks = campaign_metrics['total_clicks']
@@ -122,7 +122,7 @@ class SocialMediaMetricsCalculator:
         posts_with_metrics = []
 
         for post in self.posts:
-            post_copy = post.copy
+            post_copy = post.copy()
             post_copy['engagement_rate'] = self.calculate_engagement_rate(post)
             posts_with_metrics.append(post_copy)
 
@@ -141,7 +141,7 @@ class SocialMediaMetricsCalculator:
     def analyze_all(self) -> Dict[str, Any]:
         """Run complete analysis."""
         return {
-            'campaign_metrics': self.calculate_campaign_metrics,
-            'roi_metrics': self.calculate_roi_metrics,
-            'top_posts': self.identify_top_posts
+            'campaign_metrics': self.calculate_campaign_metrics(),
+            'roi_metrics': self.calculate_roi_metrics(),
+            'top_posts': self.identify_top_posts()
         }

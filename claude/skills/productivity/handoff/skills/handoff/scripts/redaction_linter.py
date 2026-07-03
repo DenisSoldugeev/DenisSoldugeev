@@ -123,6 +123,16 @@ PATTERNS: list[Pattern] = [
         re.compile(r"https?://[^\s'\"<>]*(?:[?&](?:token|access_token|api_key|key)=)[^\s'\"<>&]+"),
         "Strip the token query parameter from the URL.",
     ),
+    Pattern(
+        "private_cidr",
+        re.compile(
+            r"(?<![\d.])(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}"
+            r"|192\.168\.\d{1,3}\.\d{1,3}"
+            r"|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(?:/\d{1,2})?(?![\d.])"
+        ),
+        "Redact internal IP addresses / CIDR ranges; reference the host by role instead.",
+        "low",
+    ),
 ]
 
 
@@ -148,8 +158,8 @@ class Report:
 
 
 def scan_text(text: str) -> Report:
-    report = Report
-    for line_number, raw_line in enumerate(text.splitlines, start=1):
+    report = Report()
+    for line_number, raw_line in enumerate(text.splitlines(), start=1):
         if WHITELIST_MARKER in raw_line:
             continue
         for pattern in PATTERNS:
@@ -164,7 +174,7 @@ def scan_text(text: str) -> Report:
                         severity=pattern.severity,
                         match=preview,
                         suggestion=pattern.suggestion,
-                        line_text=raw_line.strip[:120],
+                        line_text=raw_line.strip()[:120],
                     )
                 )
     return report
@@ -189,7 +199,7 @@ def _format_human(report: Report, mode: str, path: Path) -> str:
         lines.append(f"    line: {f.line_text}")
         lines.append(f"    fix : {f.suggestion}")
         lines.append("")
-    counts = report.by_severity
+    counts = report.by_severity()
     lines.append(f"Severity counts: high={counts['high']} medium={counts['medium']} low={counts['low']}")
     if mode == "strict":
         lines.append("Mode: STRICT — save is blocked until findings are resolved.")
@@ -197,6 +207,27 @@ def _format_human(report: Report, mode: str, path: Path) -> str:
         lines.append("Mode: WARN — save proceeds; review findings before sharing the handoff.")
     lines.append("Tip: append `<!-- handoff:allow secret -->` to a line to whitelist it.")
     return "\n".join(lines)
+
+
+def _report_json(report, mode: str, file_label: str) -> str:
+    return json.dumps(
+        {
+            "file": file_label,
+            "mode": mode,
+            "findings": [
+                {
+                    "line": f.line_number,
+                    "pattern": f.pattern_name,
+                    "severity": f.severity,
+                    "match": f.match,
+                    "suggestion": f.suggestion,
+                }
+                for f in report.findings
+            ],
+            "counts": report.by_severity(),
+        },
+        indent=2,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -227,7 +258,10 @@ def main(argv: list[str] | None = None) -> int:
             "Allowed: AKIAIOSFODNN7EXAMPLE <!-- handoff:allow secret -->\n"
         )
         report = scan_text(fixture)
-        print(_format_human(report, "strict", Path("<sample>")))
+        if args.json:
+            print(_report_json(report, "strict", "<sample>"))
+        else:
+            print(_format_human(report, "strict", Path("<sample>")))
         return 1 if report.findings else 0
 
     if args.mode == "off":
@@ -238,33 +272,14 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("file is required unless --sample or --mode off.")
 
     path = Path(args.file)
-    if not path.exists:
+    if not path.exists():
         print(f"File not found: {path}", file=sys.stderr)
         return 2
 
     report = scan_file(path)
 
     if args.json:
-        print(
-            json.dumps(
-                {
-                    "file": str(path),
-                    "mode": args.mode,
-                    "findings": [
-                        {
-                            "line": f.line_number,
-                            "pattern": f.pattern_name,
-                            "severity": f.severity,
-                            "match": f.match,
-                            "suggestion": f.suggestion,
-                        }
-                        for f in report.findings
-                    ],
-                    "counts": report.by_severity,
-                },
-                indent=2,
-            )
-        )
+        print(_report_json(report, args.mode, str(path)))
     else:
         print(_format_human(report, args.mode, path))
 
@@ -276,4 +291,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

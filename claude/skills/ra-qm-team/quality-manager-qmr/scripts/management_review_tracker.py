@@ -110,7 +110,7 @@ class ManagementReviewTracker:
 
     def __init__(self, review: ManagementReview):
         self.review = review
-        self.today = datetime.now
+        self.today = datetime.now()
 
     def check_input_readiness(self) -> Dict:
         """Check readiness of all required inputs."""
@@ -258,21 +258,21 @@ class ManagementReviewTracker:
         recommendations = []
 
         # Check input readiness
-        readiness = self.check_input_readiness
+        readiness = self.check_input_readiness()
         if readiness["readiness_score"] < 100:
             recommendations.append(
                 f"Complete remaining review inputs: {', '.join(readiness['missing_topics'])}"
             )
 
         # Check actions
-        action_analysis = self.analyze_actions
+        action_analysis = self.analyze_actions()
         if action_analysis["overdue"]:
             recommendations.append(
                 f"Address {len(action_analysis['overdue'])} overdue action(s) immediately"
             )
 
         # Check metrics
-        metrics_assessment = self.assess_metrics
+        metrics_assessment = self.assess_metrics()
         if metrics_assessment["overall_status"] == "Critical":
             recommendations.append(
                 "Escalate critical metric failures to senior management"
@@ -306,10 +306,10 @@ class ManagementReviewTracker:
             "review_date": self.review.review_date,
             "review_type": self.review.review_type,
             "period": f"{self.review.period_start} to {self.review.period_end}",
-            "input_readiness": self.check_input_readiness,
-            "action_analysis": self.analyze_actions,
-            "metrics_assessment": self.assess_metrics,
-            "recommendations": self.generate_recommendations
+            "input_readiness": self.check_input_readiness(),
+            "action_analysis": self.analyze_actions(),
+            "metrics_assessment": self.assess_metrics(),
+            "recommendations": self.generate_recommendations()
         }
 
 
@@ -340,7 +340,7 @@ def format_text_report(report: Dict) -> str:
         f"Completion Rate: {report['action_analysis']['completion_rate']}%",
     ])
 
-    for status, count in report['action_analysis']['by_status'].items:
+    for status, count in report['action_analysis']['by_status'].items():
         lines.append(f"  {status}: {count}")
 
     if report['action_analysis']['overdue']:
@@ -387,16 +387,16 @@ def format_text_report(report: Dict) -> str:
     return "\n".join(lines)
 
 
-def interactive_mode:
+def interactive_mode():
     """Run interactive review data entry."""
     print("=" * 60)
     print("Management Review Tracker - Interactive Mode")
     print("=" * 60)
 
-    review_date = input("\nReview Date (YYYY-MM-DD): ").strip
-    review_type = input("Review Type (Annual/Semi-annual/Quarterly): ").strip
-    period_start = input("Period Start (YYYY-MM-DD): ").strip
-    period_end = input("Period End (YYYY-MM-DD): ").strip
+    review_date = input("\nReview Date (YYYY-MM-DD): ").strip()
+    review_type = input("Review Type (Annual/Semi-annual/Quarterly): ").strip()
+    period_start = input("Period Start (YYYY-MM-DD): ").strip()
+    period_end = input("Period End (YYYY-MM-DD): ").strip()
 
     print("\nEnter Quality Metrics:")
     metrics = ReviewMetrics(
@@ -429,11 +429,11 @@ def interactive_mode:
     )
 
     tracker = ManagementReviewTracker(review)
-    report = tracker.generate_report
+    report = tracker.generate_report()
     print("\n" + format_text_report(report))
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Management Review Tracker"
     )
@@ -459,10 +459,10 @@ def main:
         help="Generate sample review data"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.interactive:
-        interactive_mode
+        interactive_mode()
         return
 
     if args.sample:
@@ -513,7 +513,7 @@ def main:
             ReviewInput(
                 topic=inp["topic"],
                 responsible=inp["responsible"],
-                status=InputStatus[inp["status"].upper.replace(" ", "_")],
+                status=InputStatus[inp["status"].upper().replace(" ", "_")],
                 data_period=inp.get("data_period", "")
             )
             for inp in data.get("inputs", [])
@@ -525,8 +525,8 @@ def main:
                 description=act["description"],
                 owner=act["owner"],
                 due_date=act["due_date"],
-                priority=ActionPriority[act["priority"].upper],
-                status=ActionStatus[act["status"].upper.replace(" ", "_")],
+                priority=ActionPriority[act["priority"].upper()],
+                status=ActionStatus[act["status"].upper().replace(" ", "_")],
                 source_review=act.get("source_review", "")
             )
             for act in data.get("actions", [])
@@ -568,7 +568,7 @@ def main:
         )
 
     tracker = ManagementReviewTracker(review)
-    report = tracker.generate_report
+    report = tracker.generate_report()
 
     if args.output == "json":
         print(json.dumps(report, indent=2))
@@ -577,4 +577,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

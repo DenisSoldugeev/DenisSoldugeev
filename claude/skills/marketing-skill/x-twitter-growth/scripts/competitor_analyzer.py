@@ -149,7 +149,7 @@ def print_report(competitors: list, insights: list):
             icon = {"HIGH": "🔴", "MEDIUM": "🟡", "LOW": "⚪"}.get(i.priority, "❓")
             print(f"  {icon} [{i.category}] {i.finding}")
             print(f"     → {i.opportunity}")
-            print
+            print()
 
     # Action items
     print(f"  {'─'*66}")
@@ -162,7 +162,7 @@ def print_report(competitors: list, insights: list):
     print(f"\n{'='*70}\n")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Analyze X/Twitter competitors for content strategy insights",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -179,7 +179,7 @@ Examples:
     parser.add_argument("--import", dest="import_file", help="Import from JSON file")
     parser.add_argument("--json", action="store_true", help="Output JSON")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     competitors = []
 
@@ -213,7 +213,7 @@ Examples:
                 top_topics=["AI", "startups", "engineering"],
             ))]
             print(f"  {json.dumps(example, indent=2)}")
-            print
+            print()
             return
 
     if not competitors:
@@ -232,4 +232,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

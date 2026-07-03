@@ -42,7 +42,7 @@ Another important pattern for senior devops.
 **Implementation:**
 ```typescript
 // Advanced example
-async function advancedExample {
+async function advancedExample() {
   // Code here
 }
 ```

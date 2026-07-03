@@ -108,12 +108,12 @@ def clamp(value: float, lo: float = 0.0, hi: float = 100.0) -> float:
 
 def get_benchmarks(segment: str) -> Dict[str, Any]:
     """Return benchmarks for the given segment, falling back to mid-market."""
-    return SEGMENT_BENCHMARKS.get(segment.lower, SEGMENT_BENCHMARKS["mid-market"])
+    return SEGMENT_BENCHMARKS.get(segment.lower(), SEGMENT_BENCHMARKS["mid-market"])
 
 
 def get_thresholds(segment: str) -> Dict[str, Tuple[int, int]]:
     """Return classification thresholds for the given segment."""
-    return SEGMENT_THRESHOLDS.get(segment.lower, SEGMENT_THRESHOLDS["mid-market"])
+    return SEGMENT_THRESHOLDS.get(segment.lower(), SEGMENT_THRESHOLDS["mid-market"])
 
 
 def classify(score: float, segment: str) -> str:
@@ -237,7 +237,7 @@ def score_relationship(data: Dict[str, Any], benchmarks: Dict[str, Any]) -> Tupl
     threading = data.get("multi_threading_depth", 1)
     thread_score = clamp(safe_divide(threading, benchmarks["multi_threading_target"]) * 100)
 
-    sentiment_str = data.get("renewal_sentiment", "unknown").lower
+    sentiment_str = data.get("renewal_sentiment", "unknown").lower()
     sentiment_score = RENEWAL_SENTIMENT_SCORES.get(sentiment_str, 50.0)
 
     score = round(exec_score * 0.35 + thread_score * 0.30 + sentiment_score * 0.35, 1)
@@ -259,7 +259,7 @@ def score_relationship(data: Dict[str, Any], benchmarks: Dict[str, Any]) -> Tupl
 
 def calculate_health_score(customer: Dict[str, Any]) -> Dict[str, Any]:
     """Calculate the overall health score for a single customer."""
-    segment = customer.get("segment", "mid-market").lower
+    segment = customer.get("segment", "mid-market").lower()
     benchmarks = get_benchmarks(segment)
 
     # Score each dimension
@@ -348,20 +348,20 @@ def format_text(results: List[Dict[str, Any]]) -> str:
         label = CLASSIFICATION_LABELS.get(r["classification"], "UNKNOWN")
         lines.append("-" * 72)
         lines.append(f"Customer: {r['name']} ({r['customer_id']})")
-        lines.append(f"Segment:  {r['segment'].title}  |  ARR: ${r['arr']:,.0f}")
+        lines.append(f"Segment:  {r['segment'].title()}  |  ARR: ${r['arr']:,.0f}")
         lines.append(f"Overall Score: {r['overall_score']}/100  [{label}]")
         lines.append("")
 
         lines.append("  Dimension Scores:")
-        for dim_name, dim_data in r["dimensions"].items:
+        for dim_name, dim_data in r["dimensions"].items():
             dim_label = CLASSIFICATION_LABELS.get(dim_data["classification"], "")
-            lines.append(f"    {dim_name.title:15s} {dim_data['score']:6.1f}/100  ({dim_data['weight']})  [{dim_label}]")
+            lines.append(f"    {dim_name.title():15s} {dim_data['score']:6.1f}/100  ({dim_data['weight']})  [{dim_label}]")
 
         lines.append("")
         lines.append("  Trends:")
-        for dim_name, direction in r["trends"].items:
+        for dim_name, direction in r["trends"].items():
             arrow = {"improving": "+", "declining": "-", "stable": "=", "no_data": "?"}
-            lines.append(f"    {dim_name.title:15s} {arrow.get(direction, '?')} {direction}")
+            lines.append(f"    {dim_name.title():15s} {arrow.get(direction, '?')} {direction}")
 
         if r["recommendations"]:
             lines.append("")
@@ -397,11 +397,38 @@ def format_json(results: List[Dict[str, Any]]) -> str:
 # ---------------------------------------------------------------------------
 
 
-def main -> None:
+# Embedded synthetic fixture for --sample (two customers across segments).
+SAMPLE_DATA = {
+    "customers": [
+        {
+            "customer_id": "C-001",
+            "name": "Acme Corp",
+            "segment": "enterprise",
+            "arr": 240000,
+            "usage": {"dau_mau_ratio": 0.55, "license_utilization": 0.82},
+            "engagement": {"qbr_attendance": 1.0, "champion_engaged": True},
+            "support": {"open_tickets": 2, "csat": 4.6},
+            "relationship": {"nps": 9, "exec_sponsor": True},
+        },
+        {
+            "customer_id": "C-002",
+            "name": "Globex Ltd",
+            "segment": "smb",
+            "arr": 18000,
+            "usage": {"dau_mau_ratio": 0.12, "license_utilization": 0.35},
+            "engagement": {"qbr_attendance": 0.0, "champion_engaged": False},
+            "support": {"open_tickets": 7, "csat": 3.1},
+            "relationship": {"nps": 4, "exec_sponsor": False},
+        },
+    ]
+}
+
+
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Calculate multi-dimensional customer health scores with trend analysis."
     )
-    parser.add_argument("input_file", help="Path to JSON file containing customer data")
+    parser.add_argument("input_file", nargs="?", help="Path to JSON file containing customer data")
     parser.add_argument(
         "--format",
         choices=["text", "json"],
@@ -409,17 +436,29 @@ def main -> None:
         dest="output_format",
         help="Output format (default: text)",
     )
-    args = parser.parse_args
+    parser.add_argument(
+        "--sample",
+        action="store_true",
+        help="Run with an embedded synthetic customer fixture (no input file needed)",
+    )
+    args = parser.parse_args()
 
-    try:
-        with open(args.input_file, "r") as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        print(f"Error: File not found: {args.input_file}", file=sys.stderr)
-        sys.exit(1)
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in {args.input_file}: {e}", file=sys.stderr)
-        sys.exit(1)
+    if args.sample:
+        if args.input_file:
+            print("Warning: --sample specified; ignoring input_file", file=sys.stderr)
+        data = SAMPLE_DATA
+    else:
+        if not args.input_file:
+            parser.error("input_file is required (or use --sample)")
+        try:
+            with open(args.input_file, "r") as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            print(f"Error: File not found: {args.input_file}", file=sys.stderr)
+            sys.exit(1)
+        except json.JSONDecodeError as e:
+            print(f"Error: Invalid JSON in {args.input_file}: {e}", file=sys.stderr)
+            sys.exit(1)
 
     customers = data.get("customers", [])
     if not customers:
@@ -435,4 +474,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

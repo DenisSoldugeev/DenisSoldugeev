@@ -93,12 +93,12 @@ def compute_channel_metrics(ch: dict, profile_cfg: dict) -> dict:
 
 
 def _is_partner_channel(name: str) -> bool:
-    n = name.lower
+    n = name.lower()
     return any(tag in n for tag in ("partner", "reseller", "channel", "oem", "marketplace"))
 
 
 def _is_direct_channel(name: str) -> bool:
-    return "direct" in name.lower or "inside" in name.lower or "outbound" in name.lower
+    return "direct" in name.lower() or "inside" in name.lower() or "outbound" in name.lower()
 
 
 def optimize_mix(metrics: list, constraints: dict) -> dict:
@@ -208,7 +208,7 @@ def render_markdown(report: dict, profile: str) -> str:
 
     if "best_mix" in report and report["best_mix"].get("best_mix_pct"):
         lines += ["## Recommended mix (subject to constraints)", "| Channel | Recommended share |", "|---|---:|"]
-        for k, v in report["best_mix"]["best_mix_pct"].items:
+        for k, v in report["best_mix"]["best_mix_pct"].items():
             lines.append(f"| {k} | {v}% |")
         lines.append("")
     elif "best_mix" in report and report["best_mix"].get("error"):
@@ -218,7 +218,7 @@ def render_markdown(report: dict, profile: str) -> str:
         lines += ["## Sensitivity scenarios", "| Scenario | Recommended mix |", "|---|---|"]
         for s in report["sensitivity"]:
             if s.get("mix"):
-                mix_str = ", ".join(f"{k}: {v}%" for k, v in s["mix"].items)
+                mix_str = ", ".join(f"{k}: {v}%" for k, v in s["mix"].items())
                 lines.append(f"| {s['scenario']} | {mix_str} |")
             else:
                 lines.append(f"| {s['scenario']} | {s.get('note') or 'no feasible mix'} |")
@@ -279,17 +279,17 @@ SAMPLE = {
 }
 
 
-def main -> int:
+def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--input")
     ap.add_argument("--output", choices=["json", "markdown"], default="markdown")
     ap.add_argument(
         "--profile",
-        choices=list(PROFILES.keys),
+        choices=list(PROFILES.keys()),
         default="saas",
     )
     ap.add_argument("--sample", action="store_true")
-    args = ap.parse_args
+    args = ap.parse_args()
 
     if args.sample:
         payload = SAMPLE
@@ -297,7 +297,7 @@ def main -> int:
         with open(args.input) as f:
             payload = json.load(f)
     else:
-        ap.print_help
+        ap.print_help()
         return 0
 
     profile = payload.get("profile", args.profile)
@@ -324,4 +324,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

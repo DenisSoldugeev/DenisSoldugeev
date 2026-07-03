@@ -44,7 +44,7 @@ ctr_score: <average of all 5 scores>
 Be harsh. Most content is mediocre (4-6 range). Only exceptional content scores 8+."""
 
 try:
-    content = Path(TARGET_FILE).read_text
+    content = Path(TARGET_FILE).read_text()
 except FileNotFoundError:
     print(f"Target file not found: {TARGET_FILE}", file=sys.stderr)
     sys.exit(1)
@@ -63,8 +63,8 @@ if result.returncode != 0:
 
 # Parse output — look for ctr_score line
 output = result.stdout
-for line in output.splitlines:
-    line = line.strip
+for line in output.splitlines():
+    line = line.strip()
     if line.startswith("ctr_score:"):
         print(line)
     elif line.startswith(("curiosity:", "specificity:", "emotional:", "scroll_stop:", "seo:")):

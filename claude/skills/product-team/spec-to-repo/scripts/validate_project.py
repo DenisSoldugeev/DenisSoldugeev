@@ -113,7 +113,7 @@ def check_env_example(root, all_files):
         if ext not in CODE_EXTENSIONS:
             continue
         try:
-            content = open(filepath, "r", encoding="utf-8", errors="ignore").read
+            content = open(filepath, "r", encoding="utf-8", errors="ignore").read()
         except (OSError, UnicodeDecodeError):
             continue
         for pattern in ENV_VAR_PATTERNS:
@@ -162,7 +162,7 @@ def check_placeholders(all_files, root):
         if ext not in CODE_EXTENSIONS:
             continue
         try:
-            lines = open(filepath, "r", encoding="utf-8", errors="ignore").readlines
+            lines = open(filepath, "r", encoding="utf-8", errors="ignore").readlines()
         except (OSError, UnicodeDecodeError):
             continue
         for i, line in enumerate(lines, 1):
@@ -217,14 +217,14 @@ def print_report(result):
     print("=" * 60)
     print(f"Project: {result['project']}")
     print(f"Files scanned: {result['files_scanned']}")
-    print
+    print()
 
     for check in result["checks"]:
         icon = {"PASS": "  \u2705", "WARN": "  \u26a0\ufe0f", "FAIL": "  \u274c"}[check["status"]]
         print(f"{icon} [{check['status']}] {check['name']}: {check['message']}")
 
     s = result["summary"]
-    print
+    print()
     print(f"Results: {s['pass']} pass, {s['warn']} warn, {s['fail']} fail")
 
     indicator = "\u2705" if result["overall"] == "PASS" else "\u274c"
@@ -232,7 +232,7 @@ def print_report(result):
     print("=" * 60)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Validate a generated project directory for common issues."
     )
@@ -241,7 +241,7 @@ def main:
                         help="Output format (default: text)")
     parser.add_argument("--strict", action="store_true",
                         help="Treat warnings as failures")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if not os.path.isdir(args.path):
         print(f"Error: not a directory: {args.path}", file=sys.stderr)
@@ -258,4 +258,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -103,8 +103,8 @@ def zero_trust_auth(required_claims=None):
 
 @app.route('/api/sensitive-data')
 @zero_trust_auth(required_claims=['data:read', 'clearance:secret'])
-def get_sensitive_data:
-    return fetch_data
+def get_sensitive_data():
+    return fetch_data()
 ```
 
 ### Network Segmentation
@@ -239,7 +239,7 @@ class JWTService:
 
     def create_access_token(self, user_id, roles, expires_minutes=15):
         """Create short-lived access token."""
-        now = datetime.utcnow
+        now = datetime.utcnow()
         payload = {
             'iss': self.issuer,
             'sub': str(user_id),
@@ -253,7 +253,7 @@ class JWTService:
 
     def create_refresh_token(self, user_id, expires_days=7):
         """Create longer-lived refresh token (stored server-side)."""
-        now = datetime.utcnow
+        now = datetime.utcnow()
         jti = secrets.token_hex(32)
         payload = {
             'iss': self.issuer,
@@ -313,7 +313,7 @@ class TOTPService:
 
     def generate_secret(self):
         """Generate a new TOTP secret for user."""
-        return pyotp.random_base32
+        return pyotp.random_base32()
 
     def get_provisioning_uri(self, secret, user_email):
         """Generate QR code URI for authenticator app."""
@@ -351,7 +351,7 @@ class UserCreateRequest(BaseModel):
         email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if not re.match(email_regex, v):
             raise ValueError('Invalid email format')
-        return v.lower
+        return v.lower()
 
     @validator('password')
     def validate_password_strength(cls, v):
@@ -361,7 +361,7 @@ class UserCreateRequest(BaseModel):
             raise ValueError('Password must contain lowercase letter')
         if not re.search(r'\d', v):
             raise ValueError('Password must contain digit')
-        if not re.search(r'[!@#$%^&*,.?":{}|<>]', v):
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', v):
             raise ValueError('Password must contain special character')
         return v
 ```
@@ -381,8 +381,8 @@ class RateLimiter:
 
     def is_allowed(self, key, limit, window_seconds):
         """Check if request is within rate limit."""
-        pipe = self.redis.pipeline
-        now = time.time
+        pipe = self.redis.pipeline()
+        now = time.time()
         window_start = now - window_seconds
 
         # Remove old entries
@@ -394,7 +394,7 @@ class RateLimiter:
         # Set expiry
         pipe.expire(key, window_seconds)
 
-        results = pipe.execute
+        results = pipe.execute()
         current_count = results[1]
 
         return current_count < limit
@@ -405,7 +405,7 @@ def rate_limit(limit=100, window=3600, key_func=None):
         @wraps(f)
         def decorated(*args, **kwargs):
             if key_func:
-                key = f"rate_limit:{key_func}"
+                key = f"rate_limit:{key_func()}"
             else:
                 key = f"rate_limit:{request.remote_addr}:{f.__name__}"
 
@@ -433,7 +433,7 @@ def get_user_secure(user_id):
     """Safe parameterized query."""
     query = text("SELECT * FROM users WHERE id = :user_id")
     result = db.execute(query, {'user_id': user_id})
-    return result.fetchone
+    return result.fetchone()
 
 # For dynamic queries, use ORM
 def search_users(filters):
@@ -447,7 +447,7 @@ def search_users(filters):
     if 'role' in filters:
         query = query.filter(User.role == filters['role'])
 
-    return query.all
+    return query.all()
 ```
 
 ---
@@ -473,25 +473,25 @@ class FieldEncryption:
     def derive_key(password, salt):
         """Derive encryption key from password."""
         kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA256,
+            algorithm=hashes.SHA256(),
             length=32,
             salt=salt,
             iterations=480000,
         )
-        key = base64.urlsafe_b64encode(kdf.derive(password.encode))
+        key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
         return key
 
     def encrypt(self, plaintext):
         """Encrypt a field value."""
         if isinstance(plaintext, str):
-            plaintext = plaintext.encode
-        return self.fernet.encrypt(plaintext).decode
+            plaintext = plaintext.encode()
+        return self.fernet.encrypt(plaintext).decode()
 
     def decrypt(self, ciphertext):
         """Decrypt a field value."""
         if isinstance(ciphertext, str):
-            ciphertext = ciphertext.encode
-        return self.fernet.decrypt(ciphertext).decode
+            ciphertext = ciphertext.encode()
+        return self.fernet.decrypt(ciphertext).decode()
 
 # Usage in ORM
 class User(db.Model):
@@ -561,18 +561,18 @@ class VaultClient:
 ```python
 # BAD: Trusting client-provided data
 @app.route('/admin')
-def admin_panel:
+def admin_panel():
     # Client can forge this header!
     if request.headers.get('X-Is-Admin') == 'true':
-        return render_admin
+        return render_admin()
 
 # GOOD: Server-side verification
 @app.route('/admin')
 @login_required
-def admin_panel:
+def admin_panel():
     if not current_user.has_role('admin'):
         abort(403)
-    return render_admin
+    return render_admin()
 ```
 
 ### Anti-Pattern: Hardcoded Secrets
@@ -593,7 +593,7 @@ API_KEY = vault_client.get_secret('api/keys')['api_key']
 ```python
 # BAD: Reveals internal information
 except Exception as e:
-    return {'error': str(e), 'stack_trace': traceback.format_exc}, 500
+    return {'error': str(e), 'stack_trace': traceback.format_exc()}, 500
 
 # GOOD: Generic message, detailed logging
 except Exception as e:

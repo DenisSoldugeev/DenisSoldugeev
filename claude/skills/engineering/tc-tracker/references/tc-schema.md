@@ -58,7 +58,7 @@ A TC record is a JSON object stored at `docs/TC/records/<TC-ID>/tc_record.json`.
 {
   "revision_id": "R1",
   "timestamp": "2026-04-05T12:34:56+00:00",
-  "author": "ai:claude-opus",
+  "author": "the author",
   "summary": "Created TC record",
   "field_changes": [
     {

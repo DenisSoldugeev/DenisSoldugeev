@@ -142,7 +142,7 @@ def walk_files(root: str, exts: Optional[set] = None, dirs: Optional[set] = None
                 dirnames[:] = []
                 continue
         for fname in filenames:
-            if exts is None or os.path.splitext(fname)[1].lower in exts:
+            if exts is None or os.path.splitext(fname)[1].lower() in exts:
                 fpath = os.path.join(dirpath, fname)
                 yield fpath, os.path.relpath(fpath, root)
 
@@ -189,7 +189,7 @@ def grep_files(
                         results.append(Finding(
                             file=relpath,
                             line=lineno,
-                            snippet=line.rstrip[:120],
+                            snippet=line.rstrip()[:120],
                         ))
                         if len(results) >= max_findings:
                             return results
@@ -225,7 +225,7 @@ def read_json_file(path: str) -> dict:
 # ---------------------------------------------------------------------------
 
 def detect_stack(root: str) -> Stack:
-    s = Stack
+    s = Stack()
     pkg_path = os.path.join(root, "package.json")
     if os.path.isfile(pkg_path):
         s.has_node = True
@@ -264,7 +264,7 @@ def detect_stack(root: str) -> Stack:
         if os.path.isfile(os.path.join(root, pyfile)):
             s.has_python = True
             try:
-                content = open(os.path.join(root, pyfile)).read.lower
+                content = open(os.path.join(root, pyfile)).read().lower()
                 if "django" in content:    s.py_framework = "django"
                 elif "flask" in content:   s.py_framework = "flask"
                 elif "fastapi" in content: s.py_framework = "fastapi"
@@ -305,7 +305,7 @@ CHECKS = {
     "SEC-07": CheckDef("SEC-07", "Rate limiting on auth and sensitive endpoints", Severity.HIGH, "SEC"),
     "SEC-08": CheckDef("SEC-08", "Passwords hashed with bcrypt or argon2", Severity.CRITICAL, "SEC"),
     "SEC-11": CheckDef("SEC-11", "CSP headers configured", Severity.HIGH, "SEC"),
-    "SEC-13": CheckDef("SEC-13", "No eval or dangerouslySetInnerHTML without sanitization", Severity.HIGH, "SEC", stack="js"),  # noqa: SEC-AUDITOR
+    "SEC-13": CheckDef("SEC-13", "No eval() or dangerouslySetInnerHTML without sanitization", Severity.HIGH, "SEC", stack="js"),  # noqa: SEC-AUDITOR
     "SEC-14": CheckDef("SEC-14", "No sensitive data in URLs or logs", Severity.HIGH, "SEC"),
     "SEC-17": CheckDef("SEC-17", "No hardcoded secrets in .env committed to repo", Severity.CRITICAL, "SEC"),
     "SEC-18": CheckDef("SEC-18", ".env files listed in .gitignore", Severity.CRITICAL, "SEC"),
@@ -484,20 +484,20 @@ def check_sec13(root, stack):
     c = CHECKS["SEC-13"]
     if not stack.has_node:
         return Result(c, Status.SKIP, "Not a JS/TS project")
-    eval_findings = grep_files(root, r"(\beval\s*\(|new\s+Function\s*\", exts=JS_EXTS)
+    eval_findings = grep_files(root, r"(\beval\s*\(|new\s+Function\s*\()", exts=JS_EXTS)
     dsi_findings = grep_files(root, r"dangerouslySetInnerHTML", exts=JS_EXTS)
     # If dangerouslySetInnerHTML is used, check for DOMPurify
     unsafe_dsi = []
     for f in dsi_findings:
         try:
-            content = open(os.path.join(root, f.file), errors="ignore").read
-            if "DOMPurify" not in content and "sanitize" not in content.lower:
+            content = open(os.path.join(root, f.file), errors="ignore").read()
+            if "DOMPurify" not in content and "sanitize" not in content.lower():
                 unsafe_dsi.append(f)
         except Exception:
             unsafe_dsi.append(f)
     all_findings = eval_findings + unsafe_dsi  # noqa: SEC-AUDITOR
     if all_findings:
-        return Result(c, Status.FAIL, "Unsafe eval or unsanitized dangerouslySetInnerHTML", all_findings)  # noqa: SEC-AUDITOR
+        return Result(c, Status.FAIL, "Unsafe eval() or unsanitized dangerouslySetInnerHTML", all_findings)  # noqa: SEC-AUDITOR
     return Result(c, Status.PASS)
 
 
@@ -523,14 +523,14 @@ def check_sec17(root, stack):
         name = entry.name
         if name.startswith(".env") and name not in (".env.example", ".env.sample",
                                                       ".env.template", ".env.local.example"):
-            if entry.is_file:
+            if entry.is_file():
                 env_files.append(name)
     if not env_files:
         return Result(c, Status.PASS)
     # Check if git-tracked
     gitignore_path = os.path.join(root, ".gitignore")
     if os.path.isfile(gitignore_path):
-        content = open(gitignore_path, errors="ignore").read
+        content = open(gitignore_path, errors="ignore").read()
         if ".env" in content:
             return Result(c, Status.PASS)
     return Result(c, Status.FAIL,
@@ -543,7 +543,7 @@ def check_sec18(root, stack):
     gitignore_path = os.path.join(root, ".gitignore")
     if not os.path.isfile(gitignore_path):
         return Result(c, Status.FAIL, ".gitignore file not found")
-    content = open(gitignore_path, errors="ignore").read
+    content = open(gitignore_path, errors="ignore").read()
     if re.search(r"\.env", content):
         return Result(c, Status.PASS)
     return Result(c, Status.FAIL, ".env not listed in .gitignore")
@@ -782,7 +782,7 @@ def check_code14(root, stack):
     tsconfig_path = os.path.join(root, "tsconfig.json")
     if not os.path.isfile(tsconfig_path):
         return Result(c, Status.SKIP, "tsconfig.json not found")
-    content = open(tsconfig_path, errors="ignore").read
+    content = open(tsconfig_path, errors="ignore").read()
     if re.search(r'"strict"\s*:\s*true', content):
         return Result(c, Status.PASS)
     return Result(c, Status.FAIL, "TypeScript strict mode not enabled in tsconfig.json",
@@ -978,7 +978,7 @@ def run_manual_checks(stack: Stack, interactive: bool, category_filter: Optional
     results = []
     applicable = []
     for chk in MANUAL_CHECKS:
-        if category_filter and chk.category != category_filter.upper:
+        if category_filter and chk.category != category_filter.upper():
             continue
         if chk.stack == "ai" and not stack.has_ai:
             results.append(Result(chk, Status.SKIP, "No AI/LLM usage detected"))
@@ -996,9 +996,9 @@ def run_manual_checks(stack: Stack, interactive: bool, category_filter: Optional
             results.append(Result(chk, Status.MANUAL, "Not confirmed (run without --no-interactive to answer)"))
         return results
 
-    print
+    print()
     print(bold("Manual Checks") + " — answer Y/N for each:")
-    print
+    print()
     for chk in applicable:
         sev_label = {
             Severity.CRITICAL: red("CRITICAL"),
@@ -1007,7 +1007,7 @@ def run_manual_checks(stack: Stack, interactive: bool, category_filter: Optional
         }[chk.severity]
         while True:
             try:
-                answer = input(f"  [{sev_label}] [{chk.id}] {chk.description} [y/N]: ").strip.lower
+                answer = input(f"  [{sev_label}] [{chk.id}] {chk.description} [y/N]: ").strip().lower()
             except (EOFError, KeyboardInterrupt):
                 answer = "n"
             if answer in ("y", "yes"):
@@ -1038,20 +1038,20 @@ def print_report(all_results: List[Result], stack: Stack, scan_time: float,
                 and r.check.severity == Severity.ADVISORY]
 
     stack_desc = []
-    if stack.framework:   stack_desc.append(stack.framework.capitalize)
+    if stack.framework:   stack_desc.append(stack.framework.capitalize())
     if stack.has_supabase: stack_desc.append("Supabase")
-    if stack.deploy_target: stack_desc.append(stack.deploy_target.capitalize)
-    if stack.has_python and stack.py_framework: stack_desc.append(stack.py_framework.capitalize)
+    if stack.deploy_target: stack_desc.append(stack.deploy_target.capitalize())
+    if stack.has_python and stack.py_framework: stack_desc.append(stack.py_framework.capitalize())
     if not stack_desc:    stack_desc.append("Unknown")
     stack_str = " + ".join(stack_desc)
 
-    print
+    print()
     print(bold("SHIP GATE REPORT"))
     print("=" * 48)
     print(f"Stack:     {stack_str}")
     print(f"Scan time: {scan_time:.1f}s")
     print(f"Checks:    {len(all_results)} total")
-    print
+    print()
 
     def _section(label, items, color_fn):
         if not items and not verbose:
@@ -1069,7 +1069,7 @@ def print_report(all_results: List[Result], stack: Stack, scan_time: float,
                 print(f"          {dim(r.message)}")
             for f in r.findings[:3]:
                 print(f"          {dim(f.file)}:{f.line}  {dim(f.snippet[:80])}")
-        print
+        print()
 
     if critical:
         _section(red("CRITICAL") + " (must fix before shipping)", critical, red)
@@ -1144,7 +1144,7 @@ def print_json_report(all_results: List[Result], stack: Stack, scan_time: float)
 # Main
 # ---------------------------------------------------------------------------
 
-def main:
+def main():
     global USE_COLOR
 
     parser = argparse.ArgumentParser(
@@ -1162,9 +1162,9 @@ def main:
     parser.add_argument("--verbose", action="store_true",
                         help="Show PASS and SKIP results in addition to failures")
     parser.add_argument("--version", action="version", version=f"ship-gate {VERSION}")
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    if args.no_color or not sys.stdout.isatty:
+    if args.no_color or not sys.stdout.isatty():
         USE_COLOR = False
 
     root = os.path.abspath(args.path)
@@ -1172,7 +1172,7 @@ def main:
         print(f"Error: '{root}' is not a directory", file=sys.stderr)
         sys.exit(1)
 
-    start = time.time
+    start = time.time()
 
     # Detect stack
     stack = detect_stack(root)
@@ -1180,16 +1180,16 @@ def main:
     if not args.json:
         print(bold("Detecting stack..."), end=" ", flush=True)
         parts = []
-        if stack.framework:   parts.append(stack.framework.capitalize)
+        if stack.framework:   parts.append(stack.framework.capitalize())
         if stack.has_supabase: parts.append("Supabase")
-        if stack.deploy_target: parts.append(stack.deploy_target.capitalize)
-        if stack.has_python and stack.py_framework: parts.append(stack.py_framework.capitalize)
+        if stack.deploy_target: parts.append(stack.deploy_target.capitalize())
+        if stack.has_python and stack.py_framework: parts.append(stack.py_framework.capitalize())
         if stack.has_ai:      parts.append(f"AI({','.join(stack.ai_providers)})")
         print(", ".join(parts) if parts else "generic project")
 
     # Run automated checks
     all_results: List[Result] = []
-    categories = [args.category.upper] if args.category else CATEGORY_ORDER
+    categories = [args.category.upper()] if args.category else CATEGORY_ORDER
 
     for i, cat in enumerate(categories, 1):
         fns = CATEGORY_CHECKS.get(cat, [])
@@ -1198,7 +1198,7 @@ def main:
             try:
                 r = fn(root, stack)
             except Exception as e:
-                chk_id = fn.__name__.replace("check_", "").replace("_", "-").upper
+                chk_id = fn.__name__.replace("check_", "").replace("_", "-").upper()
                 cat_results.append(Result(
                     CheckDef(chk_id, fn.__doc__ or fn.__name__, Severity.ADVISORY, cat),
                     Status.SKIP, f"Scanner error: {e}",
@@ -1219,7 +1219,7 @@ def main:
     manual_results = run_manual_checks(stack, not args.no_interactive, args.category)
     all_results.extend(manual_results)
 
-    scan_time = time.time - start
+    scan_time = time.time() - start
 
     if args.json:
         sys.exit(print_json_report(all_results, stack, scan_time))
@@ -1228,4 +1228,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

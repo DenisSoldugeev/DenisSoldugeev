@@ -155,14 +155,14 @@ class TypeDetector:
     @classmethod
     def detect_type(cls, values: List[str]) -> str:
         """Detect the most likely data type from a sample of values"""
-        non_empty = [v for v in values if v and v.strip]
+        non_empty = [v for v in values if v and v.strip()]
         if not non_empty:
             return "string"
 
         # Check for patterns first
-        for pattern_name, pattern in cls.PATTERNS.items:
+        for pattern_name, pattern in cls.PATTERNS.items():
             regex = re.compile(pattern, re.IGNORECASE)
-            matches = sum(1 for v in non_empty if regex.match(v.strip))
+            matches = sum(1 for v in non_empty if regex.match(v.strip()))
             if matches / len(non_empty) > 0.9:
                 return pattern_name
 
@@ -172,8 +172,8 @@ class TypeDetector:
         bool_count = 0
 
         for v in non_empty:
-            v = v.strip
-            if v.lower in ('true', 'false', 'yes', 'no', '1', '0'):
+            v = v.strip()
+            if v.lower() in ('true', 'false', 'yes', 'no', '1', '0'):
                 bool_count += 1
             try:
                 int(v)
@@ -197,13 +197,13 @@ class TypeDetector:
     @classmethod
     def detect_pattern(cls, values: List[str]) -> Optional[str]:
         """Try to detect a common pattern in string values"""
-        non_empty = [v for v in values if v and v.strip]
+        non_empty = [v for v in values if v and v.strip()]
         if not non_empty or len(non_empty) < 10:
             return None
 
-        for pattern_name, pattern in cls.PATTERNS.items:
+        for pattern_name, pattern in cls.PATTERNS.items():
             regex = re.compile(pattern, re.IGNORECASE)
-            matches = sum(1 for v in non_empty if regex.match(v.strip))
+            matches = sum(1 for v in non_empty if regex.match(v.strip()))
             if matches / len(non_empty) > 0.8:
                 return pattern_name
 
@@ -317,7 +317,7 @@ class SchemaValidator(BaseValidator):
         if col_schema.unique and non_null_values:
             unique_count = len(set(non_null_values))
             if unique_count != len(non_null_values):
-                duplicate_values = [v for v, count in Counter(non_null_values).items if count > 1]
+                duplicate_values = [v for v, count in Counter(non_null_values).items() if count > 1]
                 results.append(ValidationResult(
                     check_name="unique",
                     column=col_name,
@@ -426,7 +426,7 @@ class SchemaValidator(BaseValidator):
                 except ValueError:
                     pass
             elif expected_type == "boolean":
-                valid = v_str.lower in ('true', 'false', 'yes', 'no', '1', '0')
+                valid = v_str.lower() in ('true', 'false', 'yes', 'no', '1', '0')
             elif expected_type == "email":
                 valid = bool(re.match(TypeDetector.PATTERNS['email'], v_str, re.IGNORECASE))
             elif expected_type == "uuid":
@@ -483,7 +483,7 @@ class SchemaValidator(BaseValidator):
             pk_values.append(pk)
 
         pk_counts = Counter(pk_values)
-        duplicates = {pk: count for pk, count in pk_counts.items if count > 1}
+        duplicates = {pk: count for pk, count in pk_counts.items() if count > 1}
 
         if duplicates:
             results.append(ValidationResult(
@@ -514,7 +514,7 @@ class AnomalyDetector(BaseValidator):
 
         # Get numeric columns
         numeric_columns = []
-        for col in data[0].keys:
+        for col in data[0].keys():
             values = [row.get(col) for row in data]
             non_null = [v for v in values if v is not None and v != '']
             try:
@@ -612,10 +612,10 @@ class DataProfiler:
                 columns=[],
                 duplicate_rows=0,
                 memory_size_bytes=0,
-                profile_timestamp=datetime.now.isoformat
+                profile_timestamp=datetime.now().isoformat()
             )
 
-        columns = list(data[0].keys)
+        columns = list(data[0].keys())
         column_profiles = []
 
         for col in columns:
@@ -623,12 +623,12 @@ class DataProfiler:
             column_profiles.append(profile)
 
         # Count duplicates
-        row_tuples = [tuple(sorted(row.items)) for row in data]
+        row_tuples = [tuple(sorted(row.items())) for row in data]
         duplicate_count = len(row_tuples) - len(set(row_tuples))
 
         # Estimate memory size
         memory_size = sys.getsizeof(data) + sum(
-            sys.getsizeof(row) + sum(sys.getsizeof(v) for v in row.values)
+            sys.getsizeof(row) + sum(sys.getsizeof(v) for v in row.values())
             for row in data
         )
 
@@ -639,7 +639,7 @@ class DataProfiler:
             columns=column_profiles,
             duplicate_rows=duplicate_count,
             memory_size_bytes=memory_size,
-            profile_timestamp=datetime.now.isoformat
+            profile_timestamp=datetime.now().isoformat()
         )
 
     def _profile_column(self, data: List[Dict], column: str) -> ColumnProfile:
@@ -742,7 +742,7 @@ class GreatExpectationsGenerator:
             "expectation_suite_name": f"{profile.name}_suite",
             "expectations": expectations,
             "meta": {
-                "generated_at": datetime.now.isoformat,
+                "generated_at": datetime.now().isoformat(),
                 "generator": "data_quality_validator",
                 "source_profile": profile.name
             }
@@ -923,7 +923,7 @@ class DataContractValidator:
     def load_contract(self, contract_path: str) -> Dict:
         """Load a data contract from file"""
         with open(contract_path, 'r') as f:
-            content = f.read
+            content = f.read()
 
         # Support both YAML and JSON
         if contract_path.endswith('.yaml') or contract_path.endswith('.yml'):
@@ -941,31 +941,31 @@ class DataContractValidator:
         section_stack = [(result, -1)]
 
         for line in content.split('\n'):
-            if not line.strip or line.strip.startswith('#'):
+            if not line.strip() or line.strip().startswith('#'):
                 continue
 
             # Calculate indentation
-            indent = len(line) - len(line.lstrip)
-            line = line.strip
+            indent = len(line) - len(line.lstrip())
+            line = line.strip()
 
             # Pop sections with greater or equal indentation
             while section_stack and section_stack[-1][1] >= indent:
-                section_stack.pop
+                section_stack.pop()
 
             current_section = section_stack[-1][0]
 
             if ':' in line:
                 key, value = line.split(':', 1)
-                key = key.strip
-                value = value.strip
+                key = key.strip()
+                value = value.strip()
 
                 if value:
                     # Handle lists
                     if value.startswith('[') and value.endswith(']'):
-                        current_section[key] = [v.strip.strip('"\'') for v in value[1:-1].split(',')]
-                    elif value.lower in ('true', 'false'):
-                        current_section[key] = value.lower == 'true'
-                    elif value.isdigit:
+                        current_section[key] = [v.strip().strip('"\'') for v in value[1:-1].split(',')]
+                    elif value.lower() in ('true', 'false'):
+                        current_section[key] = value.lower() == 'true'
+                    elif value.isdigit():
                         current_section[key] = int(value)
                     else:
                         current_section[key] = value.strip('"\'')
@@ -977,13 +977,13 @@ class DataContractValidator:
                 if not isinstance(current_section, list):
                     # Convert to list
                     parent = section_stack[-2][0] if len(section_stack) > 1 else result
-                    for k, v in parent.items:
+                    for k, v in parent.items():
                         if v is current_section:
                             parent[k] = [current_section] if current_section else []
                             current_section = parent[k]
                             section_stack[-1] = (current_section, section_stack[-1][1])
                             break
-                current_section.append(line[2:].strip)
+                current_section.append(line[2:].strip())
 
         return result
 
@@ -1083,8 +1083,8 @@ class DataContractValidator:
 
     def _types_compatible(self, detected: str, expected: str) -> bool:
         """Check if detected type is compatible with expected type"""
-        expected = expected.lower
-        detected = detected.lower
+        expected = expected.lower()
+        detected = detected.lower()
 
         type_groups = {
             'numeric': ['integer', 'int', 'float', 'double', 'decimal', 'number'],
@@ -1094,7 +1094,7 @@ class DataContractValidator:
             'datetime': ['datetime', 'datetime_iso', 'timestamp'],
         }
 
-        for group, types in type_groups.items:
+        for group, types in type_groups.items():
             if expected in types and detected in types:
                 return True
 
@@ -1118,7 +1118,7 @@ class ReportGenerator:
         lines.append("DATA QUALITY VALIDATION REPORT")
         lines.append("=" * 80)
         lines.append(f"\nDataset: {profile.name}")
-        lines.append(f"Generated: {datetime.now.isoformat}")
+        lines.append(f"Generated: {datetime.now().isoformat()}")
         lines.append(f"Rows: {profile.row_count:,}")
         lines.append(f"Columns: {profile.column_count}")
         lines.append(f"Duplicate Rows: {profile.duplicate_rows:,}")
@@ -1201,7 +1201,7 @@ class ReportGenerator:
         """Generate a JSON report"""
         return {
             "report_type": "data_quality_validation",
-            "generated_at": datetime.now.isoformat,
+            "generated_at": datetime.now().isoformat(),
             "dataset": {
                 "name": profile.name,
                 "row_count": profile.row_count,
@@ -1245,10 +1245,10 @@ class DataLoader:
         """Load data from file"""
         path = Path(file_path)
 
-        if not path.exists:
+        if not path.exists():
             raise FileNotFoundError(f"File not found: {file_path}")
 
-        suffix = path.suffix.lower
+        suffix = path.suffix.lower()
 
         if suffix == '.csv':
             return DataLoader._load_csv(file_path)
@@ -1292,7 +1292,7 @@ class DataLoader:
         data = []
         with open(file_path, 'r', encoding='utf-8') as f:
             for line in f:
-                line = line.strip
+                line = line.strip()
                 if line:
                     data.append(json.loads(line))
         return data
@@ -1352,25 +1352,25 @@ def cmd_validate(args):
         logger.info(f"Loading schema from {args.schema}")
         schema = SchemaLoader.load(args.schema)
 
-        validator = SchemaValidator
+        validator = SchemaValidator()
         results = validator.validate(data, schema)
 
     if args.detect_anomalies:
         logger.info("Running anomaly detection")
-        anomaly_detector = AnomalyDetector
+        anomaly_detector = AnomalyDetector()
         anomaly_results = anomaly_detector.validate(data)
         results.extend(anomaly_results)
 
     # Profile data
-    profiler = DataProfiler
+    profiler = DataProfiler()
     profile = profiler.profile(data, name=Path(args.input).stem)
 
     # Calculate score
-    score_calc = QualityScoreCalculator
+    score_calc = QualityScoreCalculator()
     score = score_calc.calculate(profile, results)
 
     # Generate report
-    reporter = ReportGenerator
+    reporter = ReportGenerator()
 
     if args.json:
         report = reporter.generate_json_report(profile, results, score)
@@ -1396,7 +1396,7 @@ def cmd_profile(args):
     logger.info(f"Loading data from {args.input}")
     data = DataLoader.load(args.input)
 
-    profiler = DataProfiler
+    profiler = DataProfiler()
     profile = profiler.profile(data, name=Path(args.input).stem)
 
     if args.json or args.output:
@@ -1433,11 +1433,11 @@ def cmd_generate_suite(args):
     data = DataLoader.load(args.input)
 
     # Profile first
-    profiler = DataProfiler
+    profiler = DataProfiler()
     profile = profiler.profile(data, name=Path(args.input).stem)
 
     # Generate suite
-    generator = GreatExpectationsGenerator
+    generator = GreatExpectationsGenerator()
     suite = generator.generate_suite(profile)
 
     output = json.dumps(suite, indent=2)
@@ -1456,21 +1456,21 @@ def cmd_contract(args):
     data = DataLoader.load(args.input)
 
     logger.info(f"Loading contract from {args.contract}")
-    contract_validator = DataContractValidator
+    contract_validator = DataContractValidator()
     contract = contract_validator.load_contract(args.contract)
 
     results = contract_validator.validate_contract(data, contract)
 
     # Profile data
-    profiler = DataProfiler
+    profiler = DataProfiler()
     profile = profiler.profile(data, name=Path(args.input).stem)
 
     # Calculate score
-    score_calc = QualityScoreCalculator
+    score_calc = QualityScoreCalculator()
     score = score_calc.calculate(profile, results)
 
     # Generate report
-    reporter = ReportGenerator
+    reporter = ReportGenerator()
 
     if args.json:
         report = reporter.generate_json_report(profile, results, score)
@@ -1501,7 +1501,7 @@ def cmd_schema(args):
         sys.exit(1)
 
     # Profile to detect types
-    profiler = DataProfiler
+    profiler = DataProfiler()
     profile = profiler.profile(data, name=Path(args.input).stem)
 
     # Generate schema
@@ -1549,7 +1549,7 @@ def cmd_schema(args):
         print(output)
 
 
-def main:
+def main():
     """Main entry point"""
     parser = argparse.ArgumentParser(
         description="Data Quality Validator - Comprehensive data quality validation",
@@ -1613,13 +1613,13 @@ Examples:
     schema_parser.add_argument('--output', '-o', help='Output schema file')
     schema_parser.set_defaults(func=cmd_schema)
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.verbose:
-        logging.getLogger.setLevel(logging.DEBUG)
+        logging.getLogger().setLevel(logging.DEBUG)
 
     if not args.command:
-        parser.print_help
+        parser.print_help()
         sys.exit(1)
 
     try:
@@ -1628,9 +1628,9 @@ Examples:
         logger.error(f"Error: {e}")
         if args.verbose:
             import traceback
-            traceback.print_exc
+            traceback.print_exc()
         sys.exit(1)
 
 
 if __name__ == '__main__':
-    main
+    main()

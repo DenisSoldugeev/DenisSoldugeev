@@ -115,13 +115,13 @@ STRONG_CTA_PATTERNS = [
 # ─── Text utilities ───────────────────────────────────────────────────────────
 
 def count_words(text: str) -> int:
-    return len(text.split)
+    return len(text.split())
 
 
 def count_sentences(text: str) -> int:
     """Rough sentence count by terminal punctuation."""
     sentences = re.split(r'[.!?]+', text)
-    return max(1, len([s for s in sentences if s.strip]))
+    return max(1, len([s for s in sentences if s.strip()]))
 
 
 def avg_words_per_sentence(text: str) -> float:
@@ -131,7 +131,7 @@ def avg_words_per_sentence(text: str) -> float:
 
 
 def avg_chars_per_word(text: str) -> float:
-    words = text.split
+    words = text.split()
     if not words:
         return 0
     return sum(len(w.strip('.,!?;:')) for w in words) / len(words)
@@ -143,7 +143,7 @@ def flesch_reading_ease(text: str) -> float:
     206.835 - 1.015 * (words/sentences) - 84.6 * (syllables/words)
     We approximate syllables as: max(1, len(word) * 0.4) for each word.
     """
-    words = text.split
+    words = text.split()
     if not words:
         return 0
     sentences = count_sentences(text)
@@ -181,18 +181,18 @@ def analyze_subject_line(subject: str) -> Dict:
     if length > 50:
         warnings.append("Subject is getting long — shorter subjects get more opens")
 
-    if subject.isupper:
+    if subject.isupper():
         issues.append("All caps subject lines trigger spam filters")
 
     if re.search(r'!!!|!{2,}', subject):
         issues.append("Multiple exclamation points look like spam")
 
     if subject.startswith("Re:") or subject.startswith("Fwd:"):
-        lower = subject.lower
+        lower = subject.lower()
         if lower.startswith("re:") or lower.startswith("fwd:"):
             warnings.append("Fake Re:/Fwd: subjects feel deceptive — people have learned this trick")
 
-    if re.search(r'[A-Z]{4,}', subject) and not subject.isupper:
+    if re.search(r'[A-Z]{4,}', subject) and not subject.isupper():
         warnings.append("SHOUTING words in subject lines look like spam")
 
     if re.search(r'[\U0001F600-\U0001FFFF]', subject):
@@ -202,7 +202,7 @@ def analyze_subject_line(subject: str) -> Dict:
         warnings.append("Question mark in subject can feel like an ad — test without")
 
     # Spam trigger check in subject
-    subject_lower = subject.lower
+    subject_lower = subject.lower()
     triggered = [w for w in SPAM_TRIGGERS if w in subject_lower]
     if triggered:
         issues.append(f"Spam trigger words in subject: {', '.join(triggered)}")
@@ -222,7 +222,7 @@ def analyze_subject_line(subject: str) -> Dict:
 
 
 def analyze_body(body: str) -> Dict:
-    body_lower = body.lower
+    body_lower = body.lower()
     findings = []
     deductions = []
 
@@ -438,7 +438,7 @@ SAMPLE_SEQUENCE = [
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
-def main:
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -451,7 +451,7 @@ def main:
         help="Path to a JSON file containing the email sequence. "
              "Use '-' to read from stdin. If omitted, runs embedded sample."
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.file:
         if args.file == "-":
@@ -514,4 +514,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

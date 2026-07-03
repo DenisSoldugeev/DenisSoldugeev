@@ -257,7 +257,7 @@ def main(argv: List[str]) -> int:
         except ValueError as e:
             print(f"error: {e}", file=sys.stderr); return 2
     else:
-        parser.print_help; return 0
+        parser.print_help(); return 0
 
     if args.output == "json":
         print(json.dumps(result, indent=2))

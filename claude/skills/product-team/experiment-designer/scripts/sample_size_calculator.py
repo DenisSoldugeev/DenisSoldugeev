@@ -22,8 +22,8 @@ def required_sample_size_per_group(
     if delta <= 0:
         raise ValueError("MDE resolves to zero; target and baseline must differ.")
 
-    z_alpha = statistics.NormalDist.inv_cdf(1 - alpha / 2)
-    z_beta = statistics.NormalDist.inv_cdf(power)
+    z_alpha = statistics.NormalDist().inv_cdf(1 - alpha / 2)
+    z_beta = statistics.NormalDist().inv_cdf(power)
     pooled = (baseline_rate + target_rate) / 2
 
     numerator = 2 * pooled * (1 - pooled) * (z_alpha + z_beta) ** 2
@@ -31,7 +31,7 @@ def required_sample_size_per_group(
     return math.ceil(n)
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Compute sample size for two-proportion product experiments."
     )
@@ -51,11 +51,11 @@ def parse_args -> argparse.Namespace:
         default=0,
         help="Optional total daily samples to estimate runtime in days.",
     )
-    return parser.parse_args
+    return parser.parse_args()
 
 
-def main -> int:
-    args = parse_args
+def main() -> int:
+    args = parse_args()
     baseline = clamp_rate(args.baseline_rate, "baseline-rate")
 
     if args.mde <= 0:
@@ -97,4 +97,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main)
+    raise SystemExit(main())

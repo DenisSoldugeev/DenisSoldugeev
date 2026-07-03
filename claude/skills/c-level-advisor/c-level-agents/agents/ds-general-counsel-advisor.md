@@ -27,27 +27,27 @@ Pairs with `ds-cfo-advisor` (term-sheet → dilution math), `ds-ciso-advisor` (d
 
 ## Skill Integration
 
-**Skill Location:** `../../skills/general-counsel-advisor/`
+**Skill Location:** `../../general-counsel-advisor/`
 
 ### Python Tools
 
 1. **Contract Risk Scanner**
-   - Path: `../../skills/general-counsel-advisor/scripts/contract_risk_scanner.py`
-   - Usage: `python ../../skills/general-counsel-advisor/scripts/contract_risk_scanner.py path/to/contract.txt`
+   - Path: `../../general-counsel-advisor/scripts/contract_risk_scanner.py`
+   - Usage: `python ../../general-counsel-advisor/scripts/contract_risk_scanner.py path/to/contract.txt`
    - Scans contract text for 12 founder-killer clauses: auto-renew traps, uncapped indemnity, one-sided liability, vague IP, aggressive non-compete, one-sided venue, missing DPA, MFN pricing, broad audit rights, perpetual license-back, force majeure asymmetry, broad non-solicit
    - Output: ranked findings (CRITICAL / HIGH / MEDIUM) with excerpt, why-it-matters, suggested redline
 
 2. **Term Sheet Analyzer**
-   - Path: `../../skills/general-counsel-advisor/scripts/term_sheet_analyzer.py`
-   - Usage: `python ../../skills/general-counsel-advisor/scripts/term_sheet_analyzer.py term_sheet.json`
+   - Path: `../../general-counsel-advisor/scripts/term_sheet_analyzer.py`
+   - Usage: `python ../../general-counsel-advisor/scripts/term_sheet_analyzer.py term_sheet.json`
    - Scores a term sheet 0-100 across 12 dimensions: liquidation preference, anti-dilution, option pool, board, vesting, pro-rata, drag-along, protective provisions, info rights, dividends, valuation/dilution, holistic
    - Output: founder-friendliness grade (FOUNDER_FRIENDLY / NEGOTIATE / HOSTILE) + per-clause flags
 
 ### Knowledge Bases
 
-- `../../skills/general-counsel-advisor/references/contracts_playbook.md` — 7 startup contract types (MSA, SaaS, NDA, DPA, employment, contractor, equity), top redlines per type, quick triage heuristics
-- `../../skills/general-counsel-advisor/references/ip_and_regulatory.md` — IP inventory (patents, copyright, trademark, trade secrets), invention assignment, OSS license compliance, regulatory trigger matrix (HIPAA, GDPR, FDA, fintech, AI Act), SOC 2 → ISO sequencing
-- `../../skills/general-counsel-advisor/references/term_sheet_decoder.md` — Full term sheet glossary, founder-friendly defaults cheat sheet, negotiation strategy, the three clauses that matter most
+- `../../general-counsel-advisor/references/contracts_playbook.md` — 7 startup contract types (MSA, SaaS, NDA, DPA, employment, contractor, equity), top redlines per type, quick triage heuristics
+- `../../general-counsel-advisor/references/ip_and_regulatory.md` — IP inventory (patents, copyright, trademark, trade secrets), invention assignment, OSS license compliance, regulatory trigger matrix (HIPAA, GDPR, FDA, fintech, AI Act), SOC 2 → ISO sequencing
+- `../../general-counsel-advisor/references/term_sheet_decoder.md` — Full term sheet glossary, founder-friendly defaults cheat sheet, negotiation strategy, the three clauses that matter most
 
 ## Workflows
 
@@ -57,7 +57,7 @@ Pairs with `ds-cfo-advisor` (term-sheet → dilution math), `ds-ciso-advisor` (d
 ```bash
 # 1. Save contract as text
 # 2. Scan for the 12 common founder-killer clauses
-python ../../skills/general-counsel-advisor/scripts/contract_risk_scanner.py path/to/contract.txt
+python ../../general-counsel-advisor/scripts/contract_risk_scanner.py path/to/contract.txt
 # 3. For each CRITICAL/HIGH finding, draft a counter-proposal
 # 4. Send redlines + counter-proposals to outside counsel
 ```
@@ -69,7 +69,7 @@ python ../../skills/general-counsel-advisor/scripts/contract_risk_scanner.py pat
 
 ```bash
 # 1. Build term_sheet.json matching the schema (see --help)
-python ../../skills/general-counsel-advisor/scripts/term_sheet_analyzer.py term_sheet.json
+python ../../general-counsel-advisor/scripts/term_sheet_analyzer.py term_sheet.json
 # 2. Identify the top 3 NEGOTIATE / CRITICAL items
 # 3. Cross-check with ds-cfo-advisor for dilution math
 # 4. Decide which 3 to fight for (don't try to win all 20)
@@ -125,12 +125,12 @@ echo "Source: $CONTRACT"
 echo ""
 
 # 1. Risk scan
-python ../../skills/general-counsel-advisor/scripts/contract_risk_scanner.py "$CONTRACT"
+python ../../general-counsel-advisor/scripts/contract_risk_scanner.py "$CONTRACT"
 
 echo ""
 echo "📚 Reference checks:"
-echo "- Contracts playbook: ../../skills/general-counsel-advisor/references/contracts_playbook.md"
-echo "- Regulatory triggers: ../../skills/general-counsel-advisor/references/ip_and_regulatory.md"
+echo "- Contracts playbook: ../../general-counsel-advisor/references/contracts_playbook.md"
+echo "- Regulatory triggers: ../../general-counsel-advisor/references/ip_and_regulatory.md"
 echo ""
 echo "📋 Required before sign:"
 echo "  ☐ All CRITICAL findings addressed or accepted with documented reason"
@@ -152,12 +152,12 @@ echo "  ☐ /ds:freeze applied if irreversible (term sheet, M&A LOI, employment 
 
 - [ds-cfo-advisor](ds-cfo-advisor.md) — term sheet → dilution math
 - [ds-ciso-advisor](ds-ciso-advisor.md) — data-touching contracts, compliance overlap
-- [ds-ceo-advisor](../../../../agents/c-level/ds-ceo-advisor.md) — board / fundraising strategic context
-- [ds-quality-regulatory](../../../../agents/ra-qm-team/ds-quality-regulatory.md) — regulated-industry execution (ISO 13485, MDR, FDA)
+- [ds-ceo-advisor](../../../agents/c-level/ds-ceo-advisor.md) — board / fundraising strategic context
+- [ds-quality-regulatory](../../../agents/ra-qm-team/ds-quality-regulatory.md) — regulated-industry execution (ISO 13485, MDR, FDA)
 
 ## References
 
-- Skill: [../../skills/general-counsel-advisor/SKILL.md](../../general-counsel-advisor/SKILL.md)
+- Skill: [../../general-counsel-advisor/SKILL.md](../../general-counsel-advisor/SKILL.md)
 - Voice spec: [../references/persona-voices.md](../references/persona-voices.md)
 - Sibling command: [`/ds:gc-review`](../skills/gc-review/SKILL.md)
 

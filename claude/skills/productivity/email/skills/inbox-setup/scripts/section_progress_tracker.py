@@ -35,7 +35,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 
-SESSIONS_DIR = Path.home / ".inbox_setup_sessions"
+SESSIONS_DIR = Path.home() / ".inbox_setup_sessions"
 TOTAL_SECTIONS = 8
 
 
@@ -45,7 +45,7 @@ def session_path(name: str) -> Path:
 
 def load_session(name: str) -> Dict[str, Any]:
     p = session_path(name)
-    if not p.exists:
+    if not p.exists():
         raise FileNotFoundError(f"Session not found: {name}")
     return json.loads(p.read_text(encoding="utf-8"))
 
@@ -55,17 +55,17 @@ def save_session(name: str, data: Dict[str, Any]) -> None:
     session_path(name).write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
-def now_iso -> str:
-    return datetime.now(timezone.utc).isoformat
+def now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 def action_start(name: str, user: Optional[str]) -> Dict[str, Any]:
-    if session_path(name).exists:
+    if session_path(name).exists():
         raise FileExistsError(f"Session already exists: {name}")
     data: Dict[str, Any] = {
         "session": name,
         "user": user or "(anonymous)",
-        "started_at": now_iso,
+        "started_at": now_iso(),
         "ended_at": None,
         "active_section": 1,
         "sections": {str(i): {"status": "pending", "questions_answered": [], "files_committed": []} for i in range(1, TOTAL_SECTIONS + 1)},
@@ -84,11 +84,11 @@ def action_record_q(name: str, section: int, question: int, answer: str) -> Dict
     sec = data["sections"][key]
     if sec["status"] == "pending":
         sec["status"] = "in_progress"
-        sec["started_at"] = now_iso
+        sec["started_at"] = now_iso()
     sec["questions_answered"].append({
         "question": question,
         "answer": answer,
-        "at": now_iso,
+        "at": now_iso(),
     })
     data["total_questions_answered"] += 1
     data["active_section"] = section
@@ -104,7 +104,7 @@ def action_record_section_done(name: str, section: int, files: List[str]) -> Dic
     sec = data["sections"][key]
     sec["status"] = "done"
     sec["files_committed"] = files
-    sec["ended_at"] = now_iso
+    sec["ended_at"] = now_iso()
     # Advance active section
     if section < TOTAL_SECTIONS:
         data["active_section"] = section + 1
@@ -118,8 +118,8 @@ def action_record_skip(name: str, section: int, reason: str) -> Dict[str, Any]:
     sec = data["sections"][key]
     sec["status"] = "skipped"
     sec["skip_reason"] = reason
-    sec["ended_at"] = now_iso
-    data["skip_log"].append({"section": section, "reason": reason, "at": now_iso})
+    sec["ended_at"] = now_iso()
+    data["skip_log"].append({"section": section, "reason": reason, "at": now_iso()})
     if section < TOTAL_SECTIONS:
         data["active_section"] = section + 1
     save_session(name, data)
@@ -133,18 +133,18 @@ def action_status(name: str) -> Dict[str, Any]:
 def action_close(name: str) -> Dict[str, Any]:
     data = load_session(name)
     if data.get("ended_at") is None:
-        data["ended_at"] = now_iso
+        data["ended_at"] = now_iso()
         save_session(name, data)
     return data
 
 
-def action_list -> List[Dict[str, Any]]:
+def action_list() -> List[Dict[str, Any]]:
     SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
     out: List[Dict[str, Any]] = []
     for p in sorted(SESSIONS_DIR.glob("*.json")):
         try:
             data = json.loads(p.read_text(encoding="utf-8"))
-            done_sections = sum(1 for s in data["sections"].values if s["status"] == "done")
+            done_sections = sum(1 for s in data["sections"].values() if s["status"] == "done")
             out.append({
                 "session": data["session"],
                 "user": data["user"],
@@ -169,7 +169,7 @@ def render_status_human(data: Dict[str, Any]) -> str:
     out.append(f"Total Qs answered:{data['total_questions_answered']}")
     out.append("")
     out.append("Per-section state:")
-    for key in sorted(data["sections"].keys, key=lambda k: int(k)):
+    for key in sorted(data["sections"].keys(), key=lambda k: int(k)):
         sec = data["sections"][key]
         marker = {"pending": "  ", "in_progress": "↻ ", "done": "✓ ", "skipped": "→ "}.get(sec["status"], "  ")
         files = ", ".join(sec["files_committed"]) if sec["files_committed"] else "—"
@@ -221,7 +221,7 @@ def main(argv: List[str]) -> int:
         elif args.action == "record_section_done":
             if not (args.session and args.section and args.files):
                 print("error: --session, --section, --files required", file=sys.stderr); return 2
-            files = [f.strip for f in args.files.split(",") if f.strip]
+            files = [f.strip() for f in args.files.split(",") if f.strip()]
             result = action_record_section_done(args.session, args.section, files)
         elif args.action == "record_skip":
             if not (args.session and args.section and args.reason):
@@ -236,7 +236,7 @@ def main(argv: List[str]) -> int:
                 print("error: --session required for close", file=sys.stderr); return 2
             result = action_close(args.session)
         else:
-            result = action_list
+            result = action_list()
     except (FileNotFoundError, FileExistsError, ValueError) as e:
         print(f"error: {e}", file=sys.stderr); return 2
 

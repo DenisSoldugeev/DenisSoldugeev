@@ -6,6 +6,7 @@ Calculate blended and channel-specific CAC for marketing campaigns.
 Supports multiple time periods and channel breakdowns.
 """
 
+import argparse
 import sys
 from typing import Dict, List
 
@@ -58,7 +59,7 @@ def print_results(results: Dict):
     print("CAC CALCULATION RESULTS")
     print("="*60 + "\n")
     
-    for channel, data in results.items:
+    for channel, data in results.items():
         if channel == 'blended':
             print("-"*60)
             print(f"BLENDED CAC")
@@ -66,13 +67,15 @@ def print_results(results: Dict):
             print(f"  Total Customers: {data['total_customers']:,}")
             print(f"  Blended CAC: ${data['blended_cac']:,.2f}")
         else:
-            print(f"{channel.upper}")
+            print(f"{channel.upper()}")
             print(f"  Spend: ${data['spend']:,.2f}")
             print(f"  Customers: {data['customers']:,}")
             print(f"  CAC: ${data['cac']:,.2f}")
-            print
+            print()
 
-def main:
+def main():
+    # TODO: accept channel data via --file <json> or stdin so the tool can be
+    # automated without hand-editing this list (known limitation).
     # Example data - replace with your actual numbers
     example_data = [
         {'channel': 'LinkedIn Ads', 'spend': 15000, 'customers': 10},
@@ -98,4 +101,12 @@ def main:
     print("Blended Target: <$300")
 
 if __name__ == "__main__":
-    main
+    parser = argparse.ArgumentParser(
+        description="Calculate blended and channel-specific CAC.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="Current limitation: channel data is the `example_data` list in "
+               "main() — edit it with your spend/customer numbers, then run with "
+               "no args. CLI input (--file <json> / stdin) is a planned "
+               "enhancement; until then this tool is not scriptable.")
+    parser.parse_args()
+    main()

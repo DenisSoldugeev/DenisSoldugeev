@@ -96,9 +96,9 @@ class RAGPipelineDesigner:
     """Main pipeline designer class."""
     
     def __init__(self):
-        self.embedding_models = self._load_embedding_models
-        self.vector_databases = self._load_vector_databases
-        self.chunking_strategies = self._load_chunking_strategies
+        self.embedding_models = self._load_embedding_models()
+        self.vector_databases = self._load_vector_databases()
+        self.chunking_strategies = self._load_chunking_strategies()
     
     def design_pipeline(self, requirements: Requirements) -> PipelineDesign:
         """Design complete RAG pipeline based on requirements."""
@@ -200,18 +200,18 @@ class RAGPipelineDesigner:
         
         if "code" in doc_types:
             if high_accuracy and not cost_sensitive:
-                model = "openai-code-search-ada-002"
-                cost_per_1k_tokens = 0.0001
-                dimensions = 1536
+                model = "voyage-code-3"
+                cost_per_1k_tokens = 0.00018  # verify current pricing before budgeting
+                dimensions = 1024
             else:
                 model = "sentence-transformers/code-bert-base"
                 cost_per_1k_tokens = 0.0  # Self-hosted
                 dimensions = 768
         elif "scientific" in doc_types:
             if high_accuracy:
-                model = "openai-text-embedding-ada-002"
-                cost_per_1k_tokens = 0.0001
-                dimensions = 1536
+                model = "openai-text-embedding-3-large"
+                cost_per_1k_tokens = 0.00013  # verify current pricing before budgeting
+                dimensions = 3072
             else:
                 model = "sentence-transformers/scibert-nli" 
                 cost_per_1k_tokens = 0.0
@@ -222,9 +222,9 @@ class RAGPipelineDesigner:
                 cost_per_1k_tokens = 0.0
                 dimensions = 384
             elif high_accuracy:
-                model = "openai-text-embedding-ada-002"
-                cost_per_1k_tokens = 0.0001  
-                dimensions = 1536
+                model = "openai-text-embedding-3-large"
+                cost_per_1k_tokens = 0.00013  # verify current pricing before budgeting
+                dimensions = 3072
             else:
                 model = "sentence-transformers/all-mpnet-base-v2"
                 cost_per_1k_tokens = 0.0
@@ -443,9 +443,15 @@ graph TB
     def _load_embedding_models(self) -> Dict[str, Dict[str, Any]]:
         """Load embedding model specifications."""
         return {
-            "openai-text-embedding-ada-002": {
-                "dimensions": 1536,
-                "cost_per_1k_tokens": 0.0001,
+            "openai-text-embedding-3-large": {
+                "dimensions": 3072,
+                "cost_per_1k_tokens": 0.00013,  # verify current pricing
+                "quality": "high",
+                "speed": "medium"
+            },
+            "voyage-3-large": {
+                "dimensions": 1024,
+                "cost_per_1k_tokens": 0.00018,  # verify current pricing
                 "quality": "high",
                 "speed": "medium"
             },
@@ -628,7 +634,7 @@ def print_design_summary(design: PipelineDesign):
     
     for component in components:
         if component:
-            print(f"\n  {component.type.upper}: {component.name}")
+            print(f"\n  {component.type.upper()}: {component.name}")
             print(f"    Rationale: {component.rationale}")
             if component.cost_monthly > 0:
                 print(f"    Monthly Cost: ${component.cost_monthly:.2f}")
@@ -637,14 +643,14 @@ def print_design_summary(design: PipelineDesign):
     print(design.architecture_diagram)
 
 
-def main:
+def main():
     """Main function with command-line interface."""
     parser = argparse.ArgumentParser(description='Design RAG pipeline based on requirements')
     parser.add_argument('requirements', help='JSON file containing system requirements')
     parser.add_argument('--output', '-o', help='Output file for pipeline design (JSON)')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Load requirements
@@ -652,7 +658,7 @@ def main:
         requirements = load_requirements(args.requirements)
         
         # Design pipeline
-        designer = RAGPipelineDesigner
+        designer = RAGPipelineDesigner()
         design = designer.design_pipeline(requirements)
         
         # Save design
@@ -665,8 +671,8 @@ def main:
         
         if args.verbose:
             print(f"\n📋 Configuration Templates:")
-            for component_type, config in design.config_templates.items:
-                print(f"\n  {component_type.upper}:")
+            for component_type, config in design.config_templates.items():
+                print(f"\n  {component_type.upper()}:")
                 print(f"    {json.dumps(config, indent=4)}")
         
     except Exception as e:
@@ -677,4 +683,4 @@ def main:
 
 
 if __name__ == '__main__':
-    exit(main)
+    exit(main())

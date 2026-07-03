@@ -55,7 +55,7 @@ def analyze_experiment(control, treatment, alpha=0.05):
 # 3. Randomise at the user (not session) level to avoid leakage.
 # 4. Run for at least 1 full business cycle (typically 2 weeks).
 # 5. Check for sample ratio mismatch: abs(n_control - n_treatment) / expected < 0.01
-# 6. Analyze with analyze_experiment and report lift + CI, not just p-value.
+# 6. Analyze with analyze_experiment() and report lift + CI, not just p-value.
 # 7. Apply Bonferroni correction if testing multiple metrics: alpha / n_metrics
 ```
 
@@ -75,7 +75,7 @@ def build_feature_pipeline(numeric_cols, categorical_cols, date_cols=None):
     """
     numeric_pipeline = Pipeline([
         ("impute", SimpleImputer(strategy="median")),
-        ("scale",  StandardScaler),
+        ("scale",  StandardScaler()),
     ])
     categorical_pipeline = Pipeline([
         ("impute", SimpleImputer(strategy="most_frequent")),
@@ -89,7 +89,7 @@ def build_feature_pipeline(numeric_cols, categorical_cols, date_cols=None):
 
 def add_time_features(df, date_col):
     """Extract cyclical and lag features from a datetime column."""
-    df = df.copy
+    df = df.copy()
     df[date_col] = pd.to_datetime(df[date_col])
     df["dow_sin"] = np.sin(2 * np.pi * df[date_col].dt.dayofweek / 7)
     df["dow_cos"] = np.cos(2 * np.pi * df[date_col].dt.dayofweek / 7)
@@ -133,10 +133,10 @@ def evaluate_model(model, X, y, cv=5):
     summary = {}
     for metric in SCORERS:
         test_scores = cv_results[f"test_{metric}"]
-        summary[metric] = {"mean": test_scores.mean, "std": test_scores.std}
+        summary[metric] = {"mean": test_scores.mean(), "std": test_scores.std()}
         # Flag overfitting: large gap between train and test score
-        train_mean = cv_results[f"train_{metric}"].mean
-        summary[metric]["overfit_gap"] = train_mean - test_scores.mean
+        train_mean = cv_results[f"train_{metric}"].mean()
+        summary[metric]["overfit_gap"] = train_mean - test_scores.mean()
     return summary
 
 def train_and_log(model, X_train, y_train, X_test, y_test, run_name):
@@ -148,7 +148,7 @@ def train_and_log(model, X_train, y_train, X_test, y_test, run_name):
             "roc_auc":  roc_auc_score(y_test, proba),
             "avg_prec": average_precision_score(y_test, proba),
         }
-        mlflow.log_params(model.get_params)
+        mlflow.log_params(model.get_params())
         mlflow.log_metrics(metrics)
         mlflow.sklearn.log_model(model, "model")
         return metrics
@@ -183,8 +183,8 @@ def diff_in_diff(df, outcome, treatment_col, post_col, controls=None):
     return {
         "att":     result.params[interaction],
         "p_value": result.pvalues[interaction],
-        "ci_95":   result.conf_int.loc[interaction].tolist,
-        "summary": result.summary,
+        "ci_95":   result.conf_int().loc[interaction].tolist(),
+        "summary": result.summary(),
     }
 
 # --- Causal inference checklist ---
@@ -208,16 +208,10 @@ def diff_in_diff(df, outcome, treatment_col, post_col, controls=None):
 python -m pytest tests/ -v --cov=src/
 python -m black src/ && python -m pylint src/
 
-# Training & evaluation
-python scripts/train.py --config prod.yaml
-python scripts/evaluate.py --model best.pth
-
-# Deployment
-docker build -t service:v1 .
-kubectl apply -f k8s/
-helm upgrade service ./charts/
-
-# Monitoring & health
-kubectl logs -f deployment/service
-python scripts/health_check.py
+# Bundled pipeline scaffolds (stdlib runners — extend the process() body with project logic)
+python3 scripts/experiment_designer.py --input experiment_spec.json --output experiment_design.json
+python3 scripts/feature_engineering_pipeline.py --input raw_features.json --output features.json
+python3 scripts/model_evaluation_suite.py --input model_predictions.json --output evaluation.json
+# Each prints a JSON run report ({status, processed_items, start/end_time}); any status other
+# than "completed" means the stage failed — fix before moving to the next pipeline stage.
 ```

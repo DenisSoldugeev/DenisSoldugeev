@@ -32,7 +32,7 @@ class SEOOptimizer:
         """Analyze content for SEO optimization"""
         
         analysis = {
-            'content_length': len(content.split),
+            'content_length': len(content.split()),
             'keyword_analysis': {},
             'structure_analysis': self._analyze_structure(content),
             'readability': self._analyze_readability(content),
@@ -63,13 +63,13 @@ class SEOOptimizer:
     def _analyze_keywords(self, content: str, primary: str, 
                          secondary: List[str]) -> Dict:
         """Analyze keyword usage and density"""
-        content_lower = content.lower
-        word_count = len(content.split)
+        content_lower = content.lower()
+        word_count = len(content.split())
         
         results = {
             'primary_keyword': {
                 'keyword': primary,
-                'count': content_lower.count(primary.lower),
+                'count': content_lower.count(primary.lower()),
                 'density': 0,
                 'in_title': False,
                 'in_headings': False,
@@ -88,12 +88,12 @@ class SEOOptimizer:
         # Check keyword placement
         first_para = content.split('\n\n')[0] if '\n\n' in content else content[:200]
         results['primary_keyword']['in_first_paragraph'] = (
-            primary.lower in first_para.lower
+            primary.lower() in first_para.lower()
         )
         
         # Analyze secondary keywords
         for keyword in secondary:
-            count = content_lower.count(keyword.lower)
+            count = content_lower.count(keyword.lower())
             results['secondary_keywords'].append({
                 'keyword': keyword,
                 'count': count,
@@ -134,7 +134,7 @@ class SEOOptimizer:
                 structure['headings']['total'] += 1
             
             # Count lists
-            if line.strip.startswith(('- ', '* ', '1. ')):
+            if line.strip().startswith(('- ', '* ', '1. ')):
                 structure['lists'] += 1
             
             # Count links
@@ -144,7 +144,7 @@ class SEOOptimizer:
             structure['links']['external'] += external_links
             
             # Track paragraphs
-            if line.strip and not line.startswith('#'):
+            if line.strip() and not line.startswith('#'):
                 current_para.append(line)
             elif current_para:
                 paragraphs.append(' '.join(current_para))
@@ -156,7 +156,7 @@ class SEOOptimizer:
         structure['paragraphs'] = len(paragraphs)
         
         if paragraphs:
-            avg_length = sum(len(p.split) for p in paragraphs) / len(paragraphs)
+            avg_length = sum(len(p.split()) for p in paragraphs) / len(paragraphs)
             structure['avg_paragraph_length'] = round(avg_length, 1)
         
         return structure
@@ -164,7 +164,7 @@ class SEOOptimizer:
     def _analyze_readability(self, content: str) -> Dict:
         """Analyze content readability"""
         sentences = re.split(r'[.!?]+', content)
-        words = content.split
+        words = content.split()
         
         if not sentences or not words:
             return {'score': 0, 'level': 'Unknown'}
@@ -193,7 +193,7 @@ class SEOOptimizer:
     
     def _extract_lsi_keywords(self, content: str, primary_keyword: str) -> List[str]:
         """Extract potential LSI (semantically related) keywords"""
-        words = re.findall(r'\b[a-z]+\b', content.lower)
+        words = re.findall(r'\b[a-z]+\b', content.lower())
         word_freq = {}
         
         # Count word frequencies
@@ -202,12 +202,12 @@ class SEOOptimizer:
                 word_freq[word] = word_freq.get(word, 0) + 1
         
         # Sort by frequency and return top related terms
-        sorted_words = sorted(word_freq.items, key=lambda x: x[1], reverse=True)
+        sorted_words = sorted(word_freq.items(), key=lambda x: x[1], reverse=True)
         
         # Filter out the primary keyword and return top 10
         lsi_keywords = []
         for word, count in sorted_words:
-            if word != primary_keyword.lower and count > 1:
+            if word != primary_keyword.lower() and count > 1:
                 lsi_keywords.append(word)
             if len(lsi_keywords) >= 10:
                 break
@@ -230,9 +230,9 @@ class SEOOptimizer:
         
         if keyword:
             # Title suggestion
-            suggestions['title'] = f"{keyword.title} - Complete Guide"
+            suggestions['title'] = f"{keyword.title()} - Complete Guide"
             if len(suggestions['title']) > 60:
-                suggestions['title'] = keyword.title[:57] + "..."
+                suggestions['title'] = keyword.title()[:57] + "..."
             
             # Meta description
             desc_base = f"Learn everything about {keyword}. {first_sentence}"
@@ -242,7 +242,7 @@ class SEOOptimizer:
             
             # URL slug
             suggestions['url_slug'] = re.sub(r'[^a-z0-9-]+', '-', 
-                                            keyword.lower).strip('-')
+                                            keyword.lower()).strip('-')
             
             # Open Graph tags
             suggestions['og_title'] = suggestions['title']
@@ -344,11 +344,11 @@ class SEOOptimizer:
 def optimize_content(content: str, keyword: str = None, 
                      secondary_keywords: List[str] = None) -> str:
     """Main function to optimize content"""
-    optimizer = SEOOptimizer
+    optimizer = SEOOptimizer()
     
     # Parse secondary keywords from comma-separated string if provided
     if secondary_keywords and isinstance(secondary_keywords, str):
-        secondary_keywords = [kw.strip for kw in secondary_keywords.split(',')]
+        secondary_keywords = [kw.strip() for kw in secondary_keywords.split(',')]
     
     results = optimizer.analyze(content, keyword, secondary_keywords)
     
@@ -423,11 +423,11 @@ if __name__ == "__main__":
         "--secondary", "-s", default=None,
         help="Comma-separated secondary keywords"
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.file:
         with open(args.file, 'r') as f:
-            content = f.read
+            content = f.read()
         print(optimize_content(content, args.keyword, args.secondary))
     else:
         print("Usage: python seo_optimizer.py <file> [--keyword primary] [--secondary kw1,kw2]")

@@ -5,6 +5,8 @@ Compatibility Checker - Analyze schema and API compatibility between versions
 This tool analyzes schema and API changes between versions and identifies backward
 compatibility issues including breaking changes, data type mismatches, missing fields,
 constraint violations, and generates migration scripts suggestions.
+
+Author: Migration Architect Skill
 Version: 1.0.0
 License: MIT
 """
@@ -81,8 +83,8 @@ class SchemaCompatibilityChecker:
     """Main schema compatibility checker class"""
     
     def __init__(self):
-        self.type_compatibility_matrix = self._build_type_compatibility_matrix
-        self.constraint_implications = self._build_constraint_implications
+        self.type_compatibility_matrix = self._build_type_compatibility_matrix()
+        self.constraint_implications = self._build_constraint_implications()
     
     def _build_type_compatibility_matrix(self) -> Dict[str, Dict[str, str]]:
         """Build data type compatibility matrix"""
@@ -242,7 +244,7 @@ class SchemaCompatibilityChecker:
                 ))
         
         # Check for modified tables
-        for table_name in set(before_tables.keys) & set(after_tables.keys):
+        for table_name in set(before_tables.keys()) & set(after_tables.keys()):
             table_issues, table_scripts = self._analyze_table_changes(
                 table_name, before_tables[table_name], after_tables[table_name]
             )
@@ -270,17 +272,17 @@ class SchemaCompatibilityChecker:
                     issues.append(CompatibilityIssue(
                         type="endpoint_removed",
                         severity="breaking",
-                        description=f"Endpoint {method.upper} {path} has been removed",
+                        description=f"Endpoint {method.upper()} {path} has been removed",
                         field_path=f"paths.{path}.{method}",
                         old_value=before_paths[path][method],
                         new_value=None,
                         impact="Client requests to this endpoint will fail with 404",
                         suggested_migration=f"Implement redirect to replacement endpoint or maintain backward compatibility stub",
-                        affected_operations=[f"{method.upper} {path}"]
+                        affected_operations=[f"{method.upper()} {path}"]
                     ))
         
         # Check for modified endpoints
-        for path in set(before_paths.keys) & set(after_paths.keys):
+        for path in set(before_paths.keys()) & set(after_paths.keys()):
             path_issues, path_scripts = self._analyze_endpoint_changes(
                 path, before_paths[path], after_paths[path]
             )
@@ -291,7 +293,7 @@ class SchemaCompatibilityChecker:
         before_components = before_schema.get("components", {}).get("schemas", {})
         after_components = after_schema.get("components", {}).get("schemas", {})
         
-        for model_name in set(before_components.keys) & set(after_components.keys):
+        for model_name in set(before_components.keys()) & set(after_components.keys()):
             model_issues, model_scripts = self._analyze_model_changes(
                 model_name, before_components[model_name], after_components[model_name]
             )
@@ -355,7 +357,7 @@ class SchemaCompatibilityChecker:
                 ))
         
         # Check for modified columns
-        for col_name in set(before_columns.keys) & set(after_columns.keys):
+        for col_name in set(before_columns.keys()) & set(after_columns.keys()):
             col_issues, col_scripts = self._analyze_column_changes(
                 table_name, col_name, before_columns[col_name], after_columns[col_name]
             )
@@ -381,8 +383,8 @@ class SchemaCompatibilityChecker:
         scripts = []
         
         # Check data type changes
-        before_type = before_col.get("type", "").lower
-        after_type = after_col.get("type", "").lower
+        before_type = before_col.get("type", "").lower()
+        after_type = after_col.get("type", "").lower()
         
         if before_type != after_type:
             compatibility = self.type_compatibility_matrix.get(before_type, {}).get(after_type, "breaking")
@@ -485,8 +487,8 @@ class SchemaCompatibilityChecker:
             after_constraint = after_constraints.get(constraint_type, [])
             
             # Convert to sets for comparison
-            before_set = set(str(c) for c in before_constraint) if isinstance(before_constraint, list) else {str(before_constraint)} if before_constraint else set
-            after_set = set(str(c) for c in after_constraint) if isinstance(after_constraint, list) else {str(after_constraint)} if after_constraint else set
+            before_set = set(str(c) for c in before_constraint) if isinstance(before_constraint, list) else {str(before_constraint)} if before_constraint else set()
+            after_set = set(str(c) for c in after_constraint) if isinstance(after_constraint, list) else {str(after_constraint)} if after_constraint else set()
             
             # Check for removed constraints
             for constraint in before_set - after_set:
@@ -494,7 +496,7 @@ class SchemaCompatibilityChecker:
                 issues.append(CompatibilityIssue(
                     type=f"{constraint_type}_removed",
                     severity=implication,
-                    description=f"{constraint_type.replace('_', ' ').title} constraint '{constraint}' removed from table '{table_name}'",
+                    description=f"{constraint_type.replace('_', ' ').title()} constraint '{constraint}' removed from table '{table_name}'",
                     field_path=f"tables.{table_name}.constraints.{constraint_type}",
                     old_value=constraint,
                     new_value=None,
@@ -521,10 +523,10 @@ class SchemaCompatibilityChecker:
                 scripts.append(MigrationScript(
                     script_type="sql",
                     description=f"Add {constraint_type} constraint to {table_name}",
-                    script_content=f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint_type}_{table_name} {constraint_type.upper} ({constraint});",
+                    script_content=f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint_type}_{table_name} {constraint_type.upper()} ({constraint});",
                     rollback_script=f"ALTER TABLE {table_name} DROP CONSTRAINT {constraint_type}_{table_name};",
                     dependencies=[],
-                    validation_query=f"SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name = '{table_name}' AND constraint_type = '{constraint_type.upper}';"
+                    validation_query=f"SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name = '{table_name}' AND constraint_type = '{constraint_type.upper()}';"
                 ))
         
         return issues, scripts
@@ -535,7 +537,7 @@ class SchemaCompatibilityChecker:
         issues = []
         scripts = []
         
-        for method in set(before_endpoint.keys) & set(after_endpoint.keys):
+        for method in set(before_endpoint.keys()) & set(after_endpoint.keys()):
             before_method = before_endpoint[method]
             after_method = after_endpoint[method]
             
@@ -553,13 +555,13 @@ class SchemaCompatibilityChecker:
                     issues.append(CompatibilityIssue(
                         type="required_parameter_removed",
                         severity="breaking",
-                        description=f"Required parameter '{param_name}' removed from {method.upper} {path}",
+                        description=f"Required parameter '{param_name}' removed from {method.upper()} {path}",
                         field_path=f"paths.{path}.{method}.parameters",
                         old_value=param,
                         new_value=None,
                         impact="Client requests with this parameter will fail",
                         suggested_migration="Implement parameter validation with backward compatibility",
-                        affected_operations=[f"{method.upper} {path}"]
+                        affected_operations=[f"{method.upper()} {path}"]
                     ))
             
             # Check for added required parameters
@@ -569,13 +571,13 @@ class SchemaCompatibilityChecker:
                     issues.append(CompatibilityIssue(
                         type="required_parameter_added",
                         severity="breaking",
-                        description=f"New required parameter '{param_name}' added to {method.upper} {path}",
+                        description=f"New required parameter '{param_name}' added to {method.upper()} {path}",
                         field_path=f"paths.{path}.{method}.parameters",
                         old_value=None,
                         new_value=param,
                         impact="Client requests without this parameter will fail",
                         suggested_migration="Provide default value or make parameter optional initially",
-                        affected_operations=[f"{method.upper} {path}"]
+                        affected_operations=[f"{method.upper()} {path}"]
                     ))
             
             # Check response schema changes
@@ -591,13 +593,13 @@ class SchemaCompatibilityChecker:
                         issues.append(CompatibilityIssue(
                             type="response_schema_changed",
                             severity="potentially_breaking",
-                            description=f"Response schema changed for {method.upper} {path} (status {status_code})",
+                            description=f"Response schema changed for {method.upper()} {path} (status {status_code})",
                             field_path=f"paths.{path}.{method}.responses.{status_code}",
                             old_value=before_schema,
                             new_value=after_schema,
                             impact="Client response parsing may fail",
                             suggested_migration="Implement versioned API responses",
-                            affected_operations=[f"{method.upper} {path}"]
+                            affected_operations=[f"{method.upper()} {path}"]
                         ))
         
         return issues, scripts
@@ -614,7 +616,7 @@ class SchemaCompatibilityChecker:
         after_required = set(after_model.get("required", []))
         
         # Check for removed properties
-        for prop_name in set(before_props.keys) - set(after_props.keys):
+        for prop_name in set(before_props.keys()) - set(after_props.keys()):
             issues.append(CompatibilityIssue(
                 type="property_removed",
                 severity="breaking",
@@ -642,7 +644,7 @@ class SchemaCompatibilityChecker:
             ))
         
         # Check for property type changes
-        for prop_name in set(before_props.keys) & set(after_props.keys):
+        for prop_name in set(before_props.keys()) & set(after_props.keys()):
             before_type = before_props[prop_name].get("type")
             after_type = after_props[prop_name].get("type")
             
@@ -711,7 +713,7 @@ class SchemaCompatibilityChecker:
         return CompatibilityReport(
             schema_before=json.dumps(before_schema, indent=2)[:500] + "..." if len(json.dumps(before_schema)) > 500 else json.dumps(before_schema, indent=2),
             schema_after=json.dumps(after_schema, indent=2)[:500] + "..." if len(json.dumps(after_schema)) > 500 else json.dumps(after_schema, indent=2),
-            analysis_date=datetime.datetime.now.isoformat,
+            analysis_date=datetime.datetime.now().isoformat(),
             overall_compatibility=overall_compatibility,
             breaking_changes_count=breaking_count,
             potentially_breaking_count=potentially_breaking_count,
@@ -726,7 +728,7 @@ class SchemaCompatibilityChecker:
     def _generate_create_table_sql(self, table_name: str, table_def: Dict[str, Any]) -> str:
         """Generate CREATE TABLE SQL statement"""
         columns = []
-        for col_name, col_def in table_def.get("columns", {}).items:
+        for col_name, col_def in table_def.get("columns", {}).items():
             columns.append(self._generate_column_definition(col_name, col_def))
         
         return f"CREATE TABLE {table_name} (\n  " + ",\n  ".join(columns) + "\n);"
@@ -746,7 +748,7 @@ class SchemaCompatibilityChecker:
         output.append("COMPATIBILITY ANALYSIS REPORT")
         output.append("=" * 80)
         output.append(f"Analysis Date: {report.analysis_date}")
-        output.append(f"Overall Compatibility: {report.overall_compatibility.upper}")
+        output.append(f"Overall Compatibility: {report.overall_compatibility.upper()}")
         output.append("")
         
         # Summary
@@ -762,8 +764,8 @@ class SchemaCompatibilityChecker:
         # Risk Assessment
         output.append("RISK ASSESSMENT")
         output.append("-" * 40)
-        for key, value in report.risk_assessment.items:
-            output.append(f"{key.replace('_', ' ').title}: {value}")
+        for key, value in report.risk_assessment.items():
+            output.append(f"{key.replace('_', ' ').title()}: {value}")
         output.append("")
         
         # Issues by Severity
@@ -775,7 +777,7 @@ class SchemaCompatibilityChecker:
         
         for severity in ["breaking", "potentially_breaking", "non_breaking"]:
             if severity in issues_by_severity:
-                output.append(f"{severity.upper.replace('_', ' ')} ISSUES")
+                output.append(f"{severity.upper().replace('_', ' ')} ISSUES")
                 output.append("-" * 40)
                 for issue in issues_by_severity[severity]:
                     output.append(f"• {issue.description}")
@@ -808,7 +810,7 @@ class SchemaCompatibilityChecker:
         return "\n".join(output)
 
 
-def main:
+def main():
     """Main function with command line interface"""
     parser = argparse.ArgumentParser(description="Analyze schema and API compatibility between versions")
     parser.add_argument("--before", required=True, help="Before schema file (JSON)")
@@ -817,7 +819,7 @@ def main:
     parser.add_argument("--output", "-o", help="Output file for compatibility report (JSON)")
     parser.add_argument("--format", "-f", choices=["json", "text", "both"], default="both", help="Output format")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Load schemas
@@ -828,7 +830,7 @@ def main:
             after_schema = json.load(f)
         
         # Analyze compatibility
-        checker = SchemaCompatibilityChecker
+        checker = SchemaCompatibilityChecker()
         
         if args.type == "database":
             report = checker.analyze_database_schema(before_schema, after_schema)
@@ -878,4 +880,4 @@ def main:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

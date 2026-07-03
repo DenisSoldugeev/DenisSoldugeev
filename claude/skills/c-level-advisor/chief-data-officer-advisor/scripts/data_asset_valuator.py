@@ -289,7 +289,7 @@ def render_text(result: Dict[str, Any], profile: Dict[str, Any], source: str) ->
     sv = result["strategic_value"]
     lines.append(f"STRATEGIC VALUE: {sv['composite_score']} / {sv['max_score']}")
     lines.append("  Components:")
-    for k, v in sv["components"].items:
+    for k, v in sv["components"].items():
         lines.append(f"    {k:<20} {v}/10")
     lines.append(f"  Moat strength: {sv['moat_strength']}")
     for line in _wrap(f"  {sv['moat_explanation']}", 2):
@@ -334,7 +334,7 @@ def _wrap(text: str, indent: int, width: int = 70) -> List[str]:
     return textwrap.wrap(text, width=width, initial_indent=" " * indent, subsequent_indent=" " * indent) or [" " * indent + text]
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Value a B2B customer data corpus + productization paths.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -342,7 +342,7 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to corpus JSON (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
@@ -370,4 +370,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

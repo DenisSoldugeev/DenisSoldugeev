@@ -48,7 +48,7 @@ def validate_fields(fields):
         elif field["type"] not in SUPPORTED_FIELD_TYPES:
             issues.append(
                 f"Field {i}: unsupported type '{field['type']}'. "
-                f"Supported: {', '.join(sorted(SUPPORTED_FIELD_TYPES.keys))}"
+                f"Supported: {', '.join(sorted(SUPPORTED_FIELD_TYPES.keys()))}"
             )
         if field.get("type") not in ("checkbox", "radio", "click") and "value" not in field:
             issues.append(f"Field {i}: missing 'value' for type '{field.get('type', '?')}'.")
@@ -68,7 +68,7 @@ def generate_field_action(field, indent=8):
     lines.append(f'{prefix}# {label}')
 
     if ftype == "checkbox":
-        if field.get("value", "true").lower in ("true", "yes", "1", "on"):
+        if field.get("value", "true").lower() in ("true", "yes", "1", "on"):
             lines.append(f'{prefix}await page.check("{selector}")')
         else:
             lines.append(f'{prefix}await page.uncheck("{selector}")')
@@ -106,7 +106,7 @@ def build_form_script(url, fields, output_format="script"):
             "field_count": len(fields),
             "field_types": list(set(f["type"] for f in fields)),
             "has_file_upload": any(f["type"] == "file" for f in fields),
-            "generated_at": datetime.now.isoformat,
+            "generated_at": datetime.now().isoformat(),
         }
         return config, None
 
@@ -122,7 +122,7 @@ def build_form_script(url, fields, output_format="script"):
 
     # Generate step functions
     step_functions = []
-    for step_num in sorted(steps.keys):
+    for step_num in sorted(steps.keys()):
         step_fields = steps[step_num]
         actions = "\n".join(generate_field_action(f) for f in step_fields)
 
@@ -146,10 +146,10 @@ async def fill_form(page):
 
     step_functions_str = "\n\n".join(step_functions)
 
-    # Generate main call sequence
+    # Generate main() call sequence
     if multi_step:
         step_calls = "\n".join(
-            f"        await fill_step_{n}(page)" for n in sorted(steps.keys)
+            f"        await fill_step_{n}(page)" for n in sorted(steps.keys())
         )
     else:
         step_calls = "        await fill_form(page)"
@@ -177,7 +177,7 @@ Auto-generated Playwright form automation script.
 Target: {url}
 Fields: {len(fields)}
 Steps: {len(steps)}
-Generated: {datetime.now.isoformat}
+Generated: {datetime.now().isoformat()}
 
 Requirements:
     pip install playwright
@@ -198,17 +198,17 @@ USER_AGENTS = [
 
 {step_functions_str}
 
-async def main:
-    async with async_playwright as p:
+async def main():
+    async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(
             viewport={{"width": 1920, "height": 1080}},
             user_agent=random.choice(USER_AGENTS),
         )
-        page = await context.new_page
+        page = await context.new_page()
 
         await page.add_init_script(
-            "Object.defineProperty(navigator, \'webdriver\', {{get:  => undefined}});"
+            "Object.defineProperty(navigator, \'webdriver\', {{get: () => undefined}});"
         )
 
         print(f"Navigating to {{URL}}...")
@@ -217,17 +217,17 @@ async def main:
 {step_calls}
 {submit_block}
         print("Automation complete.")
-        await browser.close
+        await browser.close()
 
 
 if __name__ == "__main__":
-    asyncio.run(main)
+    asyncio.run(main())
 ''')
 
     return script, None
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Generate Playwright form-fill automation scripts from a JSON field specification.",
         epilog=textwrap.dedent("""\
@@ -274,7 +274,7 @@ Multi-step forms: Add "step": N to each field to group into steps.
         help="Output JSON configuration instead of Python script",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Load fields
     fields_path = os.path.abspath(args.fields)
@@ -321,4 +321,4 @@ Multi-step forms: Add "step": N to each field to group into steps.
 
 
 if __name__ == "__main__":
-    main
+    main()

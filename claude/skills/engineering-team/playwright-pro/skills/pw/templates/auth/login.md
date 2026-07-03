@@ -14,7 +14,7 @@ Tests email/password login, social login, and remember me functionality.
 ```typescript
 import { test, expect } from '@playwright/test';
 
-test.describe('Login',  => {
+test.describe('Login', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('{{baseUrl}}/login');
   });
@@ -23,26 +23,26 @@ test.describe('Login',  => {
   test('logs in with valid credentials', async ({ page }) => {
     await page.getByRole('textbox', { name: /email/i }).fill('{{username}}');
     await page.getByRole('textbox', { name: /password/i }).fill('{{password}}');
-    await page.getByRole('button', { name: /sign in/i }).click;
+    await page.getByRole('button', { name: /sign in/i }).click();
     await expect(page).toHaveURL('{{baseUrl}}/dashboard');
-    await expect(page.getByRole('heading', { name: /dashboard/i })).toBeVisible;
+    await expect(page.getByRole('heading', { name: /dashboard/i })).toBeVisible();
   });
 
   // Happy path: remember me
   test('persists session with remember me checked', async ({ page, context }) => {
     await page.getByRole('textbox', { name: /email/i }).fill('{{username}}');
     await page.getByRole('textbox', { name: /password/i }).fill('{{password}}');
-    await page.getByRole('checkbox', { name: /remember me/i }).check;
-    await page.getByRole('button', { name: /sign in/i }).click;
+    await page.getByRole('checkbox', { name: /remember me/i }).check();
+    await page.getByRole('button', { name: /sign in/i }).click();
     await expect(page).toHaveURL('{{baseUrl}}/dashboard');
-    const cookies = await context.cookies;
+    const cookies = await context.cookies();
     const session = cookies.find(c => c.name === '{{sessionCookieName}}');
-    expect(session?.expires).toBeGreaterThan(Date.now / 1000 + 86400);
+    expect(session?.expires).toBeGreaterThan(Date.now() / 1000 + 86400);
   });
 
   // Happy path: social login
   test('redirects to social provider', async ({ page }) => {
-    await page.getByRole('button', { name: /continue with google/i }).click;
+    await page.getByRole('button', { name: /continue with google/i }).click();
     await expect(page).toHaveURL(/accounts\.google\.com/);
   });
 
@@ -50,16 +50,16 @@ test.describe('Login',  => {
   test('shows error for wrong password', async ({ page }) => {
     await page.getByRole('textbox', { name: /email/i }).fill('{{username}}');
     await page.getByRole('textbox', { name: /password/i }).fill('wrong-password');
-    await page.getByRole('button', { name: /sign in/i }).click;
+    await page.getByRole('button', { name: /sign in/i }).click();
     await expect(page.getByRole('alert')).toContainText(/invalid.*credentials/i);
     await expect(page).toHaveURL('{{baseUrl}}/login');
   });
 
   // Edge case: empty fields
   test('shows validation for empty submission', async ({ page }) => {
-    await page.getByRole('button', { name: /sign in/i }).click;
-    await expect(page.getByRole('textbox', { name: /email/i })).toBeFocused;
-    await expect(page.getByText(/email is required/i)).toBeVisible;
+    await page.getByRole('button', { name: /sign in/i }).click();
+    await expect(page.getByRole('textbox', { name: /email/i })).toBeFocused();
+    await expect(page.getByText(/email is required/i)).toBeVisible();
   });
 
   // Edge case: locked account
@@ -67,7 +67,7 @@ test.describe('Login',  => {
     for (let i = 0; i < {{lockoutAttempts}}; i++) {
       await page.getByRole('textbox', { name: /email/i }).fill('{{username}}');
       await page.getByRole('textbox', { name: /password/i }).fill('wrong');
-      await page.getByRole('button', { name: /sign in/i }).click;
+      await page.getByRole('button', { name: /sign in/i }).click();
     }
     await expect(page.getByRole('alert')).toContainText(/account.*locked/i);
   });
@@ -81,7 +81,7 @@ test.describe('Login',  => {
 ```javascript
 const { test, expect } = require('@playwright/test');
 
-test.describe('Login',  => {
+test.describe('Login', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('{{baseUrl}}/login');
   });
@@ -89,21 +89,21 @@ test.describe('Login',  => {
   test('logs in with valid credentials', async ({ page }) => {
     await page.getByRole('textbox', { name: /email/i }).fill('{{username}}');
     await page.getByRole('textbox', { name: /password/i }).fill('{{password}}');
-    await page.getByRole('button', { name: /sign in/i }).click;
+    await page.getByRole('button', { name: /sign in/i }).click();
     await expect(page).toHaveURL('{{baseUrl}}/dashboard');
-    await expect(page.getByRole('heading', { name: /dashboard/i })).toBeVisible;
+    await expect(page.getByRole('heading', { name: /dashboard/i })).toBeVisible();
   });
 
   test('shows error for wrong password', async ({ page }) => {
     await page.getByRole('textbox', { name: /email/i }).fill('{{username}}');
     await page.getByRole('textbox', { name: /password/i }).fill('wrong-password');
-    await page.getByRole('button', { name: /sign in/i }).click;
+    await page.getByRole('button', { name: /sign in/i }).click();
     await expect(page.getByRole('alert')).toContainText(/invalid.*credentials/i);
   });
 
   test('shows validation for empty submission', async ({ page }) => {
-    await page.getByRole('button', { name: /sign in/i }).click;
-    await expect(page.getByText(/email is required/i)).toBeVisible;
+    await page.getByRole('button', { name: /sign in/i }).click();
+    await expect(page.getByText(/email is required/i)).toBeVisible();
   });
 });
 ```

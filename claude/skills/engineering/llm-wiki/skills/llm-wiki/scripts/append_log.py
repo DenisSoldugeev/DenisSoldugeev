@@ -48,17 +48,17 @@ def _error(message, as_json=False):
 
 def validate_vault(vault):
     """Return the log.md path or raise if vault is invalid."""
-    if not vault.exists:
+    if not vault.exists():
         raise FileNotFoundError(f"vault does not exist: {vault}")
     log_path = vault / "wiki" / "log.md"
-    if not log_path.exists:
+    if not log_path.exists():
         raise FileNotFoundError(f"{log_path} does not exist — is this a vault?")
     return log_path
 
 
 def format_entry(op, title, detail):
     """Build the standardized log entry string."""
-    today = dt.date.today.isoformat
+    today = dt.date.today().isoformat()
     header = f"## [{today}] {op} | {title}"
     body = f"\n{detail}\n" if detail else "\n"
     return today, header, f"\n{header}\n{body}"
@@ -103,7 +103,7 @@ def append_log(vault, op, title, detail, as_json=False):
     return result
 
 
-def main:
+def main():
     p = argparse.ArgumentParser(
         description="Append a standardized entry to wiki/log.md",
         epilog="Format: ## [YYYY-MM-DD] <op> | <title>",
@@ -120,9 +120,9 @@ def main:
     p.add_argument(
         "--json", action="store_true", help="Emit result as JSON instead of human-readable"
     )
-    args = p.parse_args
+    args = p.parse_args()
     append_log(
-        Path(args.vault).expanduser.resolve,
+        Path(args.vault).expanduser().resolve(),
         args.op,
         args.title,
         args.detail,
@@ -131,4 +131,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

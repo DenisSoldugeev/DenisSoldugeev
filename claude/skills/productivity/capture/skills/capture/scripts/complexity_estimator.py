@@ -70,7 +70,7 @@ STOP_WORDS = {
 
 def extract_items(text: str) -> List[str]:
     """Return non-empty stripped lines (each line = one item)."""
-    return [line.strip for line in text.splitlines if line.strip]
+    return [line.strip() for line in text.splitlines() if line.strip()]
 
 
 def extract_keywords(items: List[str]) -> List[str]:
@@ -78,7 +78,7 @@ def extract_keywords(items: List[str]) -> List[str]:
     tokens: List[str] = []
     for it in items:
         for tok in re.findall(r"\b[A-Za-z][a-zA-Z]{2,}\b", it):
-            t = tok.lower
+            t = tok.lower()
             if t in STOP_WORDS:
                 continue
             tokens.append(t)
@@ -89,15 +89,15 @@ def detect_clusters(items: List[str], min_cluster_size: int) -> List[Dict[str, A
     """A 'cluster' is a keyword that appears in min_cluster_size+ different items."""
     keyword_to_item_indices: Dict[str, List[int]] = {}
     for i, it in enumerate(items):
-        seen_in_item: set = set
+        seen_in_item: set = set()
         for tok in re.findall(r"\b[A-Za-z][a-zA-Z]{2,}\b", it):
-            t = tok.lower
+            t = tok.lower()
             if t in STOP_WORDS or t in seen_in_item:
                 continue
             seen_in_item.add(t)
             keyword_to_item_indices.setdefault(t, []).append(i)
     clusters: List[Dict[str, Any]] = []
-    for kw, idxs in keyword_to_item_indices.items:
+    for kw, idxs in keyword_to_item_indices.items():
         if len(idxs) >= min_cluster_size:
             clusters.append({"keyword": kw, "item_indices": idxs, "size": len(idxs)})
     clusters.sort(key=lambda c: (-c["size"], c["keyword"]))
@@ -165,12 +165,12 @@ def main(argv: List[str]) -> int:
         text = SAMPLE_DUMP_LARGE if args.sample == "large" else SAMPLE_DUMP_SMALL
     elif args.path:
         p = Path(args.path)
-        if not p.exists:
+        if not p.exists():
             print(f"error: {args.path} not found", file=sys.stderr)
             return 2
         text = p.read_text(encoding="utf-8")
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     result = estimate(text, args.min_cluster_size)

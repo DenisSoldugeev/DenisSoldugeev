@@ -67,12 +67,12 @@ def check_dead_end_states(
 ) -> List[Dict[str, str]]:
     """Find states with no outgoing transitions that are not terminal."""
     findings = []
-    outgoing = set
+    outgoing = set()
     for t in transitions:
-        outgoing.add(t.get("from", "").lower)
+        outgoing.add(t.get("from", "").lower())
 
     for state in states:
-        state_lower = state.lower
+        state_lower = state.lower()
         if state_lower not in outgoing and state_lower not in terminal_states:
             findings.append({
                 "rule": "dead_end_state",
@@ -91,14 +91,14 @@ def check_orphan_states(
 ) -> List[Dict[str, str]]:
     """Find states with no incoming transitions (except the initial state)."""
     findings = []
-    incoming = set
+    incoming = set()
     for t in transitions:
-        incoming.add(t.get("to", "").lower)
+        incoming.add(t.get("to", "").lower())
 
-    initial_lower = (initial_state or "").lower
+    initial_lower = (initial_state or "").lower()
 
     for state in states:
-        state_lower = state.lower
+        state_lower = state.lower()
         if state_lower not in incoming and state_lower != initial_lower:
             findings.append({
                 "rule": "orphan_state",
@@ -113,7 +113,7 @@ def check_orphan_states(
 def check_missing_terminal_state(states: List[str]) -> List[Dict[str, str]]:
     """Check that at least one terminal/done state exists."""
     findings = []
-    states_lower = {s.lower for s in states}
+    states_lower = {s.lower() for s in states}
 
     has_terminal = bool(states_lower & REQUIRED_TERMINAL_STATES)
     if not has_terminal:
@@ -135,8 +135,8 @@ def check_duplicate_transition_names(
     seen = {}
 
     for t in transitions:
-        name = t.get("name", "").lower
-        from_state = t.get("from", "").lower
+        name = t.get("name", "").lower()
+        from_state = t.get("from", "").lower()
         key = (from_state, name)
 
         if key in seen:
@@ -158,11 +158,11 @@ def check_missing_transitions(
 ) -> List[Dict[str, str]]:
     """Check for states referenced in transitions but not defined."""
     findings = []
-    defined_states = {s.lower for s in states}
+    defined_states = {s.lower() for s in states}
 
     for t in transitions:
-        from_state = t.get("from", "").lower
-        to_state = t.get("to", "").lower
+        from_state = t.get("from", "").lower()
+        to_state = t.get("to", "").lower()
 
         if from_state and from_state not in defined_states:
             findings.append({
@@ -192,31 +192,31 @@ def check_circular_paths(
     # Build adjacency list
     adjacency = {}
     for state in states:
-        adjacency[state.lower] = set
+        adjacency[state.lower()] = set()
     for t in transitions:
-        from_state = t.get("from", "").lower
-        to_state = t.get("to", "").lower
+        from_state = t.get("from", "").lower()
+        to_state = t.get("to", "").lower()
         if from_state in adjacency:
             adjacency[from_state].add(to_state)
 
     # Find strongly connected components using iterative DFS
     def can_reach_terminal(start: str) -> bool:
-        visited = set
+        visited = set()
         stack = [start]
         while stack:
-            node = stack.pop
+            node = stack.pop()
             if node in terminal_states:
                 return True
             if node in visited:
                 continue
             visited.add(node)
-            for neighbor in adjacency.get(node, set):
+            for neighbor in adjacency.get(node, set()):
                 stack.append(neighbor)
         return False
 
     # Check each non-terminal state
     for state in states:
-        state_lower = state.lower
+        state_lower = state.lower()
         if state_lower not in terminal_states:
             if not can_reach_terminal(state_lower):
                 findings.append({
@@ -233,7 +233,7 @@ def check_self_transitions(transitions: List[Dict[str, str]]) -> List[Dict[str, 
     """Check for transitions that go from a state to itself."""
     findings = []
     for t in transitions:
-        if t.get("from", "").lower == t.get("to", "").lower:
+        if t.get("from", "").lower() == t.get("to", "").lower():
             findings.append({
                 "rule": "self_transition",
                 "severity": "info",
@@ -262,13 +262,13 @@ def validate_workflow(data: Dict[str, Any]) -> Dict[str, Any]:
         }
 
     # Determine terminal states
-    states_lower = {s.lower for s in states}
+    states_lower = {s.lower() for s in states}
     terminal_states = states_lower & REQUIRED_TERMINAL_STATES
 
     # Custom terminal states from input
     custom_terminals = data.get("terminal_states", [])
     for ct in custom_terminals:
-        terminal_states.add(ct.lower)
+        terminal_states.add(ct.lower())
 
     # Run all checks
     all_findings = []
@@ -330,7 +330,7 @@ def format_text_output(result: Dict[str, Any]) -> str:
     lines.append("HEALTH SUMMARY")
     lines.append("-" * 30)
     lines.append(f"Health Score: {result['health_score']}/100")
-    lines.append(f"Grade: {result['grade'].title}")
+    lines.append(f"Grade: {result['grade'].title()}")
     lines.append("")
 
     # Workflow info
@@ -359,7 +359,7 @@ def format_text_output(result: Dict[str, Any]) -> str:
         lines.append("DETAILED FINDINGS")
         lines.append("-" * 30)
         for i, finding in enumerate(findings, 1):
-            severity = finding["severity"].upper
+            severity = finding["severity"].upper()
             lines.append(f"{i}. [{severity}] {finding['message']}")
             lines.append(f"   Rule: {finding['rule']}")
             lines.append("")
@@ -378,7 +378,7 @@ def format_json_output(result: Dict[str, Any]) -> Dict[str, Any]:
 # CLI Interface
 # ---------------------------------------------------------------------------
 
-def main -> int:
+def main() -> int:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Validate Jira workflow definitions for anti-patterns"
@@ -394,7 +394,7 @@ def main -> int:
         help="Output format (default: text)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         with open(args.workflow_file, "r") as f:
@@ -421,4 +421,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

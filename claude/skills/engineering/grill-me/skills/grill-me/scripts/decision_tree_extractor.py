@@ -71,8 +71,8 @@ Final decision TBD on whether to flip DNS at midnight or use feature flags.
 
 def extract_branches(text: str) -> List[Dict[str, Any]]:
     branches: List[Dict[str, Any]] = []
-    seen_lines = set
-    for line_no, line in enumerate(text.splitlines, start=1):
+    seen_lines = set()
+    for line_no, line in enumerate(text.splitlines(), start=1):
         for pattern, kind in DECISION_PATTERNS:
             match = pattern.search(line)
             if not match:
@@ -84,7 +84,7 @@ def extract_branches(text: str) -> List[Dict[str, Any]]:
                 "line": line_no,
                 "kind": kind,
                 "trigger": match.group(0),
-                "context": line.strip[:160],
+                "context": line.strip()[:160],
             })
             break
     return branches
@@ -117,7 +117,7 @@ def render_text(r: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Extract decision branches from a plan/design document.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -125,12 +125,12 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to markdown plan (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
             with open(args.path, "r", encoding="utf-8") as f:
-                text = f.read
+                text = f.read()
         except (IOError, OSError) as e:
             print(f"error: {e}", file=sys.stderr)
             return 1
@@ -146,4 +146,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -28,7 +28,7 @@ class PerformanceAnalyzer:
         """
         self.campaign_metrics = campaign_metrics
         self.roi_metrics = roi_metrics
-        self.platform = campaign_metrics.get('platform', 'unknown').lower
+        self.platform = campaign_metrics.get('platform', 'unknown').lower()
 
     def benchmark_performance(self) -> Dict[str, str]:
         """Compare metrics against industry benchmarks."""
@@ -121,8 +121,8 @@ class PerformanceAnalyzer:
 
     def generate_insights(self) -> Dict[str, Any]:
         """Generate comprehensive performance insights."""
-        benchmark_results = self.benchmark_performance
-        recommendations = self.generate_recommendations
+        benchmark_results = self.benchmark_performance()
+        recommendations = self.generate_recommendations()
 
         # Determine overall campaign health
         engagement_status = benchmark_results.get('engagement_status', 'unknown')
@@ -139,8 +139,8 @@ class PerformanceAnalyzer:
             'overall_health': overall_health,
             'benchmark_comparison': benchmark_results,
             'recommendations': recommendations,
-            'key_strengths': self._identify_strengths,
-            'areas_for_improvement': self._identify_weaknesses
+            'key_strengths': self._identify_strengths(),
+            'areas_for_improvement': self._identify_weaknesses()
         }
 
     def _identify_strengths(self) -> List[str]:

@@ -281,7 +281,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.sample:
         raw = SAMPLE_INPUT
     elif args.input:
-        raw = json.loads(args.input.read_text)
+        raw = json.loads(args.input.read_text())
     else:
         p.error("Provide --input or --sample.")
         return 2
@@ -301,4 +301,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

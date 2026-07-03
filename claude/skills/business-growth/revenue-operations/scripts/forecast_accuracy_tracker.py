@@ -243,7 +243,7 @@ def analyze_categories(category_breakdowns: dict) -> dict[str, Any]:
     """
     results = {}
 
-    for category_name, entries in category_breakdowns.items:
+    for category_name, entries in category_breakdowns.items():
         category_results = []
         for entry in entries:
             actual = entry["actual"]
@@ -340,7 +340,7 @@ def generate_recommendations(
         )
 
     # Category-based recommendations
-    for cat_name, cat_data in categories.items:
+    for cat_name, cat_data in categories.items():
         worst_entries = [
             e for e in cat_data["entries"] if e["error_pct"] > 25
         ]
@@ -462,9 +462,9 @@ def format_text_report(results: dict) -> str:
         lines.append("")
         lines.append("CATEGORY BREAKDOWN")
         lines.append("-" * 40)
-        for cat_name, cat_data in results["category_breakdowns"].items:
+        for cat_name, cat_data in results["category_breakdowns"].items():
             lines.append(
-                f"\n  {cat_name.upper} (Overall MAPE: {cat_data['overall_mape']}% "
+                f"\n  {cat_name.upper()} (Overall MAPE: {cat_data['overall_mape']}% "
                 f"- {cat_data['overall_rating']})"
             )
             for entry in cat_data["entries"]:
@@ -487,7 +487,7 @@ def format_text_report(results: dict) -> str:
     return "\n".join(lines)
 
 
-def main -> None:
+def main() -> None:
     """Main entry point for forecast accuracy tracker CLI."""
     parser = argparse.ArgumentParser(
         description="Track and analyze forecast accuracy for SaaS revenue teams."
@@ -503,7 +503,7 @@ def main -> None:
         help="Output format: json or text (default: text)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         with open(args.input, "r") as f:
@@ -528,4 +528,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

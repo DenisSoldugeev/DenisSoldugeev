@@ -5,15 +5,15 @@ Security Scanner - Scan source code for security vulnerabilities.
 Table of Contents:
     SecurityScanner - Main class for security scanning
         __init__         - Initialize with target path and options
-        scan           - Run all security scans
-        scan_secrets   - Detect hardcoded secrets
-        scan_sql_injection - Detect SQL injection patterns
-        scan_xss       - Detect XSS vulnerabilities
-        scan_command_injection - Detect command injection
-        scan_path_traversal - Detect path traversal
-        _scan_file     - Scan individual file for patterns
-        _calculate_severity - Calculate finding severity
-    main - CLI entry point
+        scan()           - Run all security scans
+        scan_secrets()   - Detect hardcoded secrets
+        scan_sql_injection() - Detect SQL injection patterns
+        scan_xss()       - Detect XSS vulnerabilities
+        scan_command_injection() - Detect command injection
+        scan_path_traversal() - Detect path traversal
+        _scan_file()     - Scan individual file for patterns
+        _calculate_severity() - Calculate finding severity
+    main() - CLI entry point
 
 Usage:
     python security_scanner.py /path/to/project
@@ -103,7 +103,7 @@ class SecurityScanner:
         (r'document\.write\s*\([^;]*(?:user|input|param|query)',
          'User input in document.write'),
         (r'\.html\s*\(\s*[^)]*(?:user|input|param|query)',
-         'User input in jQuery .html'),
+         'User input in jQuery .html()'),
         (r'dangerouslySetInnerHTML',
          'React dangerouslySetInnerHTML usage'),
         (r'\|safe\s*}}',
@@ -115,9 +115,9 @@ class SecurityScanner:
         (r'subprocess\.(?:call|run|Popen)\s*\([^)]*shell\s*=\s*True',
          'Subprocess with shell=True'),
         (r'exec\s*\(\s*[^)]*(?:user|input|param|request)',
-         'exec with potential user input'),
+         'exec() with potential user input'),
         (r'eval\s*\(\s*[^)]*(?:user|input|param|request)',
-         'eval with potential user input'),
+         'eval() with potential user input'),
     ]
 
     # Path traversal patterns
@@ -160,15 +160,15 @@ class SecurityScanner:
         """
         print(f"Security Scanner - Scanning: {self.target_path}")
         print(f"Severity threshold: {self.severity_threshold}")
-        print
+        print()
 
-        if not self.target_path.exists:
+        if not self.target_path.exists():
             return {"status": "error", "message": f"Path not found: {self.target_path}"}
 
-        start_time = datetime.now
+        start_time = datetime.now()
 
         # Collect files to scan
-        files_to_scan = self._collect_files
+        files_to_scan = self._collect_files()
         print(f"Files to scan: {len(files_to_scan)}")
 
         # Run scans
@@ -183,8 +183,8 @@ class SecurityScanner:
             if self.severity_order.get(f.severity, 3) <= threshold_level
         ]
 
-        end_time = datetime.now
-        scan_duration = (end_time - start_time).total_seconds
+        end_time = datetime.now()
+        scan_duration = (end_time - start_time).total_seconds()
 
         # Group findings by severity
         severity_counts = {}
@@ -209,7 +209,7 @@ class SecurityScanner:
         """Collect files to scan."""
         files = []
 
-        if self.target_path.is_file:
+        if self.target_path.is_file():
             return [self.target_path]
 
         for root, dirs, filenames in os.walk(self.target_path):
@@ -218,7 +218,7 @@ class SecurityScanner:
 
             for filename in filenames:
                 file_path = Path(root) / filename
-                if file_path.suffix.lower in self.SCAN_EXTENSIONS:
+                if file_path.suffix.lower() in self.SCAN_EXTENSIONS:
                     files.append(file_path)
 
         return files
@@ -229,7 +229,7 @@ class SecurityScanner:
             content = file_path.read_text(encoding='utf-8', errors='ignore')
             lines = content.split('\n')
 
-            relative_path = str(file_path.relative_to(self.target_path) if self.target_path.is_dir else file_path.name)
+            relative_path = str(file_path.relative_to(self.target_path) if self.target_path.is_dir() else file_path.name)
 
             # Scan for secrets
             self._scan_patterns(
@@ -319,7 +319,7 @@ class SecurityScanner:
                         description=description,
                         file_path=file_path,
                         line_number=line_num,
-                        code_snippet=line.strip[:100],
+                        code_snippet=line.strip()[:100],
                         recommendation=self._get_recommendation(category)
                     )
 
@@ -328,16 +328,16 @@ class SecurityScanner:
     def _is_false_positive(self, line: str, file_path: str) -> bool:
         """Check if finding is likely a false positive."""
         # Skip comments
-        stripped = line.strip
+        stripped = line.strip()
         if stripped.startswith('#') or stripped.startswith('//') or stripped.startswith('*'):
             return True
 
         # Skip test files for some patterns
-        if 'test' in file_path.lower or 'spec' in file_path.lower:
+        if 'test' in file_path.lower() or 'spec' in file_path.lower():
             return True
 
         # Skip example/sample values
-        lower_line = line.lower
+        lower_line = line.lower()
         if any(skip in lower_line for skip in ['example', 'sample', 'placeholder', 'xxx', 'your_']):
             return True
 
@@ -346,14 +346,14 @@ class SecurityScanner:
     def _calculate_severity(self, default: str, file_path: str, category: str) -> str:
         """Calculate severity based on context."""
         # Increase severity for production-related files
-        if any(prod in file_path.lower for prod in ['prod', 'production', 'deploy']):
+        if any(prod in file_path.lower() for prod in ['prod', 'production', 'deploy']):
             if default == 'high':
                 return 'critical'
             if default == 'medium':
                 return 'high'
 
         # Decrease severity for config examples
-        if 'example' in file_path.lower or 'sample' in file_path.lower:
+        if 'example' in file_path.lower() or 'sample' in file_path.lower():
             if default == 'critical':
                 return 'high'
             if default == 'high':
@@ -380,25 +380,25 @@ class SecurityScanner:
         print(f"Files scanned: {result['files_scanned']}")
         print(f"Scan duration: {result['scan_duration_seconds']}s")
         print(f"Total findings: {result['total_findings']}")
-        print
+        print()
 
         if result['severity_counts']:
             print("Findings by severity:")
             for severity in ['critical', 'high', 'medium', 'low', 'info']:
                 count = result['severity_counts'].get(severity, 0)
                 if count > 0:
-                    print(f"  {severity.upper}: {count}")
+                    print(f"  {severity.upper()}: {count}")
         print("=" * 60)
 
         if result['total_findings'] > 0:
             print("\nTop findings:")
             for finding in result['findings'][:5]:
-                print(f"\n  [{finding['severity'].upper}] {finding['title']}")
+                print(f"\n  [{finding['severity'].upper()}] {finding['title']}")
                 print(f"  File: {finding['file_path']}:{finding['line_number']}")
                 print(f"  {finding['description']}")
 
 
-def main:
+def main():
     """Main entry point for CLI."""
     parser = argparse.ArgumentParser(
         description="Scan source code for security vulnerabilities",
@@ -437,7 +437,7 @@ Examples:
         help="Output file path"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     scanner = SecurityScanner(
         target_path=args.target,
@@ -445,7 +445,7 @@ Examples:
         verbose=args.verbose
     )
 
-    result = scanner.scan
+    result = scanner.scan()
 
     if args.json:
         output = json.dumps(result, indent=2)
@@ -468,4 +468,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

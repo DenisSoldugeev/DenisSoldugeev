@@ -107,13 +107,13 @@ A depth-5 element at 500px moves -600px (moves fast — feels close).
 let ticking = false;
 let lastScrollY = 0;
 
-function updateDepthLayers {
+function updateDepthLayers() {
   const scrollY = window.scrollY;
   document.documentElement.style.setProperty('--scroll-y', scrollY);
   ticking = false;
 }
 
-window.addEventListener('scroll',  => {
+window.addEventListener('scroll', () => {
   lastScrollY = window.scrollY;
   if (!ticking) {
     requestAnimationFrame(updateDepthLayers);

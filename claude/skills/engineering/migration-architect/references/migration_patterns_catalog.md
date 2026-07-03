@@ -64,8 +64,8 @@ Run new and old schemas in parallel, using feature flags to gradually route traf
 class DatabaseRouter:
     def __init__(self, feature_flag_service):
         self.feature_flags = feature_flag_service
-        self.old_db = OldDatabaseConnection
-        self.new_db = NewDatabaseConnection
+        self.old_db = OldDatabaseConnection()
+        self.new_db = NewDatabaseConnection()
     
     def route_query(self, user_id, query_type):
         if self.feature_flags.is_enabled("new_schema", user_id):
@@ -106,7 +106,7 @@ CREATE TABLE migration_events (
     event_type VARCHAR(100) NOT NULL,
     event_data JSONB NOT NULL,
     event_version INTEGER NOT NULL,
-    occurred_at TIMESTAMP WITH TIME ZONE DEFAULT NOW,
+    occurred_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     processed_at TIMESTAMP WITH TIME ZONE
 );
 ```
@@ -126,7 +126,7 @@ class MigrationEventHandler:
             event_type="entity_migrated",
             old_data=old_data,
             new_data=new_data,
-            timestamp=datetime.now
+            timestamp=datetime.now()
         )
         
         self.event_log.append(event)
@@ -186,9 +186,9 @@ spec:
 ```python
 class StranglerProxy:
     def __init__(self):
-        self.legacy_service = LegacyUserService
-        self.new_service = NewUserService
-        self.feature_flags = FeatureFlagService
+        self.legacy_service = LegacyUserService()
+        self.new_service = NewUserService()
+        self.feature_flags = FeatureFlagService()
     
     def handle_request(self, request):
         route = self.determine_route(request)
@@ -226,10 +226,10 @@ Run both old and new services simultaneously, comparing outputs to validate corr
 ```python
 class ParallelRunManager:
     def __init__(self):
-        self.primary_service = PrimaryService
-        self.candidate_service = CandidateService
-        self.comparator = ResponseComparator
-        self.metrics = MetricsCollector
+        self.primary_service = PrimaryService()
+        self.candidate_service = CandidateService()
+        self.comparator = ResponseComparator()
+        self.metrics = MetricsCollector()
     
     async def parallel_execute(self, request):
         # Execute both services concurrently
@@ -439,15 +439,15 @@ resource "aws_vpn_connection" "main" {
 ```python
 class HybridDataSync:
     def __init__(self):
-        self.on_prem_db = OnPremiseDatabase
-        self.cloud_db = CloudDatabase
-        self.sync_log = SyncLogManager
+        self.on_prem_db = OnPremiseDatabase()
+        self.cloud_db = CloudDatabase()
+        self.sync_log = SyncLogManager()
     
     async def bidirectional_sync(self):
         """Synchronize data between on-premises and cloud"""
         
         # Get last sync timestamp
-        last_sync = self.sync_log.get_last_sync_time
+        last_sync = self.sync_log.get_last_sync_time()
         
         # Sync on-prem changes to cloud
         on_prem_changes = self.on_prem_db.get_changes_since(last_sync)
@@ -465,7 +465,7 @@ class HybridDataSync:
             await self.resolve_conflict(conflict)
         
         # Update sync timestamp
-        self.sync_log.record_sync_completion
+        self.sync_log.record_sync_completion()
     
     async def apply_change_to_cloud(self, change):
         """Apply on-premises change to cloud database"""
@@ -562,7 +562,7 @@ class ProgressiveRollout:
         
     def is_enabled_for_user(self, user_id):
         # Consistent user bucketing
-        user_hash = hashlib.md5(f"{self.feature_name}:{user_id}".encode).hexdigest
+        user_hash = hashlib.md5(f"{self.feature_name}:{user_id}".encode()).hexdigest()
         bucket = int(user_hash, 16) % 100
         
         return bucket < self.rollout_percentage
@@ -595,17 +595,17 @@ class MigrationCircuitBreaker:
     
     def call_new_service(self, request):
         if self.state == 'OPEN':
-            if self.should_attempt_reset:
+            if self.should_attempt_reset():
                 self.state = 'HALF_OPEN'
             else:
                 return self.fallback_to_legacy(request)
         
         try:
             response = self.new_service.process(request)
-            self.on_success
+            self.on_success()
             return response
         except Exception as e:
-            self.on_failure
+            self.on_failure()
             return self.fallback_to_legacy(request)
     
     def on_success(self):
@@ -614,13 +614,13 @@ class MigrationCircuitBreaker:
     
     def on_failure(self):
         self.failure_count += 1
-        self.last_failure_time = time.time
+        self.last_failure_time = time.time()
         
         if self.failure_count >= self.failure_threshold:
             self.state = 'OPEN'
     
     def should_attempt_reset(self):
-        return (time.time - self.last_failure_time) >= self.timeout
+        return (time.time() - self.last_failure_time) >= self.timeout
 ```
 
 ## Migration Anti-Patterns

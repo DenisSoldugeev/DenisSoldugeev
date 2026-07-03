@@ -65,10 +65,10 @@ NO_VERIFICATION = [
 def lint_text(text, source_name="stdin"):
     """Lint a plan text. Return list of findings."""
     findings = []
-    lines = text.splitlines
+    lines = text.splitlines()
 
     for i, line in enumerate(lines, 1):
-        stripped = line.strip
+        stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
 
@@ -108,21 +108,21 @@ def lint_text(text, source_name="stdin"):
     return findings
 
 
-def main:
+def main():
     p = argparse.ArgumentParser(
         description="Detect hidden assumptions in a plan or proposal (Karpathy Principle #1).",
         epilog="Reads a markdown file or stdin. Flags silent choices, vague actions, and missing verification.",
     )
     p.add_argument("input", nargs="?", default="-", help="Markdown file to lint, or - for stdin")
     p.add_argument("--json", action="store_true", help="JSON output")
-    args = p.parse_args
+    args = p.parse_args()
 
     if args.input == "-":
-        text = sys.stdin.read
+        text = sys.stdin.read()
         source = "stdin"
     else:
         path = Path(args.input)
-        if not path.exists:
+        if not path.exists():
             print(f"[error] {path} not found", file=sys.stderr)
             sys.exit(1)
         text = path.read_text(encoding="utf-8", errors="replace")
@@ -138,7 +138,7 @@ def main:
         "status": "ok",
         "source": source,
         "total_findings": len(findings),
-        "by_category": {k: len(v) for k, v in categories.items},
+        "by_category": {k: len(v) for k, v in categories.items()},
         "verdict": "CLEAN" if len(findings) == 0 else ("REVIEW" if len(findings) < 5 else "CLARIFY"),
         "findings": findings,
     }
@@ -150,8 +150,8 @@ def main:
     print(f"Assumption Linter — {source}")
     print(f"Findings: {len(findings)}  Verdict: {result['verdict']}")
     if findings:
-        print
-        for cat, items in categories.items:
+        print()
+        for cat, items in categories.items():
             print(f"  [{cat}] ({len(items)})")
             for item in items[:5]:
                 line_ref = f"L{item['line']}: " if item["line"] else ""
@@ -159,7 +159,7 @@ def main:
                 print(f"    → \"{item['matched']}\" in: {item['context'][:80]}")
             if len(items) > 5:
                 print(f"    ... and {len(items) - 5} more")
-            print
+            print()
     else:
         print("\n  Plan looks explicit. Assumptions are surfaced.")
 
@@ -167,4 +167,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

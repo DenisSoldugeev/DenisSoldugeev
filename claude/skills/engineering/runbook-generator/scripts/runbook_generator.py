@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 def build_runbook(service: str, owner: str, environment: str) -> str:
-    today = date.today.isoformat
+    today = date.today().isoformat()
     return f"""# Runbook - {service}
 
 - Service: {service}
@@ -101,17 +101,17 @@ Describe the service purpose, dependencies, and critical user impact.
 """
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate a markdown runbook skeleton.")
     parser.add_argument("service", help="Service name")
     parser.add_argument("--owner", default="platform-team", help="Service owner label")
     parser.add_argument("--environment", default="production", help="Primary environment")
     parser.add_argument("--output", help="Optional output path (prints to stdout if omitted)")
-    return parser.parse_args
+    return parser.parse_args()
 
 
-def main -> int:
-    args = parse_args
+def main() -> int:
+    args = parse_args()
     markdown = build_runbook(args.service, owner=args.owner, environment=args.environment)
 
     if args.output:
@@ -125,4 +125,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main)
+    raise SystemExit(main())

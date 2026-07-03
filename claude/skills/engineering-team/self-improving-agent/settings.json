@@ -3,6 +3,7 @@
   "displayName": "Self-Improving Agent",
   "version": "1.0.0",
   "description": "Curate auto-memory, promote learnings to rules, extract skills from patterns.",
+  "author": "the author",
   "license": "MIT",
   "platforms": ["claude-code", "openclaw", "codex"],
   "category": "development",

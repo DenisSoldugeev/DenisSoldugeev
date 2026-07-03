@@ -29,6 +29,7 @@ class CLIError(Exception):
 class PromptVersion:
     name: str
     version: int
+    author: str
     timestamp: str
     change_note: str
     prompt: str
@@ -40,7 +41,7 @@ def add_common_subparser_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
 
 
-def build_parser -> argparse.ArgumentParser:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Version and diff prompts.")
 
     sub = parser.add_subparsers(dest="command", required=True)
@@ -76,8 +77,8 @@ def read_optional_json(input_path: Optional[str]) -> Dict[str, Any]:
         except Exception as exc:
             raise CLIError(f"Failed reading --input: {exc}") from exc
 
-    if not sys.stdin.isatty:
-        raw = sys.stdin.read.strip
+    if not sys.stdin.isatty():
+        raw = sys.stdin.read().strip()
         if raw:
             try:
                 return json.loads(raw)
@@ -88,11 +89,11 @@ def read_optional_json(input_path: Optional[str]) -> Dict[str, Any]:
 
 
 def read_store(path: Path) -> List[PromptVersion]:
-    if not path.exists:
+    if not path.exists():
         return []
     versions: List[PromptVersion] = []
-    for line in path.read_text(encoding="utf-8").splitlines:
-        if not line.strip:
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
             continue
         obj = json.loads(line)
         versions.append(PromptVersion(**obj))
@@ -122,9 +123,9 @@ def next_version(versions: List[PromptVersion], name: str) -> int:
     return (max(existing) + 1) if existing else 1
 
 
-def main -> int:
-    parser = build_parser
-    args = parser.parse_args
+def main() -> int:
+    parser = build_parser()
+    args = parser.parse_args()
     payload = read_optional_json(args.input)
 
     store_path = Path(args.store)
@@ -140,13 +141,13 @@ def main -> int:
             name=prompt_name,
             version=next_version(versions, prompt_name),
             author=author,
-            timestamp=datetime.now(timezone.utc).isoformat,
+            timestamp=datetime.now(timezone.utc).isoformat(),
             change_note=change_note,
             prompt=prompt_text,
         )
         versions.append(item)
         write_store(store_path, versions)
-        output: Dict[str, Any] = {"added": asdict(item), "store": str(store_path.resolve)}
+        output: Dict[str, Any] = {"added": asdict(item), "store": str(store_path.resolve())}
 
     elif args.command == "list":
         prompt_name = str(payload.get("name", args.name))
@@ -180,8 +181,8 @@ def main -> int:
 
         diff_lines = list(
             difflib.unified_diff(
-                old.prompt.splitlines,
-                new.prompt.splitlines,
+                old.prompt.splitlines(),
+                new.prompt.splitlines(),
                 fromfile=f"{prompt_name}@v{from_v}",
                 tofile=f"{prompt_name}@v{to_v}",
                 lineterm="",
@@ -228,7 +229,7 @@ def main -> int:
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(main)
+        raise SystemExit(main())
     except CLIError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         raise SystemExit(2)

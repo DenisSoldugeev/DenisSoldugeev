@@ -90,9 +90,9 @@ postMessage data
 ```
 element.innerHTML
 element.outerHTML
-document.write
-document.writeln
-eval
+document.write()
+document.writeln()
+eval()
 setTimeout(string)
 setInterval(string)
 new Function(string)
@@ -136,7 +136,7 @@ location.assign(...)
 ' UNION SELECT NULL,'a',NULL--
 
 -- Step 3: Extract database info
-' UNION SELECT version,NULL,NULL--
+' UNION SELECT version(),NULL,NULL--
 ' UNION SELECT table_name,NULL,NULL FROM information_schema.tables--
 ' UNION SELECT column_name,NULL,NULL FROM information_schema.columns WHERE table_name='users'--
 ```
@@ -146,7 +146,7 @@ location.assign(...)
 -- MySQL
 ' AND SLEEP(5)--
 ' AND IF(1=1, SLEEP(5), 0)--
-' AND IF(SUBSTRING(version,1,1)='5', SLEEP(5), 0)--
+' AND IF(SUBSTRING(version(),1,1)='5', SLEEP(5), 0)--
 
 -- PostgreSQL
 ' AND pg_sleep(5)--
@@ -172,8 +172,8 @@ location.assign(...)
 |---------|-------|------------|-------|--------|
 | String concat | `CONCAT('a','b')` | `'a' \|\| 'b'` | `'a' + 'b'` | `'a' \|\| 'b'` |
 | Comment | `-- ` or `#` | `--` | `--` | `--` |
-| Version | `VERSION` | `version` | `@@version` | `sqlite_version` |
-| Current user | `CURRENT_USER` | `current_user` | `SYSTEM_USER` | N/A |
+| Version | `VERSION()` | `version()` | `@@version` | `sqlite_version()` |
+| Current user | `CURRENT_USER()` | `current_user` | `SYSTEM_USER` | N/A |
 | Sleep | `SLEEP(5)` | `pg_sleep(5)` | `WAITFOR DELAY '0:0:5'` | N/A |
 
 ---
@@ -565,13 +565,13 @@ import semmle.python.dataflow.new.DataFlow
 
 from Call call, StringFormatting fmt
 where
-  call.getFunc.getName = "execute" and
+  call.getFunc().getName() = "execute" and
   fmt = call.getArg(0) and
   exists(DataFlow::Node source |
-    source.asExpr instanceof Name and
-    DataFlow::localFlow(source, DataFlow::exprNode(fmt.getAnOperand))
+    source.asExpr() instanceof Name and
+    DataFlow::localFlow(source, DataFlow::exprNode(fmt.getAnOperand()))
   )
-select call, "Potential SQL injection: user input flows into execute"
+select call, "Potential SQL injection: user input flows into execute()"
 ```
 
 ### Semgrep Custom Rules
@@ -588,17 +588,17 @@ rules:
   - id: unsafe-yaml-load
     pattern: yaml.load($DATA)
     fix: yaml.safe_load($DATA)
-    message: "Use yaml.safe_load to prevent arbitrary code execution"
+    message: "Use yaml.safe_load() to prevent arbitrary code execution"
     severity: WARNING
     languages: [python]
 
   - id: express-no-helmet
     pattern: |
-      const app = express;
+      const app = express();
       ...
       app.listen(...)
     pattern-not: |
-      const app = express;
+      const app = express();
       ...
       app.use(helmet(...));
       ...

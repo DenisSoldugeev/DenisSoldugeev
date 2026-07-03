@@ -5,6 +5,8 @@ License Checker - Dependency license compliance and conflict analysis tool.
 This script analyzes dependency licenses from package metadata, classifies them
 into risk categories, detects license conflicts, and generates compliance
 reports with actionable recommendations for legal risk management.
+
+Author: Claude Skills Engineering Team
 License: MIT
 """
 
@@ -75,9 +77,9 @@ class LicenseChecker:
     """Main license checking and compliance analysis class."""
     
     def __init__(self):
-        self.license_database = self._build_license_database
-        self.compatibility_matrix = self._build_compatibility_matrix
-        self.license_patterns = self._build_license_patterns
+        self.license_database = self._build_license_database()
+        self.compatibility_matrix = self._build_compatibility_matrix()
+        self.license_patterns = self._build_license_patterns()
     
     def _build_license_database(self) -> Dict[str, LicenseInfo]:
         """Build comprehensive license database with risk classifications."""
@@ -348,7 +350,7 @@ class LicenseChecker:
         project_path = Path(project_path)
         
         analysis_results = {
-            'timestamp': datetime.now.isoformat,
+            'timestamp': datetime.now().isoformat(),
             'project_path': str(project_path),
             'project_license': self._detect_project_license(project_path),
             'dependencies': [],
@@ -406,10 +408,10 @@ class LicenseChecker:
         
         for license_file in license_files:
             license_path = project_path / license_file
-            if license_path.exists:
+            if license_path.exists():
                 try:
                     with open(license_path, 'r', encoding='utf-8') as f:
-                        content = f.read
+                        content = f.read()
                     
                     # Analyze license content
                     detected_license = self._detect_license_from_text(content)
@@ -422,9 +424,9 @@ class LicenseChecker:
     
     def _detect_license_from_text(self, text: str) -> Optional[str]:
         """Detect license type from text content."""
-        text_upper = text.upper
+        text_upper = text.upper()
         
-        for license_id, patterns in self.license_patterns.items:
+        for license_id, patterns in self.license_patterns.items():
             for pattern in patterns:
                 if re.search(pattern, text, re.IGNORECASE):
                     return license_id
@@ -461,14 +463,14 @@ class LicenseChecker:
         
         # Simple package.json parsing as example
         package_json = project_path / 'package.json'
-        if package_json.exists:
+        if package_json.exists():
             try:
                 with open(package_json, 'r') as f:
                     data = json.load(f)
                 
                 for dep_type in ['dependencies', 'devDependencies']:
                     if dep_type in data:
-                        for name, version in data[dep_type].items:
+                        for name, version in data[dep_type].items():
                             dependencies.append({
                                 'name': name,
                                 'version': version,
@@ -504,7 +506,7 @@ class LicenseChecker:
         # For unknown licenses, try to find license files in node_modules (example)
         if not dep_license.license_detected and dep_license.ecosystem == 'npm':
             node_modules_path = project_path / 'node_modules' / dep_license.name
-            if node_modules_path.exists:
+            if node_modules_path.exists():
                 license_info = self._scan_package_directory(node_modules_path)
                 if license_info:
                     dep_license.license_detected = license_info
@@ -522,7 +524,7 @@ class LicenseChecker:
         if not license_string:
             return None
         
-        license_string = license_string.strip
+        license_string = license_string.strip()
         
         # Direct SPDX ID match
         if license_string in self.license_database:
@@ -549,8 +551,8 @@ class LicenseChecker:
             'commercial': 'PROPRIETARY'
         }
         
-        license_lower = license_string.lower
-        for pattern, mapped_license in license_mappings.items:
+        license_lower = license_string.lower()
+        for pattern, mapped_license in license_mappings.items():
             if pattern in license_lower:
                 return self.license_database.get(mapped_license)
         
@@ -562,10 +564,10 @@ class LicenseChecker:
         
         for license_file in license_files:
             file_path = package_path / license_file
-            if file_path.exists:
+            if file_path.exists():
                 try:
                     with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                        content = f.read
+                        content = f.read()
                     
                     # Try to detect license from content
                     if license_file == 'package.json':
@@ -858,7 +860,7 @@ class LicenseChecker:
         """Generate compliance report in specified format."""
         if format == 'json':
             # Convert dataclass objects for JSON serialization
-            serializable_results = analysis_results.copy
+            serializable_results = analysis_results.copy()
             serializable_results['dependencies'] = [
                 {
                     'name': dep.name,
@@ -895,14 +897,14 @@ class LicenseChecker:
         
         # License distribution
         report.append("LICENSE DISTRIBUTION:")
-        for license_type, count in summary['license_types'].items:
-            report.append(f"  {license_type.title}: {count}")
+        for license_type, count in summary['license_types'].items():
+            report.append(f"  {license_type.title()}: {count}")
         report.append("")
         
         # Risk breakdown
         report.append("RISK BREAKDOWN:")
-        for risk_level, count in summary['risk_levels'].items:
-            report.append(f"  {risk_level.title}: {count}")
+        for risk_level, count in summary['risk_levels'].items():
+            report.append(f"  {risk_level.title()}: {count}")
         report.append("")
         
         # Conflicts
@@ -912,7 +914,7 @@ class LicenseChecker:
             for conflict in analysis_results['conflicts']:
                 report.append(f"Conflict: {conflict.dependency2} ({conflict.license2})")
                 report.append(f"  Issue: {conflict.description}")
-                report.append(f"  Severity: {conflict.severity.value.upper}")
+                report.append(f"  Severity: {conflict.severity.value.upper()}")
                 report.append(f"  Resolutions: {', '.join(conflict.resolution_options[:2])}")
                 report.append("")
         
@@ -924,7 +926,7 @@ class LicenseChecker:
             report.append("-" * 30)
             for dep in high_risk_deps[:10]:  # Top 10
                 license_name = dep.license_detected.spdx_id or dep.license_detected.name
-                report.append(f"  {dep.name} v{dep.version}: {license_name} ({dep.license_detected.risk_level.value.upper})")
+                report.append(f"  {dep.name} v{dep.version}: {license_name} ({dep.license_detected.risk_level.value.upper()})")
             report.append("")
         
         # Recommendations
@@ -938,7 +940,7 @@ class LicenseChecker:
         report.append("=" * 60)
         return '\n'.join(report)
 
-def main:
+def main():
     """Main entry point for the license checker."""
     parser = argparse.ArgumentParser(
         description='Analyze dependency licenses for compliance and conflicts',
@@ -964,10 +966,10 @@ Examples:
     parser.add_argument('--warn-conflicts', action='store_true',
                        help='Show warnings for potential conflicts')
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
-        checker = LicenseChecker
+        checker = LicenseChecker()
         results = checker.analyze_project(args.project_path, args.inventory)
         report = checker.generate_report(results, args.format)
         
@@ -991,4 +993,4 @@ Examples:
         sys.exit(1)
 
 if __name__ == '__main__':
-    main
+    main()

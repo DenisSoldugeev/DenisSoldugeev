@@ -44,7 +44,7 @@ Parallax and complex animations can trigger vestibular disorders — dizziness, 
 // Also check in JavaScript — some GSAP animations don't respect CSS media queries
 if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   gsap.globalTimeline.timeScale(0); // Stops all GSAP animations
-  ScrollTrigger.getAll.forEach(t => t.kill); // Kill all scroll triggers
+  ScrollTrigger.getAll().forEach(t => t.kill()); // Kill all scroll triggers
   
   // Show all content immediately (don't hide-until-animated)
   document.querySelectorAll('[data-animate]').forEach(el => {
@@ -153,7 +153,7 @@ When using SplitText to fragment text into characters/words, the individual frag
 ```javascript
 function splitTextAccessibly(el, options) {
   // Save the full text for screen readers
-  const fullText = el.textContent.trim;
+  const fullText = el.textContent.trim();
   el.setAttribute('aria-label', fullText);
 
   // Split visually only
@@ -272,7 +272,7 @@ Beyond `prefers-reduced-motion`, provide an in-page control:
 const motionToggle = document.querySelector('.motion-toggle');
 let animationsEnabled = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-motionToggle.addEventListener('click',  => {
+motionToggle.addEventListener('click', () => {
   animationsEnabled = !animationsEnabled;
   motionToggle.setAttribute('aria-pressed', !animationsEnabled);
   motionToggle.querySelector('.motion-toggle-text').textContent = 
@@ -292,7 +292,7 @@ motionToggle.addEventListener('click',  => {
 
 // Restore on load
 const saved = localStorage.getItem('motionPreference');
-if (saved === 'off') motionToggle.click;
+if (saved === 'off') motionToggle.click();
 ```
 
 ---
@@ -324,7 +324,7 @@ if (saved === 'off') motionToggle.click;
 
 ```javascript
 // Announce loading state to screen readers
-function announceLoading {
+function announceLoading() {
   const announcement = document.createElement('div');
   announcement.setAttribute('role', 'status');
   announcement.setAttribute('aria-live', 'polite');
@@ -333,9 +333,9 @@ function announceLoading {
   document.body.appendChild(announcement);
 
   // Update announcement when done
-  window.addEventListener('load',  => {
+  window.addEventListener('load', () => {
     announcement.textContent = 'Page loaded';
-    setTimeout( => announcement.remove, 1000);
+    setTimeout(() => announcement.remove(), 1000);
   });
 }
 ```

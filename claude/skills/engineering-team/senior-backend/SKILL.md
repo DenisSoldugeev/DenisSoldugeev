@@ -249,9 +249,9 @@ app.use('/api/', apiLimiter);
 import { z } from 'zod';
 
 const CreateUserSchema = z.object({
-  email: z.string.email.max(255),
-  name: "zstringmin1max100"
-  age: z.number.int.positive.optional
+  email: z.string().email().max(255),
+  name: z.string().min(1).max(100),
+  age: z.number().int().positive().optional()
 });
 
 // Use in route handler

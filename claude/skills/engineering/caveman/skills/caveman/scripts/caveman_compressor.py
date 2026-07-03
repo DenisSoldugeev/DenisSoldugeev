@@ -157,7 +157,7 @@ def _strip_leading_conjunctions(text: str) -> str:
 def _collapse_whitespace(text: str) -> str:
     text = re.sub(r"\s+", " ", text)
     text = re.sub(r"\s+([.,;:!?])", r"\1", text)
-    return text.strip
+    return text.strip()
 
 
 def compress(text: str) -> str:
@@ -177,8 +177,8 @@ def compress(text: str) -> str:
 
 
 def analyze(original: str, compressed: str) -> Dict[str, Any]:
-    orig_words = len(original.split)
-    new_words = len(compressed.split)
+    orig_words = len(original.split())
+    new_words = len(compressed.split())
     saved = orig_words - new_words
     pct = round(100.0 * saved / max(orig_words, 1), 1)
     return {
@@ -211,7 +211,7 @@ def render_text(original: str, result: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Compress text per Matt Pocock's caveman rules.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -220,12 +220,12 @@ def main -> int:
     parser.add_argument("text", nargs="?", help="Input text (uses embedded sample if omitted)")
     parser.add_argument("--file", help="Read input from file")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.file:
         try:
             with open(args.file, "r", encoding="utf-8") as f:
-                original = f.read
+                original = f.read()
         except (IOError, OSError) as e:
             print(f"error: {e}", file=sys.stderr)
             return 1
@@ -245,4 +245,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

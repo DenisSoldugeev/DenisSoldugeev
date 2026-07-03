@@ -53,7 +53,7 @@ def parse_behuman_output(text: str) -> dict:
     current = None
 
     for line in text.split("\n"):
-        lower = line.lower.strip
+        lower = line.lower().strip()
         if lower.startswith("self"):
             current = "self"
             continue
@@ -67,7 +67,7 @@ def parse_behuman_output(text: str) -> dict:
         if current:
             sections[current] += line + "\n"
 
-    return {k: v.strip for k, v in sections.items}
+    return {k: v.strip() for k, v in sections.items()}
 ```
 
 ## Claude Code / Skill Usage

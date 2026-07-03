@@ -52,7 +52,7 @@ CROSS JOIN LATERAL (
   ORDER BY total DESC LIMIT 3
 ) top_orders;
 ```
-MySQL equivalent: use a subquery with `ROW_NUMBER`.
+MySQL equivalent: use a subquery with `ROW_NUMBER()`.
 
 ---
 
@@ -127,7 +127,7 @@ SELECT path FROM breadcrumb WHERE parent_id IS NULL;
 
 ### ROW_NUMBER — assign unique rank per partition
 ```sql
-SELECT *, ROW_NUMBER OVER (PARTITION BY department_id ORDER BY salary DESC) AS rank
+SELECT *, ROW_NUMBER() OVER (PARTITION BY department_id ORDER BY salary DESC) AS rank
 FROM employees;
 ```
 
@@ -136,8 +136,8 @@ FROM employees;
 -- RANK: 1, 2, 2, 4 (skips after tie)
 -- DENSE_RANK: 1, 2, 2, 3 (no skip)
 SELECT name, salary,
-  RANK OVER (ORDER BY salary DESC) AS rank,
-  DENSE_RANK OVER (ORDER BY salary DESC) AS dense_rank
+  RANK() OVER (ORDER BY salary DESC) AS rank,
+  DENSE_RANK() OVER (ORDER BY salary DESC) AS dense_rank
 FROM employees;
 ```
 
@@ -228,7 +228,7 @@ GROUP BY GROUPING SETS (
   (region, product_category),
   (region),
   (product_category),
-  
+  ()
 );
 ```
 
@@ -237,7 +237,7 @@ GROUP BY GROUPING SETS (
 SELECT region, city, SUM(revenue)
 FROM sales
 GROUP BY ROLLUP (region, city);
--- Produces: (region, city), (region), 
+-- Produces: (region, city), (region), ()
 ```
 
 ### CUBE — all combinations
@@ -265,7 +265,7 @@ MySQL/SQL Server equivalent: `SUM(CASE WHEN status = 'paid' THEN 1 ELSE 0 END)`.
 ### PostgreSQL — ON CONFLICT
 ```sql
 INSERT INTO user_settings (user_id, key, value, updated_at)
-VALUES (1, 'theme', 'dark', NOW)
+VALUES (1, 'theme', 'dark', NOW())
 ON CONFLICT (user_id, key)
 DO UPDATE SET value = EXCLUDED.value, updated_at = EXCLUDED.updated_at;
 ```
@@ -273,7 +273,7 @@ DO UPDATE SET value = EXCLUDED.value, updated_at = EXCLUDED.updated_at;
 ### MySQL — ON DUPLICATE KEY
 ```sql
 INSERT INTO user_settings (user_id, key_name, value, updated_at)
-VALUES (1, 'theme', 'dark', NOW)
+VALUES (1, 'theme', 'dark', NOW())
 ON DUPLICATE KEY UPDATE value = VALUES(value), updated_at = VALUES(updated_at);
 ```
 
@@ -282,9 +282,9 @@ ON DUPLICATE KEY UPDATE value = VALUES(value), updated_at = VALUES(updated_at);
 MERGE INTO user_settings AS target
 USING (VALUES (1, 'theme', 'dark')) AS source (user_id, key_name, value)
 ON target.user_id = source.user_id AND target.key_name = source.key_name
-WHEN MATCHED THEN UPDATE SET value = source.value, updated_at = GETDATE
+WHEN MATCHED THEN UPDATE SET value = source.value, updated_at = GETDATE()
 WHEN NOT MATCHED THEN INSERT (user_id, key_name, value, updated_at)
-  VALUES (source.user_id, source.key_name, source.value, GETDATE);
+  VALUES (source.user_id, source.key_name, source.value, GETDATE());
 ```
 
 ---
@@ -349,9 +349,9 @@ LIMIT 20;
 ### Batch INSERT
 ```sql
 INSERT INTO events (type, payload, created_at) VALUES
-  ('click', '{"page": "/home"}', NOW),
-  ('view', '{"page": "/pricing"}', NOW),
-  ('click', '{"page": "/signup"}', NOW);
+  ('click', '{"page": "/home"}', NOW()),
+  ('view', '{"page": "/pricing"}', NOW()),
+  ('click', '{"page": "/signup"}', NOW());
 ```
 
 ### Batch UPDATE with VALUES

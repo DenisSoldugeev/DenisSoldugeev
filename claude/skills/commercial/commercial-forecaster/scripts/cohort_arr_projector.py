@@ -208,7 +208,7 @@ def render_markdown(r: ProjectionResult) -> str:
     L.append("")
     L.append("## Assumption block (NON-OPTIONAL — present alongside the cohort heatmap)")
     L.append("")
-    for k, v in r.assumptions.items:
+    for k, v in r.assumptions.items():
         L.append(f"- **{k}:** {v}")
     L.append("")
     L.append("## Next steps")
@@ -218,7 +218,7 @@ def render_markdown(r: ProjectionResult) -> str:
     return "\n".join(L)
 
 
-def sample_context -> dict[str, Any]:
+def sample_context() -> dict[str, Any]:
     return {
         "cohorts": [
             {
@@ -248,16 +248,16 @@ def sample_context -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(description=__doc__.splitlines[0])
+    p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--input", type=Path, help="Path to cohort-intake JSON.")
     p.add_argument("--output", default="markdown", choices=["markdown", "json"], help="Output format.")
     p.add_argument("--sample", action="store_true", help="Run with built-in sample context.")
     args = p.parse_args(argv)
 
     if args.sample:
-        ctx = sample_context
+        ctx = sample_context()
     elif args.input:
-        ctx = json.loads(args.input.read_text)
+        ctx = json.loads(args.input.read_text())
     else:
         p.error("Provide --input or --sample.")
         return 2
@@ -292,4 +292,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

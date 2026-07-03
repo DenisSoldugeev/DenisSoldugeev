@@ -104,37 +104,37 @@ def _split_sections(text: str) -> dict[str, str]:
     sections: dict[str, str] = {}
     current_header: str | None = None
     current_lines: list[str] = []
-    for line in body.splitlines:
+    for line in body.splitlines():
         m = re.match(r"^##\s+(.+?)\s*$", line)
         if m:
             if current_header is not None:
-                sections[current_header] = "\n".join(current_lines).strip
-            current_header = m.group(1).strip
+                sections[current_header] = "\n".join(current_lines).strip()
+            current_header = m.group(1).strip()
             current_lines = []
         else:
             if current_header is not None:
                 current_lines.append(line)
     if current_header is not None:
-        sections[current_header] = "\n".join(current_lines).strip
+        sections[current_header] = "\n".join(current_lines).strip()
     return sections
 
 
 def _is_placeholder(text: str) -> bool:
-    stripped = text.strip
+    stripped = text.strip()
     if not stripped:
         return True
     for pattern in PLACEHOLDER_PATTERNS:
         if re.fullmatch(pattern, stripped, re.IGNORECASE):
             return True
     # Section content that is ONLY placeholder comment(s)
-    non_placeholder = re.sub(r"_?<!--.*?-->_?", "", stripped, flags=re.DOTALL).strip
+    non_placeholder = re.sub(r"_?<!--.*?-->_?", "", stripped, flags=re.DOTALL).strip()
     return not non_placeholder
 
 
 def _bullet_lines(section: str) -> list[str]:
     out = []
-    for line in section.splitlines:
-        line = line.rstrip
+    for line in section.splitlines():
+        line = line.rstrip()
         if re.match(r"^\s*[-*+]\s+", line):
             out.append(line)
     return out
@@ -156,14 +156,14 @@ def _git_state(cwd: Path) -> dict[str, int]:
     if run(["git", "rev-parse", "--is-inside-work-tree"]):
         state["in_repo"] = 1
         status = run(["git", "status", "--porcelain"]) or ""
-        state["dirty"] = sum(1 for ln in status.splitlines if ln.strip)
+        state["dirty"] = sum(1 for ln in status.splitlines() if ln.strip())
         log = run(["git", "log", "--since=1.day.ago", "--oneline"]) or ""
-        state["recent_commits"] = sum(1 for ln in log.splitlines if ln.strip)
+        state["recent_commits"] = sum(1 for ln in log.splitlines() if ln.strip())
     return state
 
 
 def check(text: str, cwd: Path | None = None) -> Report:
-    report = Report
+    report = Report()
     sections = _split_sections(text)
 
     # Check 1: all 5 sections present
@@ -207,7 +207,7 @@ def check(text: str, cwd: Path | None = None) -> Report:
     decisions_text = sections.get("Open decisions", "")
     has_decisions = (
         not _is_placeholder(decisions_text)
-        and "none." not in decisions_text.lower[:30]
+        and "none." not in decisions_text.lower()[:30]
     )
     if cwd is not None:
         gs = _git_state(cwd)
@@ -246,7 +246,7 @@ def check(text: str, cwd: Path | None = None) -> Report:
         if not re.search(r"[-—–]\s+\S+", b.split("**", 2)[-1] if "**" in b else b):
             report.add(
                 "low", "SKILL_NO_WHY",
-                f"Skill bullet has no '— why' explanation: {b.strip[:60]}",
+                f"Skill bullet has no '— why' explanation: {b.strip()[:60]}",
                 "Format: `- skill-name — one-line why this session needs it`",
             )
             break  # only flag once
@@ -278,7 +278,7 @@ def _format_human(report: Report, mode: str, path: Path) -> str:
         lines.append(f"  [{f.severity}] {f.code}: {f.message}")
         lines.append(f"    fix: {f.suggestion}")
         lines.append("")
-    counts = report.by_severity
+    counts = report.by_severity()
     lines.append(f"Severity counts: high={counts['high']} medium={counts['medium']} low={counts['low']}")
     if mode == "strict":
         lines.append("Mode: STRICT — save is blocked until findings are resolved.")
@@ -349,7 +349,7 @@ _<!-- What must the next agent decide before continuing? -->_
                     {"severity": f.severity, "code": f.code, "message": f.message, "suggestion": f.suggestion}
                     for f in report.findings
                 ],
-                "counts": report.by_severity,
+                "counts": report.by_severity(),
             }, indent=2))
         else:
             print(_format_human(report, args.mode, Path("<sample>")))
@@ -359,7 +359,7 @@ _<!-- What must the next agent decide before continuing? -->_
         parser.error("file is required unless --sample is used.")
 
     path = Path(args.file)
-    if not path.exists:
+    if not path.exists():
         print(f"File not found: {path}", file=sys.stderr)
         return 2
 
@@ -369,7 +369,7 @@ _<!-- What must the next agent decide before continuing? -->_
         print(f"Error reading {path}: {exc}", file=sys.stderr)
         return 2
 
-    cwd = None if args.no_git else Path.cwd
+    cwd = None if args.no_git else Path.cwd()
     report = check(text, cwd=cwd)
 
     if args.json:
@@ -380,7 +380,7 @@ _<!-- What must the next agent decide before continuing? -->_
                 {"severity": f.severity, "code": f.code, "message": f.message, "suggestion": f.suggestion}
                 for f in report.findings
             ],
-            "counts": report.by_severity,
+            "counts": report.by_severity(),
         }, indent=2))
     else:
         print(_format_human(report, args.mode, path))
@@ -393,4 +393,4 @@ _<!-- What must the next agent decide before continuing? -->_
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

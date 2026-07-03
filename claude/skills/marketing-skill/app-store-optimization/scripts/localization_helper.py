@@ -147,7 +147,7 @@ class LocalizationHelper:
         localized_metadata = {}
         warnings = []
 
-        for field, text in source_metadata.items:
+        for field, text in source_metadata.items():
             if field not in limits:
                 continue
 
@@ -269,7 +269,7 @@ class LocalizationHelper:
             'warnings': []
         }
 
-        for field, text in translated_metadata.items:
+        for field, text in translated_metadata.items():
             if field not in limits:
                 continue
 
@@ -332,7 +332,7 @@ class LocalizationHelper:
         for market_code in target_markets:
             # Find market in priority lists
             market_info = None
-            for tier_name, markets in self.PRIORITY_MARKETS.items:
+            for tier_name, markets in self.PRIORITY_MARKETS.items():
                 for m in markets:
                     if m['language'] == market_code:
                         market_info = m
@@ -394,7 +394,7 @@ class LocalizationHelper:
             'screenshots': 50  # Caption text
         }
 
-        total_words = sum(typical_word_counts.values)
+        total_words = sum(typical_word_counts.values())
         estimated_cost = total_words * base_cost_per_word * multiplier
 
         return {
@@ -524,12 +524,12 @@ class LocalizationHelper:
         issues = []
 
         # Check for untranslated placeholders
-        for field, text in translated_metadata.items:
-            if '[' in text or '{' in text or 'TODO' in text.upper:
+        for field, text in translated_metadata.items():
+            if '[' in text or '{' in text or 'TODO' in text.upper():
                 issues.append(f"{field} contains placeholder text")
 
         # Check for excessive punctuation
-        for field, text in translated_metadata.items:
+        for field, text in translated_metadata.items():
             if text.count('!') > 3:
                 issues.append(f"{field} has excessive exclamation marks")
 
@@ -563,7 +563,7 @@ def plan_localization_strategy(
     Returns:
         Complete localization plan
     """
-    helper = LocalizationHelper
+    helper = LocalizationHelper()
 
     target_markets = helper.identify_target_markets(
         current_market=current_market,

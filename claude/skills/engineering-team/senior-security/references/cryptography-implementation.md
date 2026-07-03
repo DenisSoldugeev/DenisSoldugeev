@@ -27,7 +27,7 @@ Practical cryptographic patterns for securing data at rest, in transit, and in u
 | Key exchange | X25519, ECDH P-256 | RSA key transport |
 | Password hashing | Argon2id, bcrypt, scrypt | MD5, SHA-1, plain SHA-256 |
 | Message authentication | HMAC-SHA256, Poly1305 | MD5, SHA-1 |
-| Random generation | OS CSPRNG | Math.random, time-based |
+| Random generation | OS CSPRNG | Math.random(), time-based |
 
 ### Security Strength Comparison
 
@@ -88,7 +88,7 @@ class AESGCMEncryption:
 
 
 # Usage
-encryptor = AESGCMEncryption
+encryptor = AESGCMEncryption()
 plaintext = b"Sensitive data to encrypt"
 aad = b"user_id:12345"  # Authenticated but not encrypted
 
@@ -112,7 +112,7 @@ class ChaChaEncryption:
 
     def __init__(self, key: bytes = None):
         if key is None:
-            key = ChaCha20Poly1305.generate_key
+            key = ChaCha20Poly1305.generate_key()
         self.key = key
         self.chacha = ChaCha20Poly1305(key)
 
@@ -174,16 +174,16 @@ class EnvelopeEncryption:
         encrypted_dek = self.kek_public.encrypt(
             dek,
             padding.OAEP(
-                mgf=padding.MGF1(algorithm=hashes.SHA256),
-                algorithm=hashes.SHA256,
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
                 label=None
             )
         )
 
         return {
-            'encrypted_dek': base64.b64encode(encrypted_dek).decode,
-            'nonce': base64.b64encode(nonce).decode,
-            'ciphertext': base64.b64encode(encrypted_data).decode
+            'encrypted_dek': base64.b64encode(encrypted_dek).decode(),
+            'nonce': base64.b64encode(nonce).decode(),
+            'ciphertext': base64.b64encode(encrypted_data).decode()
         }
 
     def decrypt(self, envelope: dict) -> bytes:
@@ -199,8 +199,8 @@ class EnvelopeEncryption:
         dek = self.kek_private.decrypt(
             encrypted_dek,
             padding.OAEP(
-                mgf=padding.MGF1(algorithm=hashes.SHA256),
-                algorithm=hashes.SHA256,
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
                 label=None
             )
         )
@@ -229,7 +229,7 @@ def generate_rsa_keypair(key_size=4096):
         public_exponent=65537,
         key_size=key_size
     )
-    public_key = private_key.public_key
+    public_key = private_key.public_key()
 
     return private_key, public_key
 
@@ -237,9 +237,9 @@ def serialize_keys(private_key, public_key, password=None):
     """Serialize keys for storage."""
     # Private key (encrypted with password)
     if password:
-        encryption = serialization.BestAvailableEncryption(password.encode)
+        encryption = serialization.BestAvailableEncryption(password.encode())
     else:
-        encryption = serialization.NoEncryption
+        encryption = serialization.NoEncryption()
 
     private_pem = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
@@ -260,8 +260,8 @@ def rsa_encrypt(public_key, plaintext: bytes) -> bytes:
     return public_key.encrypt(
         plaintext,
         padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256),
-            algorithm=hashes.SHA256,
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
             label=None
         )
     )
@@ -271,8 +271,8 @@ def rsa_decrypt(private_key, ciphertext: bytes) -> bytes:
     return private_key.decrypt(
         ciphertext,
         padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256),
-            algorithm=hashes.SHA256,
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
             label=None
         )
     )
@@ -295,9 +295,9 @@ class Ed25519Signer:
 
     def __init__(self, private_key=None):
         if private_key is None:
-            private_key = Ed25519PrivateKey.generate
+            private_key = Ed25519PrivateKey.generate()
         self.private_key = private_key
-        self.public_key = private_key.public_key
+        self.public_key = private_key.public_key()
 
     def sign(self, message: bytes) -> bytes:
         """Create digital signature."""
@@ -320,7 +320,7 @@ class Ed25519Signer:
 
 
 # Usage for message signing
-signer = Ed25519Signer
+signer = Ed25519Signer()
 message = b"Important document content"
 signature = signer.sign(message)
 
@@ -343,8 +343,8 @@ class X25519KeyExchange:
     """
 
     def __init__(self):
-        self.private_key = x25519.X25519PrivateKey.generate
-        self.public_key = self.private_key.public_key
+        self.private_key = x25519.X25519PrivateKey.generate()
+        self.public_key = self.private_key.public_key()
 
     def get_public_key_bytes(self) -> bytes:
         """Get public key to send to peer."""
@@ -368,7 +368,7 @@ class X25519KeyExchange:
 
         # Derive encryption key using HKDF
         derived_key = HKDF(
-            algorithm=hashes.SHA256,
+            algorithm=hashes.SHA256(),
             length=32,
             salt=None,
             info=info,
@@ -378,12 +378,12 @@ class X25519KeyExchange:
 
 
 # Key exchange example
-alice = X25519KeyExchange
-bob = X25519KeyExchange
+alice = X25519KeyExchange()
+bob = X25519KeyExchange()
 
 # Exchange public keys (can be done over insecure channel)
-alice_public = alice.get_public_key_bytes
-bob_public = bob.get_public_key_bytes
+alice_public = alice.get_public_key_bytes()
+bob_public = bob.get_public_key_bytes()
 
 # Both derive the same shared key
 alice_shared = alice.derive_shared_key(bob_public, info=b"session-key")
@@ -447,7 +447,7 @@ class SecurePasswordHasher:
 
 
 # Usage
-hasher = SecurePasswordHasher
+hasher = SecurePasswordHasher()
 
 # During registration
 password = "user_password_123!"
@@ -483,10 +483,10 @@ class BcryptHasher:
 
     def hash_password(self, password: str) -> str:
         salt = bcrypt.gensalt(rounds=self.rounds)
-        return bcrypt.hashpw(password.encode, salt).decode
+        return bcrypt.hashpw(password.encode(), salt).decode()
 
     def verify_password(self, password: str, hash: str) -> bool:
-        return bcrypt.checkpw(password.encode, hash.encode)
+        return bcrypt.checkpw(password.encode(), hash.encode())
 ```
 
 ### HMAC for Message Authentication
@@ -498,20 +498,20 @@ import secrets
 
 def create_hmac(key: bytes, message: bytes) -> bytes:
     """Create HMAC-SHA256 authentication tag."""
-    return hmac.new(key, message, hashlib.sha256).digest
+    return hmac.new(key, message, hashlib.sha256).digest()
 
 def verify_hmac(key: bytes, message: bytes, tag: bytes) -> bool:
     """Verify HMAC in constant time."""
-    expected = hmac.new(key, message, hashlib.sha256).digest
+    expected = hmac.new(key, message, hashlib.sha256).digest()
     return hmac.compare_digest(expected, tag)
 
 # API request signing example
 def sign_api_request(secret_key: bytes, method: str, path: str,
                      body: bytes, timestamp: str) -> str:
     """Sign API request for authentication."""
-    message = f"{method}\n{path}\n{timestamp}\n".encode + body
+    message = f"{method}\n{path}\n{timestamp}\n".encode() + body
     signature = create_hmac(secret_key, message)
-    return signature.hex
+    return signature.hex()
 ```
 
 ---
@@ -537,13 +537,13 @@ def derive_key_pbkdf2(password: str, salt: bytes = None,
         salt = os.urandom(16)
 
     kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256,
+        algorithm=hashes.SHA256(),
         length=32,
         salt=salt,
         iterations=iterations
     )
 
-    key = kdf.derive(password.encode)
+    key = kdf.derive(password.encode())
     return key, salt
 
 def derive_key_scrypt(password: str, salt: bytes = None) -> tuple:
@@ -563,7 +563,7 @@ def derive_key_scrypt(password: str, salt: bytes = None) -> tuple:
         p=1       # Parallelization
     )
 
-    key = kdf.derive(password.encode)
+    key = kdf.derive(password.encode())
     return key, salt
 ```
 
@@ -591,8 +591,8 @@ class KeyManager:
         key_metadata = {
             'key_id': key_id,
             'algorithm': algorithm,
-            'created_at': datetime.utcnow.isoformat,
-            'expires_at': (datetime.utcnow + timedelta(days=365)).isoformat,
+            'created_at': datetime.utcnow().isoformat(),
+            'expires_at': (datetime.utcnow() + timedelta(days=365)).isoformat(),
             'status': 'active'
         }
 
@@ -613,12 +613,12 @@ class KeyManager:
         self.storage.update_key_metadata(old_key_id, old_metadata)
 
         # Generate new key
-        new_key_id = f"{old_key_id.rsplit('_', 1)[0]}_{datetime.utcnow.strftime('%Y%m%d')}"
+        new_key_id = f"{old_key_id.rsplit('_', 1)[0]}_{datetime.utcnow().strftime('%Y%m%d')}"
         return self.generate_key(new_key_id)
 
     def get_encryption_key(self) -> tuple:
         """Get current active key for encryption."""
-        return self.storage.get_active_key
+        return self.storage.get_active_key()
 
     def get_decryption_key(self, key_id: str) -> bytes:
         """Get specific key for decryption."""
@@ -678,9 +678,9 @@ class AWSKMSProvider:
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 def bad_ecb_encrypt(key, plaintext):
-    cipher = Cipher(algorithms.AES(key), modes.ECB)
-    encryptor = cipher.encryptor
-    return encryptor.update(plaintext) + encryptor.finalize
+    cipher = Cipher(algorithms.AES(key), modes.ECB())
+    encryptor = cipher.encryptor()
+    return encryptor.update(plaintext) + encryptor.finalize()
 
 # GOOD: Use authenticated encryption (GCM)
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -732,11 +732,11 @@ import random
 import secrets
 
 # BAD: Predictable random
-def bad_generate_token:
+def bad_generate_token():
     return ''.join(random.choices('abcdef0123456789', k=32))
 
 # GOOD: Cryptographically secure
-def good_generate_token:
+def good_generate_token():
     return secrets.token_hex(16)
 ```
 

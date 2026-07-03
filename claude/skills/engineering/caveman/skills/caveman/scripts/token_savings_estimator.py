@@ -34,7 +34,7 @@ from caveman_compressor import compress, SAMPLE_INPUT  # noqa: E402
 # Heuristic: average chars per token
 CHARS_PER_TOKEN_PROSE = 4.0
 CHARS_PER_TOKEN_TECHNICAL = 3.5
-TECHNICAL_TOKEN_INDICATORS = ("```", "{", "}", "", "->", "==", "//", "/*", "import ", "function ")
+TECHNICAL_TOKEN_INDICATORS = ("```", "{", "}", "()", "->", "==", "//", "/*", "import ", "function ")
 
 
 def _estimate_chars_per_token(text: str) -> float:
@@ -100,7 +100,7 @@ def render_text(r: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Estimate token + cost savings from caveman compression.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -111,12 +111,12 @@ def main -> int:
     parser.add_argument("--file", help="Read input from file")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
     parser.add_argument("--price-per-mtok", type=float, default=0.0, help=price_help)
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.file:
         try:
             with open(args.file, "r", encoding="utf-8") as f:
-                original = f.read
+                original = f.read()
         except (IOError, OSError) as e:
             print(f"error: {e}", file=sys.stderr)
             return 1
@@ -134,4 +134,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

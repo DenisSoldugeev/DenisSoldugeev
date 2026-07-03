@@ -29,14 +29,14 @@ document.addEventListener("keydown", function (e) {
         case "ArrowRight":
         case "PageDown":
         case " ":
-            e.preventDefault; next; break;
+            e.preventDefault(); next(); break;
         // ...
     }
 });
 ```
 
 - **Modifier-aware**: we check `metaKey/ctrlKey/altKey` and bail. This means `Cmd+R` reloads (browser default), `Ctrl+P` prints (browser default), and we don't fight them.
-- **`preventDefault` on every match**: Space normally scrolls; we replace that with advance-slide.
+- **`preventDefault()` on every match**: Space normally scrolls; we replace that with advance-slide.
 - **`replaceState` for URL hash**: each slide change updates `#N` in the URL so deep links work + back button moves through slides naturally.
 
 ## URL hash deep linking

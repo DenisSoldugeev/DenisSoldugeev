@@ -50,7 +50,7 @@ DEMO_FINDINGS = [
     AuditFinding("drive", "Link sharing defaults", "FAIL",
                  "Default link sharing is set to 'Anyone with the link'",
                  "Sensitive files accessible without authentication",
-                 "gws admin settings update drive --defaultLinkSharing restricted"),
+                 "Restrict default link sharing: Admin Console > Apps > Google Workspace > Drive > Sharing settings"),
     AuditFinding("gmail", "Auto-forwarding", "PASS",
                  "No auto-forwarding rules detected for admin accounts"),
     AuditFinding("gmail", "SPF record", "PASS",
@@ -74,11 +74,11 @@ DEMO_FINDINGS = [
     AuditFinding("oauth", "High-risk apps", "WARN",
                  "3 apps have Drive full access scope",
                  "Apps can read/modify all Drive files",
-                 "Audit each app: gws admin tokens list --json | filter by scope"),
+                 "Audit each app via the Directory API tokens resource (verify: gws schema admin.tokens.list)"),
     AuditFinding("admin", "Super admin count", "WARN",
                  "4 super admin accounts detected (recommended: 2-3)",
                  "Increased attack surface for privilege escalation",
-                 "Reduce super admins: gws admin users list --query 'isAdmin=true' --json"),
+                 "Reduce super admins: list them via the Directory API (verify: gws schema admin.users.list)"),
     AuditFinding("admin", "2-Step verification", "PASS",
                  "2-Step verification enforced for all users"),
     AuditFinding("admin", "Password policy", "PASS",
@@ -99,12 +99,12 @@ def run_gws_command(cmd: List[str]) -> Optional[str]:
         return None
 
 
-def audit_drive -> List[AuditFinding]:
+def audit_drive() -> List[AuditFinding]:
     """Audit Drive sharing and security settings."""
     findings = []
 
     # Check sharing settings
-    output = run_gws_command(["gws", "drive", "about", "get", "--json"])
+    output = run_gws_command(["gws", "drive", "about", "get", "--params", '{"fields": "*"}'])
     if output:
         try:
             data = json.loads(output)
@@ -135,12 +135,13 @@ def audit_drive -> List[AuditFinding]:
     return findings
 
 
-def audit_gmail -> List[AuditFinding]:
+def audit_gmail() -> List[AuditFinding]:
     """Audit Gmail forwarding and email security."""
     findings = []
 
     # Check forwarding rules
-    output = run_gws_command(["gws", "gmail", "users.settings.forwardingAddresses", "list", "me", "--json"])
+    output = run_gws_command(["gws", "gmail", "users", "settings", "forwardingAddresses", "list",
+                              "--params", '{"userId": "me"}'])
     if output:
         try:
             data = json.loads(output)
@@ -150,7 +151,7 @@ def audit_gmail -> List[AuditFinding]:
                     "gmail", "Auto-forwarding", "WARN",
                     f"{len(addrs)} forwarding addresses configured",
                     "Data exfiltration via email forwarding",
-                    "Review: gws gmail users.settings.forwardingAddresses list me --json"
+                    "Review forwarding addresses (verify: gws schema gmail.users.settings.forwardingAddresses.list)"
                 ))
             else:
                 findings.append(AuditFinding(
@@ -168,11 +169,11 @@ def audit_gmail -> List[AuditFinding]:
     return findings
 
 
-def audit_calendar -> List[AuditFinding]:
+def audit_calendar() -> List[AuditFinding]:
     """Audit Calendar sharing settings."""
     findings = []
 
-    output = run_gws_command(["gws", "calendar", "calendarList", "get", "primary", "--json"])
+    output = run_gws_command(["gws", "calendar", "calendarList", "get", "--params", '{"calendarId": "primary"}'])
     if output:
         findings.append(AuditFinding(
             "calendar", "Primary calendar", "PASS",
@@ -189,7 +190,7 @@ def audit_calendar -> List[AuditFinding]:
 
 def run_live_audit(services: List[str]) -> AuditReport:
     """Run live audit against actual gws installation."""
-    report = AuditReport
+    report = AuditReport()
     all_findings = []
 
     audit_map = {
@@ -201,14 +202,14 @@ def run_live_audit(services: List[str]) -> AuditReport:
     for svc in services:
         fn = audit_map.get(svc)
         if fn:
-            all_findings.extend(fn)
+            all_findings.extend(fn())
 
     report.findings = [asdict(f) for f in all_findings]
     report = calculate_score(report)
     return report
 
 
-def run_demo_audit -> AuditReport:
+def run_demo_audit() -> AuditReport:
     """Return demo audit report with embedded sample data."""
     report = AuditReport(
         findings=[asdict(f) for f in DEMO_FINDINGS],
@@ -251,7 +252,7 @@ def calculate_score(report: AuditReport) -> AuditReport:
     return report
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Security and configuration audit for Google Workspace",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -267,12 +268,12 @@ Examples:
     parser.add_argument("--services", default="gmail,drive,calendar",
                         help="Comma-separated services to audit (default: gmail,drive,calendar)")
     parser.add_argument("--demo", action="store_true", help="Run with demo data")
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    services = [s.strip for s in args.services.split(",") if s.strip]
+    services = [s.strip() for s in args.services.split(",") if s.strip()]
 
     if args.demo or not shutil.which("gws"):
-        report = run_demo_audit
+        report = run_demo_audit()
     else:
         report = run_live_audit(services)
 
@@ -290,7 +291,7 @@ Examples:
         for f in report.findings:
             if f["area"] != current_area:
                 current_area = f["area"]
-                print(f"\n  {current_area.upper}")
+                print(f"\n  {current_area.upper()}")
                 print(f"  {'-'*40}")
 
             icon = {"PASS": "PASS", "WARN": "WARN", "FAIL": "FAIL"}.get(f["status"], "????")
@@ -306,4 +307,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

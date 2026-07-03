@@ -234,9 +234,9 @@ Extract reusable logic:
 function useDebounce<T>(value: T, delay = 500): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
-  useEffect( => {
-    const timer = setTimeout( => setDebouncedValue(value), delay);
-    return  => clearTimeout(timer);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
   }, [value, delay]);
 
   return debouncedValue;
@@ -255,8 +255,8 @@ function DataFetcher({ url, render }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect( => {
-    fetch(url).then(r => r.json).then(setData).finally( => setLoading(false));
+  useEffect(() => {
+    fetch(url).then(r => r.json()).then(setData).finally(() => setLoading(false));
   }, [url]);
 
   return render({ data, loading });
@@ -302,7 +302,7 @@ async function ProductPage({ params }) {
 'use client';
 function AddToCartButton({ productId }) {
   const [adding, setAdding] = useState(false);
-  return <button onClick={ => addToCart(productId)}>Add</button>;
+  return <button onClick={() => addToCart(productId)}>Add</button>;
 }
 ```
 
@@ -336,10 +336,10 @@ import Image from 'next/image';
 
 ```tsx
 // Parallel fetching
-async function Dashboard {
+async function Dashboard() {
   const [user, stats] = await Promise.all([
-    getUser,
-    getStats
+    getUser(),
+    getStats()
   ]);
   return <div>...</div>;
 }
@@ -395,8 +395,8 @@ Reference: `references/frontend_best_practices.md`
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-test('button triggers action on click', async  => {
-  const onClick = vi.fn;
+test('button triggers action on click', async () => {
+  const onClick = vi.fn();
   render(<Button onClick={onClick}>Click me</Button>);
 
   await userEvent.click(screen.getByRole('button'));
@@ -404,10 +404,10 @@ test('button triggers action on click', async  => {
 });
 
 // Test accessibility
-test('dialog is accessible', async  => {
+test('dialog is accessible', async () => {
   render(<Dialog open={true} title="Confirm" />);
 
-  expect(screen.getByRole('dialog')).toBeInTheDocument;
+  expect(screen.getByRole('dialog')).toBeInTheDocument();
   expect(screen.getByRole('dialog')).toHaveAttribute('aria-labelledby');
 });
 ```
@@ -422,7 +422,7 @@ test('dialog is accessible', async  => {
 // next.config.js
 const nextConfig = {
   images: {
-    remotePatterns: [{ hostname: "cdnexamplecom" }],
+    remotePatterns: [{ protocol: 'https', hostname: 'cdn.example.com' }],
     formats: ['image/avif', 'image/webp'],
   },
   experimental: {
@@ -434,7 +434,7 @@ const nextConfig = {
 ### Tailwind CSS Utilities
 
 ```tsx
-// Conditional classes with cn
+// Conditional classes with cn()
 import { cn } from '@/lib/utils';
 
 <button className={cn(

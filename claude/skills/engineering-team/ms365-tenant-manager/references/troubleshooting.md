@@ -204,7 +204,7 @@ Update-MgUser -UserId user@tenant.com -UsageLocation "US"
 # Then assign license
 $license = @{
     AddLicenses = @(@{SkuId = "sku-id"})
-    RemoveLicenses = @
+    RemoveLicenses = @()
 }
 Set-MgUserLicense -UserId user@tenant.com -BodyParameter $license
 ```
@@ -236,7 +236,7 @@ Get-MgUserLicenseDetail -UserId user@tenant.com |
 
 # Remove conflicting license first
 $remove = @{
-    AddLicenses = @
+    AddLicenses = @()
     RemoveLicenses = @("conflicting-sku-id")
 }
 Set-MgUserLicense -UserId user@tenant.com -BodyParameter $remove
@@ -364,12 +364,12 @@ New-MgGroupMember -GroupId $group.Id -DirectoryObjectId (Get-MgUser -UserId user
    # Reassign license
    Set-MgUserLicense -UserId user@tenant.com -BodyParameter @{
        RemoveLicenses = @("sku-id")
-       AddLicenses = @
+       AddLicenses = @()
    }
    Start-Sleep -Seconds 60
    Set-MgUserLicense -UserId user@tenant.com -BodyParameter @{
        AddLicenses = @(@{SkuId = "sku-id"})
-       RemoveLicenses = @
+       RemoveLicenses = @()
    }
    ```
 

@@ -78,7 +78,7 @@ SCHEMA_RULES: Dict[str, Dict[str, List[str]]] = {
     },
 }
 
-KNOWN_TYPES = set(SCHEMA_RULES.keys)
+KNOWN_TYPES = set(SCHEMA_RULES.keys())
 
 
 # ─── HTML Parser to extract JSON-LD blocks ───────────────────────────────────
@@ -87,22 +87,22 @@ class JSONLDExtractor(HTMLParser):
     """Extracts all <script type="application/ld+json"> blocks from HTML."""
 
     def __init__(self):
-        super.__init__
+        super().__init__()
         self.blocks: List[str] = []
         self._in_ld_json = False
         self._current = []
 
     def handle_starttag(self, tag: str, attrs: list):
-        if tag.lower == "script":
+        if tag.lower() == "script":
             attr_dict = dict(attrs)
-            if attr_dict.get("type", "").lower == "application/ld+json":
+            if attr_dict.get("type", "").lower() == "application/ld+json":
                 self._in_ld_json = True
                 self._current = []
 
     def handle_endtag(self, tag: str):
-        if tag.lower == "script" and self._in_ld_json:
+        if tag.lower() == "script" and self._in_ld_json:
             self._in_ld_json = False
-            self.blocks.append("".join(self._current).strip)
+            self.blocks.append("".join(self._current).strip())
 
     def handle_data(self, data: str):
         if self._in_ld_json:
@@ -317,7 +317,7 @@ SAMPLE_HTML = """<!DOCTYPE html>
     "dateModified": "2024-03-15",
     "author": {
       "@type": "Person",
-      "name": "Jane Doe"
+      "name": "Reza Rezvani"
     },
     "publisher": {
       "@type": "Organization",
@@ -389,7 +389,7 @@ SAMPLE_HTML = """<!DOCTYPE html>
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
-def main:
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -401,15 +401,15 @@ def main:
         help="Path to an HTML file to validate. "
              "Use '-' to read from stdin. If omitted, runs embedded sample."
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.file:
         if args.file == "-":
-            html = sys.stdin.read
+            html = sys.stdin.read()
         else:
             try:
                 with open(args.file, "r", encoding="utf-8") as f:
-                    html = f.read
+                    html = f.read()
             except FileNotFoundError:
                 print(f"Error: File not found: {args.file}", file=sys.stderr)
                 sys.exit(1)
@@ -417,7 +417,7 @@ def main:
         print("No file provided — running on embedded sample HTML.\n")
         html = SAMPLE_HTML
 
-    extractor = JSONLDExtractor
+    extractor = JSONLDExtractor()
     extractor.feed(html)
 
     all_results = []
@@ -439,4 +439,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

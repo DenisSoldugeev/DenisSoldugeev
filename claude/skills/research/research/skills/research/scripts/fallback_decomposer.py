@@ -30,20 +30,20 @@ FRAMEWORK = [
 
 def _extract_topic(question: str) -> str:
     """Strip leading 'research', interrogatives, framing verbs to surface the topic noun phrase."""
-    q = question.strip.rstrip("?").strip
+    q = question.strip().rstrip("?").strip()
     q = re.sub(
         r"^(can you |could you |please |i need to |i want to |help me )",
         "", q, flags=re.IGNORECASE,
-    ).strip
+    ).strip()
     q = re.sub(
         r"^(research |look into |investigate |find me information on |"
         r"find information on |do some research on |what do we know about |"
         r"what is |what's |how are |how is |how do |why is |why are |"
         r"who is |who are |when |where |tell me about )",
         "", q, flags=re.IGNORECASE,
-    ).strip
+    ).strip()
     q = re.sub(r"\s+", " ", q)
-    return q or question.strip.rstrip("?")
+    return q or question.strip().rstrip("?")
 
 
 def decompose(question: str, n: int = 5) -> dict:
@@ -81,13 +81,13 @@ def render_human(result: dict) -> str:
     return "\n".join(lines)
 
 
-def main:
+def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--question", help="The research question to decompose.")
     p.add_argument("--n", type=int, default=5, help="Number of sub-questions (3-5; default 5).")
     p.add_argument("--output", choices=["human", "json"], default="human")
     p.add_argument("--sample", action="store_true", help="Run with built-in sample question.")
-    args = p.parse_args
+    args = p.parse_args()
 
     if args.sample:
         args.question = "How are health systems integrating LLM-based clinical decision support in 2026?"
@@ -104,4 +104,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

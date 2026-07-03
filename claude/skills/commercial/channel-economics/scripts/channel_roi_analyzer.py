@@ -226,18 +226,18 @@ SAMPLE = {
 }
 
 
-def main -> int:
+def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--input", help="Path to JSON input file")
     ap.add_argument("--output", choices=["json", "markdown"], default="markdown")
     ap.add_argument(
         "--profile",
-        choices=list(PROFILES.keys),
+        choices=list(PROFILES.keys()),
         default="saas",
         help="Industry profile (tunes LTV multiplier + marginal-decay alpha)",
     )
     ap.add_argument("--sample", action="store_true")
-    args = ap.parse_args
+    args = ap.parse_args()
 
     if args.sample:
         payload = SAMPLE
@@ -245,7 +245,7 @@ def main -> int:
         with open(args.input) as f:
             payload = json.load(f)
     else:
-        ap.print_help
+        ap.print_help()
         return 0
 
     profile = payload.get("profile", args.profile)
@@ -267,4 +267,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

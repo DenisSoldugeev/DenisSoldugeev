@@ -10,8 +10,8 @@
 
 set -euo pipefail
 
-MISSING=
-WARNINGS=
+MISSING=()
+WARNINGS=()
 
 # --- Define required vars by environment ---
 ALWAYS_REQUIRED=(
@@ -126,7 +126,7 @@ export const config = {
 
 FAIL=0
 
-check {
+check() {
   local label="$1"
   local pattern="$2"
   local matches

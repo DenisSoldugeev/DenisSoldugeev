@@ -40,11 +40,11 @@ def calculate(reference: date, window_years: int) -> Dict[str, Any]:
     fy_start_date = date(current_fy - 1, 10, 1)
     fy_end_date = date(current_fy, 9, 30)
     return {
-        "reference_date": reference.isoformat,
+        "reference_date": reference.isoformat(),
         "calendar_year": reference.year,
         "current_fiscal_year": current_fy,
-        "current_fy_start": fy_start_date.isoformat,
-        "current_fy_end": fy_end_date.isoformat,
+        "current_fy_start": fy_start_date.isoformat(),
+        "current_fy_end": fy_end_date.isoformat(),
         "window_years": window_years,
         "window_fiscal_years": years,
         "reporter_payload_snippet": f'"fiscal_years": {json.dumps(years)}',
@@ -73,11 +73,11 @@ def main(argv: List[str]) -> int:
 
     if args.reference_date:
         try:
-            ref = datetime.strptime(args.reference_date, "%Y-%m-%d").date
+            ref = datetime.strptime(args.reference_date, "%Y-%m-%d").date()
         except ValueError:
             print(f"error: invalid --reference-date '{args.reference_date}', expected YYYY-MM-DD", file=sys.stderr); return 2
     else:
-        ref = date.today
+        ref = date.today()
 
     try:
         result = calculate(ref, args.window)

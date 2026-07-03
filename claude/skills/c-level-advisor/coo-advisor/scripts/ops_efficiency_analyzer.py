@@ -130,7 +130,7 @@ def score_process_maturity(process: ProcessData) -> dict[str, Any]:
     dimension_scores = {}
     recommendations = []
 
-    for dimension, config in MATURITY_CRITERIA.items:
+    for dimension, config in MATURITY_CRITERIA.items():
         raw_score = maturity_inputs.get(dimension, 0)
         # Normalize raw score (0-5) to weight
         normalized = (raw_score / 5.0) * config["weight"] * 5
@@ -454,7 +454,7 @@ def _dept_revenue_benchmark(dept_name: str, stage: str) -> int:
         },
     }
     stage_data = benchmarks.get(stage, benchmarks["series_a"])
-    dept_key = dept_name.lower.replace(" ", "_").replace("-", "_")
+    dept_key = dept_name.lower().replace(" ", "_").replace("-", "_")
     return stage_data.get(dept_key, stage_data["default"])
 
 
@@ -613,7 +613,7 @@ def format_report(
 ) -> str:
     """Format the full analysis report as plain text."""
     lines = []
-    now = datetime.now.strftime("%Y-%m-%d %H:%M")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     lines.append("=" * 70)
     lines.append("OPERATIONAL EFFICIENCY ANALYSIS REPORT")
@@ -780,7 +780,7 @@ def run_analysis(data: dict) -> str:
     )
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Operational Efficiency Analyzer — COO Advisor Tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -796,7 +796,7 @@ def main:
         help="Path to write report (default: stdout)",
         default=None,
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.input:
         try:
@@ -1068,4 +1068,4 @@ SAMPLE_DATA = {
 
 
 if __name__ == "__main__":
-    main
+    main()

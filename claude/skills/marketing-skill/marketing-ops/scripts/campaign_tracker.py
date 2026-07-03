@@ -29,30 +29,30 @@ SAMPLE_CAMPAIGN = {
 def analyze_campaign(campaign: dict) -> dict:
     """Analyze campaign status and generate report."""
     tasks = campaign["tasks"]
-    today = datetime.now.strftime("%Y-%m-%d")
+    today = datetime.now().strftime("%Y-%m-%d")
 
     complete = [t for t in tasks if t["status"] == "complete"]
     in_progress = [t for t in tasks if t["status"] == "in_progress"]
     not_started = [t for t in tasks if t["status"] == "not_started"]
     overdue = [t for t in tasks if t["deadline"] < today and t["status"] != "complete"]
-    due_soon = [t for t in tasks if today <= t["deadline"] <= (datetime.now + timedelta(days=3)).strftime("%Y-%m-%d") and t["status"] != "complete"]
+    due_soon = [t for t in tasks if today <= t["deadline"] <= (datetime.now() + timedelta(days=3)).strftime("%Y-%m-%d") and t["status"] != "complete"]
 
     total = len(tasks)
     progress = round((len(complete) / total) * 100) if total > 0 else 0
 
     # Skills coverage
     skills_used = list(set(t["skill"] for t in tasks))
-    pods_covered = set
+    pods_covered = set()
     pod_map = {
         "content": ["content-strategy", "copywriting", "copy-editing", "social-content", "marketing-ideas", "content-production", "content-humanizer", "content-creator"],
-        "seo": ["seo-audit", "programmatic-seo", "ai-seo", "schema-markup", "site-architecture"],
+        "seo": ["seo-audit", "programmatic-seo", "aeo", "schema-markup", "site-architecture"],
         "cro": ["page-cro", "form-cro", "signup-flow-cro", "onboarding-cro", "popup-cro", "paywall-upgrade-cro"],
         "channels": ["email-sequence", "cold-email", "paid-ads", "ad-creative", "social-media-manager"],
         "growth": ["ab-test-setup", "referral-program", "free-tool-strategy", "churn-prevention"],
         "intelligence": ["campaign-analytics", "analytics-tracking", "competitor-alternatives", "marketing-psychology"],
         "gtm": ["launch-strategy", "pricing-strategy"]
     }
-    for pod, skills in pod_map.items:
+    for pod, skills in pod_map.items():
         if any(s in skills_used for s in skills):
             pods_covered.add(pod)
 
@@ -77,7 +77,7 @@ def analyze_campaign(campaign: dict) -> dict:
         "overdue": [{"task": t["task"], "deadline": t["deadline"], "owner": t["owner"]} for t in overdue],
         "due_soon": [{"task": t["task"], "deadline": t["deadline"], "owner": t["owner"]} for t in due_soon],
         "pods_covered": sorted(pods_covered),
-        "pods_missing": sorted(set(pod_map.keys) - pods_covered),
+        "pods_missing": sorted(set(pod_map.keys()) - pods_covered),
         "skills_used": sorted(skills_used),
         "blockers": blockers
     }
@@ -118,7 +118,7 @@ def print_report(analysis: dict):
     print(f"{'='*55}")
 
 
-def main:
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -132,12 +132,12 @@ def main:
         "--json", action="store_true",
         help="Also output results as JSON"
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.input_file:
         filepath = Path(args.input_file)
-        if filepath.exists:
-            campaign = json.loads(filepath.read_text)
+        if filepath.exists():
+            campaign = json.loads(filepath.read_text())
         else:
             print(f"Error: {filepath} not found", file=sys.stderr)
             sys.exit(1)
@@ -153,4 +153,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

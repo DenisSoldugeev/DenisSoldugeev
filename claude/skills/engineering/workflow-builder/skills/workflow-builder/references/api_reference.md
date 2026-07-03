@@ -11,7 +11,7 @@ export const meta = {
   name: 'workflow-name',            // required, non-empty string
   description: 'One-line summary',  // required
   whenToUse: 'When to run this',    // optional
-  phases: [                         // optional, one entry per phase call
+  phases: [                         // optional, one entry per phase() call
     { title: 'Phase Name', detail: 'Description', model: 'haiku' }
   ]
 }
@@ -21,17 +21,17 @@ export const meta = {
 
 | Global | Signature | Returns |
 |--------|-----------|---------|
-| `agent` | `agent(prompt, opts?) → Promise<string\|object>` | Text, or a validated object when `schema` is set |
-| `pipeline` | `pipeline(items, ...stages) → Promise<any[]>` | Streamed per-item results (no barrier between stages) |
-| `parallel` | `parallel(thunks) → Promise<any[]>` | Concurrent results (barrier — waits for all) |
-| `phase` | `phase(title) → void` | Groups subsequent agents under a heading |
-| `log` | `log(message) → void` | Narrator output to the workflow log |
-| `console` | `.log`, `.error`, … | Routed into the workflow log |
-| `workflow` | `workflow(nameOrRef, args?) → Promise<any>` | Result of a nested workflow (one level deep max) |
+| `agent()` | `agent(prompt, opts?) → Promise<string\|object>` | Text, or a validated object when `schema` is set |
+| `pipeline()` | `pipeline(items, ...stages) → Promise<any[]>` | Streamed per-item results (no barrier between stages) |
+| `parallel()` | `parallel(thunks) → Promise<any[]>` | Concurrent results (barrier — waits for all) |
+| `phase()` | `phase(title) → void` | Groups subsequent agents under a heading |
+| `log()` | `log(message) → void` | Narrator output to the workflow log |
+| `console` | `.log()`, `.error()`, … | Routed into the workflow log |
+| `workflow()` | `workflow(nameOrRef, args?) → Promise<any>` | Result of a nested workflow (one level deep max) |
 | `args` | any | The input passed to the workflow, unchanged |
-| `budget` | `{ total, spent, remaining }` | Token tracking |
+| `budget` | `{ total, spent(), remaining() }` | Token tracking |
 
-## 3. `agent` options
+## 3. `agent()` options
 
 ```js
 agent(prompt, {
@@ -49,21 +49,21 @@ agent(prompt, {
 
 **Resume cache key** includes `schema`, `model`, `isolation`, and `agentType` — changing any of these re-runs the agent on resume. `label` and `phase` do **not** invalidate the cache.
 
-## 4. `pipeline` vs `parallel`
+## 4. `pipeline()` vs `parallel()`
 
 **`pipeline(items, stage1, stage2, …)`** — each item flows through every stage independently; there is no barrier between stages, so stage 2 starts for an item the moment stage 1 finishes for *that* item. Stage callbacks receive `(prevResult, originalItem, index)`. Wall-clock time ≈ the slowest single item's full chain, not the sum of slowest-per-stage. **Default choice for multi-stage work.**
 
-**`parallel(thunks)`** — runs an array of ` => Promise` thunks concurrently and waits for all (a barrier). Use only when the next step genuinely needs the entire prior result set — dedup, merge, or a count-based exit. Requires thunks, not bare promises: `parallel([ => agent(a),  => agent(b)])`.
+**`parallel(thunks)`** — runs an array of `() => Promise` thunks concurrently and waits for all (a barrier). Use only when the next step genuinely needs the entire prior result set — dedup, merge, or a count-based exit. Requires thunks, not bare promises: `parallel([() => agent(a), () => agent(b)])`.
 
 ## 5. `budget` object
 
 ```js
 budget.total        // user-set target, or null if none
-budget.spent      // output tokens spent this turn
-budget.remaining  // max(0, total - spent), or Infinity when total is null
+budget.spent()      // output tokens spent this turn
+budget.remaining()  // max(0, total - spent()), or Infinity when total is null
 ```
 
-Throws `WorkflowBudgetExceededError` once `spent` reaches `total`. Use `budget.remaining` as a loop guard for depth-scaling workflows.
+Throws `WorkflowBudgetExceededError` once `spent()` reaches `total`. Use `budget.remaining()` as a loop guard for depth-scaling workflows.
 
 ## 6. Caps & limits
 
@@ -78,17 +78,17 @@ Throws `WorkflowBudgetExceededError` once `spent` reaches `total`. Use `budget.r
 ## 7. Sandbox restrictions
 
 **Banned (non-reproducible — break resume):**
-- `Math.random` → vary the agent prompt by index instead.
-- `Date.now` → pass timestamps in via `args`.
-- argless `new Date` → use `new Date(specificValue)`.
+- `Math.random()` → vary the agent prompt by index instead.
+- `Date.now()` → pass timestamps in via `args`.
+- argless `new Date()` → use `new Date(specificValue)`.
 
-**No access** to filesystem, Node APIs (`require`, `fs`, `process`), or network from the orchestrator. Any work needing those must happen *inside* an `agent` call (the sub-agent has full tool access).
+**No access** to filesystem, Node APIs (`require`, `fs`, `process`), or network from the orchestrator. Any work needing those must happen *inside* an `agent()` call (the sub-agent has full tool access).
 
 ## 8. Execution & resume
 
 1. The script is persisted to the session directory.
 2. A background task launches and returns a run ID (`wf_…`).
-3. A journal records each `agent` call keyed by a hash of `(prompt, opts)`.
+3. A journal records each `agent()` call keyed by a hash of `(prompt, opts)`.
 4. Resume via `Workflow({ scriptPath, resumeFromRunId })` — cached calls return instantly; only changed or new calls re-run. Resume works **same-session only**; edit the saved file and re-invoke with `scriptPath`.
 
 ## 9. Enabling the feature
@@ -111,5 +111,5 @@ Save workflow files under `.claude/workflows/` in the project, then browse, laun
 4. Anthropic — sub-agents & the Agent tool documentation (fresh-context isolation model).
 5. Anthropic — Claude Agent SDK: orchestration and background-task execution patterns.
 6. JSON Schema specification (json-schema.org) — the `schema` option's validation contract.
-7. Node.js / ECMAScript — async/await and `Promise.all` semantics underlying `parallel`.
+7. Node.js / ECMAScript — async/await and `Promise.all` semantics underlying `parallel()`.
 8. Google SRE Workbook — error-budget discipline, analogous to the `budget` guard pattern.

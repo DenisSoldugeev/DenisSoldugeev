@@ -38,7 +38,7 @@ Scan the project:
 
 List every test file with:
 - File path
-- Number of tests (count `it`, `test`, or test methods)
+- Number of tests (count `it()`, `test()`, or test methods)
 - Dependencies (custom commands, page objects, fixtures)
 - Complexity (simple/medium/complex based on lines and patterns)
 
@@ -112,8 +112,8 @@ Order files by dependency graph:
 ### Step 6: Identify Risks
 
 Flag tests that may need manual intervention:
-- Tests using Cypress-only features (`cy.origin`, `cy.session`)
-- Tests with complex `cy.intercept` patterns
+- Tests using Cypress-only features (`cy.origin()`, `cy.session()`)
+- Tests with complex `cy.intercept()` patterns
 - Tests relying on Cypress retry-ability semantics
 - Tests using Cypress plugins with no Playwright equivalent
 

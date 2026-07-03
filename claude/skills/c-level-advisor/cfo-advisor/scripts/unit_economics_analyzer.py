@@ -335,7 +335,7 @@ def print_channel_analysis(results: list[UnitEconomicsResult], channels: list[Ch
 
 
 def export_csv_results(cohort_results: list[UnitEconomicsResult], channel_results: list[UnitEconomicsResult]) -> str:
-    buf = io.StringIO
+    buf = io.StringIO()
     writer = csv.writer(buf)
     writer.writerow(["Type", "Label", "Customers", "CAC", "ARPA_Monthly", "Gross_Margin_Pct",
                      "Monthly_Churn", "LTV", "LTV_CAC_Ratio", "Payback_Months",
@@ -355,14 +355,14 @@ def export_csv_results(cohort_results: list[UnitEconomicsResult], channel_result
                          round(r.ltv_cac_ratio, 2) if r.ltv_cac_ratio != float("inf") else "inf",
                          round(r.payback_months, 2) if r.payback_months != float("inf") else "inf",
                          "", ""])
-    return buf.getvalue
+    return buf.getvalue()
 
 
 # ---------------------------------------------------------------------------
 # Sample data
 # ---------------------------------------------------------------------------
 
-def make_sample_cohorts -> list[CohortData]:
+def make_sample_cohorts() -> list[CohortData]:
     """
     Series A SaaS company, 8 quarters of cohort data.
     Shows a business improving on all dimensions over time.
@@ -444,7 +444,7 @@ def make_sample_cohorts -> list[CohortData]:
     ]
 
 
-def make_sample_channels -> list[ChannelData]:
+def make_sample_channels() -> list[ChannelData]:
     """
     Q4 2024 channel breakdown. Blended looks fine; per-channel reveals problems.
     """
@@ -463,13 +463,13 @@ def make_sample_channels -> list[ChannelData]:
 # Entry point
 # ---------------------------------------------------------------------------
 
-def main -> None:
+def main() -> None:
     parser = argparse.ArgumentParser(description="Unit Economics Analyzer")
     parser.add_argument("--csv", action="store_true", help="Export results as CSV to stdout")
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    cohorts = make_sample_cohorts
-    channels = make_sample_channels
+    cohorts = make_sample_cohorts()
+    channels = make_sample_channels()
 
     print("\n" + "="*80)
     print("  UNIT ECONOMICS ANALYZER")
@@ -526,4 +526,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

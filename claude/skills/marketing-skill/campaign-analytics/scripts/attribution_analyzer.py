@@ -118,7 +118,7 @@ def time_decay_attribution(journeys: List[Dict], half_life_days: float = 7.0) ->
         weights: List[float] = []
         for tp in sorted_tp:
             tp_time = parse_timestamp(tp["timestamp"])
-            days_before = (conversion_time - tp_time).total_seconds / 86400.0
+            days_before = (conversion_time - tp_time).total_seconds() / 86400.0
             weight = math.exp(-decay_rate * days_before)
             weights.append(weight)
 
@@ -191,7 +191,7 @@ def compute_summary(journeys: List[Dict]) -> Dict[str, Any]:
     total_journeys = len(journeys)
     converted = sum(1 for j in journeys if j.get("converted", False))
     total_revenue = sum(j.get("revenue", 0.0) for j in journeys if j.get("converted", False))
-    all_channels = set
+    all_channels = set()
     for j in journeys:
         for tp in j.get("touchpoints", []):
             all_channels.add(tp["channel"])
@@ -221,18 +221,18 @@ def format_text(results: Dict[str, Any]) -> str:
     lines.append(f"  Total Revenue:      ${summary['total_revenue']:,.2f}")
     lines.append(f"  Channels Observed:  {', '.join(summary['channels_observed'])}")
 
-    for model_name, credits in results["models"].items:
+    for model_name, credits in results["models"].items():
         lines.append("")
         lines.append("-" * 70)
-        lines.append(f"MODEL: {model_name.upper}")
+        lines.append(f"MODEL: {model_name.upper()}")
         lines.append("-" * 70)
 
         if not credits:
             lines.append("  No conversions to attribute.")
             continue
 
-        total_credit = sum(credits.values)
-        sorted_channels = sorted(credits.items, key=lambda x: x[1], reverse=True)
+        total_credit = sum(credits.values())
+        sorted_channels = sorted(credits.items(), key=lambda x: x[1], reverse=True)
 
         lines.append(f"  {'Channel':<25} {'Revenue Credit':>15} {'Share':>10}")
         lines.append(f"  {'-'*25} {'-'*15} {'-'*10}")
@@ -250,15 +250,15 @@ def format_text(results: Dict[str, Any]) -> str:
         lines.append("CROSS-MODEL COMPARISON")
         lines.append("=" * 70)
 
-        all_channels = set
-        for credits in results["models"].values:
-            all_channels.update(credits.keys)
+        all_channels = set()
+        for credits in results["models"].values():
+            all_channels.update(credits.keys())
         all_channels_sorted = sorted(all_channels)
 
-        model_names = list(results["models"].keys)
+        model_names = list(results["models"].keys())
         header = f"  {'Channel':<20}"
         for mn in model_names:
-            short = mn.replace("-", " ").title
+            short = mn.replace("-", " ").title()
             header += f" {short:>14}"
         lines.append(header)
         lines.append(f"  {'-'*20}" + f" {'-'*14}" * len(model_names))
@@ -274,7 +274,7 @@ def format_text(results: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def main -> None:
+def main() -> None:
     """Main entry point for the attribution analyzer."""
     parser = argparse.ArgumentParser(
         description="Multi-touch attribution analyzer for marketing campaigns.",
@@ -304,7 +304,7 @@ def main -> None:
         help="Output format (default: text)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Load input data
     try:
@@ -329,7 +329,7 @@ def main -> None:
     model_results: Dict[str, Dict[str, float]] = {}
     for model_name in models_to_run:
         credits = run_model(model_name, journeys, args.half_life)
-        model_results[model_name] = {ch: round(v, 2) for ch, v in credits.items}
+        model_results[model_name] = {ch: round(v, 2) for ch, v in credits.items()}
 
     # Build output
     results: Dict[str, Any] = {
@@ -344,4 +344,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -184,19 +184,19 @@ class MetadataOptimizer:
         max_length = self.limits['keywords']
 
         # Extract words already in title (these don't need to be in keyword field)
-        title_words = set(app_title.lower.split) if app_title else set
+        title_words = set(app_title.lower().split()) if app_title else set()
 
         # Process keywords
         processed_keywords = []
         for keyword in target_keywords:
-            keyword_lower = keyword.lower.strip
+            keyword_lower = keyword.lower().strip()
 
             # Skip if already in title
             if keyword_lower in title_words:
                 continue
 
             # Remove duplicates and process
-            words = keyword_lower.split
+            words = keyword_lower.split()
             for word in words:
                 if word not in processed_keywords and word not in title_words:
                     processed_keywords.append(word)
@@ -216,7 +216,7 @@ class MetadataOptimizer:
             'remaining_chars': max_length - len(keyword_field),
             'keywords_included': keyword_field.split(','),
             'keywords_count': len(keyword_field.split(',')),
-            'keywords_excluded': [kw for kw in target_keywords if kw.lower not in keyword_field],
+            'keywords_excluded': [kw for kw in target_keywords if kw.lower() not in keyword_field],
             'description_coverage': density,
             'optimization_tips': [
                 'Keywords in title are auto-indexed - no need to repeat',
@@ -246,7 +246,7 @@ class MetadataOptimizer:
             'field_status': {}
         }
 
-        for field_name, value in metadata.items:
+        for field_name, value in metadata.items():
             if field_name not in self.limits:
                 validation_results['warnings'].append(
                     f"Unknown field '{field_name}' for {self.platform} platform"
@@ -295,12 +295,12 @@ class MetadataOptimizer:
         Returns:
             Density analysis
         """
-        text_lower = text.lower
-        total_words = len(text_lower.split)
+        text_lower = text.lower()
+        total_words = len(text_lower.split())
 
         keyword_densities = {}
         for keyword in target_keywords:
-            keyword_lower = keyword.lower
+            keyword_lower = keyword.lower()
             count = text_lower.count(keyword_lower)
             density = (count / total_words * 100) if total_words > 0 else 0
 
@@ -311,7 +311,7 @@ class MetadataOptimizer:
             }
 
         # Overall assessment
-        total_keyword_occurrences = sum(kw['occurrences'] for kw in keyword_densities.values)
+        total_keyword_occurrences = sum(kw['occurrences'] for kw in keyword_densities.values())
         overall_density = (total_keyword_occurrences / total_words * 100) if total_words > 0 else 0
 
         return {
@@ -352,13 +352,13 @@ class MetadataOptimizer:
         primary_keyword = target_keywords[0] if target_keywords else ''
 
         # Template: [Primary Keyword] - [Unique Value]
-        short_desc = f"{primary_keyword.title} - {unique_value}"[:max_length]
+        short_desc = f"{primary_keyword.title()} - {unique_value}"[:max_length]
 
         return {
             'short_description': short_desc,
             'length': len(short_desc),
             'remaining_chars': max_length - len(short_desc),
-            'keywords_included': [primary_keyword] if primary_keyword in short_desc.lower else [],
+            'keywords_included': [primary_keyword] if primary_keyword in short_desc.lower() else [],
             'strategy': 'keyword_value_proposition'
         }
 
@@ -400,7 +400,7 @@ class MetadataOptimizer:
         # Hook (with primary keyword)
         primary_keyword = target_keywords[0] if target_keywords else ''
         unique_value = app_info.get('unique_value', '')
-        hook = f"{unique_value} {primary_keyword.title} that helps you achieve more.\n\n"
+        hook = f"{unique_value} {primary_keyword.title()} that helps you achieve more.\n\n"
         sections.append(hook)
 
         # Features (with keywords naturally integrated)
@@ -412,7 +412,7 @@ class MetadataOptimizer:
                 feature_text = f"• {feature}"
                 if i <= len(target_keywords):
                     keyword = target_keywords[i-1]
-                    if keyword.lower not in feature.lower:
+                    if keyword.lower() not in feature.lower():
                         feature_text = f"• {feature} with {keyword}"
                 sections.append(f"{feature_text}\n")
             sections.append("\n")
@@ -452,7 +452,7 @@ class MetadataOptimizer:
     def _remove_plural_duplicates(self, keywords: List[str]) -> List[str]:
         """Remove plural forms if singular exists."""
         deduplicated = []
-        singular_set = set
+        singular_set = set()
 
         for keyword in keywords:
             if keyword.endswith('s') and len(keyword) > 1:
@@ -482,11 +482,11 @@ class MetadataOptimizer:
 
     def _calculate_coverage(self, keywords: List[str], text: str) -> Dict[str, int]:
         """Calculate how many keywords are covered in text."""
-        text_lower = text.lower
+        text_lower = text.lower()
         coverage = {}
 
         for keyword in keywords:
-            coverage[keyword] = text_lower.count(keyword.lower)
+            coverage[keyword] = text_lower.count(keyword.lower())
 
         return coverage
 
@@ -517,7 +517,7 @@ class MetadataOptimizer:
         """Generate recommendations based on keyword density analysis."""
         recommendations = []
 
-        for keyword, data in keyword_densities.items:
+        for keyword, data in keyword_densities.items():
             if data['status'] == 'too_low':
                 recommendations.append(
                     f"Increase usage of '{keyword}' - currently only {data['occurrences']} times"

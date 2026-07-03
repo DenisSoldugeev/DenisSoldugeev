@@ -22,12 +22,30 @@ from typing import Dict, List, Optional
 from uuid import uuid4
 
 
+def add_months(dt: datetime, months: int) -> datetime:
+    """Add calendar months per GDPR Art. 12(3) (one month, not 30 days).
+
+    If the target month has no equivalent day (e.g., Jan 31 + 1 month),
+    clamp to the last day of the target month.
+    """
+    month_index = dt.month - 1 + months
+    year = dt.year + month_index // 12
+    month = month_index % 12 + 1
+    # last day of target month
+    if month == 12:
+        next_month_first = datetime(year + 1, 1, 1)
+    else:
+        next_month_first = datetime(year, month + 1, 1)
+    last_day = (next_month_first - timedelta(days=1)).day
+    return dt.replace(year=year, month=month, day=min(dt.day, last_day))
+
+
 # GDPR Articles for each right
 RIGHTS_TYPES = {
     "access": {
         "article": "Art. 15",
         "name": "Right of Access",
-        "deadline_days": 30,
+        "deadline_months": 1,  # Art. 12(3): one month of receipt
         "description": "Data subject has the right to obtain confirmation of processing and access to their data",
         "response_includes": [
             "Purposes of processing",
@@ -42,7 +60,7 @@ RIGHTS_TYPES = {
     "rectification": {
         "article": "Art. 16",
         "name": "Right to Rectification",
-        "deadline_days": 30,
+        "deadline_months": 1,  # Art. 12(3): one month of receipt
         "description": "Data subject has the right to have inaccurate personal data corrected",
         "response_includes": [
             "Confirmation of correction",
@@ -53,7 +71,7 @@ RIGHTS_TYPES = {
     "erasure": {
         "article": "Art. 17",
         "name": "Right to Erasure (Right to be Forgotten)",
-        "deadline_days": 30,
+        "deadline_months": 1,  # Art. 12(3): one month of receipt
         "description": "Data subject has the right to have their personal data erased",
         "grounds": [
             "Data no longer necessary for original purpose",
@@ -74,7 +92,7 @@ RIGHTS_TYPES = {
     "restriction": {
         "article": "Art. 18",
         "name": "Right to Restriction of Processing",
-        "deadline_days": 30,
+        "deadline_months": 1,  # Art. 12(3): one month of receipt
         "description": "Data subject has the right to restrict processing of their data",
         "grounds": [
             "Accuracy contested (during verification)",
@@ -86,7 +104,7 @@ RIGHTS_TYPES = {
     "portability": {
         "article": "Art. 20",
         "name": "Right to Data Portability",
-        "deadline_days": 30,
+        "deadline_months": 1,  # Art. 12(3): one month of receipt
         "description": "Data subject has the right to receive their data in a portable format",
         "conditions": [
             "Processing based on consent or contract",
@@ -101,7 +119,7 @@ RIGHTS_TYPES = {
     "objection": {
         "article": "Art. 21",
         "name": "Right to Object",
-        "deadline_days": 30,
+        "deadline_months": 1,  # Art. 12(3): one month of receipt
         "description": "Data subject has the right to object to processing",
         "applies_to": [
             "Processing based on legitimate interests",
@@ -112,7 +130,7 @@ RIGHTS_TYPES = {
     "automated": {
         "article": "Art. 22",
         "name": "Rights Related to Automated Decision-Making",
-        "deadline_days": 30,
+        "deadline_months": 1,  # Art. 12(3): one month of receipt
         "description": "Data subject has the right not to be subject to solely automated decisions",
         "includes": [
             "Right to human intervention",
@@ -140,25 +158,25 @@ class RightsTracker:
 
     def __init__(self, data_file: str = "dsr_requests.json"):
         self.data_file = Path(data_file)
-        self.requests = self._load_requests
+        self.requests = self._load_requests()
 
     def _load_requests(self) -> Dict:
         """Load requests from file."""
-        if self.data_file.exists:
+        if self.data_file.exists():
             with open(self.data_file, "r") as f:
                 return json.load(f)
-        return {"requests": [], "metadata": {"created": datetime.now.isoformat}}
+        return {"requests": [], "metadata": {"created": datetime.now().isoformat()}}
 
     def _save_requests(self):
         """Save requests to file."""
-        self.requests["metadata"]["updated"] = datetime.now.isoformat
+        self.requests["metadata"]["updated"] = datetime.now().isoformat()
         with open(self.data_file, "w") as f:
             json.dump(self.requests, f, indent=2)
 
     def _generate_id(self) -> str:
         """Generate unique request ID."""
         count = len(self.requests["requests"]) + 1
-        return f"DSR-{datetime.now.strftime('%Y%m')}-{count:04d}"
+        return f"DSR-{datetime.now().strftime('%Y%m')}-{count:04d}"
 
     def add_request(
         self,
@@ -169,14 +187,15 @@ class RightsTracker:
     ) -> Dict:
         """Add a new data subject request."""
         if right_type not in RIGHTS_TYPES:
-            raise ValueError(f"Invalid right type. Must be one of: {list(RIGHTS_TYPES.keys)}")
+            raise ValueError(f"Invalid right type. Must be one of: {list(RIGHTS_TYPES.keys())}")
 
         right_info = RIGHTS_TYPES[right_type]
-        now = datetime.now
-        deadline = now + timedelta(days=right_info["deadline_days"])
+        now = datetime.now()
+        # Art. 12(3): respond within one calendar month of receipt
+        deadline = add_months(now, right_info["deadline_months"])
 
         request = {
-            "id": self._generate_id,
+            "id": self._generate_id(),
             "type": right_type,
             "article": right_info["article"],
             "right_name": right_info["name"],
@@ -189,8 +208,8 @@ class RightsTracker:
             "status": "received",
             "status_description": STATUSES["received"],
             "dates": {
-                "received": now.isoformat,
-                "deadline": deadline.isoformat,
+                "received": now.isoformat(),
+                "deadline": deadline.isoformat(),
                 "verified": None,
                 "completed": None
             },
@@ -199,7 +218,7 @@ class RightsTracker:
         }
 
         self.requests["requests"].append(request)
-        self._save_requests
+        self._save_requests()
         return request
 
     def update_status(
@@ -210,7 +229,7 @@ class RightsTracker:
     ) -> Optional[Dict]:
         """Update request status."""
         if new_status not in STATUSES:
-            raise ValueError(f"Invalid status. Must be one of: {list(STATUSES.keys)}")
+            raise ValueError(f"Invalid status. Must be one of: {list(STATUSES.keys())}")
 
         for req in self.requests["requests"]:
             if req["id"] == request_id:
@@ -219,21 +238,22 @@ class RightsTracker:
 
                 if new_status == "verified":
                     req["subject"]["verified"] = True
-                    req["dates"]["verified"] = datetime.now.isoformat
+                    req["dates"]["verified"] = datetime.now().isoformat()
                 elif new_status == "completed":
-                    req["dates"]["completed"] = datetime.now.isoformat
+                    req["dates"]["completed"] = datetime.now().isoformat()
                 elif new_status == "extended":
-                    # Extend deadline by additional 60 days (max total 90)
+                    # Art. 12(3): extendable by two further calendar months for
+                    # complex/numerous requests (data subject informed within month 1)
                     original_deadline = datetime.fromisoformat(req["dates"]["deadline"])
-                    req["dates"]["deadline"] = (original_deadline + timedelta(days=60)).isoformat
+                    req["dates"]["deadline"] = add_months(original_deadline, 2).isoformat()
 
                 if note:
                     req["notes"].append({
-                        "timestamp": datetime.now.isoformat,
+                        "timestamp": datetime.now().isoformat(),
                         "note": note
                     })
 
-                self._save_requests
+                self._save_requests()
                 return req
 
         return None
@@ -252,7 +272,7 @@ class RightsTracker:
     ) -> List[Dict]:
         """List requests with optional filtering."""
         results = []
-        now = datetime.now
+        now = datetime.now()
 
         for req in self.requests["requests"]:
             if status_filter and req["status"] != status_filter:
@@ -275,7 +295,7 @@ class RightsTracker:
 
     def generate_report(self) -> Dict:
         """Generate compliance report."""
-        now = datetime.now
+        now = datetime.now()
         total = len(self.requests["requests"])
 
         status_counts = {}
@@ -310,7 +330,7 @@ class RightsTracker:
         compliance_rate = (completed_on_time / (completed_on_time + completed_late) * 100) if (completed_on_time + completed_late) > 0 else 100
 
         return {
-            "report_date": now.isoformat,
+            "report_date": now.isoformat(),
             "summary": {
                 "total_requests": total,
                 "open_requests": total - status_counts.get("completed", 0) - status_counts.get("refused", 0),
@@ -323,7 +343,7 @@ class RightsTracker:
             "performance": {
                 "completed_on_time": completed_on_time,
                 "completed_late": completed_late,
-                "average_response_days": self._calculate_avg_response_time
+                "average_response_days": self._calculate_avg_response_time()
             }
         }
 
@@ -426,7 +446,7 @@ Reference: {req['id']}
         return template
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Track and manage data subject rights requests"
     )
@@ -440,21 +460,21 @@ def main:
 
     # Add command
     add_parser = subparsers.add_parser("add", help="Add new request")
-    add_parser.add_argument("--type", "-t", required=True, choices=RIGHTS_TYPES.keys)
+    add_parser.add_argument("--type", "-t", required=True, choices=RIGHTS_TYPES.keys())
     add_parser.add_argument("--subject", "-s", required=True, help="Subject name")
     add_parser.add_argument("--email", "-e", required=True, help="Subject email")
     add_parser.add_argument("--details", "-d", default="", help="Request details")
 
     # List command
     list_parser = subparsers.add_parser("list", help="List requests")
-    list_parser.add_argument("--status", choices=STATUSES.keys, help="Filter by status")
+    list_parser.add_argument("--status", choices=STATUSES.keys(), help="Filter by status")
     list_parser.add_argument("--overdue", action="store_true", help="Show only overdue")
     list_parser.add_argument("--json", action="store_true", help="JSON output")
 
     # Status command
     status_parser = subparsers.add_parser("status", help="Get/update request status")
     status_parser.add_argument("--id", required=True, help="Request ID")
-    status_parser.add_argument("--update", choices=STATUSES.keys, help="Update status")
+    status_parser.add_argument("--update", choices=STATUSES.keys(), help="Update status")
     status_parser.add_argument("--note", default="", help="Add note")
 
     # Report command
@@ -468,7 +488,7 @@ def main:
     # Types command
     subparsers.add_parser("types", help="List available request types")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     tracker = RightsTracker(args.data_file)
 
@@ -509,7 +529,7 @@ def main:
                 print(f"Request not found: {args.id}")
 
     elif args.command == "report":
-        report = tracker.generate_report
+        report = tracker.generate_report()
         output = json.dumps(report, indent=2)
         if args.output:
             with open(args.output, "w") as f:
@@ -528,14 +548,14 @@ def main:
     elif args.command == "types":
         print("Available Request Types:")
         print("-" * 60)
-        for key, info in RIGHTS_TYPES.items:
+        for key, info in RIGHTS_TYPES.items():
             print(f"\n{key} ({info['article']})")
             print(f"  {info['name']}")
-            print(f"  Deadline: {info['deadline_days']} days")
+            print(f"  Deadline: {info['deadline_months']} calendar month(s) (Art. 12(3))")
 
     else:
-        parser.print_help
+        parser.print_help()
 
 
 if __name__ == "__main__":
-    main
+    main()

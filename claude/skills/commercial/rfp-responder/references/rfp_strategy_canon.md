@@ -66,7 +66,7 @@ The skill exposes 5 profiles via `--profile`. Each shifts the base rate:
 
 5. **Bain & Company, B2B Sales and RFP-Win-Rate Research** — Bain's commercial-discipline practice publishes regular benchmarks on disciplined-pursuit win-rates (35-45%) vs respond-to-everything win-rates (5-12%). The 20% NO-BID threshold in `winrate_predictor.py` is calibrated against this data.
 
-6. **McKinsey & Company, B2B Sales Practice** — McKinsey research on decision-criteria alignment and win-rate. Sources the bimodal alignment effect (>80% alignment doubles base rate; <50% collapses to 30% of base) encoded in `alignment_factor`.
+6. **McKinsey & Company, B2B Sales Practice** — McKinsey research on decision-criteria alignment and win-rate. Sources the bimodal alignment effect (>80% alignment doubles base rate; <50% collapses to 30% of base) encoded in `alignment_factor()`.
 
 7. **B2B International (now Kantar B2B), Buyer Behavior in RFP Processes** — research on how B2B evaluation committees actually score responses. Confirms that compliance-matrix presence, proof-point substantiation, and rubric-aligned response structure are the top-3 evaluator-cited differentiators.
 

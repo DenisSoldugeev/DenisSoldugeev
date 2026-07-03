@@ -24,7 +24,7 @@ The mis-match between session timeout and operation time means **synchronous wai
 
 When triggering a slow operation:
 
-1. Locate the trigger button (via find)
+1. Locate the trigger button (via find())
 2. Click it
 3. **Verify generation started** via screenshot (look for spinner / "Generating" indicator)
 4. **Tell the user**: "Generation in progress — NotebookLM will notify you when ready. NotebookLM sends in-app and email notifications when complete."
@@ -47,7 +47,8 @@ The user already knows how NotebookLM works — they'll see the notification whe
 | Studio: Study Guide | Generation | 30-60s | **Wait** (with 90s timeout) |
 | Studio: Briefing Doc | Generation | 30-60s | **Wait** (with 90s timeout) |
 | Studio: FAQ | Generation | 30-60s | **Wait** (with 90s timeout) |
-| Studio: Table of Contents | Generation | 20-40s | **Wait** |
+| Studio: Flashcards / Quiz | Generation | 30-60s | **Wait** |
+| Studio: Video Overview | Generation | 5-15 min | **Fire-and-notify** |
 | Studio: Timeline | Generation | 30-60s | **Wait** (with 90s timeout) |
 | **Studio: Audio Overview** | Audio gen | **5-10 min** | **NOTIFY** (fire-and-notify) |
 | **Studio: Infographic** | Visual gen | **2-5 min** | **NOTIFY** |
@@ -103,7 +104,7 @@ Skill clicks "Generate Audio Overview" at T+0. Browser-automation session times 
 
 ### Failure 2: Wasted compute
 
-Skill loops `screenshot` every 5s waiting for completion. 10 minutes × 12 screenshots/min = 120 wasted screenshots. Compute cost adds up.
+Skill loops `screenshot()` every 5s waiting for completion. 10 minutes × 12 screenshots/min = 120 wasted screenshots. Compute cost adds up.
 
 ### Failure 3: Hides errors
 

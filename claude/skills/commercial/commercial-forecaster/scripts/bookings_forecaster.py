@@ -106,7 +106,7 @@ def parse_date(s: str | None) -> date | None:
     if not s:
         return None
     try:
-        return datetime.fromisoformat(str(s)).date
+        return datetime.fromisoformat(str(s)).date()
     except ValueError:
         return None
 
@@ -205,13 +205,13 @@ def compute_forecast(ctx: dict[str, Any], profile: str) -> ForecastResult:
     # Compute median stage age per stage for stall detection
     by_stage_age: dict[str, list[int]] = {}
     for o in opps:
-        stage = str(o.get("stage", "")).lower
+        stage = str(o.get("stage", "")).lower()
         age = int(o.get("age_days") or 0)
         by_stage_age.setdefault(stage, []).append(age)
-    median_stage_age = {s: int(statistics.median(ages)) for s, ages in by_stage_age.items if ages}
+    median_stage_age = {s: int(statistics.median(ages)) for s, ages in by_stage_age.items() if ages}
 
     # Resolve conversion per unique stage encountered
-    unique_stages = sorted({str(o.get("stage", "")).lower for o in opps})
+    unique_stages = sorted({str(o.get("stage", "")).lower() for o in opps})
     stage_conversions = [blend_conversion(s, hist, profile) for s in unique_stages]
     sc_map = {sc.stage: sc for sc in stage_conversions}
 
@@ -223,7 +223,7 @@ def compute_forecast(ctx: dict[str, Any], profile: str) -> ForecastResult:
 
     for o in opps:
         opp_id = str(o.get("opp_id") or o.get("id") or "?")
-        stage = str(o.get("stage", "")).lower
+        stage = str(o.get("stage", "")).lower()
         amount = float(o.get("amount") or 0)
         close_date = parse_date(o.get("close_date"))
         age_days = int(o.get("age_days") or 0)
@@ -375,7 +375,7 @@ def render_markdown(r: ForecastResult, ctx: dict[str, Any], profile: str) -> str
     return "\n".join(L)
 
 
-def sample_context -> dict[str, Any]:
+def sample_context() -> dict[str, Any]:
     return {
         "opportunities": [
             {"opp_id": "OPP-101", "stage": "commit", "amount": 180000, "close_date": "2026-06-15", "age_days": 45, "last_activity_days": 3},
@@ -403,10 +403,10 @@ def sample_context -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(description=__doc__.splitlines[0])
+    p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--input", type=Path, help="Path to forecast-intake JSON.")
     p.add_argument(
-        "--profile", default="saas", choices=list(PROFILES.keys),
+        "--profile", default="saas", choices=list(PROFILES.keys()),
         help="Industry profile for stage-conversion priors when historical data is missing per stage.",
     )
     p.add_argument("--output", default="markdown", choices=["markdown", "json"], help="Output format.")
@@ -414,9 +414,9 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
 
     if args.sample:
-        ctx = sample_context
+        ctx = sample_context()
     elif args.input:
-        ctx = json.loads(args.input.read_text)
+        ctx = json.loads(args.input.read_text())
     else:
         p.error("Provide --input or --sample.")
         return 2
@@ -452,4 +452,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

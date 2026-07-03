@@ -32,21 +32,21 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-def _now -> str:
-    return datetime.now(timezone.utc).isoformat
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 def _session_path(session: str) -> Path:
-    base = Path.home / ".research_sessions"
+    base = Path.home() / ".research_sessions"
     base.mkdir(parents=True, exist_ok=True)
-    safe = "".join(c if c.isalnum or c in ("-", "_") else "_" for c in session)
+    safe = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in session)
     return base / f"{safe}.json"
 
 
 def _load(session: str) -> dict:
     path = _session_path(session)
-    if not path.exists:
-        return {"session": session, "created_at": _now, "events": []}
+    if not path.exists():
+        return {"session": session, "created_at": _now(), "events": []}
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -60,7 +60,7 @@ def record_decision(session: str, question: str, route_to: str, confidence: str,
                     matched: dict | None = None) -> dict:
     data = _load(session)
     event = {
-        "at": _now,
+        "at": _now(),
         "type": "decision",
         "question": question,
         "route_to": route_to,
@@ -75,7 +75,7 @@ def record_decision(session: str, question: str, route_to: str, confidence: str,
 def record_override(session: str, from_target: str, to_target: str, reason: str) -> dict:
     data = _load(session)
     event = {
-        "at": _now,
+        "at": _now(),
         "type": "override",
         "from": from_target,
         "to": to_target,
@@ -89,7 +89,7 @@ def record_override(session: str, from_target: str, to_target: str, reason: str)
 def record_delegation(session: str, target: str, signals: str) -> dict:
     data = _load(session)
     event = {
-        "at": _now,
+        "at": _now(),
         "type": "delegation",
         "target": target,
         "signals": signals,
@@ -124,7 +124,7 @@ def render_human(result: dict) -> str:
     return json.dumps(result, indent=2)
 
 
-def main:
+def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--action",
                    choices=["record_decision", "record_override", "record_delegation", "read"],
@@ -141,13 +141,13 @@ def main:
     p.add_argument("--signals", help="(record_delegation) Signals that matched.")
     p.add_argument("--output", choices=["human", "json"], default="human")
     p.add_argument("--sample", action="store_true", help="Run a built-in 4-event sample sequence.")
-    args = p.parse_args
+    args = p.parse_args()
 
     if args.sample:
         session = "sample"
         path = _session_path(session)
-        if path.exists:
-            path.unlink
+        if path.exists():
+            path.unlink()
         record_decision(session,
                         "Can you review the literature on PICO for sepsis?",
                         "litreview",
@@ -197,4 +197,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

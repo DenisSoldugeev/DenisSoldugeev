@@ -123,8 +123,8 @@ python ../../engineering/karpathy-coder/skills/karpathy-coder/scripts/diff_surge
 - [ds-frontend-engineer](ds-frontend-engineer.md) — fork into for API consumers
 - [ds-karpathy-reviewer](ds-karpathy-reviewer.md) — invoke before every commit
 - [ds-cto-advisor](../c-level/ds-cto-advisor.md) — escalate strategic build-vs-buy
-- [ds-vpe-advisor](../../skills/c-level-advisor/c-level-agents/agents/ds-vpe-advisor.md) — escalate throughput / org / DORA
-- [ds-ciso-advisor](../../skills/c-level-advisor/c-level-agents/agents/ds-ciso-advisor.md) — escalate regulated-data exposure
+- [ds-vpe-advisor](../../c-level-advisor/c-level-agents/agents/ds-vpe-advisor.md) — escalate throughput / org / DORA
+- [ds-ciso-advisor](../../c-level-advisor/c-level-agents/agents/ds-ciso-advisor.md) — escalate regulated-data exposure
 
 ## Invocation Contract
 

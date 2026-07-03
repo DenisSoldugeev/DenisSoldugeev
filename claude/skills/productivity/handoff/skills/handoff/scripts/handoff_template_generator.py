@@ -17,12 +17,12 @@ import sys
 import tempfile
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import config_loader  # noqa: E402
 
 
 def _slugify(text: str, max_len: int = 40) -> str:
-    text = re.sub(r"[^A-Za-z0-9]+", "-", text).strip("-").lower
+    text = re.sub(r"[^A-Za-z0-9]+", "-", text).strip("-").lower()
     if not text:
         text = "handoff"
     return text[:max_len].rstrip("-")
@@ -43,14 +43,14 @@ def _git_context(cwd: Path) -> str | None:
             return None
         if result.returncode != 0:
             return None
-        return result.stdout.strip
+        return result.stdout.strip()
 
     if _run(["git", "rev-parse", "--is-inside-work-tree"]) != "true":
         return None
     branch = _run(["git", "branch", "--show-current"]) or "(detached)"
     last_commit = _run(["git", "log", "-1", "--oneline"]) or "(no commits)"
     status = _run(["git", "status", "--porcelain"]) or ""
-    dirty_count = sum(1 for line in status.splitlines if line.strip)
+    dirty_count = sum(1 for line in status.splitlines() if line.strip())
     lines = [
         "_Git context (auto-included from config)._",
         "",
@@ -71,27 +71,27 @@ def _save_dirs(config: dict) -> list[Path]:
     raw_path = save.get("path")
     dirs: list[Path] = []
     if mode == "temp":
-        dirs.append(Path(tempfile.gettempdir))
+        dirs.append(Path(tempfile.gettempdir()))
     elif raw_path:
         dirs.append(Path(raw_path))
-    proj = Path.cwd / ".handoff"
-    if proj.exists and proj not in dirs:
+    proj = Path.cwd() / ".handoff"
+    if proj.exists() and proj not in dirs:
         dirs.append(proj)
-    return [d for d in dirs if d.exists]
+    return [d for d in dirs if d.exists()]
 
 
 def _find_latest_handoff(config: dict) -> Path | None:
     latest: tuple[float, Path] | None = None
     for d in _save_dirs(config):
         try:
-            for entry in d.iterdir:
-                if not entry.is_file or not entry.name.lower.endswith(".md"):
+            for entry in d.iterdir():
+                if not entry.is_file() or not entry.name.lower().endswith(".md"):
                     continue
-                name = entry.name.lower
+                name = entry.name.lower()
                 if not any(t in name for t in HANDOFF_FILENAME_TOKENS):
                     continue
                 try:
-                    mtime = entry.stat.st_mtime
+                    mtime = entry.stat().st_mtime
                 except OSError:
                     continue
                 if latest is None or mtime > latest[0]:
@@ -119,23 +119,23 @@ def _resolve_save_path(config: dict, goal: str, now: dt.datetime) -> Path:
         filename = f"handoff-{now.strftime('%Y%m%d-%H%M%S')}.md"
 
     if mode == "project":
-        base = Path(raw_path) if raw_path else (Path.cwd / ".handoff")
+        base = Path(raw_path) if raw_path else (Path.cwd() / ".handoff")
     elif mode == "home_visible":
-        base = Path(raw_path) if raw_path else (Path.home / "handoffs")
+        base = Path(raw_path) if raw_path else (Path.home() / "handoffs")
     elif mode == "home_hidden":
-        base = Path(raw_path) if raw_path else (Path.home / ".handoff")
+        base = Path(raw_path) if raw_path else (Path.home() / ".handoff")
     elif mode == "custom":
         if not raw_path:
             raise SystemExit("Custom save mode requires save_location.path in config.")
         base = Path(raw_path)
     else:
-        base = Path(tempfile.gettempdir)
+        base = Path(tempfile.gettempdir())
     base.mkdir(parents=True, exist_ok=True)
     return base / filename
 
 
 def _scaffold(goal: str, git_block: str | None, now: dt.datetime) -> str:
-    iso = now.replace(microsecond=0).isoformat + "Z"
+    iso = now.replace(microsecond=0).isoformat() + "Z"
     git_section = git_block if git_block else "_<!-- git context disabled or not in a repo -->_"
     return f"""---
 generated_at: {iso}
@@ -212,9 +212,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    config = config_loader.load_config
-    now = dt.datetime.utcnow
-    goal = args.goal.strip
+    config = config_loader.load_config()
+    now = dt.datetime.utcnow()
+    goal = args.goal.strip()
 
     if args.refresh and not args.sample:
         existing = _find_latest_handoff(config)
@@ -229,7 +229,7 @@ def main(argv: list[str] | None = None) -> int:
 
     git_block: str | None = None
     if not args.no_git and config.get("include_git_context", True):
-        git_block = _git_context(Path.cwd)
+        git_block = _git_context(Path.cwd())
 
     content = _scaffold(goal=goal, git_block=git_block, now=now)
 
@@ -253,4 +253,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

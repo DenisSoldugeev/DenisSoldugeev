@@ -267,7 +267,7 @@ Action:
 Trigger: Issue created
 Condition: Issue type = Story AND assignee is empty
 Action:
-  - Lookup: JQL = "assignee in (dev1, dev2, dev3) AND sprint in openSprints AND status != Done"
+  - Lookup: JQL = "assignee in (dev1, dev2, dev3) AND sprint in openSprints() AND status != Done"
   - Assign to team member with fewest open issues
 ```
 

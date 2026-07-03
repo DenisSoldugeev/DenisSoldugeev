@@ -74,7 +74,7 @@ python scripts/bicep_generator.py --arch-type web-app --output main.bicep
 param environment string = 'dev'
 
 @description('The Azure region for resources')
-param location string = resourceGroup.location
+param location string = resourceGroup().location
 
 @description('The application name')
 param appName string = 'myapp'

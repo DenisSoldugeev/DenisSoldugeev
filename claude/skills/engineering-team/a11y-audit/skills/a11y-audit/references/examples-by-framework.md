@@ -143,11 +143,11 @@ handleTabKeydown(event: KeyboardEvent, index: number): void {
       return;
   }
 
-  event.preventDefault;
+  event.preventDefault();
   this.selectTab(this.tabs[newIndex]);
   // Move focus to the new tab button
   const tabElement = document.getElementById(`tab-${this.tabs[newIndex].id}`);
-  tabElement?.focus;
+  tabElement?.focus();
 }
 ```
 
@@ -155,7 +155,7 @@ handleTabKeydown(event: KeyboardEvent, index: number): void {
 
 ```tsx
 // BEFORE: src/app/page.tsx
-export default function Home {
+export default function Home() {
   return (
     <main>
       <div className="text-4xl font-bold">Welcome to Acme</div>
@@ -163,7 +163,7 @@ export default function Home {
         Build better products with our platform.
       </div>
       <div className="mt-8 bg-blue-600 text-white px-6 py-3 rounded cursor-pointer"
-           onClick={ => router.push('/signup')}>
+           onClick={() => router.push('/signup')}>
         Get Started
       </div>
     </main>
@@ -190,7 +190,7 @@ export const metadata: Metadata = {
   description: 'Build better products with the Acme platform.',
 };
 
-export default function Home {
+export default function Home() {
   return (
     <main>
       <h1 className="text-4xl font-bold">Welcome to Acme</h1>
@@ -231,7 +231,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 </script>
 
 {#each items as item, i}
-  <div class="header" on:click={ => toggle(i)}>
+  <div class="header" on:click={() => toggle(i)}>
     {item.title}
   </div>
   {#if openIndex === i}
@@ -260,7 +260,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   function handleKeydown(event, i) {
     if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault;
+      event.preventDefault();
       toggle(i);
     }
   }
@@ -274,7 +274,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         aria-expanded={openIndex === i}
         aria-controls="panel-{i}"
         id="header-{i}"
-        on:click={ => toggle(i)}
+        on:click={() => toggle(i)}
         on:keydown={(e) => handleKeydown(e, i)}
       >
         {item.title}

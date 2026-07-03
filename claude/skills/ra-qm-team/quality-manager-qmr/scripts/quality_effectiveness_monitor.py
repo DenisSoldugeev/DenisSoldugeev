@@ -102,7 +102,7 @@ class QMSEffectivenessMonitor:
 
     def calculate_sigma_level(self, metric: QualityMetric, historical_values: List[float]) -> float:
         """Calculate process sigma level based on defect rate."""
-        if metric.unit == "PPM" or "rate" in metric.metric_name.lower:
+        if metric.unit == "PPM" or "rate" in metric.metric_name.lower():
             # For defect rates, DPMO = defects_per_million_opportunities
             if historical_values:
                 avg_defect_rate = mean(historical_values)
@@ -204,7 +204,7 @@ class QMSEffectivenessMonitor:
                 grouped[m.metric_name] = []
             grouped[m.metric_name].append(m)
 
-        for metric_name, metric_list in grouped.items:
+        for metric_name, metric_list in grouped.items():
             if len(metric_list) < 5:
                 continue
 
@@ -390,7 +390,7 @@ def format_qms_report(report: QMSReport) -> str:
         "-" * 40,
     ]
 
-    for category, data in report.trends_analysis.items:
+    for category, data in report.trends_analysis.items():
         lines.append(f"  {category}: {data['avg_value']} (alerts: {data['alerts']})")
 
     if report.predictive_alerts:
@@ -422,7 +422,7 @@ def format_qms_report(report: QMSReport) -> str:
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="QMS Effectiveness Monitor")
     parser.add_argument("--metrics", type=str, help="CSV file with quality metrics")
     parser.add_argument("--qms-data", type=str, help="JSON file with QMS data")
@@ -431,8 +431,8 @@ def main:
     parser.add_argument("--output", choices=["text", "json"], default="text")
     parser.add_argument("--interactive", action="store_true", help="Interactive mode")
 
-    args = parser.parse_args
-    monitor = QMSEffectivenessMonitor
+    args = parser.parse_args()
+    monitor = QMSEffectivenessMonitor()
 
     if args.metrics:
         metrics = monitor.load_csv(args.metrics)
@@ -478,4 +478,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

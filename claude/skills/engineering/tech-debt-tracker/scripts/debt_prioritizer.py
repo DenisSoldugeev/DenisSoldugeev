@@ -141,17 +141,17 @@ class DebtPrioritizer:
                                       reverse=True)
         
         # Step 4: Generate sprint allocation recommendations
-        sprint_allocation = self._generate_sprint_allocation
+        sprint_allocation = self._generate_sprint_allocation()
         
         # Step 5: Generate insights and recommendations
-        insights = self._generate_insights
+        insights = self._generate_insights()
         
         # Step 6: Create visualization data
-        charts_data = self._generate_charts_data
+        charts_data = self._generate_charts_data()
         
         return {
             "metadata": {
-                "analysis_date": datetime.now.isoformat,
+                "analysis_date": datetime.now().isoformat(),
                 "framework_used": framework,
                 "team_size": self.team_size,
                 "sprint_capacity_hours": self.sprint_capacity_hours,
@@ -161,12 +161,12 @@ class DebtPrioritizer:
             "sprint_allocation": sprint_allocation,
             "insights": insights,
             "charts_data": charts_data,
-            "recommendations": self._generate_recommendations
+            "recommendations": self._generate_recommendations()
         }
     
     def _enrich_debt_item(self, item: Dict[str, Any]) -> Dict[str, Any]:
         """Enrich debt item with detailed estimates and impact analysis."""
-        enriched = item.copy
+        enriched = item.copy()
         
         # Generate effort estimate
         effort = self._estimate_effort(item)
@@ -334,11 +334,11 @@ class DebtPrioritizer:
         
         # Estimate frequency based on file path patterns
         frequency_multiplier = 1.0
-        if any(pattern in file_path.lower for pattern in ["main", "core", "auth", "api"]):
+        if any(pattern in file_path.lower() for pattern in ["main", "core", "auth", "api"]):
             frequency_multiplier = 2.0
-        elif any(pattern in file_path.lower for pattern in ["util", "helper", "common"]):
+        elif any(pattern in file_path.lower() for pattern in ["util", "helper", "common"]):
             frequency_multiplier = 1.5
-        elif any(pattern in file_path.lower for pattern in ["test", "spec", "config"]):
+        elif any(pattern in file_path.lower() for pattern in ["test", "spec", "config"]):
             frequency_multiplier = 0.5
         
         # Team impact multiplier
@@ -399,7 +399,7 @@ class DebtPrioritizer:
             "documentation": ["missing_docstring", "outdated_docs"]
         }
         
-        for category, types in categories.items:
+        for category, types in categories.items():
             if debt_type in types:
                 return category
         
@@ -590,7 +590,7 @@ class DebtPrioritizer:
             effort_by_category[item["category"]] += item["effort_estimate"]["hours_estimate"]
         
         # Priority distribution
-        priorities = Counter
+        priorities = Counter()
         for item in self.prioritized_items:
             score = item["priority_score"]
             if score >= 8:
@@ -619,13 +619,13 @@ class DebtPrioritizer:
         return {
             "category_distribution": dict(categories),
             "total_effort_hours": round(total_effort, 1),
-            "effort_by_category": {k: round(v, 1) for k, v in effort_by_category.items},
+            "effort_by_category": {k: round(v, 1) for k, v in effort_by_category.items()},
             "priority_distribution": dict(priorities),
             "high_risk_items_count": len(high_risk_items),
             "quick_wins_count": len(quick_wins),
             "total_cost_of_delay": round(total_cost_of_delay, 1),
             "average_daily_interest_rate": round(avg_interest_rate, 2),
-            "top_categories_by_effort": sorted(effort_by_category.items, 
+            "top_categories_by_effort": sorted(effort_by_category.items(), 
                                              key=lambda x: x[1], reverse=True)[:3]
         }
     
@@ -649,7 +649,7 @@ class DebtPrioritizer:
             effort_by_category[item["category"]] += item["effort_estimate"]["hours_estimate"]
         
         pie_data = [{"category": k, "effort": round(v, 1)} 
-                   for k, v in effort_by_category.items]
+                   for k, v in effort_by_category.items()]
         
         # Priority timeline (bar chart)
         timeline_data = []
@@ -684,7 +684,7 @@ class DebtPrioritizer:
         """Generate actionable recommendations based on analysis."""
         recommendations = []
         
-        insights = self._generate_insights
+        insights = self._generate_insights()
         
         # Quick wins recommendation
         if insights["quick_wins_count"] > 0:
@@ -744,7 +744,7 @@ def format_prioritized_report(analysis_result: Dict[str, Any]) -> str:
     output.append("=" * 60)
     metadata = analysis_result["metadata"]
     output.append(f"Analysis Date: {metadata['analysis_date']}")
-    output.append(f"Framework: {metadata['framework_used'].upper}")
+    output.append(f"Framework: {metadata['framework_used'].upper()}")
     output.append(f"Team Size: {metadata['team_size']}")
     output.append(f"Sprint Capacity: {metadata['sprint_capacity_hours']} hours")
     output.append("")
@@ -798,7 +798,7 @@ def format_prioritized_report(analysis_result: Dict[str, Any]) -> str:
     return "\n".join(output)
 
 
-def main:
+def main():
     """Main entry point for the debt prioritizer."""
     parser = argparse.ArgumentParser(description="Prioritize technical debt backlog")
     parser.add_argument("inventory_file", help="Path to debt inventory JSON file")
@@ -811,7 +811,7 @@ def main:
     parser.add_argument("--sprint-capacity", type=int, default=80, 
                        help="Sprint capacity in hours")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     # Initialize prioritizer
     prioritizer = DebtPrioritizer(args.team_size, args.sprint_capacity)
@@ -854,4 +854,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

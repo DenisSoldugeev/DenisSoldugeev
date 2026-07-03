@@ -33,11 +33,11 @@ class EcosystemAnalyzer:
             Dictionary of health score components
         """
         scores = {
-            'github_health': self._score_github_health,
-            'npm_health': self._score_npm_health,
-            'community_health': self._score_community_health,
-            'corporate_backing': self._score_corporate_backing,
-            'maintenance_health': self._score_maintenance_health
+            'github_health': self._score_github_health(),
+            'npm_health': self._score_npm_health(),
+            'community_health': self._score_community_health(),
+            'corporate_backing': self._score_corporate_backing(),
+            'maintenance_health': self._score_maintenance_health()
         }
 
         # Calculate weighted average
@@ -49,7 +49,7 @@ class EcosystemAnalyzer:
             'maintenance_health': 0.20
         }
 
-        overall = sum(scores[k] * weights[k] for k in scores.keys)
+        overall = sum(scores[k] * weights[k] for k in scores.keys())
         scores['overall_health'] = overall
 
         return scores
@@ -339,7 +339,7 @@ class EcosystemAnalyzer:
         Returns:
             Viability assessment with risk factors
         """
-        health = self.calculate_health_score
+        health = self.calculate_health_score()
         overall_health = health['overall_health']
 
         # Determine viability level
@@ -459,16 +459,16 @@ class EcosystemAnalyzer:
         Returns:
             Complete ecosystem analysis
         """
-        health = self.calculate_health_score
-        viability = self.assess_viability
+        health = self.calculate_health_score()
+        viability = self.assess_viability()
 
         return {
             'technology': self.technology,
             'health_scores': health,
             'viability_assessment': viability,
-            'github_metrics': self._format_github_metrics,
-            'npm_metrics': self._format_npm_metrics if self.npm_data else None,
-            'community_metrics': self._format_community_metrics
+            'github_metrics': self._format_github_metrics(),
+            'npm_metrics': self._format_npm_metrics() if self.npm_data else None,
+            'community_metrics': self._format_community_metrics()
         }
 
     def _format_github_metrics(self) -> Dict[str, Any]:

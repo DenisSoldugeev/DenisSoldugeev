@@ -28,7 +28,7 @@ def run_git(*args):
             ["git"] + list(args),
             capture_output=True, text=True, check=True
         )
-        return result.stdout.strip
+        return result.stdout.strip()
     except subprocess.CalledProcessError as e:
         return ""
 
@@ -43,11 +43,11 @@ def get_session_config(session_id):
     config = {}
     with open(config_path) as f:
         for line in f:
-            line = line.strip
+            line = line.strip()
             if ":" in line and not line.startswith("#"):
                 key, val = line.split(":", 1)
-                val = val.strip.strip('"')
-                config[key.strip] = val
+                val = val.strip().strip('"')
+                config[key.strip()] = val
     return config
 
 
@@ -57,7 +57,7 @@ def get_hub_branches(session_id):
                      "--format=%(refname:short)")
     if not output:
         return []
-    return [b.strip for b in output.split("\n") if b.strip]
+    return [b.strip() for b in output.split("\n") if b.strip()]
 
 
 def get_worktree_path(branch):
@@ -85,7 +85,7 @@ def run_eval_in_worktree(worktree_path, eval_cmd):
             eval_cmd, shell=True, capture_output=True, text=True,
             cwd=worktree_path, timeout=120
         )
-        return result.stdout.strip, result.returncode
+        return result.stdout.strip(), result.returncode
     except subprocess.TimeoutExpired:
         return "TIMEOUT", 1
     except Exception as e:
@@ -160,17 +160,17 @@ def rank_by_metric(results, direction="lower"):
     return valid + invalid
 
 
-def run_demo:
+def run_demo():
     """Show demo ranking output."""
     print("=" * 60)
     print("AgentHub Result Ranker — Demo Mode")
     print("=" * 60)
-    print
+    print()
     print("Session: 20260317-143022")
     print("Eval: pytest bench.py --json")
     print("Metric: p50_ms (lower is better)")
     print("Baseline: 180ms")
-    print
+    print()
 
     header = f"{'RANK':<6} {'AGENT':<10} {'METRIC':<10} {'DELTA':<10} {'FILES':<7} {'SUMMARY'}"
     print(header)
@@ -178,13 +178,13 @@ def run_demo:
     print(f"{'1':<6} {'agent-2':<10} {'142ms':<10} {'-38ms':<10} {'2':<7} Replaced O(n²) with hash map lookup")
     print(f"{'2':<6} {'agent-1':<10} {'165ms':<10} {'-15ms':<10} {'3':<7} Added caching layer")
     print(f"{'3':<6} {'agent-3':<10} {'190ms':<10} {'+10ms':<10} {'1':<7} Minor loop optimizations")
-    print
+    print()
     print("Winner: agent-2 (142ms, -21% from baseline)")
-    print
+    print()
     print("Next step: Run /hub:merge to merge agent-2's branch")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Rank AgentHub agent results"
     )
@@ -205,10 +205,10 @@ def main:
                         help="Output format (default: table)")
     parser.add_argument("--demo", action="store_true",
                         help="Show demo output")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.demo:
-        run_demo
+        run_demo()
         return
 
     if not args.session:
@@ -282,7 +282,7 @@ def main:
         print(f"Metric: {metric} ({dir_str})")
     if baseline:
         print(f"Baseline: {baseline}")
-    print
+    print()
 
     if args.diff_summary or not eval_cmd:
         header = f"{'RANK':<6} {'AGENT':<12} {'FILES':<7} {'ADDED':<8} {'REMOVED':<8} {'NET':<6}"
@@ -307,9 +307,9 @@ def main:
     # Winner
     if ranked and ranked[0].get("metric_value") is not None:
         winner = ranked[0]
-        print
+        print()
         print(f"Winner: {winner['agent']} ({winner['metric_value']})")
 
 
 if __name__ == "__main__":
-    main
+    main()

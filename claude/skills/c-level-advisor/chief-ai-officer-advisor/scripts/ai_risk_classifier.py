@@ -90,7 +90,7 @@ def classify_eu(profile: Dict[str, Any]) -> Dict[str, Any]:
     decisions = profile.get("decisions_affected", "informational")
     biometric = profile.get("biometric_data_processed", False)
     automation = profile.get("automation_level", "advisory")
-    use_case = profile.get("use_case", "").lower
+    use_case = profile.get("use_case", "").lower()
 
     # Article 5 prohibited check (heuristic match)
     for prohibited in PROHIBITED_TRIGGERS:
@@ -193,7 +193,7 @@ def classify_eu(profile: Dict[str, Any]) -> Dict[str, Any]:
 
 def us_state_triggers(profile: Dict[str, Any]) -> List[Dict[str, str]]:
     """Return list of triggered US state-level obligations."""
-    states = set(s.upper for s in profile.get("deploys_in_us_states", []))
+    states = set(s.upper() for s in profile.get("deploys_in_us_states", []))
     domain = profile.get("domain", "")
     user_facing = profile.get("user_facing", False)
     triggers = []
@@ -439,7 +439,7 @@ def _wrap(text: str, indent: int, width: int = 70) -> List[str]:
     return textwrap.wrap(text, width=width, initial_indent=" " * indent, subsequent_indent=" " * indent) or [" " * indent + text]
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Classify an AI use case under EU AI Act + US state laws.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -447,7 +447,7 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to use_case JSON (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
@@ -475,4 +475,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

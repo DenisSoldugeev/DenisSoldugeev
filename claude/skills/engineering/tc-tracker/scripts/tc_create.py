@@ -32,12 +32,12 @@ VALID_SCOPES = ("feature", "bugfix", "refactor", "infrastructure", "documentatio
 VALID_PRIORITIES = ("critical", "high", "medium", "low")
 
 
-def now_iso -> str:
+def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
 def slugify(text: str) -> str:
-    text = text.lower.strip
+    text = text.lower().strip()
     text = re.sub(r"[^a-z0-9\s-]", "", text)
     text = re.sub(r"[\s_]+", "-", text)
     text = re.sub(r"-+", "-", text)
@@ -72,7 +72,7 @@ def compute_stats(records: list) -> dict:
 def build_record(tc_id: str, title: str, scope: str, priority: str, summary: str,
                  motivation: str, project_name: str, author: str, session_id: str,
                  platform: str, model: str) -> dict:
-    ts = now_iso
+    ts = now_iso()
     return {
         "tc_id": tc_id,
         "parent_tc": None,
@@ -143,7 +143,7 @@ def build_record(tc_id: str, title: str, scope: str, priority: str, summary: str
     }
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(description="Create a new TC record.")
     parser.add_argument("--root", default=".", help="Project root (default: current directory)")
     parser.add_argument("--name", required=True, help="Functionality slug (kebab-case, e.g. user-auth)")
@@ -157,14 +157,14 @@ def main -> int:
     parser.add_argument("--platform", default="claude_code", choices=("claude_code", "claude_web", "api", "other"))
     parser.add_argument("--model", default="unknown", help="AI model identifier")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    root = Path(args.root).resolve
+    root = Path(args.root).resolve()
     tc_dir = root / "docs" / "TC"
     config_path = tc_dir / "tc_config.json"
     registry_path = tc_dir / "tc_registry.json"
 
-    if not config_path.exists or not registry_path.exists:
+    if not config_path.exists() or not registry_path.exists():
         msg = f"TC tracking not initialized at {tc_dir}. Run tc_init.py first."
         print(json.dumps({"status": "error", "error": msg}) if args.json else f"ERROR: {msg}")
         return 2
@@ -179,7 +179,7 @@ def main -> int:
 
     project_name = config.get("project_name", "Unknown Project")
     author = args.author or config.get("default_author", "Claude")
-    session_id = args.session_id or f"session-{int(datetime.now.timestamp)}-{os.getpid}"
+    session_id = args.session_id or f"session-{int(datetime.now().timestamp())}-{os.getpid()}"
 
     if len(args.title) < 5 or len(args.title) > 120:
         msg = "Title must be 5-120 characters."
@@ -197,11 +197,11 @@ def main -> int:
         return 2
 
     next_num = registry.get("next_tc_number", 1)
-    today = datetime.now
+    today = datetime.now()
     tc_id = f"TC-{next_num:03d}-{date_slug(today)}-{name_slug}"
 
     record_dir = tc_dir / "records" / tc_id
-    if record_dir.exists:
+    if record_dir.exists():
         msg = f"Record directory already exists: {record_dir}"
         print(json.dumps({"status": "error", "error": msg}) if args.json else f"ERROR: {msg}")
         return 2
@@ -241,7 +241,7 @@ def main -> int:
     }
     registry["records"].append(registry_entry)
     registry["next_tc_number"] = next_num + 1
-    registry["updated"] = now_iso
+    registry["updated"] = now_iso()
     registry["statistics"] = compute_stats(registry["records"])
 
     try:
@@ -267,11 +267,11 @@ def main -> int:
         print(f"  Scope:    {args.scope}")
         print(f"  Priority: {args.priority}")
         print(f"  Record:   {record_dir / 'tc_record.json'}")
-        print
+        print()
         print(f"Next: tc_update.py --root {args.root} --tc-id {tc_id} --set-status in_progress")
 
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

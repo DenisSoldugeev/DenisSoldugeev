@@ -48,9 +48,9 @@ class FixtureGenerator:
         elif data_type == "date":
             return self._date_boundaries(constraints)
         elif data_type == "email":
-            return self._email_boundaries
+            return self._email_boundaries()
         elif data_type == "url":
-            return self._url_boundaries
+            return self._url_boundaries()
         else:
             return []
 
@@ -90,7 +90,7 @@ class FixtureGenerator:
 
         # Add special characters
         if max_len >= 10:
-            boundaries.append("test@#$%^&*")  # Special characters
+            boundaries.append("test@#$%^&*()")  # Special characters
             boundaries.append("unicode: 你好")  # Unicode
 
         return [b for b in boundaries if b is not None]
@@ -160,15 +160,15 @@ class FixtureGenerator:
             List of edge case test scenarios
         """
         if scenario == "auth":
-            return self._auth_edge_cases
+            return self._auth_edge_cases()
         elif scenario == "payment":
-            return self._payment_edge_cases
+            return self._payment_edge_cases()
         elif scenario == "form":
             return self._form_edge_cases(context or {})
         elif scenario == "api":
-            return self._api_edge_cases
+            return self._api_edge_cases()
         elif scenario == "file_upload":
-            return self._file_upload_edge_cases
+            return self._file_upload_edge_cases()
         else:
             return []
 
@@ -336,7 +336,7 @@ class FixtureGenerator:
         for _ in range(count):
             mock_obj = {}
 
-            for field_name, field_def in schema.items:
+            for field_name, field_def in schema.items():
                 field_type = field_def.get('type', 'string')
                 mock_obj[field_name] = self._generate_field_value(field_type, field_def)
 
@@ -403,7 +403,7 @@ class FixtureGenerator:
         elif format == "python":
             return f"""# {fixture_name} fixture
 
-{fixture_name.upper} = {repr(data)}
+{fixture_name.upper()} = {repr(data)}
 """
 
         elif format == "yaml":
@@ -419,7 +419,7 @@ class FixtureGenerator:
         indent_str = "  " * indent
 
         if isinstance(data, dict):
-            for key, value in data.items:
+            for key, value in data.items():
                 if isinstance(value, (dict, list)):
                     lines.append(f"{indent_str}{key}:")
                     lines.append(self._dict_to_yaml(value, indent + 1))

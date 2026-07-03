@@ -131,12 +131,12 @@ def print_report(
     print(f"  Significance level (α): {alpha}")
     print(f"  Statistical power (1−β): {power:.0%}")
     print(f"  Variants: {variants}")
-    print
+    print()
     print(f"  Required per variant:  {n:>10,}")
     print(f"  Required total:        {total:>10,}")
-    print
+    print()
     print(f"  Duration: {duration_estimate(n, daily_traffic, variants)}")
-    print
+    print()
 
     # Risk interpretation
     if n < 100:
@@ -179,10 +179,10 @@ def print_table(test: str, baseline: float, mde: float, alpha: float,
 
     print("=" * 70)
     print("  (Values = required n per variant)")
-    print
+    print()
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Calculate required sample size for A/B experiments.")
     parser.add_argument("--test", choices=["proportion", "mean"], required=True,
                         help="Type of metric: proportion (conversion rate) or mean (continuous)")
@@ -202,7 +202,7 @@ def main:
     parser.add_argument("--baseline-mean", type=float, help="Control group mean")
     parser.add_argument("--baseline-std", type=float, help="Control group standard deviation")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         if args.test == "proportion":
@@ -259,4 +259,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

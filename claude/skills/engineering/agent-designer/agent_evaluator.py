@@ -131,9 +131,9 @@ class AgentEvaluator:
     """Evaluate multi-agent system performance from execution logs"""
     
     def __init__(self):
-        self.error_patterns = self._define_error_patterns
-        self.performance_thresholds = self._define_performance_thresholds
-        self.cost_benchmarks = self._define_cost_benchmarks
+        self.error_patterns = self._define_error_patterns()
+        self.performance_thresholds = self._define_performance_thresholds()
+        self.cost_benchmarks = self._define_cost_benchmarks()
     
     def _define_error_patterns(self) -> Dict[str, Dict[str, Any]]:
         """Define common error patterns and their classifications"""
@@ -312,7 +312,7 @@ class AgentEvaluator:
                 try:
                     start_dt = datetime.fromisoformat(start_time.replace("Z", "+00:00"))
                     end_dt = datetime.fromisoformat(end_time.replace("Z", "+00:00"))
-                    time_diff_hours = (end_dt - start_dt).total_seconds / 3600
+                    time_diff_hours = (end_dt - start_dt).total_seconds() / 3600
                     throughput_tasks_per_hour = total_tasks / time_diff_hours if time_diff_hours > 0 else 0.0
                 except:
                     throughput_tasks_per_hour = 0.0
@@ -353,7 +353,7 @@ class AgentEvaluator:
             return 0.0
         sorted_data = sorted(data)
         index = (percentile / 100) * (len(sorted_data) - 1)
-        if index.is_integer:
+        if index.is_integer():
             return sorted_data[int(index)]
         else:
             lower_index = int(index)
@@ -384,10 +384,10 @@ class AgentEvaluator:
         unclassified_errors = []
         
         for error in errors:
-            error_message = str(error.get("error", {})).lower
+            error_message = str(error.get("error", {})).lower()
             classified = False
             
-            for pattern_name, pattern_info in self.error_patterns.items:
+            for pattern_name, pattern_info in self.error_patterns.items():
                 for pattern in pattern_info["patterns"]:
                     if re.search(pattern, error_message):
                         error_groups[pattern_name].append(error)
@@ -402,7 +402,7 @@ class AgentEvaluator:
         # Analyze each error group
         total_errors = len(errors)
         
-        for error_type, error_list in error_groups.items:
+        for error_type, error_list in error_groups.items():
             count = len(error_list)
             percentage = (count / total_errors) * 100 if total_errors > 0 else 0.0
             
@@ -466,9 +466,9 @@ class AgentEvaluator:
             return []
         
         # Simple pattern extraction - find common phrases
-        word_counts = Counter
+        word_counts = Counter()
         for message in error_messages:
-            words = re.findall(r'\w+', message.lower)
+            words = re.findall(r'\w+', message.lower())
             for word in words:
                 if len(word) > 3:  # Ignore short words
                     word_counts[word] += 1
@@ -485,7 +485,7 @@ class AgentEvaluator:
         bottlenecks = []
         
         # Agent performance bottlenecks
-        for agent_id, metrics in agent_metrics.items:
+        for agent_id, metrics in agent_metrics.items():
             if metrics.success_rate < 0.8:
                 severity = "critical" if metrics.success_rate < 0.5 else "high"
                 bottlenecks.append(BottleneckAnalysis(
@@ -536,7 +536,7 @@ class AgentEvaluator:
         
         # Tool usage bottlenecks
         tool_usage = self._analyze_tool_usage(logs)
-        for tool, usage_stats in tool_usage.items:
+        for tool, usage_stats in tool_usage.items():
             if usage_stats.get("error_rate", 0) > 0.2:
                 bottlenecks.append(BottleneckAnalysis(
                     bottleneck_type="tool",
@@ -613,13 +613,13 @@ class AgentEvaluator:
         # Sort bottlenecks by severity and impact
         severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
         bottlenecks.sort(key=lambda x: (severity_order[x.severity], 
-                                       -sum(x.impact_on_performance.values)))
+                                       -sum(x.impact_on_performance.values())))
         
         return bottlenecks
     
     def _get_agent_workflows(self, agent_id: str, logs: List[ExecutionLog]) -> List[str]:
         """Get workflows affected by a specific agent"""
-        workflows = set
+        workflows = set()
         for log in logs:
             if log.agent_id == agent_id:
                 workflows.add(log.task_type)
@@ -631,7 +631,7 @@ class AgentEvaluator:
             "usage_count": 0,
             "error_count": 0,
             "total_duration": 0,
-            "affected_workflows": set,
+            "affected_workflows": set(),
             "retry_count": 0
         })
         
@@ -649,7 +649,7 @@ class AgentEvaluator:
         
         # Calculate derived metrics
         result = {}
-        for tool, stats in tool_stats.items:
+        for tool, stats in tool_stats.items():
             result[tool] = {
                 "usage_count": stats["usage_count"],
                 "error_rate": stats["error_count"] / stats["usage_count"] if stats["usage_count"] > 0 else 0,
@@ -777,6 +777,7 @@ class AgentEvaluator:
                     "latency_reduction": min(0.5, (system_metrics.average_duration_ms - 5000) / system_metrics.average_duration_ms),
                     "throughput_improvement": 1.5
                 },
+                estimated_cost_savings=None,
                 estimated_performance_gain=1.4,
                 implementation_steps=[
                     "Profile and optimize slow operations",
@@ -795,14 +796,15 @@ class AgentEvaluator:
                 recommendations.append(OptimizationRecommendation(
                     category="reliability",
                     priority="high",
-                    title=f"Address {error_analysis.error_type.title} Errors",
-                    description=f"{error_analysis.error_type.title} errors occur in {error_analysis.percentage:.1f}% of cases",
+                    title=f"Address {error_analysis.error_type.title()} Errors",
+                    description=f"{error_analysis.error_type.title()} errors occur in {error_analysis.percentage:.1f}% of cases",
                     implementation_effort="medium",
                     expected_impact={
                         "error_reduction": error_analysis.percentage / 100,
                         "reliability_improvement": 1.1
                     },
                     estimated_cost_savings=system_metrics.total_cost_usd * (error_analysis.percentage / 100) * 0.5,
+                    estimated_performance_gain=None,
                     implementation_steps=error_analysis.suggested_fixes,
                     risks=["May require significant code changes"],
                     prerequisites=["Root cause analysis", "Testing framework"]
@@ -814,11 +816,12 @@ class AgentEvaluator:
             recommendations.append(OptimizationRecommendation(
                 category="performance",
                 priority="high" if bottleneck.severity == "critical" else "medium",
-                title=f"Address {bottleneck.bottleneck_type.title} Bottleneck",
+                title=f"Address {bottleneck.bottleneck_type.title()} Bottleneck",
                 description=bottleneck.description,
                 implementation_effort="medium",
                 expected_impact=bottleneck.estimated_improvement,
-                estimated_performance_gain=list(bottleneck.estimated_improvement.values)[0] if bottleneck.estimated_improvement else 1.1,
+                estimated_cost_savings=None,
+                estimated_performance_gain=list(bottleneck.estimated_improvement.values())[0] if bottleneck.estimated_improvement else 1.1,
                 implementation_steps=bottleneck.optimization_suggestions,
                 risks=["System downtime during implementation", "Potential cascade effects"],
                 prerequisites=["Impact assessment", "Rollback plan"]
@@ -836,6 +839,7 @@ class AgentEvaluator:
                     "throughput_improvement": 2.0,
                     "scalability_headroom": 5.0
                 },
+                estimated_cost_savings=None,
                 estimated_performance_gain=2.0,
                 implementation_steps=[
                     "Implement horizontal scaling for agents",
@@ -914,7 +918,7 @@ class AgentEvaluator:
         
         # Create metadata
         metadata = {
-            "generated_at": datetime.now.isoformat,
+            "generated_at": datetime.now().isoformat(),
             "evaluator_version": "1.0",
             "total_logs_processed": len(logs),
             "agents_analyzed": len(agents),
@@ -956,7 +960,7 @@ class AgentEvaluator:
             daily_avg_durations = {}
             daily_costs = {}
             
-            for date, date_logs in daily_metrics.items:
+            for date, date_logs in daily_metrics.items():
                 if date_logs:
                     metrics = self.calculate_performance_metrics(date_logs)
                     daily_success_rates[date] = metrics.success_rate
@@ -983,7 +987,7 @@ class AgentEvaluator:
         
         # Cost by agent
         agent_costs = {}
-        for agent_id, metrics in agent_metrics.items:
+        for agent_id, metrics in agent_metrics.items():
             agent_costs[agent_id] = metrics.total_cost_usd
         
         # Cost by task type
@@ -999,7 +1003,7 @@ class AgentEvaluator:
             "cost_by_agent": dict(agent_costs),
             "cost_by_task_type": dict(task_type_costs),
             "cost_per_token": total_cost / total_tokens if total_tokens > 0 else 0,
-            "top_cost_drivers": sorted(task_type_costs.items, key=lambda x: x[1], reverse=True)[:5]
+            "top_cost_drivers": sorted(task_type_costs.items(), key=lambda x: x[1], reverse=True)[:5]
         }
     
     def _check_sla_compliance(self, metrics: PerformanceMetrics) -> Dict[str, Any]:
@@ -1027,12 +1031,12 @@ class AgentEvaluator:
             }
         }
         
-        overall_compliance = all(sla["compliant"] for sla in compliance.values)
+        overall_compliance = all(sla["compliant"] for sla in compliance.values())
         
         return {
             "overall_compliant": overall_compliance,
             "sla_details": compliance,
-            "compliance_score": sum(1 for sla in compliance.values if sla["compliant"]) / len(compliance)
+            "compliance_score": sum(1 for sla in compliance.values() if sla["compliant"]) / len(compliance)
         }
     
     def _assess_overall_health(self, metrics: PerformanceMetrics) -> str:
@@ -1116,7 +1120,7 @@ class AgentEvaluator:
         return findings
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Multi-Agent System Performance Evaluator")
     parser.add_argument("input_file", help="JSON file with execution logs")
     parser.add_argument("-o", "--output", help="Output file prefix (default: evaluation_report)")
@@ -1125,7 +1129,7 @@ def main:
     parser.add_argument("--detailed", action="store_true", 
                        help="Include detailed analysis in output")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Load execution logs
@@ -1133,7 +1137,7 @@ def main:
             logs_data = json.load(f)
         
         # Parse logs
-        evaluator = AgentEvaluator
+        evaluator = AgentEvaluator()
         logs = evaluator.parse_execution_logs(logs_data.get("execution_logs", []))
         
         if not logs:
@@ -1192,7 +1196,7 @@ def main:
         print(f"\n{'='*60}")
         print(f"AGENT SYSTEM EVALUATION REPORT")
         print(f"{'='*60}")
-        print(f"Overall Health: {report.summary['overall_health'].upper}")
+        print(f"Overall Health: {report.summary['overall_health'].upper()}")
         print(f"Total Tasks: {report.system_metrics.total_tasks}")
         print(f"Success Rate: {report.system_metrics.success_rate:.1%}")
         print(f"Average Duration: {report.system_metrics.average_duration_ms/1000:.1f}s")
@@ -1220,4 +1224,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

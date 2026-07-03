@@ -68,7 +68,7 @@ STACK_TEMPLATES = {
         "dirs": ["src/app", "src/components", "src/lib", "src/styles", "public", "tests"],
         "files": {
             "src/app/layout.tsx": "export default function RootLayout({ children }: { children: React.ReactNode }) {\n  return <html lang=\"en\"><body>{children}</body></html>;\n}\n",
-            "src/app/page.tsx": "export default function Home {\n  return <main><h1>Welcome</h1></main>;\n}\n",
+            "src/app/page.tsx": "export default function Home() {\n  return <main><h1>Welcome</h1></main>;\n}\n",
         }
     },
     "express": {
@@ -102,7 +102,7 @@ STACK_TEMPLATES = {
         }, indent=2),
         "dirs": ["src/routes", "src/middleware", "src/models", "src/services", "src/utils", "tests"],
         "files": {
-            "src/index.ts": "import express from 'express';\nimport cors from 'cors';\nimport helmet from 'helmet';\nimport { config } from 'dotenv';\n\nconfig;\n\nconst app = express;\nconst PORT = process.env.PORT || 3000;\n\napp.use(helmet);\napp.use(cors);\napp.use(express.json);\n\napp.get('/health', (req, res) => res.json({ status: 'ok' }));\n\napp.listen(PORT,  => console.log(`Server running on port ${PORT}`));\n",
+            "src/index.ts": "import express from 'express';\nimport cors from 'cors';\nimport helmet from 'helmet';\nimport { config } from 'dotenv';\n\nconfig();\n\nconst app = express();\nconst PORT = process.env.PORT || 3000;\n\napp.use(helmet());\napp.use(cors());\napp.use(express.json());\n\napp.get('/health', (req, res) => res.json({ status: 'ok' }));\n\napp.listen(PORT, () => console.log(`Server running on port ${PORT}`));\n",
         }
     },
     "fastapi": {
@@ -110,9 +110,9 @@ STACK_TEMPLATES = {
         "dirs": ["app/api", "app/models", "app/services", "app/core", "tests", "alembic"],
         "files": {
             "app/__init__.py": "",
-            "app/main.py": "from fastapi import FastAPI\nfrom app.core.config import settings\n\napp = FastAPI(title=settings.PROJECT_NAME)\n\n@app.get('/health')\ndef health: return {'status': 'ok'}\n",
+            "app/main.py": "from fastapi import FastAPI\nfrom app.core.config import settings\n\napp = FastAPI(title=settings.PROJECT_NAME)\n\n@app.get('/health')\ndef health(): return {'status': 'ok'}\n",
             "app/core/__init__.py": "",
-            "app/core/config.py": "from pydantic_settings import BaseSettings\n\nclass Settings(BaseSettings):\n    PROJECT_NAME: str = 'API'\n    DATABASE_URL: str = 'sqlite:///./app.db'\n    class Config:\n        env_file = '.env'\n\nsettings = Settings\n",
+            "app/core/config.py": "from pydantic_settings import BaseSettings\n\nclass Settings(BaseSettings):\n    PROJECT_NAME: str = 'API'\n    DATABASE_URL: str = 'sqlite:///./app.db'\n    class Config:\n        env_file = '.env'\n\nsettings = Settings()\n",
         }
     }
 }
@@ -388,7 +388,7 @@ def scaffold_project(config: Dict[str, Any], output_dir: str, dry_run: bool = Fa
     all_files["Dockerfile"] = generate_dockerfile(config)
 
     # Write files
-    for filepath, content in all_files.items:
+    for filepath, content in all_files.items():
         full_path = os.path.join(output_dir, filepath)
         if not dry_run:
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
@@ -397,7 +397,7 @@ def scaffold_project(config: Dict[str, Any], output_dir: str, dry_run: bool = Fa
         files_created.append({"path": filepath, "type": "file", "size": len(content)})
 
     return {
-        "generated_at": datetime.now.isoformat,
+        "generated_at": datetime.now().isoformat(),
         "project_name": config.get("name", "my-project"),
         "stack": stack,
         "output_dir": output_dir,
@@ -408,14 +408,14 @@ def scaffold_project(config: Dict[str, Any], output_dir: str, dry_run: bool = Fa
     }
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Bootstrap SaaS project from config")
     parser.add_argument("input", help="Path to project config JSON")
     parser.add_argument("--output-dir", type=str, default="./my-project", help="Output directory")
     parser.add_argument("--format", choices=["json", "text"], default="text", help="Output format")
     parser.add_argument("--dry-run", action="store_true", help="Preview without creating files")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     with open(args.input) as f:
         config = json.load(f)
@@ -438,4 +438,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

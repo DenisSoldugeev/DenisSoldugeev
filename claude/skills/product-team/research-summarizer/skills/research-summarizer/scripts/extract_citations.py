@@ -49,7 +49,7 @@ def extract_dois(text):
         citations.append({
             "type": "doi",
             "doi": doi,
-            "raw": match.group(0).strip,
+            "raw": match.group(0).strip(),
             "url": f"https://doi.org/{doi}",
         })
     return citations
@@ -74,7 +74,7 @@ def extract_author_year(text):
     """Extract author-year citations like (Smith, 2023) or Smith & Jones (2021)."""
     citations = []
     for match in PATTERNS["author_year"].finditer(text):
-        author = match.group(1).strip
+        author = match.group(1).strip()
         year = match.group(2)
         citations.append({
             "type": "author_year",
@@ -90,7 +90,7 @@ def extract_numbered_refs(text):
     citations = []
     for match in PATTERNS["numbered_ref"].finditer(text):
         num = match.group(1)
-        content = match.group(2).strip
+        content = match.group(2).strip()
         citations.append({
             "type": "numbered",
             "number": int(num),
@@ -102,18 +102,18 @@ def extract_numbered_refs(text):
 
 def deduplicate(citations):
     """Remove duplicate citations based on raw text."""
-    seen = OrderedDict
+    seen = OrderedDict()
     for c in citations:
         key = c.get("doi") or c.get("url") or c.get("raw", "")
-        key = key.lower.strip
+        key = key.lower().strip()
         if key and key not in seen:
             seen[key] = c
-    return list(seen.values)
+    return list(seen.values())
 
 
 def classify_source(citation):
     """Classify citation as primary, secondary, or tertiary."""
-    raw = citation.get("content", citation.get("raw", "")).lower
+    raw = citation.get("content", citation.get("raw", "")).lower()
     if any(kw in raw for kw in ["meta-analysis", "systematic review", "literature review", "survey of"]):
         return "secondary"
     if any(kw in raw for kw in ["textbook", "encyclopedia", "handbook", "dictionary"]):
@@ -247,7 +247,7 @@ def run_extraction(text, fmt, output_mode):
             })
         print(json.dumps(result, indent=2))
     else:
-        print(f"Citations ({fmt.upper}) — {len(citations)} found\n")
+        print(f"Citations ({fmt.upper()}) — {len(citations)} found\n")
         primary = [c for c in citations if c["classification"] == "primary"]
         secondary = [c for c in citations if c["classification"] == "secondary"]
         tertiary = [c for c in citations if c["classification"] == "tertiary"]
@@ -257,12 +257,12 @@ def run_extraction(text, fmt, output_mode):
                 print(f"### {label}")
                 for i, c in enumerate(group, 1):
                     print(f"  {i}. {formatter(c)}")
-                print
+                print()
 
     return citations
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="research-summarizer: Extract and format citations from text"
     )
@@ -284,14 +284,14 @@ def main:
         action="store_true",
         help="Read from stdin instead of file",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.stdin:
-        text = sys.stdin.read
+        text = sys.stdin.read()
     elif args.file:
         try:
             with open(args.file, "r", encoding="utf-8") as f:
-                text = f.read
+                text = f.read()
         except FileNotFoundError:
             print(f"Error: File not found: {args.file}", file=sys.stderr)
             sys.exit(1)
@@ -306,4 +306,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -82,7 +82,7 @@ def lambda_handler(event, context):
 
     if step == "createSecret":
         # Generate new credentials
-        new_password = generate_password
+        new_password = generate_password()
         client.put_secret_value(
             SecretId=secret_id,
             ClientRequestToken=token,
@@ -159,17 +159,17 @@ from azure.keyvault.secrets import SecretClient
 def get_secret(vault_url, secret_name, use_managed_identity=True):
     """Retrieve secret from Azure Key Vault."""
     if use_managed_identity:
-        credential = ManagedIdentityCredential
+        credential = ManagedIdentityCredential()
     else:
-        credential = DefaultAzureCredential
+        credential = DefaultAzureCredential()
     client = SecretClient(vault_url=vault_url, credential=credential)
     return client.get_secret(secret_name).value
 
 def list_secrets(vault_url):
     """List all secret names (not values)."""
-    credential = DefaultAzureCredential
+    credential = DefaultAzureCredential()
     client = SecretClient(vault_url=vault_url, credential=credential)
-    return [s.name for s in client.list_properties_of_secrets]
+    return [s.name for s in client.list_properties_of_secrets()]
 ```
 
 ### RBAC vs Access Policies
@@ -226,14 +226,14 @@ from google.cloud import secretmanager
 
 def get_secret(project_id, secret_id, version="latest"):
     """Retrieve secret from GCP Secret Manager."""
-    client = secretmanager.SecretManagerServiceClient
+    client = secretmanager.SecretManagerServiceClient()
     name = f"projects/{project_id}/secrets/{secret_id}/versions/{version}"
     response = client.access_secret_version(request={"name": name})
     return response.payload.data.decode("UTF-8")
 
 def create_secret(project_id, secret_id, secret_value):
     """Create a new secret with initial version."""
-    client = secretmanager.SecretManagerServiceClient
+    client = secretmanager.SecretManagerServiceClient()
     parent = f"projects/{project_id}"
 
     # Create the secret resource

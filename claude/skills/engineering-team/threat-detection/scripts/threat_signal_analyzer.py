@@ -84,35 +84,35 @@ ANOMALY_TIME_HOURS_SUSPICIOUS = list(range(0, 6)) + list(range(22, 24))
 def hunt_mode(args):
     """Score and prioritize a threat hunting hypothesis."""
     hypothesis = args.hypothesis or ""
-    hypothesis_lower = hypothesis.lower
+    hypothesis_lower = hypothesis.lower()
 
     # Extract T-code references via regex
     matched_tcodes = list(set(re.findall(MITRE_PATTERN, hypothesis, re.IGNORECASE)))
 
     # Keyword matching — multi-word keywords must be checked before single-word
     matched_keywords = []
-    seen_keywords = set
-    sorted_keywords = sorted(HUNT_KEYWORDS.keys, key=lambda k: -len(k))
+    seen_keywords = set()
+    sorted_keywords = sorted(HUNT_KEYWORDS.keys(), key=lambda k: -len(k))
     for kw in sorted_keywords:
         if kw in hypothesis_lower and kw not in seen_keywords:
             matched_keywords.append(kw)
             seen_keywords.add(kw)
 
     # Build tactic set from matched keywords and any T-codes that map to known tactics
-    tactics = set
+    tactics = set()
     for kw in matched_keywords:
         tactics.add(HUNT_KEYWORDS[kw]["tactic"])
 
     # T-codes that happen to be in our keyword map (by mitre field)
     for tcode in matched_tcodes:
-        for kw_data in HUNT_KEYWORDS.values:
-            if kw_data["mitre"].upper == tcode.upper:
+        for kw_data in HUNT_KEYWORDS.values():
+            if kw_data["mitre"].upper() == tcode.upper():
                 tactics.add(kw_data["tactic"])
                 break
 
     # Collect data sources for matched tactics (deduped, ordered)
     data_sources_set = []
-    seen_sources = set
+    seen_sources = set()
     for tactic in tactics:
         for src in HUNT_DATA_SOURCES.get(tactic, []):
             if src not in seen_sources:
@@ -189,7 +189,7 @@ def ioc_mode(args):
 
     ioc_counts = {}
     ioc_values = {}  # type -> list of values
-    for ioc_type, candidate_keys in type_key_map.items:
+    for ioc_type, candidate_keys in type_key_map.items():
         for ck in candidate_keys:
             if ck in ioc_data:
                 vals = ioc_data[ck]
@@ -213,7 +213,7 @@ def ioc_mode(args):
 
     # Build sweep plan
     sweep_plan = {}
-    for ioc_type, count in ioc_counts.items:
+    for ioc_type, count in ioc_counts.items():
         stale = freshness_warning  # applies to entire IOC batch
         sweep_plan[ioc_type] = {
             "count": count,
@@ -358,7 +358,7 @@ def anomaly_mode(args):
     risk_score = round(hard_flag_count / total_events, 4) if total_events > 0 else 0.0
 
     # Top anomalous entities
-    top_entities = sorted(entity_counts.items, key=lambda x: -x[1])[:5]
+    top_entities = sorted(entity_counts.items(), key=lambda x: -x[1])[:5]
 
     # Recommended action
     if hard_flag_count > 0:
@@ -405,7 +405,7 @@ def anomaly_mode(args):
 # main
 # ---------------------------------------------------------------------------
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description=(
             "Threat Signal Analyzer — Hunt hypothesis scoring, IOC sweep planning, "
@@ -457,7 +457,7 @@ def main:
     parser.add_argument("--json", action="store_true", dest="output_json",
                         help="Output results as JSON")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.mode == "hunt":
         if not args.hypothesis:
@@ -504,7 +504,7 @@ def main:
                 print(f"IOC Age (days)  : {result['ioc_age_days']}")
             print(f"\nAction: {result['recommended_action']}")
             print("\nSweep Plan:")
-            for ioc_type, plan in result["sweep_plan"].items:
+            for ioc_type, plan in result["sweep_plan"].items():
                 stale_tag = " [STALE]" if plan["stale"] else ""
                 print(f"  {ioc_type:<12} {plan['count']} IOC(s){stale_tag} -> {', '.join(plan['targets'])}")
         # Exit codes based on staleness and coverage
@@ -568,4 +568,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

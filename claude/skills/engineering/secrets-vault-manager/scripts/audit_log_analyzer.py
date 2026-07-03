@@ -35,7 +35,7 @@ def load_logs(path):
     entries = []
     try:
         with open(path, "r") as f:
-            content = f.read.strip
+            content = f.read().strip()
     except FileNotFoundError:
         print(f"ERROR: Log file not found: {path}", file=sys.stderr)
         sys.exit(1)
@@ -53,7 +53,7 @@ def load_logs(path):
 
     # Try JSON lines
     for i, line in enumerate(content.split("\n"), 1):
-        line = line.strip
+        line = line.strip()
         if not line:
             continue
         try:
@@ -141,9 +141,9 @@ def analyze(entries, threshold):
 
     # 1. Volume spikes — identities accessing secrets more than threshold * average
     if access_by_identity:
-        avg_access = sum(access_by_identity.values) / len(access_by_identity)
+        avg_access = sum(access_by_identity.values()) / len(access_by_identity)
         spike_threshold = max(threshold * avg_access, threshold)
-        for identity, count in access_by_identity.items:
+        for identity, count in access_by_identity.items():
             if count >= spike_threshold:
                 anomalies.append({
                     "type": "volume_spike",
@@ -155,7 +155,7 @@ def analyze(entries, threshold):
                 })
 
     # 2. Multi-IP access — single identity from many IPs
-    for identity, ips in access_by_ip.items:
+    for identity, ips in access_by_ip.items():
         if len(ips) >= threshold:
             anomalies.append({
                 "type": "multi_ip_access",
@@ -167,7 +167,7 @@ def analyze(entries, threshold):
             })
 
     # 3. Failed access attempts
-    for source, count in failed_by_source.items:
+    for source, count in failed_by_source.items():
         if count >= threshold:
             anomalies.append({
                 "type": "failed_access",
@@ -183,7 +183,7 @@ def analyze(entries, threshold):
         for p in off_hours_access:
             off_hours_identities[p["identity"]] += 1
 
-        for identity, count in off_hours_identities.items:
+        for identity, count in off_hours_identities.items():
             if count >= max(threshold, 2):
                 anomalies.append({
                     "type": "off_hours_access",
@@ -194,7 +194,7 @@ def analyze(entries, threshold):
                 })
 
     # 5. Broad path access — single identity touching many paths
-    for identity, paths in path_by_identity.items:
+    for identity, paths in path_by_identity.items():
         if len(paths) >= threshold * 2:
             anomalies.append({
                 "type": "broad_access",
@@ -216,19 +216,19 @@ def analyze(entries, threshold):
         "unique_identities": len(access_by_identity),
         "unique_paths": len(access_by_path),
         "unique_source_ips": len(ip_to_identities),
-        "total_failures": sum(failed_by_source.values),
+        "total_failures": sum(failed_by_source.values()),
         "off_hours_events": len(off_hours_access),
         "anomalies_found": len(anomalies),
     }
 
     # Top accessed paths
-    top_paths = sorted(access_by_path.items, key=lambda x: -x[1])[:10]
+    top_paths = sorted(access_by_path.items(), key=lambda x: -x[1])[:10]
 
     return {
         "summary": summary,
         "anomalies": anomalies,
         "top_accessed_paths": [{"path": p, "count": c} for p, c in top_paths],
-        "hourly_distribution": dict(sorted(hourly_distribution.items)),
+        "hourly_distribution": dict(sorted(hourly_distribution.items())),
     }
 
 
@@ -238,9 +238,9 @@ def print_human(result, threshold):
     anomalies = result["anomalies"]
 
     print("=== Audit Log Analysis Report ===")
-    print(f"Generated: {datetime.now.strftime('%Y-%m-%d %H:%M')}")
+    print(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     print(f"Anomaly threshold: {threshold}")
-    print
+    print()
 
     print("--- Summary ---")
     print(f"  Total log entries:     {summary['total_entries']}")
@@ -250,26 +250,26 @@ def print_human(result, threshold):
     print(f"  Total failures:        {summary['total_failures']}")
     print(f"  Off-hours events:      {summary['off_hours_events']}")
     print(f"  Anomalies detected:    {summary['anomalies_found']}")
-    print
+    print()
 
     if anomalies:
         print("--- Anomalies ---")
         for i, a in enumerate(anomalies, 1):
             print(f"  [{a['severity']}] {a['type']}: {a['description']}")
-        print
+        print()
     else:
         print("--- No anomalies detected ---")
-        print
+        print()
 
     if result["top_accessed_paths"]:
         print("--- Top Accessed Paths ---")
         for item in result["top_accessed_paths"]:
             print(f"  {item['count']:5d}  {item['path']}")
-        print
+        print()
 
     if result["hourly_distribution"]:
         print("--- Hourly Distribution ---")
-        max_count = max(result["hourly_distribution"].values) if result["hourly_distribution"] else 1
+        max_count = max(result["hourly_distribution"].values()) if result["hourly_distribution"] else 1
         for hour in range(24):
             count = result["hourly_distribution"].get(hour, 0)
             bar_len = int((count / max_count) * 40) if max_count > 0 else 0
@@ -278,7 +278,33 @@ def print_human(result, threshold):
         print("  (* = off-hours)")
 
 
-def main:
+# Embedded synthetic audit log — exercises volume-spike + off-hours + failed-access
+# detectors so --sample produces a non-trivial report without a real log file.
+SAMPLE_ENTRIES = [
+    {"timestamp": "2026-03-20T03:14:00Z", "type": "request",
+     "auth": {"display_name": "approle-payment-svc"},
+     "request": {"path": "secret/data/production/payment/api-keys", "operation": "read"},
+     "response": {"status_code": 200}, "remote_address": "10.0.1.15"},
+    {"timestamp": "2026-03-20T03:15:00Z", "type": "request",
+     "auth": {"display_name": "approle-payment-svc"},
+     "request": {"path": "secret/data/production/payment/db", "operation": "read"},
+     "response": {"status_code": 200}, "remote_address": "10.0.1.99"},
+    {"timestamp": "2026-03-20T03:16:00Z", "type": "request",
+     "auth": {"display_name": "approle-payment-svc"},
+     "request": {"path": "secret/data/production/payment/jwt", "operation": "read"},
+     "response": {"status_code": 403}, "remote_address": "203.0.113.7"},
+    {"timestamp": "2026-03-20T03:17:00Z", "type": "request",
+     "auth": {"display_name": "approle-payment-svc"},
+     "request": {"path": "secret/data/production/payment/jwt", "operation": "read"},
+     "response": {"status_code": 403}, "remote_address": "203.0.113.7"},
+    {"timestamp": "2026-03-20T14:00:00Z", "type": "request",
+     "auth": {"display_name": "ci-runner"},
+     "request": {"path": "secret/data/ci/tokens", "operation": "read"},
+     "response": {"status_code": 200}, "remote_address": "10.0.2.20"},
+]
+
+
+def main():
     parser = argparse.ArgumentParser(
         description="Analyze Vault/cloud secret manager audit logs for anomalies.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -299,7 +325,7 @@ def main:
               %(prog)s --log-file audit.json --threshold 3 --json
         """),
     )
-    parser.add_argument("--log-file", required=True, help="Path to audit log file (JSON lines or JSON array)")
+    parser.add_argument("--log-file", help="Path to audit log file (JSON lines or JSON array)")
     parser.add_argument(
         "--threshold",
         type=int,
@@ -307,24 +333,36 @@ def main:
         help="Anomaly sensitivity threshold — lower = more sensitive (default: 5)",
     )
     parser.add_argument("--json", action="store_true", dest="json_output", help="Output as JSON")
+    parser.add_argument("--sample", action="store_true",
+                        help="Analyze an embedded synthetic audit log")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    entries = load_logs(args.log_file)
+    if args.sample:
+        entries = SAMPLE_ENTRIES
+        log_file = "<embedded sample>"
+        threshold = 2
+    else:
+        if not args.log_file:
+            parser.error("--log-file is required (or use --sample)")
+        entries = load_logs(args.log_file)
+        log_file = args.log_file
+        threshold = args.threshold
+
     if not entries:
         print("No log entries found in file.", file=sys.stderr)
         sys.exit(1)
 
-    result = analyze(entries, args.threshold)
-    result["log_file"] = args.log_file
-    result["threshold"] = args.threshold
-    result["analyzed_at"] = datetime.now.isoformat
+    result = analyze(entries, threshold)
+    result["log_file"] = log_file
+    result["threshold"] = threshold
+    result["analyzed_at"] = datetime.now().isoformat()
 
     if args.json_output:
         print(json.dumps(result, indent=2))
     else:
-        print_human(result, args.threshold)
+        print_human(result, threshold)
 
 
 if __name__ == "__main__":
-    main
+    main()

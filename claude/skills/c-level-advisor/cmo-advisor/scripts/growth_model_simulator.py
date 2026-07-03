@@ -229,9 +229,9 @@ def _weighted_cac(channel_mix: Dict[str, float]) -> float:
     channel_cac = {ch.name: ch.cac for ch in CHANNELS}
     total = sum(
         channel_mix.get(name, 0) * cac
-        for name, cac in channel_cac.items
+        for name, cac in channel_cac.items()
     )
-    weight_sum = sum(channel_mix.values)
+    weight_sum = sum(channel_mix.values())
     return total / weight_sum if weight_sum > 0 else 5_000
 
 
@@ -260,10 +260,10 @@ def print_header(title: str) -> None:
     print("=" * width)
 
 
-def print_channel_overview -> None:
+def print_channel_overview() -> None:
     print_header("Current Channel Mix")
     print(f"  Starting MRR: {fmt_mrr(STARTING_MRR)}  |  Monthly churn: {MONTHLY_CHURN_RATE:.1%}  |  Expansion: {EXPANSION_RATE:.1%}/mo")
-    print
+    print()
     print(f"  {'Channel':<22} {'% MRR':>7} {'CAC':>8} {'Payback':>9} {'Growth/mo':>10}")
     print("  " + "-" * 60)
     for ch in sorted(CHANNELS, key=lambda c: c.pct_of_new_mrr, reverse=True):
@@ -279,10 +279,10 @@ def print_model_detail(proj: ModelProjection) -> None:
     print_header(f"Model: {model.name}")
     print(f"  {model.description}")
     if model.notes:
-        print
+        print()
         for note in model.notes:
             print(f"  • {note}")
-    print
+    print()
 
     # Print monthly snapshot (every 3 months + final)
     milestones = set(range(3, SIMULATION_MONTHS + 1, 3)) | {SIMULATION_MONTHS}
@@ -302,7 +302,7 @@ def print_model_detail(proj: ModelProjection) -> None:
     weighted_cac = _weighted_cac(model.channel_mix)
     be = f"Month {proj.break_even_month}" if proj.break_even_month else f"> {SIMULATION_MONTHS}mo"
 
-    print
+    print()
     print(f"  Final MRR ({SIMULATION_MONTHS}mo):    {fmt_mrr(final.mrr)}")
     print(f"  Final ARR:             {fmt_currency(arr_final)}")
     print(f"  Growth multiple:       {growth_x:.1f}x from starting MRR")
@@ -358,7 +358,7 @@ def print_channel_mix_impact(projections: List[ModelProjection]) -> None:
         print(f"    Month {SIMULATION_MONTHS}: {arrow} {abs(delta_pct):.1f}%  vs. current  ({fmt_mrr(delta)} {'more' if delta > 0 else 'less'} MRR)")
         if proj.model.months_to_steady_state > 4:
             print(f"    ⚠ Model takes {proj.model.months_to_steady_state} months to reach steady state — short-term dip expected.")
-        print
+        print()
 
 
 def print_decision_guide(projections: List[ModelProjection]) -> None:
@@ -377,7 +377,7 @@ def print_decision_guide(projections: List[ModelProjection]) -> None:
             final_mrr = proj.snapshots[-1].mrr
             print(f"  If: {condition}")
             print(f"  → Use {model_name} → {fmt_mrr(final_mrr)} MRR at month {SIMULATION_MONTHS}")
-            print
+            print()
 
     print("  Key question before switching models:")
     print("    'Do we have 12-18 months of runway to prove the new model")
@@ -389,8 +389,8 @@ def print_decision_guide(projections: List[ModelProjection]) -> None:
 # Main
 # ---------------------------------------------------------------------------
 
-def main -> None:
-    print_channel_overview
+def main() -> None:
+    print_channel_overview()
 
     projections = [simulate_model(model, SIMULATION_MONTHS) for model in GROWTH_MODELS]
 
@@ -413,4 +413,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

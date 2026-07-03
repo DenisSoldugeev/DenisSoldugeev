@@ -236,7 +236,7 @@ def _bump_severity(severity: str, modifier: str) -> str:
     if modifier not in ("internet-facing", "regulated-data"):
         return severity
     try:
-        idx = _SEV_LADDER.index(severity.lower)
+        idx = _SEV_LADDER.index(severity.lower())
         return _SEV_LADDER[min(idx + 1, len(_SEV_LADDER) - 1)]
     except ValueError:
         return severity
@@ -250,8 +250,8 @@ def _extract_actions(statement: dict) -> List[str]:
     """Normalise Action field to a list of lowercase strings."""
     action_field = statement.get("Action") or statement.get("action") or []
     if isinstance(action_field, str):
-        return [action_field.lower]
-    return [str(a).lower for a in action_field]
+        return [action_field.lower()]
+    return [str(a).lower() for a in action_field]
 
 
 def _extract_resources(statement: dict) -> List[str]:
@@ -271,7 +271,7 @@ def _extract_principal(statement: dict) -> str:
     principal = statement.get("Principal") or statement.get("principal") or "N/A"
     if isinstance(principal, dict):
         parts = []
-        for k, v in principal.items:
+        for k, v in principal.items():
             if isinstance(v, list):
                 parts.append(f"{k}:{','.join(v)}")
             else:
@@ -282,7 +282,7 @@ def _extract_principal(statement: dict) -> str:
 
 def _is_allow(statement: dict) -> bool:
     effect = str(statement.get("Effect") or statement.get("effect") or "Allow")
-    return effect.strip.lower == "allow"
+    return effect.strip().lower() == "allow"
 
 
 def analyze_statement(
@@ -320,7 +320,7 @@ def analyze_statement(
         # Check individual high-risk actions
         matched_privesc = [
             a for a in actions
-            if a in [p.lower for p in PRIVILEGE_ESCALATION_ACTIONS]
+            if a in [p.lower() for p in PRIVILEGE_ESCALATION_ACTIONS]
         ]
 
         if matched_privesc:
@@ -346,7 +346,7 @@ def analyze_statement(
 
         # Check dangerous combos
         for combo in ESCALATION_COMBOS:
-            combo_actions_lower = [c.lower for c in combo["actions"]]
+            combo_actions_lower = [c.lower() for c in combo["actions"]]
             if all(ca in actions for ca in combo_actions_lower):
                 combo_sev = _bump_severity(combo["severity"], severity_modifier)
                 findings.append(IAMFinding(
@@ -385,7 +385,7 @@ def analyze_statement(
     elif check_mode == "data-exfil":
         matched_exfil = [
             a for a in actions
-            if a in [d.lower for d in DATA_EXFILTRATION_ACTIONS]
+            if a in [d.lower() for d in DATA_EXFILTRATION_ACTIONS]
         ]
 
         if matched_exfil:
@@ -462,7 +462,7 @@ def analyze_policy(
     Analyse a full IAM policy document for findings.
 
     Iterates over every Statement in the policy and delegates to
-    analyze_statement for per-check logic.
+    analyze_statement() for per-check logic.
 
     Args:
         policy:             Parsed IAM policy JSON dict.
@@ -485,7 +485,7 @@ def analyze_policy(
     if not isinstance(statements, list):
         statements = [statements]
 
-    prefix = source.replace(" ", "_").replace("/", "_")[:12].upper
+    prefix = source.replace(" ", "_").replace("/", "_")[:12].upper()
 
     for idx, stmt in enumerate(statements):
         stmt_findings = analyze_statement(
@@ -547,7 +547,7 @@ def check_s3_policy(
     findings: List[IAMFinding] = []
     fid = 0
 
-    def _next_id -> str:
+    def _next_id() -> str:
         nonlocal fid
         fid += 1
         return f"S3-{fid:03d}"
@@ -562,7 +562,7 @@ def check_s3_policy(
             if "*" in principal or '"*"' in principal:
                 severity = _bump_severity("critical", severity_modifier)
                 findings.append(IAMFinding(
-                    finding_id=_next_id,
+                    finding_id=_next_id(),
                     category="s3",
                     severity=severity,
                     title="S3 Bucket Policy: Public Principal",
@@ -601,12 +601,12 @@ def check_s3_policy(
         "restrict_public_buckets": restrict_public_buckets,
         "block_public_policy": block_public_policy,
     }
-    missing_blocks = [k for k, v in block_fields.items if v is None or v is False]
+    missing_blocks = [k for k, v in block_fields.items() if v is None or v is False]
 
     if missing_blocks:
         severity = _bump_severity("critical", severity_modifier)
         findings.append(IAMFinding(
-            finding_id=_next_id,
+            finding_id=_next_id(),
             category="s3",
             severity=severity,
             title="S3 Public Access Block Not Fully Enabled",
@@ -642,15 +642,15 @@ def check_s3_policy(
                 or {}
             )
             algo = str(apply_sse.get("SSEAlgorithm") or apply_sse.get("sse_algorithm") or "")
-            if algo.upper in ("AES256", "AWS:KMS"):
+            if algo.upper() in ("AES256", "AWS:KMS"):
                 has_sse = True
     elif isinstance(sse_config, str):
-        has_sse = sse_config.upper in ("AES256", "AWS:KMS")
+        has_sse = sse_config.upper() in ("AES256", "AWS:KMS")
 
     if not has_sse:
         severity = _bump_severity("high", severity_modifier)
         findings.append(IAMFinding(
-            finding_id=_next_id,
+            finding_id=_next_id(),
             category="s3",
             severity=severity,
             title="S3 Server-Side Encryption Not Configured",
@@ -680,14 +680,14 @@ def check_s3_policy(
             or versioning.get("enabled")
             or ""
         )
-        versioning_enabled = status.lower in ("enabled", "true")
+        versioning_enabled = status.lower() in ("enabled", "true")
     elif isinstance(versioning, bool):
         versioning_enabled = versioning
 
     if not versioning_enabled:
         severity = _bump_severity("medium", severity_modifier)
         findings.append(IAMFinding(
-            finding_id=_next_id,
+            finding_id=_next_id(),
             category="s3",
             severity=severity,
             title="S3 Bucket Versioning Disabled",
@@ -759,7 +759,7 @@ def check_security_group(
     findings: List[IAMFinding] = []
     fid = 0
 
-    def _next_id -> str:
+    def _next_id() -> str:
         nonlocal fid
         fid += 1
         return f"SG-{fid:03d}"
@@ -809,7 +809,7 @@ def check_security_group(
                 # All traffic open to the internet
                 severity = _bump_severity("critical", severity_modifier)
                 findings.append(IAMFinding(
-                    finding_id=_next_id,
+                    finding_id=_next_id(),
                     category="sg",
                     severity=severity,
                     title="Security Group: All Traffic Open to Internet",
@@ -838,7 +838,7 @@ def check_security_group(
                     service = RISKY_PORTS[port]
                     severity = _bump_severity("critical", severity_modifier)
                     findings.append(IAMFinding(
-                        finding_id=_next_id,
+                        finding_id=_next_id(),
                         category="sg",
                         severity=severity,
                         title=f"Security Group: {service} ({port}) Open to Internet",
@@ -864,10 +864,10 @@ def check_security_group(
                     else f"ports {from_port}-{to_port}"
                 )
                 findings.append(IAMFinding(
-                    finding_id=_next_id,
+                    finding_id=_next_id(),
                     category="sg",
                     severity=severity,
-                    title=f"Security Group: {port_label.title} Open to Internet",
+                    title=f"Security Group: {port_label.title()} Open to Internet",
                     description=(
                         f"Inbound rule opens {port_label} ({protocol}) to {cidr} ({ip_ver}). "
                         "Broad internet exposure increases attack surface even on non-standard ports."
@@ -906,7 +906,7 @@ def print_text_report(result: IAMAnalysisResult) -> None:
     print(sep)
     print(f"  Source          : {result.source}")
     print(f"  Check Mode      : {result.check_mode}")
-    print(f"  Provider        : {result.provider.upper}")
+    print(f"  Provider        : {result.provider.upper()}")
     print(f"  Severity Mod    : {result.severity_modifier}")
     print(f"  Timestamp       : {result.timestamp_utc}")
     print(sep)
@@ -930,7 +930,7 @@ def print_text_report(result: IAMAnalysisResult) -> None:
 
     print(f"\n  Findings ({len(result.findings)}):")
     for finding in result.findings:
-        print(f"\n  [{finding.severity.upper}] {finding.finding_id}: {finding.title}")
+        print(f"\n  [{finding.severity.upper()}] {finding.finding_id}: {finding.title}")
         print(f"    {finding.description}")
         if finding.affected_actions:
             preview = finding.affected_actions[:4]
@@ -964,7 +964,7 @@ def result_to_dict(result: IAMAnalysisResult) -> dict:
 # Main Entry Point
 # ---------------------------------------------------------------------------
 
-def main -> None:
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Cloud Security Posture Check — IAM, S3, and Security Group analysis",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -1019,7 +1019,7 @@ Exit codes:
         help="Write JSON output to file",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # --- Load input file ---
     try:
@@ -1177,4 +1177,4 @@ Exit codes:
 
 
 if __name__ == "__main__":
-    main
+    main()

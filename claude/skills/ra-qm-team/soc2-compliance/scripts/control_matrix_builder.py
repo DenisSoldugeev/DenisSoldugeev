@@ -560,7 +560,7 @@ TSC_CONTROLS: Dict[str, Dict[str, Any]] = {
     },
 }
 
-VALID_CATEGORIES = list(TSC_CONTROLS.keys)
+VALID_CATEGORIES = list(TSC_CONTROLS.keys())
 
 
 def build_matrix(categories: List[str]) -> List[Dict[str, str]]:
@@ -609,13 +609,13 @@ def format_markdown(matrix: List[Dict[str, str]]) -> str:
 
 def format_csv(matrix: List[Dict[str, str]]) -> str:
     """Format control matrix as CSV."""
-    output = io.StringIO
+    output = io.StringIO()
     if not matrix:
         return ""
-    writer = csv.DictWriter(output, fieldnames=matrix[0].keys)
-    writer.writeheader
+    writer = csv.DictWriter(output, fieldnames=matrix[0].keys())
+    writer.writeheader()
     writer.writerows(matrix)
-    return output.getvalue
+    return output.getvalue()
 
 
 def format_json(matrix: List[Dict[str, str]]) -> str:
@@ -623,7 +623,7 @@ def format_json(matrix: List[Dict[str, str]]) -> str:
     return json.dumps({"controls": matrix, "total": len(matrix)}, indent=2)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="SOC 2 Control Matrix Builder — generates control matrices from selected Trust Service Criteria categories."
     )
@@ -646,10 +646,10 @@ def main:
         help="Shorthand for --format json",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Parse categories
-    categories = [c.strip.lower for c in args.categories.split(",")]
+    categories = [c.strip().lower() for c in args.categories.split(",")]
     invalid = [c for c in categories if c not in VALID_CATEGORIES]
     if invalid:
         print(
@@ -676,4 +676,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

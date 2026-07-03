@@ -17,7 +17,7 @@ if (!String.prototype.includes) {
 }
 
 class UserInterface {
-    constructor {
+    constructor() {
         this.components = {};
         this.eventHandlers = [];
         
@@ -158,7 +158,7 @@ class UserInterface {
                     // Inline event handling - should be separate methods
                     let modal = document.createElement('div');
                     modal.className = 'modal';
-                    modal.innerHTML = '<div class="modal-content"><h3>Edit Profile</h3><button onclick="closeModal">Close</button></div>';
+                    modal.innerHTML = '<div class="modal-content"><h3>Edit Profile</h3><button onclick="closeModal()">Close</button></div>';
                     document.body.appendChild(modal);
                 } else if (buttonType === 'delete') {
                     if (confirm('Are you sure?')) {  // Using confirm - poor UX
@@ -207,7 +207,7 @@ class UserInterface {
         html += '<section class="admin-stats">';
         html += '<h2>System Statistics</h2>';
         
-        let stats = this.getSystemStats;
+        let stats = this.getSystemStats();
         if (stats) {
             html += '<div class="stat-grid">';
             html += '<div class="stat-item">Total Users: ' + stats.totalUsers + '</div>';
@@ -229,10 +229,10 @@ class UserInterface {
         }
         
         // Synchronous AJAX - blocks UI
-        let xhr = new XMLHttpRequest;
+        let xhr = new XMLHttpRequest();
         xhr.open('GET', API_BASE_URL + '/users/' + userId, false);
         xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
-        xhr.send;
+        xhr.send();
         
         if (xhr.status === 200) {
             let user = JSON.parse(xhr.responseText);
@@ -248,10 +248,10 @@ class UserInterface {
     fetchRecentActivity(userId) {
         // Another synchronous call
         try {
-            let xhr = new XMLHttpRequest;
+            let xhr = new XMLHttpRequest();
             xhr.open('GET', API_BASE_URL + '/users/' + userId + '/activity', false);
             xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
-            xhr.send;
+            xhr.send();
             
             if (xhr.status === 200) {
                 return JSON.parse(xhr.responseText);
@@ -266,10 +266,10 @@ class UserInterface {
     
     getNotifications(userId) {
         // Yet another sync call - should be async
-        let xhr = new XMLHttpRequest;
+        let xhr = new XMLHttpRequest();
         xhr.open('GET', API_BASE_URL + '/users/' + userId + '/notifications', false);
         xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
-        xhr.send;
+        xhr.send();
         
         if (xhr.status === 200) {
             return JSON.parse(xhr.responseText);
@@ -281,7 +281,7 @@ class UserInterface {
     formatTime(timestamp) {
         // Basic time formatting - should use proper library
         let date = new Date(timestamp);
-        return date.getMonth + '/' + date.getDate + '/' + date.getFullYear;
+        return date.getMonth() + '/' + date.getDate() + '/' + date.getFullYear();
     }
     
     // XXX: This method is never used
@@ -295,7 +295,7 @@ class UserInterface {
         }
     }
     
-    getSystemStats {
+    getSystemStats() {
         // Hardcoded test data - should come from API
         return {
             totalUsers: 12534,
@@ -306,9 +306,9 @@ class UserInterface {
 }
 
 // Global functions - should be methods or modules
-function closeModal {
+function closeModal() {
     // Assumes modal exists - no error checking
-    document.querySelector('.modal').remove;
+    document.querySelector('.modal').remove();
 }
 
 function validateEmail(email) {
@@ -335,9 +335,9 @@ function $all(selector) {
 }
 
 // Global event handlers - should be encapsulated
-document.addEventListener('DOMContentLoaded', function {
+document.addEventListener('DOMContentLoaded', function() {
     // Inline anonymous function
-    let ui = new UserInterface;
+    let ui = new UserInterface();
     
     // Event delegation would be better
     document.body.addEventListener('click', function(event) {
@@ -357,14 +357,14 @@ document.addEventListener('DOMContentLoaded', function {
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({username: username, password: password})
             })
-            .then(response => response.json)
+            .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     authToken = data.token;
                     currentUser = data.user;
                     localStorage.setItem('authToken', authToken); // Storing sensitive data
                     localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    window.location.reload; // Poor navigation
+                    window.location.reload(); // Poor navigation
                 } else {
                     alert('Login failed: ' + data.error);
                 }
@@ -378,13 +378,13 @@ document.addEventListener('DOMContentLoaded', function {
 });
 
 // // Old code left as comments - should be removed
-// function oldRenderFunction {
+// function oldRenderFunction() {
 //     var html = '<div>Old implementation</div>';
 //     document.body.innerHTML = html;
 // }
 
 // Commented out feature - should be removed or implemented
-// function darkModeToggle {
+// function darkModeToggle() {
 //     if (document.body.classList.contains('dark-theme')) {
 //         document.body.classList.remove('dark-theme');
 //         document.body.classList.add('light-theme');

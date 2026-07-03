@@ -110,7 +110,7 @@ class CapTable:
         return sum(s.shares for s in self.shareholders)
 
     def snapshot(self, label: str = "") -> list[CapTableEntry]:
-        total = self.total_shares
+        total = self.total_shares()
         return [
             CapTableEntry(
                 name=s.name,
@@ -130,7 +130,7 @@ class CapTable:
         2. Issue new shares to investor at round price
         Returns a RoundResult with full cap table snapshot.
         """
-        current_total = self.total_shares
+        current_total = self.total_shares()
 
         # Step 1: Option pool shuffle (if pre-round)
         option_pool_shares_created = 0.0
@@ -171,7 +171,7 @@ class CapTable:
                     ))
 
         # Step 2: Price per share (after pool creation)
-        current_total_post_pool = self.total_shares
+        current_total_post_pool = self.total_shares()
         if config.share_price_override:
             price_per_share = config.share_price_override
         else:
@@ -189,7 +189,7 @@ class CapTable:
         ))
 
         post_money = config.pre_money_valuation + config.investment_amount
-        total_post = self.total_shares
+        total_post = self.total_shares()
 
         return RoundResult(
             round_name=config.name,
@@ -200,7 +200,7 @@ class CapTable:
             new_shares_issued=new_shares,
             option_pool_shares_created=option_pool_shares_created,
             total_shares=total_post,
-            cap_table=self.snapshot,
+            cap_table=self.snapshot(),
         )
 
     def analyze_exit(self, exit_valuation: float) -> list[ExitAnalysis]:
@@ -208,7 +208,7 @@ class CapTable:
         Simple exit analysis: all preferred converts to common, proceeds split pro-rata.
         (Does not model liquidation preferences — see fundraising_playbook.md for that.)
         """
-        total = self.total_shares
+        total = self.total_shares()
         price_per_share = exit_valuation / total
         results = []
         for s in self.shareholders:
@@ -244,7 +244,7 @@ def fmt(value: float, prefix: str = "$") -> str:
 
 def print_round_result(result: RoundResult, prev_cap_table: Optional[list[CapTableEntry]] = None) -> None:
     print(f"\n{'='*70}")
-    print(f"  {result.round_name.upper}")
+    print(f"  {result.round_name.upper()}")
     print(f"{'='*70}")
     print(f"  Pre-money valuation:   {fmt(result.pre_money_valuation)}")
     print(f"  Investment:            {fmt(result.investment_amount)}")
@@ -325,7 +325,7 @@ def print_dilution_summary(rounds: list[RoundResult]) -> None:
 
 
 def export_csv_rounds(rounds: list[RoundResult]) -> str:
-    buf = io.StringIO
+    buf = io.StringIO()
     writer = csv.writer(buf)
     writer.writerow(["Round", "Shareholder", "Share Class", "Shares", "Ownership Pct",
                      "Invested", "Pre Money", "Post Money", "Price Per Share"])
@@ -337,21 +337,21 @@ def export_csv_rounds(rounds: list[RoundResult]) -> str:
                 round(entry.invested, 2), round(r.pre_money_valuation, 0),
                 round(r.post_money_valuation, 0), round(r.price_per_share, 4),
             ])
-    return buf.getvalue
+    return buf.getvalue()
 
 
 # ---------------------------------------------------------------------------
 # Sample data: typical two-founder Series A/B/C startup
 # ---------------------------------------------------------------------------
 
-def build_sample_model -> tuple[CapTable, list[RoundResult]]:
+def build_sample_model() -> tuple[CapTable, list[RoundResult]]:
     """
     Sample company:
       - 2 founders, started with 10M shares each
       - 1M shares for early advisor
       - Raises Pre-seed → Seed → Series A → Series B → Series C
     """
-    cap = CapTable
+    cap = CapTable()
     SHARES_PER_FOUNDER = 4_000_000
     SHARES_ADVISOR = 200_000
 
@@ -361,7 +361,7 @@ def build_sample_model -> tuple[CapTable, list[RoundResult]]:
     cap.add_shareholder(Shareholder("Advisor",         "common", SHARES_ADVISOR))
 
     rounds: list[RoundResult] = []
-    prev_cap = cap.snapshot
+    prev_cap = cap.snapshot()
 
     # Round 1: Pre-seed — $500K at $4.5M pre, 10% option pool created
     r1 = cap.execute_round(RoundConfig(
@@ -426,12 +426,12 @@ def build_sample_model -> tuple[CapTable, list[RoundResult]]:
 # Entry point
 # ---------------------------------------------------------------------------
 
-def main -> None:
+def main() -> None:
     parser = argparse.ArgumentParser(description="Fundraising Model — Cap Table & Dilution")
     parser.add_argument("--exit", type=float, default=250.0,
                         help="Exit valuation in $M for return analysis (default: 250)")
     parser.add_argument("--csv", action="store_true", help="Export round data as CSV to stdout")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     exit_valuation = args.exit * 1_000_000
 
@@ -441,7 +441,7 @@ def main -> None:
     print("  Pre-seed → Seed → Series A → Series B → Series C")
     print("="*70)
 
-    cap, rounds = build_sample_model
+    cap, rounds = build_sample_model()
 
     # Print each round
     prev = None
@@ -487,4 +487,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

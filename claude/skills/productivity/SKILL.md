@@ -7,7 +7,7 @@ description: "Personal productivity skills: capture, inbox/email triage, reflect
 
 Personal productivity skills: capture, inbox/email triage, reflection, handoff.
 
-5 skills. Load the specific sub-skill SKILL.md you need on demand.
+6 skills. Load the specific sub-skill SKILL.md you need on demand.
 
 | Skill | Path | Focus |
 |-------|------|-------|
@@ -16,6 +16,7 @@ Personal productivity skills: capture, inbox/email triage, reflection, handoff.
 | email | `email/skills/inbox-setup/SKILL.md` | One-time setup skill that builds a personalized inbox triage knowledge base via interactive interview. Intervi… |
 | handoff | `handoff/skills/handoff/SKILL.md` | Compact the current conversation into a handoff document for another agent to pick up. Save to a user-configur… |
 | reflect | `reflect/skills/reflect/SKILL.md` | Mid-conversation reflection skill that pauses execution and zooms out from detail-mode to honestly reassess di… |
+| roast | `roast/skills/roast/SKILL.md` | Use when someone asks to roast an idea, pressure-test or stress-test an idea, validate a business idea, "conve… |
 
 ## Rules
 - Load only the specific skill SKILL.md you need.

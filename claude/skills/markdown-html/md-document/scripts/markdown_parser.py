@@ -62,8 +62,8 @@ def slugify(text: str) -> str:
     """Convert a heading text to a URL-safe anchor slug."""
     text = re.sub(r"<[^>]+>", "", text)  # strip any HTML tags
     text = re.sub(r"[^a-zA-Z0-9\s-]", "", text)
-    text = re.sub(r"\s+", "-", text.strip)
-    return text.lower or "section"
+    text = re.sub(r"\s+", "-", text.strip())
+    return text.lower() or "section"
 
 
 def render_inline_html(text: str) -> str:
@@ -97,13 +97,13 @@ def parse_table(lines: list[str], start: int) -> tuple[dict[str, Any], int]:
         i += 1
 
     def split_row(row: str) -> list[str]:
-        cells = row.strip.strip("|").split("|")
-        return [c.strip for c in cells]
+        cells = row.strip().strip("|").split("|")
+        return [c.strip() for c in cells]
 
     headers = split_row(header_line)
     aligns = []
     for cell in split_row(delim_line):
-        s = cell.strip
+        s = cell.strip()
         if s.startswith(":") and s.endswith(":"):
             aligns.append("center")
         elif s.endswith(":"):
@@ -145,7 +145,7 @@ def parse_callout(lines: list[str], start: int) -> tuple[dict[str, Any], int]:
         > Body line 2
     """
     m = CALLOUT_RE.match(lines[start])
-    kind = m.group(1).upper if m else "NOTE"
+    kind = m.group(1).upper() if m else "NOTE"
     body: list[str] = []
     i = start + 1
     while i < len(lines):
@@ -173,7 +173,7 @@ def parse_blockquote(lines: list[str], start: int) -> tuple[dict[str, Any], int]
 def parse_code_block(lines: list[str], start: int) -> tuple[dict[str, Any], int]:
     """Parse a fenced code block starting at start (which is the opening fence)."""
     m = FENCE_RE.match(lines[start])
-    language = m.group(1).strip if m else ""
+    language = m.group(1).strip() if m else ""
     body: list[str] = []
     i = start + 1
     while i < len(lines):
@@ -191,7 +191,7 @@ def parse_paragraph(lines: list[str], start: int) -> tuple[dict[str, Any], int]:
     i = start
     while i < len(lines):
         ln = lines[i]
-        if not ln.strip:
+        if not ln.strip():
             break
         # Stop if we hit a block-level construct
         if (HEADING_RE.match(ln) or FENCE_RE.match(ln) or HR_RE.match(ln) or
@@ -201,13 +201,13 @@ def parse_paragraph(lines: list[str], start: int) -> tuple[dict[str, Any], int]:
             break
         body.append(ln)
         i += 1
-    text = " ".join(s.strip for s in body)
+    text = " ".join(s.strip() for s in body)
     return ({"type": "paragraph", "text": text}, i)
 
 
 def parse_markdown(text: str) -> dict[str, Any]:
     """Top-level parse — returns {meta, blocks}."""
-    lines = text.splitlines
+    lines = text.splitlines()
     blocks: list[dict[str, Any]] = []
     i = 0
     title = ""
@@ -217,7 +217,7 @@ def parse_markdown(text: str) -> dict[str, Any]:
     while i < len(lines):
         line = lines[i]
 
-        if not line.strip:
+        if not line.strip():
             i += 1
             continue
 
@@ -225,7 +225,7 @@ def parse_markdown(text: str) -> dict[str, Any]:
         h = HEADING_RE.match(line)
         if h:
             level = len(h.group(1))
-            text_inline = h.group(2).strip
+            text_inline = h.group(2).strip()
             anchor = slugify(text_inline)
             heading_count += 1
             if level == 1 and not title:
@@ -354,15 +354,15 @@ def main(argv: list[str]) -> int:
         text = SAMPLE_MARKDOWN
     elif args.input:
         if args.input == "-":
-            text = sys.stdin.read
+            text = sys.stdin.read()
         else:
             path = Path(args.input)
-            if not path.exists:
+            if not path.exists():
                 print(f"error: input not found: {path}", file=sys.stderr)
                 return 2
             text = path.read_text(encoding="utf-8")
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     result = parse_markdown(text)

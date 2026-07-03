@@ -112,10 +112,10 @@ class SelectivityEstimator:
     
     def estimate_selectivity(self, column: Column, table_size_estimate: int = 10000) -> float:
         """Estimate column selectivity (0.0 = all same values, 1.0 = all unique values)."""
-        column_name_lower = column.name.lower
+        column_name_lower = column.name.lower()
         
         # Primary key or unique columns
-        if column.unique or column.name.lower in ['id', 'uuid', 'guid']:
+        if column.unique or column.name.lower() in ['id', 'uuid', 'guid']:
             return 1.0
         
         # Check cardinality estimate if available
@@ -140,7 +140,7 @@ class SelectivityEstimator:
                 return 0.1  # Very poor selectivity
         
         # Data type based estimation
-        data_type_upper = column.data_type.upper
+        data_type_upper = column.data_type.upper()
         if data_type_upper.startswith('BOOL'):
             return 0.1
         elif data_type_upper.startswith(('TINYINT', 'SMALLINT')):
@@ -165,7 +165,7 @@ class IndexOptimizer:
         self.tables: Dict[str, Dict[str, Column]] = {}
         self.existing_indexes: Dict[str, List[Index]] = {}
         self.query_patterns: List[QueryPattern] = []
-        self.selectivity_estimator = SelectivityEstimator
+        self.selectivity_estimator = SelectivityEstimator()
         
         # Configuration
         self.max_composite_index_columns = 6
@@ -177,12 +177,12 @@ class IndexOptimizer:
         if 'tables' not in schema_data:
             raise ValueError("Schema must contain 'tables' key")
         
-        for table_name, table_def in schema_data['tables'].items:
+        for table_name, table_def in schema_data['tables'].items():
             self.tables[table_name] = {}
             self.existing_indexes[table_name] = []
             
             # Load columns
-            for col_name, col_def in table_def.get('columns', {}).items:
+            for col_name, col_def in table_def.get('columns', {}).items():
                 column = Column(
                     name=col_name,
                     data_type=col_def.get('type', 'VARCHAR(255)'),
@@ -213,7 +213,7 @@ class IndexOptimizer:
         for query_def in query_data['queries']:
             pattern = QueryPattern(
                 query_id=query_def['id'],
-                query_type=query_def.get('type', 'SELECT').upper,
+                query_type=query_def.get('type', 'SELECT').upper(),
                 table=query_def['table'],
                 where_conditions=query_def.get('where_conditions', []),
                 join_conditions=query_def.get('join_conditions', []),
@@ -403,7 +403,7 @@ class IndexOptimizer:
         order_columns = [col['column'] for col in pattern.order_by if col['column'] in self.tables[table_name]]
         
         # Combine WHERE and ORDER BY columns
-        index_columns = where_columns.copy
+        index_columns = where_columns.copy()
         include_columns = []
         
         # Add ORDER BY columns to index columns
@@ -501,7 +501,7 @@ class IndexOptimizer:
     def _generate_recommendation_id(self, table: str, columns: List[str], suffix: str = "") -> str:
         """Generate unique recommendation ID."""
         content = f"{table}_{'_'.join(sorted(columns))}_{suffix}"
-        return hashlib.md5(content.encode).hexdigest[:8]
+        return hashlib.md5(content.encode()).hexdigest()[:8]
     
     def _estimate_benefit(self, selectivity: float, frequency: int) -> str:
         """Estimate performance benefit of index."""
@@ -551,7 +551,7 @@ class IndexOptimizer:
     
     def _deduplicate_recommendations(self, recommendations: List[IndexRecommendation]) -> List[IndexRecommendation]:
         """Remove duplicate recommendations."""
-        seen_indexes = set
+        seen_indexes = set()
         unique_recommendations = []
         
         for rec in recommendations:
@@ -577,7 +577,7 @@ class IndexOptimizer:
         """Identify redundant, overlapping, and potentially unused indexes."""
         redundancy_issues = []
         
-        for table_name, indexes in self.existing_indexes.items:
+        for table_name, indexes in self.existing_indexes.items():
             if len(indexes) < 2:
                 continue
             
@@ -665,7 +665,7 @@ class IndexOptimizer:
         issues = []
         
         # Collect all columns used in query patterns for this table
-        used_columns = set
+        used_columns = set()
         table_patterns = [p for p in self.query_patterns if p.table == table_name]
         
         for pattern in table_patterns:
@@ -720,12 +720,12 @@ class IndexOptimizer:
     
     def generate_analysis_report(self) -> Dict[str, Any]:
         """Generate comprehensive analysis report."""
-        recommendations = self.analyze_missing_indexes
-        redundancy_issues = self.analyze_redundant_indexes
-        size_estimates = self.estimate_index_sizes
+        recommendations = self.analyze_missing_indexes()
+        redundancy_issues = self.analyze_redundant_indexes()
+        size_estimates = self.estimate_index_sizes()
         
         # Calculate statistics
-        total_existing_indexes = sum(len(indexes) for indexes in self.existing_indexes.values)
+        total_existing_indexes = sum(len(indexes) for indexes in self.existing_indexes.values())
         tables_analyzed = len(self.tables)
         query_patterns_analyzed = len(self.query_patterns)
         
@@ -776,7 +776,7 @@ class IndexOptimizer:
         
         impact_analysis["query_optimization"] = {
             "queries_improved": len(query_benefits),
-            "high_impact_queries": len([q for q, benefits in query_benefits.items 
+            "high_impact_queries": len([q for q, benefits in query_benefits.items() 
                                       if any("High" in benefit for benefit in benefits)]),
             "benefit_distribution": dict(Counter(
                 rec.estimated_benefit for rec in recommendations
@@ -863,7 +863,7 @@ class IndexOptimizer:
         return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Optimize database indexes based on schema and query patterns")
     parser.add_argument("--schema", "-s", required=True, help="Schema definition JSON file")
     parser.add_argument("--queries", "-q", required=True, help="Query patterns JSON file")
@@ -875,7 +875,7 @@ def main:
     parser.add_argument("--min-priority", "-p", type=int, default=4, 
                        help="Minimum priority level to include (1=highest, 4=lowest)")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Load schema
@@ -887,12 +887,12 @@ def main:
             query_data = json.load(f)
         
         # Initialize optimizer
-        optimizer = IndexOptimizer
+        optimizer = IndexOptimizer()
         optimizer.load_schema(schema_data)
         optimizer.load_query_patterns(query_data)
         
         # Generate analysis
-        analysis = optimizer.generate_analysis_report
+        analysis = optimizer.generate_analysis_report()
         
         # Filter by priority if specified
         if args.min_priority < 4:
@@ -923,4 +923,4 @@ def main:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

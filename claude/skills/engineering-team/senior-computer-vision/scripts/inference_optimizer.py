@@ -59,13 +59,13 @@ class InferenceOptimizer:
 
     def __init__(self, model_path: str):
         self.model_path = Path(model_path)
-        self.model_format = self._detect_format
+        self.model_format = self._detect_format()
         self.model_info = {}
         self.benchmark_results = {}
 
     def _detect_format(self) -> str:
         """Detect model format from file extension."""
-        suffix = self.model_path.suffix.lower
+        suffix = self.model_path.suffix.lower()
         if suffix in MODEL_FORMATS:
             return MODEL_FORMATS[suffix]
         raise ValueError(f"Unknown model format: {suffix}")
@@ -77,7 +77,7 @@ class InferenceOptimizer:
         analysis = {
             'path': str(self.model_path),
             'format': self.model_format,
-            'file_size_mb': self.model_path.stat.st_size / 1024 / 1024,
+            'file_size_mb': self.model_path.stat().st_size / 1024 / 1024,
             'parameters': None,
             'layers': [],
             'input_shape': None,
@@ -86,9 +86,9 @@ class InferenceOptimizer:
         }
 
         if self.model_format == 'onnx':
-            analysis.update(self._analyze_onnx)
+            analysis.update(self._analyze_onnx())
         elif self.model_format == 'pytorch':
-            analysis.update(self._analyze_pytorch)
+            analysis.update(self._analyze_pytorch())
 
         self.model_info = analysis
         return analysis
@@ -162,16 +162,16 @@ class InferenceOptimizer:
             else:
                 # Assume it's the model itself
                 if hasattr(checkpoint, 'state_dict'):
-                    state_dict = checkpoint.state_dict
+                    state_dict = checkpoint.state_dict()
                 else:
                     return {'error': 'Could not extract state dict'}
 
             # Count parameters
             total_params = 0
             layer_info = []
-            for name, param in state_dict.items:
+            for name, param in state_dict.items():
                 if hasattr(param, 'numel'):
-                    param_count = param.numel
+                    param_count = param.numel()
                     total_params += param_count
                     layer_info.append({
                         'name': name,
@@ -240,16 +240,16 @@ class InferenceOptimizer:
             # Try GPU first, fall back to CPU
             providers = ['CPUExecutionProvider']
             try:
-                if 'CUDAExecutionProvider' in ort.get_available_providers:
+                if 'CUDAExecutionProvider' in ort.get_available_providers():
                     providers = ['CUDAExecutionProvider'] + providers
             except:
                 pass
 
             session = ort.InferenceSession(str(self.model_path), providers=providers)
-            input_name = session.get_inputs[0].name
-            device = 'cuda' if 'CUDA' in session.get_providers[0] else 'cpu'
+            input_name = session.get_inputs()[0].name
+            device = 'cuda' if 'CUDA' in session.get_providers()[0] else 'cpu'
 
-            results = {'device': device, 'provider': session.get_providers[0]}
+            results = {'device': device, 'provider': session.get_providers()[0]}
             batch_results = []
 
             for batch_size in batch_sizes:
@@ -263,9 +263,9 @@ class InferenceOptimizer:
                 # Benchmark
                 latencies = []
                 for _ in range(num_iterations):
-                    start = time.perf_counter
+                    start = time.perf_counter()
                     session.run(None, {input_name: dummy})
-                    latencies.append((time.perf_counter - start) * 1000)
+                    latencies.append((time.perf_counter() - start) * 1000)
 
                 batch_result = {
                     'batch_size': batch_size,
@@ -298,7 +298,7 @@ class InferenceOptimizer:
             import numpy as np
 
             # Load model
-            device = torch.device('cuda' if torch.cuda.is_available else 'cpu')
+            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
             checkpoint = torch.load(str(self.model_path), map_location=device)
 
             # Handle different checkpoint formats
@@ -315,7 +315,7 @@ class InferenceOptimizer:
             results = {'device': str(device)}
             batch_results = []
 
-            with torch.no_grad:
+            with torch.no_grad():
                 for batch_size in batch_sizes:
                     dummy = torch.randn(batch_size, 3, *input_size, device=device)
 
@@ -323,18 +323,18 @@ class InferenceOptimizer:
                     for _ in range(warmup):
                         _ = model(dummy)
                     if device.type == 'cuda':
-                        torch.cuda.synchronize
+                        torch.cuda.synchronize()
 
                     # Benchmark
                     latencies = []
                     for _ in range(num_iterations):
                         if device.type == 'cuda':
-                            torch.cuda.synchronize
-                        start = time.perf_counter
+                            torch.cuda.synchronize()
+                        start = time.perf_counter()
                         _ = model(dummy)
                         if device.type == 'cuda':
-                            torch.cuda.synchronize
-                        latencies.append((time.perf_counter - start) * 1000)
+                            torch.cuda.synchronize()
+                        latencies.append((time.perf_counter() - start) * 1000)
 
                     batch_result = {
                         'batch_size': batch_size,
@@ -458,7 +458,7 @@ class InferenceOptimizer:
             print("-" * 70)
             print(f"Device:      {self.benchmark_results.get('device', 'N/A')}")
             print(f"Input Size:  {self.benchmark_results.get('input_size', 'N/A')}")
-            print
+            print()
             print(f"{'Batch':<8} {'Latency (ms)':<15} {'Throughput (FPS)':<18} {'P99 (ms)':<12}")
             print("-" * 55)
 
@@ -471,7 +471,7 @@ class InferenceOptimizer:
         print("=" * 70 + "\n")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Analyze and optimize vision model inference"
     )
@@ -496,9 +496,9 @@ def main:
                        help='Output as JSON')
     parser.add_argument('--output', '-o', help='Output file path')
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    if not Path(args.model_path).exists:
+    if not Path(args.model_path).exists():
         logger.error(f"Model not found: {args.model_path}")
         sys.exit(1)
 
@@ -512,7 +512,7 @@ def main:
 
     # Analyze model
     if args.analyze or not (args.benchmark or args.recommend):
-        results['analysis'] = optimizer.analyze_model
+        results['analysis'] = optimizer.analyze_model()
 
     # Benchmark
     if args.benchmark:
@@ -526,25 +526,25 @@ def main:
     # Recommendations
     if args.recommend:
         if not optimizer.model_info:
-            optimizer.analyze_model
+            optimizer.analyze_model()
         results['recommendations'] = optimizer.get_optimization_recommendations(args.target)
 
     # Output
     if args.json:
         print(json.dumps(results, indent=2, default=str))
     else:
-        optimizer.print_summary
+        optimizer.print_summary()
 
         if args.recommend and 'recommendations' in results:
             print("OPTIMIZATION RECOMMENDATIONS")
             print("-" * 70)
             for i, rec in enumerate(results['recommendations'], 1):
-                print(f"\n{i}. {rec['step'].upper}")
+                print(f"\n{i}. {rec['step'].upper()}")
                 print(f"   {rec['description']}")
                 print(f"   Expected speedup: {rec['expected_speedup']}")
                 if rec.get('command'):
                     print(f"   Command: {rec['command']}")
-            print
+            print()
 
     # Save to file
     if args.output:
@@ -554,4 +554,4 @@ def main:
 
 
 if __name__ == '__main__':
-    main
+    main()

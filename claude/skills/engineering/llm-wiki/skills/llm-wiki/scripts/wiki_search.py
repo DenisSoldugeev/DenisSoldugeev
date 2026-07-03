@@ -33,15 +33,15 @@ STOPWORDS = {
 
 def tokenize(text: str) -> list[str]:
     return [
-        t.lower
+        t.lower()
         for t in TOKEN_RE.findall(text)
-        if t.lower not in STOPWORDS and len(t) > 1
+        if t.lower() not in STOPWORDS and len(t) > 1
     ]
 
 
 def load_docs(vault: Path) -> list[dict]:
     wiki = vault / "wiki"
-    if not wiki.exists:
+    if not wiki.exists():
         raise SystemExit(f"[error] {wiki} not found")
     docs = []
     for md in sorted(wiki.rglob("*.md")):
@@ -77,7 +77,7 @@ def bm25_scores(
             df[term] += 1
     idf = {
         term: math.log(1 + (N - df_t + 0.5) / (df_t + 0.5))
-        for term, df_t in df.items
+        for term, df_t in df.items()
     }
 
     scores: list[tuple[int, float]] = []
@@ -96,7 +96,7 @@ def bm25_scores(
 
 
 def snippet(text: str, query: list[str], width: int = 220) -> str:
-    lower = text.lower
+    lower = text.lower()
     for term in query:
         idx = lower.find(term)
         if idx >= 0:
@@ -107,15 +107,15 @@ def snippet(text: str, query: list[str], width: int = 220) -> str:
     return text[:width].replace("\n", " ") + ("…" if len(text) > width else "")
 
 
-def main -> None:
+def main() -> None:
     p = argparse.ArgumentParser(description="BM25 search over an LLM Wiki vault")
     p.add_argument("--vault", required=True)
     p.add_argument("--query", required=True)
     p.add_argument("--limit", type=int, default=10)
     p.add_argument("--json", action="store_true")
-    args = p.parse_args
+    args = p.parse_args()
 
-    docs = load_docs(Path(args.vault).expanduser.resolve)
+    docs = load_docs(Path(args.vault).expanduser().resolve())
     qtokens = tokenize(args.query)
     if not qtokens:
         print("[error] empty query after tokenization", file=sys.stderr)
@@ -142,4 +142,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

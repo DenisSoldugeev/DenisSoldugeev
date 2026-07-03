@@ -146,9 +146,9 @@ class AirflowGenerator(PipelineGenerator):
             "from datetime import datetime, timedelta",
         ]
 
-        operators_used = set
+        operators_used = set()
         for task in config.tasks:
-            op_type = task.operator.split('_')[0].lower
+            op_type = task.operator.split('_')[0].lower()
             if op_type in self.OPERATOR_IMPORTS:
                 operators_used.add(op_type)
 
@@ -219,13 +219,13 @@ with DAG(
         tasks_code = ""
 
         for task in config.tasks:
-            if 'python' in task.operator.lower:
+            if 'python' in task.operator.lower():
                 tasks_code += self._generate_python_task(task)
-            elif 'bash' in task.operator.lower:
+            elif 'bash' in task.operator.lower():
                 tasks_code += self._generate_bash_task(task)
-            elif 'sql' in task.operator.lower or 'postgres' in task.operator.lower:
+            elif 'sql' in task.operator.lower() or 'postgres' in task.operator.lower():
                 tasks_code += self._generate_sql_task(task, config)
-            elif 'snowflake' in task.operator.lower:
+            elif 'snowflake' in task.operator.lower():
                 tasks_code += self._generate_snowflake_task(task)
             else:
                 tasks_code += self._generate_generic_task(task)
@@ -353,7 +353,7 @@ class PrefectGenerator(PipelineGenerator):
     def generate(self, config: PipelineConfig) -> str:
         """Generate Prefect flow from configuration."""
 
-        code = self._generate_header
+        code = self._generate_header()
         code += self._generate_tasks(config)
         code += self._generate_flow(config)
 
@@ -389,7 +389,7 @@ import pandas as pd
 )
 def {task_config.task_id}(input_data=None):
     """Task: {task_config.task_id}"""
-    logger = get_run_logger
+    logger = get_run_logger()
     logger.info(f"Executing {task_config.task_id}")
 
     # Add processing logic here
@@ -408,9 +408,9 @@ def {task_config.task_id}(input_data=None):
     description="{config.description}",
     version="1.0.0",
 )
-def {config.name.replace('-', '_')}_flow:
+def {config.name.replace('-', '_')}_flow():
     """Main flow orchestrating all tasks."""
-    logger = get_run_logger
+    logger = get_run_logger()
     logger.info("Starting flow: {config.name}")
 
 '''
@@ -426,7 +426,7 @@ def {config.name.replace('-', '_')}_flow:
                 dep_var = task_vars.get(task_config.dependencies[0], "None")
                 flow_code += f"    {var_name} = {task_name}({dep_var})\n"
             else:
-                flow_code += f"    {var_name} = {task_name}\n"
+                flow_code += f"    {var_name} = {task_name}()\n"
 
         flow_code += '''
     logger.info("Flow completed successfully")
@@ -434,7 +434,7 @@ def {config.name.replace('-', '_')}_flow:
 
 
 if __name__ == "__main__":
-    ''' + f'{config.name.replace("-", "_")}_flow' + '\n'
+    ''' + f'{config.name.replace("-", "_")}_flow()' + '\n'
 
         return flow_code
 
@@ -466,7 +466,7 @@ class DagsterGenerator(PipelineGenerator):
     def generate(self, config: PipelineConfig) -> str:
         """Generate Dagster job from configuration."""
 
-        code = self._generate_header
+        code = self._generate_header()
         code += self._generate_ops(config)
         code += self._generate_job(config)
 
@@ -495,8 +495,8 @@ import pandas as pd
             if has_input:
                 ops_code += f'''
 @op(
-    ins={{"input_data": In}},
-    out=Out,
+    ins={{"input_data": In()}},
+    out=Out(),
 )
 def {task_config.task_id}(context, input_data):
     """Op: {task_config.task_id}"""
@@ -517,7 +517,7 @@ def {task_config.task_id}(context, input_data):
 '''
             else:
                 ops_code += f'''
-@op(out=Out)
+@op(out=Out())
 def {task_config.task_id}(context):
     """Op: {task_config.task_id}"""
     context.log.info(f"Executing {task_config.task_id}")
@@ -544,7 +544,7 @@ def {task_config.task_id}(context):
         "schedule": "{config.schedule}",
     }},
 )
-def {config.name.replace('-', '_')}_job:
+def {config.name.replace('-', '_')}_job():
     """Main job orchestrating all ops."""
 '''
         # Build dependency graph
@@ -557,9 +557,9 @@ def {config.name.replace('-', '_')}_job:
                 if dep_output:
                     job_code += f"    {task_name}_output = {task_name}({dep_output})\n"
                 else:
-                    job_code += f"    {task_name}_output = {task_name}\n"
+                    job_code += f"    {task_name}_output = {task_name}()\n"
             else:
-                job_code += f"    {task_name}_output = {task_name}\n"
+                job_code += f"    {task_name}_output = {task_name}()\n"
 
             task_outputs[task_name] = f"{task_name}_output"
 
@@ -714,7 +714,7 @@ class ETLPatternGenerator:
 # CLI Interface
 # ============================================================================
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Pipeline Orchestrator - Generate and manage data pipeline configurations",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -767,10 +767,10 @@ Examples:
     tmpl_parser.add_argument('--tables', required=True)
     tmpl_parser.add_argument('--output', '-o', help='Output file path')
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.command is None:
-        parser.print_help
+        parser.print_help()
         sys.exit(1)
 
     try:
@@ -800,9 +800,9 @@ Examples:
 
             # Generate code
             generators = {
-                'airflow': AirflowGenerator,
-                'prefect': PrefectGenerator,
-                'dagster': DagsterGenerator
+                'airflow': AirflowGenerator(),
+                'prefect': PrefectGenerator(),
+                'dagster': DagsterGenerator()
             }
 
             generator = generators[args.type]
@@ -823,12 +823,12 @@ Examples:
 
         elif args.command == 'validate':
             with open(args.dag) as f:
-                code = f.read
+                code = f.read()
 
             generators = {
-                'airflow': AirflowGenerator,
-                'prefect': PrefectGenerator,
-                'dagster': DagsterGenerator
+                'airflow': AirflowGenerator(),
+                'prefect': PrefectGenerator(),
+                'dagster': DagsterGenerator()
             }
 
             generator = generators[args.type]
@@ -857,9 +857,9 @@ Examples:
                 sys.exit(1)
 
             generators = {
-                'airflow': AirflowGenerator,
-                'prefect': PrefectGenerator,
-                'dagster': DagsterGenerator
+                'airflow': AirflowGenerator(),
+                'prefect': PrefectGenerator(),
+                'dagster': DagsterGenerator()
             }
 
             generator = generators[args.type]
@@ -880,4 +880,4 @@ Examples:
 
 
 if __name__ == '__main__':
-    main
+    main()

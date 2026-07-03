@@ -65,14 +65,14 @@ const last = focusable[focusable.length - 1];
 modal.addEventListener('keydown', (e) => {
   if (e.key === 'Tab') {
     if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault;
-      last.focus;
+      e.preventDefault();
+      last.focus();
     } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault;
-      first.focus;
+      e.preventDefault();
+      first.focus();
     }
   }
-  if (e.key === 'Escape') closeModal;
+  if (e.key === 'Escape') closeModal();
 });
 ```
 
@@ -81,12 +81,12 @@ modal.addEventListener('keydown', (e) => {
 ```javascript
 // Save focus before opening modal
 const trigger = document.activeElement;
-openModal;
+openModal();
 
 // Restore focus on close
-function closeModal {
+function closeModal() {
   modal.hidden = true;
-  trigger.focus;
+  trigger.focus();
 }
 ```
 

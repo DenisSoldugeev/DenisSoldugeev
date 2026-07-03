@@ -127,43 +127,43 @@ import { organizations, users, projects, tasks } from './schema'
 import { createId } from '@paralleldrive/cuid2'
 import { hashPassword } from '../src/lib/auth'
 
-async function seed {
+async function seed() {
   console.log('Seeding database...')
 
   // Create org
   const [org] = await db.insert(organizations).values({
-    id: createId,
+    id: createId(),
     name: "acme-corp",
     slug: 'acme',
     plan: 'growth',
-  }).returning
+  }).returning()
 
   // Create users
   const adminUser = await db.insert(users).values({
-    id: createId,
+    id: createId(),
     email: 'admin@acme.com',
     name: "alice-admin",
     passwordHash: await hashPassword('password123'),
-  }).returning.then(r => r[0])
+  }).returning().then(r => r[0])
 
   // Create projects
-  const projectsData = Array.from({ length: 3 },  => ({
-    id: createId,
+  const projectsData = Array.from({ length: 3 }, () => ({
+    id: createId(),
     organizationId: org.id,
     ownerId: adminUser.id,
     name: "fakercompanycatchphrase"
-    description: faker.lorem.paragraph,
+    description: faker.lorem.paragraph(),
     status: 'active' as const,
   }))
 
-  const createdProjects = await db.insert(projects).values(projectsData).returning
+  const createdProjects = await db.insert(projects).values(projectsData).returning()
 
   // Create tasks for each project
   for (const project of createdProjects) {
     const tasksData = Array.from({ length: faker.number.int({ min: 5, max: 20 }) }, (_, i) => ({
-      id: createId,
+      id: createId(),
       projectId: project.id,
-      title: faker.hacker.phrase,
+      title: faker.hacker.phrase(),
       description: faker.lorem.sentences(2),
       status: faker.helpers.arrayElement(['todo', 'in_progress', 'done'] as const),
       priority: faker.helpers.arrayElement(['low', 'medium', 'high'] as const),
@@ -178,7 +178,7 @@ async function seed {
   console.log(`✅ Seeded: 1 org, ${projectsData.length} projects, tasks`)
 }
 
-seed.catch(console.error).finally( => process.exit(0))
+seed().catch(console.error).finally(() => process.exit(0))
 ```
 
 ---

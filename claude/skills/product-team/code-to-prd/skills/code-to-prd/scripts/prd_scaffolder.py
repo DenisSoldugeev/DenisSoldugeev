@@ -24,7 +24,7 @@ from typing import Any, Dict, List
 
 def slugify(text: str) -> str:
     """Convert text to a filename-safe slug."""
-    text = text.strip.lower
+    text = text.strip().lower()
     text = re.sub(r"[/:{}*?\"<>|]", "-", text)
     text = re.sub(r"[^a-z0-9\-]", "-", text)
     text = re.sub(r"-+", "-", text)
@@ -40,7 +40,7 @@ def route_to_page_name(route: str) -> str:
     clean = [p for p in parts if not p.startswith(":") and not p.startswith("*")]
     if not clean:
         clean = [p.lstrip(":*") for p in parts]
-    return " ".join(w.capitalize for w in "-".join(clean).replace("_", "-").split("-"))
+    return " ".join(w.capitalize() for w in "-".join(clean).replace("_", "-").split("-"))
 
 
 def generate_readme(project_name: str, routes: List[Dict], summary: Dict, date: str) -> str:
@@ -193,7 +193,7 @@ def generate_enum_dictionary(enums: List[Dict]) -> str:
         if e.get("values"):
             lines.append("| Key | Value |")
             lines.append("|-----|-------|")
-            for k, v in e["values"].items:
+            for k, v in e["values"].items():
                 lines.append(f"| `{k}` | {v} |")
         lines.append("")
 
@@ -269,7 +269,7 @@ def generate_page_relationships(routes: List[Dict]) -> str:
 
 def scaffold(analysis: Dict[str, Any], output_dir: Path, project_name: Optional[str] = None):
     """Create the full PRD directory structure."""
-    date = datetime.now.strftime("%Y-%m-%d")
+    date = datetime.now().strftime("%Y-%m-%d")
     name = project_name or analysis.get("project", {}).get("name", "Project")
     routes = analysis.get("routes", {}).get("pages", [])
     apis = analysis.get("apis", {}).get("endpoints", [])
@@ -369,7 +369,7 @@ def print_summary(output_dir: Path, analysis: Dict[str, Any]):
     print(f"\n  Next: Review each page stub and fill in the TODO sections.")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Scaffold PRD directory from codebase analysis"
     )
@@ -380,10 +380,10 @@ def main:
                         help="Validate analysis JSON without generating files")
     parser.add_argument("--dry-run", action="store_true",
                         help="Show what would be created without writing files")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     analysis_path = Path(args.analysis)
-    if not analysis_path.exists:
+    if not analysis_path.exists():
         print(f"Error: Analysis file not found: {analysis_path}")
         raise SystemExit(2)
 
@@ -432,4 +432,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

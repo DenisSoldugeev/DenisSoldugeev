@@ -37,31 +37,31 @@ Differentiates clearly:
 
 ## Skill Integration
 
-**Skill Location:** `../../skills/vpe-advisor/`
+**Skill Location:** `../../vpe-advisor/`
 
 ### Python Tools
 
 1. **Delivery Throughput Analyzer**
-   - Path: `../../skills/vpe-advisor/scripts/delivery_throughput_analyzer.py`
-   - Usage: `python ../../skills/vpe-advisor/scripts/delivery_throughput_analyzer.py sprint_metrics.json`
+   - Path: `../../vpe-advisor/scripts/delivery_throughput_analyzer.py`
+   - Usage: `python ../../vpe-advisor/scripts/delivery_throughput_analyzer.py sprint_metrics.json`
    - Returns: DORA 4 metrics (Deployment Frequency, Lead Time, MTTR, Change Failure Rate) with Elite/High/Medium/Low verdict per metric and overall. Cycle-time bottleneck identification (top wait stage as % of cycle) + typical fixes per bottleneck
 
 2. **Engineering Hiring Funnel Calculator**
-   - Path: `../../skills/vpe-advisor/scripts/eng_hiring_funnel_calculator.py`
-   - Usage: `python ../../skills/vpe-advisor/scripts/eng_hiring_funnel_calculator.py funnel.json`
+   - Path: `../../vpe-advisor/scripts/eng_hiring_funnel_calculator.py`
+   - Usage: `python ../../vpe-advisor/scripts/eng_hiring_funnel_calculator.py funnel.json`
    - Returns: Stage-by-stage conversion rates (7-stage funnel) with healthy/leaky verdict, end-to-end conversion, required top-of-funnel volume for hiring target, weakest-stage identification + fixes (sourcing, calibration, interview design, comp/close discipline)
 
 3. **Engineering Team Structure Designer**
-   - Path: `../../skills/vpe-advisor/scripts/eng_team_structure_designer.py`
-   - Usage: `python ../../skills/vpe-advisor/scripts/eng_team_structure_designer.py team.json`
+   - Path: `../../vpe-advisor/scripts/eng_team_structure_designer.py`
+   - Usage: `python ../../vpe-advisor/scripts/eng_team_structure_designer.py team.json`
    - Returns: Recommended structure (informal pods / formal squads / squads+tribes / multi-tribe) based on headcount, squad sizing assessment (5-9 IC range), manager-trigger (first EM, EM-overstretched, EM-underutilized), director-trigger (3+ EMs reporting to VPE/CTO)
 
 ### Knowledge Bases
 
-- `../../skills/vpe-advisor/references/delivery_throughput.md` — Full DORA framework + thresholds + 4 common bottlenecks (PR review, CI flakiness, deploy gates, scheduled releases) + what to fix first (lead time → failure rate → frequency → MTTR) + anti-patterns
-- `../../skills/vpe-advisor/references/engineering_hiring_funnel.md` — 7-stage funnel + healthy conversion benchmarks + leakage diagnosis per stage + pipeline volume math + time-to-fill discipline + technical interview design + cost-per-hire
-- `../../skills/vpe-advisor/references/eng_team_structure.md` — Conway's Law + headcount-to-structure map + span-of-control benchmarks + EM-vs-tech-lead distinction + manager + director + VPE triggers + squad sizing + chapter discipline
-- `../../skills/vpe-advisor/references/production_discipline.md` — On-call rotation (≥ 6 people; burnout signals) + incident response (severity levels, IC role, blameless postmortems) + deployment cadence (continuous vs scheduled; progressive delivery) + SLO discipline + maturity-level model (Level 1-5)
+- `../../vpe-advisor/references/delivery_throughput.md` — Full DORA framework + thresholds + 4 common bottlenecks (PR review, CI flakiness, deploy gates, scheduled releases) + what to fix first (lead time → failure rate → frequency → MTTR) + anti-patterns
+- `../../vpe-advisor/references/engineering_hiring_funnel.md` — 7-stage funnel + healthy conversion benchmarks + leakage diagnosis per stage + pipeline volume math + time-to-fill discipline + technical interview design + cost-per-hire
+- `../../vpe-advisor/references/eng_team_structure.md` — Conway's Law + headcount-to-structure map + span-of-control benchmarks + EM-vs-tech-lead distinction + manager + director + VPE triggers + squad sizing + chapter discipline
+- `../../vpe-advisor/references/production_discipline.md` — On-call rotation (≥ 6 people; burnout signals) + incident response (severity levels, IC role, blameless postmortems) + deployment cadence (continuous vs scheduled; progressive delivery) + SLO discipline + maturity-level model (Level 1-5)
 
 ## Workflows
 
@@ -69,7 +69,7 @@ Differentiates clearly:
 **Goal:** DORA diagnosis + identify top bottleneck + 90-day fix plan.
 
 ```bash
-python ../../skills/vpe-advisor/scripts/delivery_throughput_analyzer.py sprint_metrics.json
+python ../../vpe-advisor/scripts/delivery_throughput_analyzer.py sprint_metrics.json
 # Cross-check architectural causes with ds-cto-advisor
 # Output: top bottleneck + one engineer named to own the fix
 # Log via /ds:decide
@@ -79,7 +79,7 @@ python ../../skills/vpe-advisor/scripts/delivery_throughput_analyzer.py sprint_m
 **Goal:** Identify funnel leakage + compute pipeline gap.
 
 ```bash
-python ../../skills/vpe-advisor/scripts/eng_hiring_funnel_calculator.py funnel.json
+python ../../vpe-advisor/scripts/eng_hiring_funnel_calculator.py funnel.json
 # Cross-check comp + leveling with ds-chro-advisor
 # Cross-check cost-per-hire envelope with ds-cfo-advisor
 # Output: weakest-stage fixes + sourcing channel diversification plan
@@ -89,7 +89,7 @@ python ../../skills/vpe-advisor/scripts/eng_hiring_funnel_calculator.py funnel.j
 **Goal:** Confirm structure matches headcount + work streams; identify manager-trigger.
 
 ```bash
-python ../../skills/vpe-advisor/scripts/eng_team_structure_designer.py team.json
+python ../../vpe-advisor/scripts/eng_team_structure_designer.py team.json
 # Cross-check Conway's Law alignment with ds-cto-advisor
 # Output: structure recommendation + manager hire plan
 ```
@@ -119,13 +119,13 @@ python ../../skills/vpe-advisor/scripts/eng_team_structure_designer.py team.json
 # Quarterly VPE brief — pre-board version
 
 # 1. Delivery throughput (DORA 4 metrics + bottleneck)
-python ../../skills/vpe-advisor/scripts/delivery_throughput_analyzer.py current-sprint.json
+python ../../vpe-advisor/scripts/delivery_throughput_analyzer.py current-sprint.json
 
 # 2. Hiring funnel health + pipeline gap
-python ../../skills/vpe-advisor/scripts/eng_hiring_funnel_calculator.py current-funnel.json
+python ../../vpe-advisor/scripts/eng_hiring_funnel_calculator.py current-funnel.json
 
 # 3. Team structure check
-python ../../skills/vpe-advisor/scripts/eng_team_structure_designer.py current-team.json
+python ../../vpe-advisor/scripts/eng_team_structure_designer.py current-team.json
 
 # Board narrative requires:
 #   - DORA verdict + top bottleneck
@@ -145,15 +145,15 @@ python ../../skills/vpe-advisor/scripts/eng_team_structure_designer.py current-t
 
 ## Related Agents
 
-- [ds-cto-advisor](../../../../agents/c-level/ds-cto-advisor.md) — Architecture, scaling cliffs (CTO decides what to build; VPE decides how to ship)
+- [ds-cto-advisor](../../../agents/c-level/ds-cto-advisor.md) — Architecture, scaling cliffs (CTO decides what to build; VPE decides how to ship)
 - [ds-chro-advisor](ds-chro-advisor.md) — Hiring systems (ladders, bands)
 - [ds-coo-advisor](ds-coo-advisor.md) — Operating cadence company-wide
 - [ds-cfo-advisor](ds-cfo-advisor.md) — Cost-per-hire envelope, eng budget
-- [ds-engineering-lead](../../../../agents/engineering-team/ds-engineering-lead.md) — Day-to-day incident + on-call coordination
+- [ds-engineering-lead](../../../agents/engineering-team/ds-engineering-lead.md) — Day-to-day incident + on-call coordination
 
 ## References
 
-- Skill: [../../skills/vpe-advisor/SKILL.md](../../vpe-advisor/SKILL.md)
+- Skill: [../../vpe-advisor/SKILL.md](../../vpe-advisor/SKILL.md)
 - Voice spec: [../references/persona-voices.md](../references/persona-voices.md)
 - Sibling command: [`/ds:vpe-review`](../skills/vpe-review/SKILL.md)
 

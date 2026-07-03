@@ -1,6 +1,6 @@
 ---
 name: "cdo-review"
-description: "/ds:cdo-review <plan> — Decision-driven Chief Data Officer interrogation of any plan that touches training data, data architecture, data productization, or data team hiring."
+description: "/ds:cdo-review <plan> — Decision-driven Chief Data Officer interrogation of any plan that touches training data, data architecture, data productization, or data team hiring. Use when validating training-data rights before model work, choosing warehouse vs lakehouse vs mesh, or valuing data assets for productization or M&A."
 ---
 
 # /ds:cdo-review — CDO Forcing Questions
@@ -60,13 +60,13 @@ The decision-driven CDO pressure-tests any plan that touches data strategy. Six 
 
 ```bash
 # 1. AI training audit (if any ML / AI use case)
-python ../../../skills/chief-data-officer-advisor/scripts/ai_training_data_audit.py sources.json
+python ../../../chief-data-officer-advisor/scripts/ai_training_data_audit.py sources.json
 
 # 2. Architecture decision (if changing the stack)
-python ../../../skills/chief-data-officer-advisor/scripts/data_product_strategy_picker.py profile.json
+python ../../../chief-data-officer-advisor/scripts/data_product_strategy_picker.py profile.json
 
 # 3. Data asset valuation (if productizing or pre-M&A)
-python ../../../skills/chief-data-officer-advisor/scripts/data_asset_valuator.py corpus.json
+python ../../../chief-data-officer-advisor/scripts/data_asset_valuator.py corpus.json
 ```
 
 ## Output Format
@@ -111,7 +111,7 @@ python ../../../skills/chief-data-officer-advisor/scripts/data_asset_valuator.py
 - `/ds:gc-review` — for any productization or licensing path
 - `/ds:ciso-review` — for any architecture change touching customer data
 - `/ds:cfo-review` — for build-vs-buy TCO and M&A valuation math
-- `/ds:chro-review` — for data team hires (comp, ladder, leveling)
+- `ds-chro-advisor` agent — for data team hires (comp, ladder, leveling)
 - `/ds:decide` — log the verdict
 - `/ds:freeze 90` — on multi-year infrastructure contracts
 
@@ -119,7 +119,7 @@ python ../../../skills/chief-data-officer-advisor/scripts/data_asset_valuator.py
 
 - Agent: [`ds-cdo-advisor`](../../agents/ds-cdo-advisor.md)
 - Skill: [`chief-data-officer-advisor`](../../../chief-data-officer-advisor/SKILL.md)
-- Adjacent: `../../../skills/general-counsel-advisor/` (contractual constraints), `../../../skills/cto-advisor/` (architecture capacity)
+- Adjacent: `../../../general-counsel-advisor/` (contractual constraints), `../../../cto-advisor/` (architecture capacity)
 
 ---
 

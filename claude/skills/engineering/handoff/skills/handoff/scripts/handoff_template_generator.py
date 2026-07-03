@@ -90,7 +90,7 @@ SECTION_PROMPTS = {
 def _detect_emphasis(focus: str) -> str:
     if not focus:
         return "default"
-    focus_lower = focus.lower
+    focus_lower = focus.lower()
     for keyword, emphasis in FOCUS_EMPHASIS:
         if keyword in focus_lower:
             return emphasis
@@ -100,7 +100,7 @@ def _detect_emphasis(focus: str) -> str:
 def generate_template(next_focus: str, session_id: str = "") -> str:
     emphasis = _detect_emphasis(next_focus)
     prompts = SECTION_PROMPTS.get(emphasis, SECTION_PROMPTS["default"])
-    timestamp = datetime.now.isoformat(timespec="seconds")
+    timestamp = datetime.now().isoformat(timespec="seconds")
     session_label = session_id or "<session_id>"
 
     lines = []
@@ -170,7 +170,7 @@ def analyze(next_focus: str, session_id: str = "") -> Dict[str, Any]:
     }
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Generate a handoff document template per Matt Pocock's structure.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -181,7 +181,7 @@ def main -> int:
     parser.add_argument("--out", help="Write template to file (default: stdout)")
     parser.add_argument("--mktemp", action="store_true", help="Write to a mktemp-style file (handoff-XXXXXX.md)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if not args.next_focus:
         args.next_focus = "(embedded sample: continue Stream B Matt Pocock skills batch)"
@@ -201,7 +201,7 @@ def main -> int:
         result["written_to"] = args.out
 
     if args.output == "json":
-        print(json.dumps({k: v for k, v in result.items if k != "template"} | {"template_preview": result["template"][:500]}, indent=2))
+        print(json.dumps({k: v for k, v in result.items() if k != "template"} | {"template_preview": result["template"][:500]}, indent=2))
     else:
         if "written_to" in result:
             print(f"Wrote handoff template to: {result['written_to']}")
@@ -214,4 +214,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

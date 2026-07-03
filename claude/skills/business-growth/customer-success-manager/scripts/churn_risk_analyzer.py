@@ -111,7 +111,7 @@ def days_until(date_str: Optional[str]) -> Optional[int]:
         return None
     try:
         target = datetime.strptime(date_str[:10], "%Y-%m-%d")
-        delta = (target - datetime.now).days
+        delta = (target - datetime.now()).days
         return max(delta, 0)
     except (ValueError, TypeError):
         return None
@@ -219,7 +219,7 @@ def score_support_issues(data: Dict[str, Any]) -> Tuple[float, List[Dict[str, st
 
     escalations = data.get("open_escalations", 0)
     critical_unresolved = data.get("unresolved_critical", 0)
-    sat_trend = data.get("satisfaction_trend", "stable").lower
+    sat_trend = data.get("satisfaction_trend", "stable").lower()
 
     esc_risk = clamp(escalations * 35.0)  # 3 escalations => 100
     critical_risk = clamp(critical_unresolved * 50.0)  # 2 unresolved critical => 100
@@ -278,7 +278,7 @@ def score_commercial_factors(data: Dict[str, Any]) -> Tuple[float, List[Dict[str
     warnings: List[Dict[str, str]] = []
     risk_points = 0.0
 
-    contract_type = data.get("contract_type", "annual").lower
+    contract_type = data.get("contract_type", "annual").lower()
     pricing_complaints = data.get("pricing_complaints", False)
     budget_cuts = data.get("budget_cuts_mentioned", False)
 
@@ -392,7 +392,7 @@ def format_text(results: List[Dict[str, Any]]) -> str:
     for r in sorted_results:
         lines.append("-" * 72)
         lines.append(f"Customer: {r['name']} ({r['customer_id']})")
-        lines.append(f"Segment:  {r['segment'].title}  |  ARR: ${r['arr']:,.0f}")
+        lines.append(f"Segment:  {r['segment'].title()}  |  ARR: ${r['arr']:,.0f}")
         renewal_str = f"{r['days_to_renewal']} days" if r["days_to_renewal"] is not None else "N/A"
         lines.append(f"Risk Score: {r['risk_score']}/100  [{r['risk_label']}]  |  Renewal: {renewal_str}")
         if r["urgency_multiplier"] > 1.0:
@@ -400,15 +400,15 @@ def format_text(results: List[Dict[str, Any]]) -> str:
         lines.append("")
 
         lines.append("  Signal Scores:")
-        for signal_name, signal_data in r["signal_scores"].items:
-            display_name = signal_name.replace("_", " ").title
+        for signal_name, signal_data in r["signal_scores"].items():
+            display_name = signal_name.replace("_", " ").title()
             lines.append(f"    {display_name:25s} {signal_data['score']:6.1f}/100  ({signal_data['weight']})")
 
         if r["warning_signals"]:
             lines.append("")
             lines.append("  Warning Signals:")
             for w in r["warning_signals"]:
-                severity_tag = w["severity"].upper
+                severity_tag = w["severity"].upper()
                 lines.append(f"    [{severity_tag}] {w['signal']}")
 
         if r["recommended_actions"]:
@@ -446,7 +446,7 @@ def format_json(results: List[Dict[str, Any]]) -> str:
 # ---------------------------------------------------------------------------
 
 
-def main -> None:
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Analyse churn risk with behavioral signal detection and intervention recommendations."
     )
@@ -458,7 +458,7 @@ def main -> None:
         dest="output_format",
         help="Output format (default: text)",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         with open(args.input_file, "r") as f:
@@ -484,4 +484,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

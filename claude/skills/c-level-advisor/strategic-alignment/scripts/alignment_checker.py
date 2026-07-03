@@ -332,7 +332,7 @@ def print_report(data, orphans, gaps, over_indexed, conflicts, coverage, score):
         teams_str = ", ".join(s["team"] for s in supporting) if supporting else "⚠️  NONE"
         print(f"  [{okr['id']}] {okr['objective']}")
         print(f"       Supported by: {teams_str}")
-    print
+    print()
     print(sep)
 
     # Orphan OKRs
@@ -342,11 +342,11 @@ def print_report(data, orphans, gaps, over_indexed, conflicts, coverage, score):
             note = f" — {o.get('note', 'No parent company OKR assigned')}"
             print(f"  ⚠️  [{o['okr_id']}] {o['team']}: {o['objective']}")
             print(f"       Issue: {note}")
-        print
+        print()
         print("  → Action: Connect each orphan to a company OKR, or deprioritize it.")
     else:
         print("  ✅ None found. All team OKRs connect to company OKRs.")
-    print
+    print()
     print(sep)
 
     # Coverage gaps
@@ -355,18 +355,18 @@ def print_report(data, orphans, gaps, over_indexed, conflicts, coverage, score):
         for g in gaps:
             print(f"  🔴 [{g['company_okr_id']}] {g['objective']}")
             print(f"       No team is working on this. It will not be achieved.")
-        print
+        print()
         print("  → Action: Assign at least one team owner to each unowned company OKR.")
     else:
         print("  ✅ All company OKRs have at least one team supporting them.")
-    print
+    print()
 
     if over_indexed:
         print(f"  📊 OVER-INDEXED OKRs ({len(over_indexed)} company OKRs with 4+ teams)\n")
         for o in over_indexed:
             print(f"  [{o['company_okr_id']}] {o['objective']}")
             print(f"       {o['supporting_team_count']} teams: {', '.join(o['supporting_teams'])}")
-        print
+        print()
         print("  → Note: High coverage isn't necessarily bad, but check if under-covered OKRs are being neglected.")
     print(sep)
 
@@ -378,11 +378,11 @@ def print_report(data, orphans, gaps, over_indexed, conflicts, coverage, score):
             print(f"  {label} Conflict #{i}")
             print(f"    {c['team_a']} [{c['okr_a']}] ↔ {c['team_b']} [{c['okr_b']}]")
             print(f"    {c['description']}")
-            print
+            print()
         print("  → Action: For each conflict, design a shared metric or shared constraint that prevents local optimization at company expense.")
     else:
         print("  ✅ No declared or potential conflicts detected.")
-    print
+    print()
     print(sep)
 
     # Summary
@@ -395,7 +395,7 @@ def print_report(data, orphans, gaps, over_indexed, conflicts, coverage, score):
     print(f"  Coverage gaps:      {len(gaps)} of {total_company_okrs} company OKRs have no team support")
     print(f"  Conflicts:          {len(conflicts)}")
     print(f"  Alignment score:    {score}/100  {score_label(score)}")
-    print
+    print()
 
     if score < 70:
         print("  ⚠️  RECOMMENDED ACTIONS:")
@@ -406,7 +406,7 @@ def print_report(data, orphans, gaps, over_indexed, conflicts, coverage, score):
         if conflicts:
             print(f"    3. Address {len(conflicts)} conflict(s) with shared metrics or constraints")
         print("    4. Run a cross-functional OKR review before next quarter begins")
-    print
+    print()
     print(f"{'═' * 60}\n")
 
 
@@ -414,11 +414,11 @@ def print_report(data, orphans, gaps, over_indexed, conflicts, coverage, score):
 # Main
 # ─────────────────────────────────────────────
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Strategic OKR Alignment Checker")
     parser.add_argument("--file", help="Path to JSON file with OKR data")
     parser.add_argument("--sample", action="store_true", help="Print sample JSON format and exit")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.sample:
         print(json.dumps(SAMPLE_DATA, indent=2))
@@ -452,4 +452,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

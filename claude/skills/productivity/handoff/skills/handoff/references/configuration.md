@@ -95,7 +95,7 @@ For `temp` mode, `filename_style` is always `mktemp`.
 
 ### `setup_completed_at` — ISO timestamp
 
-Set automatically by setup. Read by `config_loader.setup_completed` to decide whether to show the first-run prompt.
+Set automatically by setup. Read by `config_loader.setup_completed()` to decide whether to show the first-run prompt.
 
 ## Per-project overrides
 

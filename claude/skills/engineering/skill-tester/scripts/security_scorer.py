@@ -5,6 +5,8 @@ Security Scorer - Security dimension scoring module
 This module provides comprehensive security assessment for Python scripts,
 evaluating sensitive data exposure, safe file operations, command injection
 prevention, and input validation quality.
+
+Author: Claude Skills Engineering Team
 Version: 2.0.0
 """
 
@@ -424,11 +426,11 @@ class SecurityScorer:
         Score command injection prevention.
         
         Evaluates scripts for:
-        - os.system, os.popen usage
+        - os.system(), os.popen() usage
         - subprocess with shell=True
-        - eval, exec usage
-        - asyncio.create_subprocess_shell
-        - pexpect.spawn
+        - eval(), exec() usage
+        - asyncio.create_subprocess_shell()
+        - pexpect.spawn()
         - Safe patterns (shlex.quote, shell=False)
         
         Returns:
@@ -447,8 +449,8 @@ class SecurityScorer:
             (PATTERN_EVAL, 'eval usage - code injection risk', CRITICAL_VULNERABILITY_PENALTY),
             (PATTERN_EXEC, 'exec usage - code injection risk', CRITICAL_VULNERABILITY_PENALTY),
             (PATTERN_SUBPROCESS_SHELL_TRUE, 'subprocess with shell=True', HIGH_SEVERITY_PENALTY),
-            (PATTERN_ASYNCIO_SHELL, 'asyncio.create_subprocess_shell', HIGH_SEVERITY_PENALTY),
-            (PATTERN_PEXPECT_SPAWN, 'pexpect.spawn', MEDIUM_SEVERITY_PENALTY),
+            (PATTERN_ASYNCIO_SHELL, 'asyncio.create_subprocess_shell()', HIGH_SEVERITY_PENALTY),
+            (PATTERN_PEXPECT_SPAWN, 'pexpect.spawn()', MEDIUM_SEVERITY_PENALTY),
         ]
         
         # Safe patterns get bonus points
@@ -543,10 +545,10 @@ class SecurityScorer:
             - suggestions: Improvement suggestions
         """
         # Score each component
-        sensitive_score, sensitive_findings = self.score_sensitive_data_exposure
-        file_ops_score, file_ops_findings = self.score_safe_file_operations
-        command_injection_score, command_findings = self.score_command_injection_prevention
-        input_validation_score, input_suggestions = self.score_input_validation
+        sensitive_score, sensitive_findings = self.score_sensitive_data_exposure()
+        file_ops_score, file_ops_findings = self.score_safe_file_operations()
+        command_injection_score, command_findings = self.score_command_injection_prevention()
+        input_validation_score, input_suggestions = self.score_input_validation()
         
         # Calculate overall score (equal weight: 25% each)
         overall_score = (
@@ -560,7 +562,7 @@ class SecurityScorer:
         all_findings = sensitive_findings + file_ops_findings + command_findings
         
         # Generate suggestions based on findings
-        suggestions = input_suggestions.copy
+        suggestions = input_suggestions.copy()
         if sensitive_findings:
             suggestions.append("Remove hardcoded credentials and use environment variables or secure config")
         if file_ops_findings:

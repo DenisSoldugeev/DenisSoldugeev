@@ -54,15 +54,15 @@ class ProjectScanner:
         self.components: Dict[str, Dict] = {}
         self.relationships: List[Tuple[str, str, str]] = []  # (from, to, type)
         self.layers: Dict[str, List[str]] = defaultdict(list)
-        self.technologies: Set[str] = set
-        self.external_deps: Set[str] = set
+        self.technologies: Set[str] = set()
+        self.external_deps: Set[str] = set()
 
     def scan(self) -> Dict:
         """Scan the project and return structure information."""
-        self._scan_directories
-        self._detect_technologies
-        self._detect_relationships
-        self._classify_layers
+        self._scan_directories()
+        self._detect_technologies()
+        self._detect_relationships()
+        self._classify_layers()
 
         return {
             'components': self.components,
@@ -77,8 +77,8 @@ class ProjectScanner:
         ignore_dirs = {'.git', 'node_modules', '__pycache__', '.venv', 'venv',
                        'dist', 'build', '.next', '.nuxt', 'coverage', '.pytest_cache'}
 
-        for item in self.project_path.iterdir:
-            if item.is_dir and item.name not in ignore_dirs and not item.name.startswith('.'):
+        for item in self.project_path.iterdir():
+            if item.is_dir() and item.name not in ignore_dirs and not item.name.startswith('.'):
                 component_info = self._analyze_directory(item)
                 if component_info['files'] > 0:
                     self.components[item.name] = component_info
@@ -86,11 +86,11 @@ class ProjectScanner:
     def _analyze_directory(self, dir_path: Path) -> Dict:
         """Analyze a directory to understand its role."""
         files = list(dir_path.rglob('*'))
-        code_files = [f for f in files if f.is_file and f.suffix in
+        code_files = [f for f in files if f.is_file() and f.suffix in
                       ['.py', '.js', '.ts', '.jsx', '.tsx', '.go', '.rs', '.java', '.vue']]
 
         # Count imports/dependencies within the directory
-        imports = set
+        imports = set()
         for f in code_files[:50]:  # Limit to avoid large projects
             imports.update(self._extract_imports(f))
 
@@ -103,7 +103,7 @@ class ProjectScanner:
 
     def _extract_imports(self, file_path: Path) -> Set[str]:
         """Extract import statements from a file."""
-        imports = set
+        imports = set()
         try:
             content = file_path.read_text(encoding='utf-8', errors='ignore')
 
@@ -126,8 +126,8 @@ class ProjectScanner:
 
     def _guess_component_type(self, name: str) -> str:
         """Guess component type from directory name."""
-        name_lower = name.lower
-        for layer, patterns in self.LAYER_PATTERNS.items:
+        name_lower = name.lower()
+        for layer, patterns in self.LAYER_PATTERNS.items():
             for pattern in patterns:
                 if pattern in name_lower:
                     return layer
@@ -135,7 +135,7 @@ class ProjectScanner:
 
     def _detect_technologies(self):
         """Detect technologies used in the project."""
-        for tech, patterns in self.TECH_PATTERNS.items:
+        for tech, patterns in self.TECH_PATTERNS.items():
             for pattern in patterns:
                 matches = list(self.project_path.rglob(f'*{pattern}*'))
                 if matches:
@@ -143,17 +143,17 @@ class ProjectScanner:
                     break
 
         # Detect external dependencies from package files
-        self._parse_package_json
-        self._parse_requirements_txt
-        self._parse_go_mod
+        self._parse_package_json()
+        self._parse_requirements_txt()
+        self._parse_go_mod()
 
     def _parse_package_json(self):
         """Parse package.json for dependencies."""
         pkg_path = self.project_path / 'package.json'
-        if pkg_path.exists:
+        if pkg_path.exists():
             try:
-                data = json.loads(pkg_path.read_text)
-                deps = list(data.get('dependencies', {}).keys)[:10]
+                data = json.loads(pkg_path.read_text())
+                deps = list(data.get('dependencies', {}).keys())[:10]
                 self.external_deps.update(deps)
             except Exception:
                 pass
@@ -161,9 +161,9 @@ class ProjectScanner:
     def _parse_requirements_txt(self):
         """Parse requirements.txt for dependencies."""
         req_path = self.project_path / 'requirements.txt'
-        if req_path.exists:
+        if req_path.exists():
             try:
-                content = req_path.read_text
+                content = req_path.read_text()
                 deps = re.findall(r'^([a-zA-Z0-9_-]+)', content, re.MULTILINE)[:10]
                 self.external_deps.update(deps)
             except Exception:
@@ -172,9 +172,9 @@ class ProjectScanner:
     def _parse_go_mod(self):
         """Parse go.mod for dependencies."""
         mod_path = self.project_path / 'go.mod'
-        if mod_path.exists:
+        if mod_path.exists():
             try:
-                content = mod_path.read_text
+                content = mod_path.read_text()
                 deps = re.findall(r'^\s+([^\s]+)\s+v', content, re.MULTILINE)[:10]
                 self.external_deps.update([d.split('/')[-1] for d in deps])
             except Exception:
@@ -182,18 +182,18 @@ class ProjectScanner:
 
     def _detect_relationships(self):
         """Detect relationships between components."""
-        component_names = set(self.components.keys)
+        component_names = set(self.components.keys())
 
-        for comp_name, comp_info in self.components.items:
+        for comp_name, comp_info in self.components.items():
             for imp in comp_info.get('imports', []):
                 # Check if import references another component
                 for other_comp in component_names:
-                    if other_comp != comp_name and other_comp.lower in imp.lower:
+                    if other_comp != comp_name and other_comp.lower() in imp.lower():
                         self.relationships.append((comp_name, other_comp, 'uses'))
 
     def _classify_layers(self):
         """Classify components into architectural layers."""
-        for comp_name, comp_info in self.components.items:
+        for comp_name, comp_info in self.components.items():
             layer = comp_info.get('type', 'unknown')
             if layer != 'unknown':
                 self.layers[layer].append(comp_name)
@@ -214,13 +214,13 @@ class DiagramGenerator:
     def generate(self, diagram_type: str) -> str:
         """Generate diagram based on type."""
         if diagram_type == 'component':
-            return self._generate_component_diagram
+            return self._generate_component_diagram()
         elif diagram_type == 'layer':
-            return self._generate_layer_diagram
+            return self._generate_layer_diagram()
         elif diagram_type == 'deployment':
-            return self._generate_deployment_diagram
+            return self._generate_deployment_diagram()
         else:
-            return self._generate_component_diagram
+            return self._generate_component_diagram()
 
     def _generate_component_diagram(self) -> str:
         raise NotImplementedError
@@ -239,13 +239,13 @@ class MermaidGenerator(DiagramGenerator):
         lines = ['graph TD']
 
         # Add components
-        for name, info in self.components.items:
+        for name, info in self.components.items():
             safe_name = self._safe_id(name)
             file_count = info.get('files', 0)
             lines.append(f'    {safe_name}["{name}<br/>{file_count} files"]')
 
         # Add relationships
-        seen = set
+        seen = set()
         for src, dst, rel_type in self.relationships:
             key = (src, dst)
             if key not in seen:
@@ -271,7 +271,7 @@ class MermaidGenerator(DiagramGenerator):
         for layer in layer_order:
             components = self.layers.get(layer, [])
             if components:
-                lines.append(f'    subgraph {layer.title} Layer')
+                lines.append(f'    subgraph {layer.title()} Layer')
                 for comp in components:
                     safe_comp = self._safe_id(comp)
                     lines.append(f'        {safe_comp}["{comp}"]')
@@ -348,14 +348,14 @@ class PlantUMLGenerator(DiagramGenerator):
         lines = ['@startuml', 'skinparam componentStyle rectangle', '']
 
         # Add components
-        for name, info in self.components.items:
+        for name, info in self.components.items():
             file_count = info.get('files', 0)
             lines.append(f'component "{name}\\n({file_count} files)" as {self._safe_id(name)}')
 
         lines.append('')
 
         # Add relationships
-        seen = set
+        seen = set()
         for src, dst, rel_type in self.relationships:
             key = (src, dst)
             if key not in seen:
@@ -382,7 +382,7 @@ class PlantUMLGenerator(DiagramGenerator):
         for layer in layer_order:
             components = self.layers.get(layer, [])
             if components:
-                lines.append(f'package "{layer.title} Layer" {{')
+                lines.append(f'package "{layer.title()} Layer" {{')
                 for comp in components:
                     lines.append(f'  [{comp}]')
                 lines.append('}')
@@ -441,7 +441,7 @@ class ASCIIGenerator(DiagramGenerator):
         # Components
         lines.append('Components:')
         lines.append('-' * 40)
-        for name, info in self.components.items:
+        for name, info in self.components.items():
             file_count = info.get('files', 0)
             comp_type = info.get('type', 'unknown')
             lines.append(f'  [{name}]')
@@ -453,7 +453,7 @@ class ASCIIGenerator(DiagramGenerator):
         if self.relationships:
             lines.append('Relationships:')
             lines.append('-' * 40)
-            seen = set
+            seen = set()
             for src, dst, rel_type in self.relationships:
                 key = (src, dst)
                 if key not in seen:
@@ -485,7 +485,7 @@ class ASCIIGenerator(DiagramGenerator):
             components = self.layers.get(layer, [])
             if components:
                 lines.append(f'+{"-" * 56}+')
-                lines.append(f'| {layer.upper:^54} |')
+                lines.append(f'| {layer.upper():^54} |')
                 lines.append(f'+{"-" * 56}+')
                 for comp in components:
                     lines.append(f'|   [{comp:^48}]   |')
@@ -552,7 +552,7 @@ class ASCIIGenerator(DiagramGenerator):
         return '\n'.join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description='Generate architecture diagrams from project structure',
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -605,14 +605,14 @@ Output formats:
         help='Output raw scan results as JSON'
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    project_path = Path(args.project_path).resolve
-    if not project_path.exists:
+    project_path = Path(args.project_path).resolve()
+    if not project_path.exists():
         print(f"Error: Project path does not exist: {project_path}", file=sys.stderr)
         sys.exit(1)
 
-    if not project_path.is_dir:
+    if not project_path.is_dir():
         print(f"Error: Project path is not a directory: {project_path}", file=sys.stderr)
         sys.exit(1)
 
@@ -621,7 +621,7 @@ Output formats:
 
     # Scan project
     scanner = ProjectScanner(project_path)
-    scan_result = scanner.scan
+    scan_result = scanner.scan()
 
     if args.verbose:
         print(f"Found {len(scan_result['components'])} components")
@@ -657,4 +657,4 @@ Output formats:
 
 
 if __name__ == '__main__':
-    main
+    main()

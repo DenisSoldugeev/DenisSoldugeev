@@ -106,10 +106,10 @@ def extract_md_links(text: str) -> List[str]:
 
 def _collect_links_for_file(filepath: str, files: List[str]) -> Set[str]:
     """Read filepath, return set of links that resolve to other files in `files`."""
-    out: Set[str] = set
+    out: Set[str] = set()
     try:
         with open(filepath, "r", encoding="utf-8") as fh:
-            text = fh.read
+            text = fh.read()
     except (IOError, OSError):
         return out
     for link in extract_md_links(text):
@@ -123,11 +123,11 @@ def detect_circular_refs(folder: str, files: List[str]) -> List[Tuple[str, str]]
     """Detect circular references: file A -> file B -> file A.
     Returns list of (file_a, file_b) tuples."""
     graph: Dict[str, Set[str]] = {f: _collect_links_for_file(f, files) for f in files}
-    seen_pairs: Set[Tuple[str, str]] = set
+    seen_pairs: Set[Tuple[str, str]] = set()
     circular: List[Tuple[str, str]] = []
-    for a, neighbors in graph.items:
+    for a, neighbors in graph.items():
         for b in neighbors:
-            if a not in graph.get(b, set):
+            if a not in graph.get(b, set()):
                 continue
             pair = tuple(sorted([a, b]))
             if pair in seen_pairs:
@@ -243,7 +243,7 @@ def render_text(r: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Validate skill folder structure per Matt Pocock's write-a-skill pattern.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -253,7 +253,7 @@ def main -> int:
     parser.add_argument("path", nargs="?", help="Path to skill folder (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
     parser.add_argument("--max-lines", type=int, default=DEFAULT_MAX_LINES, help=max_lines_help)
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         folder = args.path
@@ -274,4 +274,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

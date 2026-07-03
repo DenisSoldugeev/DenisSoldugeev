@@ -30,8 +30,8 @@ def infer_type(values: list[str]) -> str:
     """Infer dominant type from non-null string values."""
     counts = {"int": 0, "float": 0, "bool": 0, "string": 0}
     for v in values:
-        v = v.strip
-        if v.lower in ("true", "false"):
+        v = v.strip()
+        if v.lower() in ("true", "false"):
             counts["bool"] += 1
         else:
             try:
@@ -61,8 +61,8 @@ def safe_std(nums: list[float], mean: float) -> float | None:
 def profile_column(name: str, raw_values: list[str]) -> dict:
     total = len(raw_values)
     null_strings = {"", "null", "none", "n/a", "na", "nan", "nil"}
-    null_count = sum(1 for v in raw_values if v.strip.lower in null_strings)
-    non_null = [v for v in raw_values if v.strip.lower not in null_strings]
+    null_count = sum(1 for v in raw_values if v.strip().lower() in null_strings)
+    non_null = [v for v in raw_values if v.strip().lower() not in null_strings]
 
     col_type = infer_type(non_null)
     unique_values = set(non_null)
@@ -160,9 +160,9 @@ def print_report(headers: list[str], profiles: list[dict], dqs: dict, total_rows
 
     dims = dqs["dimensions"]
     print("\nDimension Breakdown:")
-    for dim, val in dims.items:
+    for dim, val in dims.items():
         bar = int(val / 5)
-        print(f"  {dim.capitalize:<14} {val:>5.1f}  {'█' * bar}{'░' * (20 - bar)}")
+        print(f"  {dim.capitalize():<14} {val:>5.1f}  {'█' * bar}{'░' * (20 - bar)}")
 
     print("\n" + "-" * 64)
     print("COLUMN PROFILES")
@@ -218,13 +218,13 @@ def print_report(headers: list[str], profiles: list[dict], dqs: dict, total_rows
     print("\n" + "=" * 64)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Profile a CSV dataset and compute a Data Quality Score.")
     parser.add_argument("--file", required=True, help="Path to CSV file")
     parser.add_argument("--columns", help="Comma-separated list of columns to profile (default: all)")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--monitor", action="store_true", help="Print monitoring thresholds")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         headers, rows = load_csv(args.file)
@@ -255,4 +255,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

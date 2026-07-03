@@ -54,14 +54,14 @@ class UserService:
             email=email,           # Old column
             email_address=email    # New column
         )
-        return user.save
+        return user.save()
     
     def update_email(self, user_id, new_email):
         # Update both columns
         user = User.objects.get(id=user_id)
         user.email = new_email
         user.email_address = new_email
-        user.save
+        user.save()
         return user
 ```
 
@@ -175,7 +175,7 @@ class DataMigrator:
 class CDCProcessor:
     def __init__(self):
         self.kafka_consumer = KafkaConsumer('db_changes')
-        self.target_db = TargetDatabase
+        self.target_db = TargetDatabase()
     
     def process_changes(self):
         for message in self.kafka_consumer:
@@ -671,23 +671,23 @@ class CircuitBreaker:
         """Execute function with circuit breaker protection"""
         
         if self.state == 'OPEN':
-            if self._should_attempt_reset:
+            if self._should_attempt_reset():
                 self.state = 'HALF_OPEN'
             else:
                 raise CircuitBreakerOpenException("Circuit breaker is OPEN")
         
         try:
             result = func(*args, **kwargs)
-            self._on_success
+            self._on_success()
             return result
         except self.expected_exception as e:
-            self._on_failure
+            self._on_failure()
             raise
     
     def _should_attempt_reset(self):
         return (
             self.last_failure_time and
-            time.time - self.last_failure_time >= self.recovery_timeout
+            time.time() - self.last_failure_time >= self.recovery_timeout
         )
     
     def _on_success(self):
@@ -696,7 +696,7 @@ class CircuitBreaker:
     
     def _on_failure(self):
         self.failure_count += 1
-        self.last_failure_time = time.time
+        self.last_failure_time = time.time()
         
         if self.failure_count >= self.failure_threshold:
             self.state = 'OPEN'
@@ -738,7 +738,7 @@ class HealthChecker:
         for check in self.checks:
             try:
                 result = await asyncio.wait_for(
-                    check'func',
+                    check['func'](),
                     timeout=check['timeout']
                 )
                 results[check['name']] = {
@@ -761,25 +761,25 @@ class HealthChecker:
         return {
             'status': overall_status,
             'checks': results,
-            'timestamp': datetime.utcnow.isoformat
+            'timestamp': datetime.utcnow().isoformat()
         }
 
 # Example health checks
-health_checker = HealthChecker
+health_checker = HealthChecker()
 
-async def database_check:
+async def database_check():
     """Check database connectivity"""
     result = await db.execute("SELECT 1")
     return result is not None
 
-async def external_api_check:
+async def external_api_check():
     """Check external API availability"""
     response = await http_client.get("https://api.example.com/health")
     return response.status_code == 200
 
-async def memory_check:
+async def memory_check():
     """Check memory usage"""
-    memory_usage = psutil.virtual_memory.percent
+    memory_usage = psutil.virtual_memory().percent
     if memory_usage > 90:
         raise Exception(f"Memory usage too high: {memory_usage}%")
     return f"Memory usage: {memory_usage}%"
@@ -872,7 +872,7 @@ class MigrationMetrics:
     
     def record_migration_step(self, operation, status, duration=None):
         """Record completion of a migration step"""
-        self.migration_progress.labels(operation=operation, status=status).inc
+        self.migration_progress.labels(operation=operation, status=status).inc()
         
         if duration:
             self.migration_duration.labels(operation=operation).observe(duration)
@@ -883,28 +883,28 @@ class MigrationMetrics:
     
     def update_traffic_split(self, version_weights):
         """Update traffic split metrics"""
-        for version, weight in version_weights.items:
+        for version, weight in version_weights.items():
             self.traffic_split.labels(version=version).set(weight)
 
 # Usage in migration
 metrics = MigrationMetrics(prometheus_client)
 
 def perform_migration_step(operation):
-    start_time = time.time
+    start_time = time.time()
     
     try:
         # Perform migration operation
         result = execute_migration_operation(operation)
         
         # Record success
-        duration = time.time - start_time
+        duration = time.time() - start_time
         metrics.record_migration_step(operation, 'success', duration)
         
         return result
         
     except Exception as e:
         # Record failure
-        duration = time.time - start_time
+        duration = time.time() - start_time
         metrics.record_migration_step(operation, 'failure', duration)
         raise
 ```
@@ -940,7 +940,7 @@ class AutoRollbackSystem:
         """Monitor deployment and trigger rollback if needed"""
         
         while True:
-            for trigger_name, config in self.rollback_triggers.items:
+            for trigger_name, config in self.rollback_triggers.items():
                 if await self.check_trigger(trigger_name, config):
                     if config['auto_rollback']:
                         await self.execute_rollback(deployment_name, trigger_name)
@@ -984,7 +984,7 @@ class AutoRollbackSystem:
 ```sql
 -- Point-in-time recovery setup
 -- Create restore point before migration
-SELECT pg_create_restore_point('pre_migration_' || to_char(now, 'YYYYMMDD_HH24MISS'));
+SELECT pg_create_restore_point('pre_migration_' || to_char(now(), 'YYYYMMDD_HH24MISS'));
 
 -- Rollback using point-in-time recovery
 -- (This would be executed on a separate recovery instance)
@@ -1004,19 +1004,19 @@ class DataRollbackManager:
         
         rollback_point = {
             'migration_id': migration_id,
-            'timestamp': datetime.utcnow,
+            'timestamp': datetime.utcnow(),
             'backup_location': None,
             'schema_snapshot': None
         }
         
         # Create database backup
         backup_path = await self.backup.create_backup(
-            f"pre_migration_{migration_id}_{int(time.time)}"
+            f"pre_migration_{migration_id}_{int(time.time())}"
         )
         rollback_point['backup_location'] = backup_path
         
         # Capture schema snapshot
-        schema_snapshot = await self.capture_schema_snapshot
+        schema_snapshot = await self.capture_schema_snapshot()
         rollback_point['schema_snapshot'] = schema_snapshot
         
         # Store rollback point metadata
@@ -1033,7 +1033,7 @@ class DataRollbackManager:
             raise Exception(f"No rollback point found for migration {migration_id}")
         
         # Stop application traffic
-        await self.stop_application_traffic
+        await self.stop_application_traffic()
         
         try:
             # Restore from backup
@@ -1050,7 +1050,7 @@ class DataRollbackManager:
             await self.update_application_config(rollback_point)
             
             # Resume application traffic
-            await self.resume_application_traffic
+            await self.resume_application_traffic()
             
             print(f"Data rollback completed successfully for migration {migration_id}")
             

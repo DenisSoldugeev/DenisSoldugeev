@@ -50,7 +50,7 @@ Always load from jsDelivr CDN:
 The foundation of all 2.5D depth. Different layers scroll at different speeds.
 
 ```javascript
-function initParallax {
+function initParallax() {
   const layers = document.querySelectorAll('[data-depth]');
 
   const depthFactors = {
@@ -133,7 +133,7 @@ New sections slide over previous ones. Each buried section scales down and darke
 ```
 
 ```javascript
-function initCardStack {
+function initCardStack() {
   const cards = gsap.utils.toArray('.card-stack-section');
 
   cards.forEach((card, i) => {
@@ -286,7 +286,7 @@ function initHorizontalScroll(containerEl) {
       trigger: containerEl,
       pin: true,
       scrub: 1,
-      end:  => `+=${containerEl.offsetWidth * (panels.length - 1)}`,
+      end: () => `+=${containerEl.offsetWidth * (panels.length - 1)}`,
       snap: 1 / (panels.length - 1),  // auto-snap to each panel
     }
   });
@@ -362,7 +362,7 @@ Full-page scroll snapping between sections — creates a chapter-like book feeli
 
 ```javascript
 // Using GSAP Observer for smooth snapping
-function initSectionSnap {
+function initSectionSnap() {
   // Register Observer plugin
   gsap.registerPlugin(Observer);
 
@@ -379,7 +379,7 @@ function initSectionSnap {
     const next = sections[index];
 
     const tl = gsap.timeline({
-      onComplete:  => {
+      onComplete: () => {
         currentIndex = index;
         animating = false;
       }
@@ -402,8 +402,8 @@ function initSectionSnap {
 
   Observer.create({
     type: 'wheel,touch',
-    onDown:  => goTo(Math.min(currentIndex + 1, sections.length - 1)),
-    onUp:  => goTo(Math.max(currentIndex - 1, 0)),
+    onDown: () => goTo(Math.min(currentIndex + 1, sections.length - 1)),
+    onUp: () => goTo(Math.max(currentIndex - 1, 0)),
     tolerance: 100,
     preventDefault: true,
   });
@@ -421,7 +421,7 @@ Lenis replaces native browser scroll with silky-smooth physics-based scrolling. 
 ```
 
 ```javascript
-function initLenis {
+function initLenis() {
   const lenis = new Lenis({
     duration: 1.2,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -445,7 +445,7 @@ function initLenis {
 Only animate elements that are currently visible. Critical for performance.
 
 ```javascript
-function initRevealObserver {
+function initRevealObserver() {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -467,14 +467,14 @@ function initRevealObserver {
 
 function triggerAnimation(el, type) {
   const animations = {
-    'fade-up':     => gsap.from(el, { y: 60, opacity: 0, duration: 0.8, ease: 'power3.out' }),
-    'fade-in':     => gsap.from(el, { opacity: 0, duration: 1.0, ease: 'power2.out' }),
-    'scale-in':    => gsap.from(el, { scale: 0.8, opacity: 0, duration: 0.7, ease: 'back.out(1.7)' }),
-    'slide-left':  => gsap.from(el, { x: -80, opacity: 0, duration: 0.8, ease: 'power3.out' }),
-    'slide-right': => gsap.from(el, { x: 80, opacity: 0, duration: 0.8, ease: 'power3.out' }),
-    'converge':    => animateSplitConverge(el), // See text-animations.md
+    'fade-up':    () => gsap.from(el, { y: 60, opacity: 0, duration: 0.8, ease: 'power3.out' }),
+    'fade-in':    () => gsap.from(el, { opacity: 0, duration: 1.0, ease: 'power2.out' }),
+    'scale-in':   () => gsap.from(el, { scale: 0.8, opacity: 0, duration: 0.7, ease: 'back.out(1.7)' }),
+    'slide-left': () => gsap.from(el, { x: -80, opacity: 0, duration: 0.8, ease: 'power3.out' }),
+    'slide-right':() => gsap.from(el, { x: 80, opacity: 0, duration: 0.8, ease: 'power3.out' }),
+    'converge':   () => animateSplitConverge(el), // See text-animations.md
   };
-  animations[type]?.;
+  animations[type]?.();
 }
 ```
 

@@ -16,7 +16,7 @@ Project management skills: scrum master, senior PM, Atlassian Jira/Confluence/ad
 | confluence-expert | `confluence-expert/SKILL.md` | Atlassian Confluence expert for creating and managing spaces, knowledge bases, and documentation. Configures s… |
 | jira-expert | `jira-expert/SKILL.md` | Atlassian Jira expert for creating and managing projects, planning, product discovery, JQL queries, workflows,… |
 | meeting-analyzer | `meeting-analyzer/SKILL.md` | Analyzes meeting transcripts and recordings to surface behavioral patterns, communication anti-patterns, and a… |
-| pm-skills | `pm-skills/SKILL.md` | 6 project management agent skills and plugins for Claude Code, Codex, Gemini CLI, Cursor, OpenClaw. Senior PM,… |
+| pm-skills | `pm-skills/SKILL.md` | Router/index for the 8 project-management skills bundled in this plugin (senior PM quant toolkit, scrum master… |
 | scrum-master | `scrum-master/SKILL.md` | Advanced Scrum Master skill for data-driven agile team analysis and coaching. Use when the user asks about spr… |
 | senior-pm | `senior-pm/SKILL.md` | Senior Project Manager for enterprise software, SaaS, and digital transformation projects. Specializes in port… |
 | team-communications | `team-communications/SKILL.md` | Write internal company communications — 3P updates (Progress/Plans/Problems), company-wide newsletters, FAQ ro… |

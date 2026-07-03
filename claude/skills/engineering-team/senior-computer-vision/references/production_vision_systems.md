@@ -128,7 +128,7 @@ def analyze_model(model_path):
 
     # Top 10 largest layers
     print("\nLargest layers:")
-    sorted_params = sorted(param_sizes.items, key=lambda x: x[1], reverse=True)
+    sorted_params = sorted(param_sizes.items(), key=lambda x: x[1], reverse=True)
     for name, size in sorted_params[:10]:
         print(f"  {name}: {size:,} params")
 
@@ -165,13 +165,13 @@ def build_tensorrt_engine(onnx_path, engine_path, precision='fp16',
 
     # Parse ONNX
     with open(onnx_path, 'rb') as f:
-        if not parser.parse(f.read):
+        if not parser.parse(f.read()):
             for error in range(parser.num_errors):
                 print(parser.get_error(error))
             raise RuntimeError("ONNX parsing failed")
 
     # Configure builder
-    config = builder.create_builder_config
+    config = builder.create_builder_config()
     config.set_memory_pool_limit(trt.MemoryPoolType.WORKSPACE,
                                   workspace_gb * 1024 * 1024 * 1024)
 
@@ -183,7 +183,7 @@ def build_tensorrt_engine(onnx_path, engine_path, precision='fp16',
         # Requires calibrator for INT8
 
     # Set optimization profile for dynamic shapes
-    profile = builder.create_optimization_profile
+    profile = builder.create_optimization_profile()
     input_name = network.get_input(0).name
     input_shape = network.get_input(0).shape
 
@@ -222,17 +222,17 @@ class TensorRTInference:
 
         # Load engine
         with open(engine_path, 'rb') as f:
-            engine_data = f.read
+            engine_data = f.read()
 
         runtime = trt.Runtime(self.logger)
         self.engine = runtime.deserialize_cuda_engine(engine_data)
-        self.context = self.engine.create_execution_context
+        self.context = self.engine.create_execution_context()
 
         # Allocate buffers
         self.inputs = []
         self.outputs = []
         self.bindings = []
-        self.stream = cuda.Stream
+        self.stream = cuda.Stream()
 
         for i in range(self.engine.num_io_tensors):
             name = self.engine.get_tensor_name(i)
@@ -264,7 +264,7 @@ class TensorRTInference:
             Output numpy array
         """
         # Copy input to host buffer
-        np.copyto(self.inputs[0]['host'], input_data.ravel)
+        np.copyto(self.inputs[0]['host'], input_data.ravel())
 
         # Transfer input to device
         cuda.memcpy_htod_async(
@@ -287,7 +287,7 @@ class TensorRTInference:
         )
 
         # Synchronize
-        self.stream.synchronize
+        self.stream.synchronize()
 
         # Reshape output
         output = self.outputs[0]['host'].reshape(self.outputs[0]['shape'])
@@ -307,7 +307,7 @@ class Int8Calibrator(trt.IInt8EntropyCalibrator2):
             cache_file: Path to save calibration cache
             batch_size: Calibration batch size
         """
-        super.__init__
+        super().__init__()
         self.calibration_data = calibration_data
         self.cache_file = cache_file
         self.batch_size = batch_size
@@ -340,7 +340,7 @@ class Int8Calibrator(trt.IInt8EntropyCalibrator2):
     def read_calibration_cache(self):
         if os.path.exists(self.cache_file):
             with open(self.cache_file, 'rb') as f:
-                return f.read
+                return f.read()
         return None
 
     def write_calibration_cache(self, cache):
@@ -381,7 +381,7 @@ class ONNXInference:
             providers = ['CPUExecutionProvider']
 
         # Session options
-        sess_options = ort.SessionOptions
+        sess_options = ort.SessionOptions()
         sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
         sess_options.intra_op_num_threads = 4
 
@@ -393,13 +393,13 @@ class ONNXInference:
         )
 
         # Get input/output info
-        self.input_name = self.session.get_inputs[0].name
-        self.input_shape = self.session.get_inputs[0].shape
-        self.output_name = self.session.get_outputs[0].name
+        self.input_name = self.session.get_inputs()[0].name
+        self.input_shape = self.session.get_inputs()[0].shape
+        self.output_name = self.session.get_outputs()[0].name
 
         print(f"Loaded model: {model_path}")
         print(f"Input: {self.input_name} {self.input_shape}")
-        print(f"Provider: {self.session.get_providers[0]}")
+        print(f"Provider: {self.session.get_providers()[0]}")
 
     def infer(self, input_data):
         """
@@ -430,10 +430,10 @@ class ONNXInference:
             self.infer(dummy_input)
 
         # Benchmark
-        start = time.perf_counter
+        start = time.perf_counter()
         for _ in range(num_iterations):
             self.infer(dummy_input)
-        end = time.perf_counter
+        end = time.perf_counter()
 
         avg_time = (end - start) / num_iterations * 1000
         fps = 1000 / avg_time * input_shape[0]
@@ -478,9 +478,9 @@ def optimize_for_jetson(model_path, output_path, jetson_model='orin'):
     parser = trt.OnnxParser(network, logger)
 
     with open(model_path, 'rb') as f:
-        parser.parse(f.read)
+        parser.parse(f.read())
 
-    builder_config = builder.create_builder_config
+    builder_config = builder.create_builder_config()
     builder_config.set_memory_pool_limit(
         trt.MemoryPoolType.WORKSPACE,
         config['workspace'] * 1024 * 1024 * 1024
@@ -519,7 +519,7 @@ class OpenVINOInference:
             model_path: Path to ONNX or OpenVINO IR model
             device: 'CPU', 'GPU', 'MYRIAD' (Intel NCS)
         """
-        self.core = Core
+        self.core = Core()
 
         # Load and compile model
         self.model = self.core.read_model(model_path)
@@ -552,10 +552,10 @@ class OpenVINOInference:
             self.infer(dummy)
 
         # Benchmark
-        start = time.perf_counter
+        start = time.perf_counter()
         for _ in range(num_iterations):
             self.infer(dummy)
-        elapsed = time.perf_counter - start
+        elapsed = time.perf_counter() - start
 
         latency = elapsed / num_iterations * 1000
         print(f"Latency: {latency:.2f}ms")
@@ -710,7 +710,7 @@ import numpy as np
 
 class YOLOHandler(BaseHandler):
     def __init__(self):
-        super.__init__
+        super().__init__()
         self.input_size = 640
         self.conf_threshold = 0.25
         self.iou_threshold = 0.45
@@ -735,7 +735,7 @@ class YOLOHandler(BaseHandler):
 
     def inference(self, data):
         """Run model inference."""
-        with torch.no_grad:
+        with torch.no_grad():
             outputs = self.model(data)
         return outputs
 
@@ -745,7 +745,7 @@ class YOLOHandler(BaseHandler):
         for output in outputs:
             # Apply NMS and format results
             detections = self._nms(output, self.conf_threshold, self.iou_threshold)
-            results.append(detections.tolist)
+            results.append(detections.tolist())
         return results
 ```
 
@@ -775,7 +775,7 @@ app = FastAPI(title="YOLO Detection API")
 model = None
 
 @app.on_event("startup")
-async def load_model:
+async def load_model():
     global model
     model = ONNXInference("models/yolov8m.onnx", device='cuda')
 
@@ -785,7 +785,7 @@ async def detect(file: UploadFile = File(...), conf: float = 0.25):
     Detect objects in uploaded image.
     """
     # Read image
-    contents = await file.read
+    contents = await file.read()
     nparr = np.frombuffer(contents, np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
@@ -804,7 +804,7 @@ async def detect(file: UploadFile = File(...), conf: float = 0.25):
     })
 
 @app.get("/health")
-async def health:
+async def health():
     return {"status": "healthy", "model_loaded": model is not None}
 
 if __name__ == "__main__":
@@ -827,7 +827,7 @@ class VideoDetector:
         self.model = model
         self.conf_threshold = conf_threshold
         self.track = track
-        self.tracker = ByteTrack if track else None
+        self.tracker = ByteTrack() if track else None
         self.fps_buffer = deque(maxlen=30)
 
     def process_video(self, source, output_path=None, show=True):
@@ -849,15 +849,15 @@ class VideoDetector:
             writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
         frame_count = 0
-        start_time = time.time
+        start_time = time.time()
 
-        while cap.isOpened:
-            ret, frame = cap.read
+        while cap.isOpened():
+            ret, frame = cap.read()
             if not ret:
                 break
 
             # Inference
-            t0 = time.perf_counter
+            t0 = time.perf_counter()
             detections = self._detect(frame)
 
             # Tracking
@@ -865,7 +865,7 @@ class VideoDetector:
                 detections = self.tracker.update(detections)
 
             # Calculate FPS
-            inference_time = time.perf_counter - t0
+            inference_time = time.perf_counter() - t0
             self.fps_buffer.append(1 / inference_time)
             avg_fps = sum(self.fps_buffer) / len(self.fps_buffer)
 
@@ -884,13 +884,13 @@ class VideoDetector:
             frame_count += 1
 
         # Cleanup
-        cap.release
+        cap.release()
         if output_path:
-            writer.release
-        cv2.destroyAllWindows
+            writer.release()
+        cv2.destroyAllWindows()
 
         # Print statistics
-        total_time = time.time - start_time
+        total_time = time.time() - start_time
         print(f"Processed {frame_count} frames in {total_time:.1f}s")
         print(f"Average FPS: {frame_count / total_time:.1f}")
 
@@ -971,7 +971,7 @@ def process_videos_batch(video_paths, model, output_dir, max_workers=4):
         for future in concurrent.futures.as_completed(futures):
             video_path = futures[future]
             try:
-                output_path = future.result
+                output_path = future.result()
                 print(f"Completed: {video_path} -> {output_path}")
             except Exception as e:
                 print(f"Failed: {video_path} - {e}")
@@ -1019,29 +1019,29 @@ class MetricsWrapper:
 
     def infer(self, input_data):
         """Inference with metrics."""
-        start_time = time.perf_counter
+        start_time = time.perf_counter()
 
         try:
             result = self.model.infer(input_data)
-            INFERENCE_COUNT.labels(self.model_name, 'success').inc
+            INFERENCE_COUNT.labels(self.model_name, 'success').inc()
 
             # Count detections by class
             for det in result:
-                DETECTIONS_COUNT.labels(self.model_name, det['class']).inc
+                DETECTIONS_COUNT.labels(self.model_name, det['class']).inc()
 
             return result
 
         except Exception as e:
-            INFERENCE_COUNT.labels(self.model_name, 'error').inc
+            INFERENCE_COUNT.labels(self.model_name, 'error').inc()
             raise
 
         finally:
-            latency = time.perf_counter - start_time
+            latency = time.perf_counter() - start_time
             INFERENCE_LATENCY.labels(self.model_name).observe(latency)
 
             # Update GPU memory
-            if torch.cuda.is_available:
-                memory = torch.cuda.memory_allocated
+            if torch.cuda.is_available():
+                memory = torch.cuda.memory_allocated()
                 GPU_MEMORY.labels('cuda:0').set(memory)
 
 # Start metrics server
@@ -1061,14 +1061,14 @@ class StructuredLogger:
         self.logger.setLevel(level)
 
         # JSON formatter
-        handler = logging.StreamHandler
-        handler.setFormatter(JsonFormatter)
+        handler = logging.StreamHandler()
+        handler.setFormatter(JsonFormatter())
         self.logger.addHandler(handler)
 
     def log_inference(self, model_name, latency, num_detections, input_shape):
         self.logger.info(json.dumps({
             'event': 'inference',
-            'timestamp': datetime.utcnow.isoformat,
+            'timestamp': datetime.utcnow().isoformat(),
             'model_name': model_name,
             'latency_ms': latency * 1000,
             'num_detections': num_detections,
@@ -1078,7 +1078,7 @@ class StructuredLogger:
     def log_error(self, model_name, error, input_shape):
         self.logger.error(json.dumps({
             'event': 'inference_error',
-            'timestamp': datetime.utcnow.isoformat,
+            'timestamp': datetime.utcnow().isoformat(),
             'model_name': model_name,
             'error': str(error),
             'error_type': type(error).__name__,
@@ -1087,7 +1087,7 @@ class StructuredLogger:
 
 class JsonFormatter(logging.Formatter):
     def format(self, record):
-        return record.getMessage
+        return record.getMessage()
 ```
 
 ---
@@ -1103,18 +1103,18 @@ class BatchProcessor:
         self.max_batch_size = max_batch_size
         self.max_wait_ms = max_wait_ms
         self.queue = []
-        self.lock = threading.Lock
+        self.lock = threading.Lock()
         self.results = {}
 
     async def process(self, image, request_id):
         """Add image to batch and wait for result."""
-        future = asyncio.Future
+        future = asyncio.Future()
 
         with self.lock:
             self.queue.append((request_id, image, future))
 
             if len(self.queue) >= self.max_batch_size:
-                self._process_batch
+                self._process_batch()
 
         # Wait for result with timeout
         result = await asyncio.wait_for(future, timeout=5.0)
@@ -1152,7 +1152,7 @@ class MultiGPUInference:
             device_ids: List of GPU IDs, e.g., [0, 1, 2, 3]
         """
         if device_ids is None:
-            device_ids = list(range(torch.cuda.device_count))
+            device_ids = list(range(torch.cuda.device_count()))
 
         self.device = torch.device('cuda:0')
         self.model = DataParallel(model, device_ids=device_ids)
@@ -1163,10 +1163,10 @@ class MultiGPUInference:
         """
         Run inference across GPUs.
         """
-        with torch.no_grad:
+        with torch.no_grad():
             images = torch.from_numpy(images).to(self.device)
             outputs = self.model(images)
-        return outputs.cpu.numpy
+        return outputs.cpu().numpy()
 ```
 
 ### Performance Benchmarking
@@ -1190,9 +1190,9 @@ def comprehensive_benchmark(model, input_sizes, batch_sizes, num_iterations=100)
             # Benchmark
             latencies = []
             for _ in range(num_iterations):
-                start = time.perf_counter
+                start = time.perf_counter()
                 model.infer(dummy)
-                latencies.append(time.perf_counter - start)
+                latencies.append(time.perf_counter() - start)
 
             # Calculate statistics
             latencies = np.array(latencies) * 1000  # Convert to ms

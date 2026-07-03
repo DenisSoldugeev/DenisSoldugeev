@@ -40,10 +40,10 @@ class SecurityAssessor:
             Dictionary with security score components
         """
         # Component scores
-        vuln_score = self._score_vulnerabilities
-        patch_score = self._score_patch_responsiveness
-        features_score = self._score_security_features
-        track_record_score = self._score_track_record
+        vuln_score = self._score_vulnerabilities()
+        patch_score = self._score_patch_responsiveness()
+        features_score = self._score_security_features()
+        track_record_score = self._score_track_record()
 
         # Weighted average
         weights = {
@@ -377,9 +377,9 @@ class SecurityAssessor:
 
         return {
             'current_vulnerabilities': current,
-            'total_current': sum(current.values),
+            'total_current': sum(current.values()),
             'historical_vulnerabilities': historical,
-            'total_historical': sum(historical.values),
+            'total_historical': sum(historical.values()),
             'common_types': common_types,
             'severity_distribution': self._calculate_severity_distribution(current),
             'trend': self._analyze_vulnerability_trend(current, historical)
@@ -395,13 +395,13 @@ class SecurityAssessor:
         Returns:
             Percentage distribution
         """
-        total = sum(vulnerabilities.values)
+        total = sum(vulnerabilities.values())
         if total == 0:
-            return {k: "0%" for k in vulnerabilities.keys}
+            return {k: "0%" for k in vulnerabilities.keys()}
 
         return {
             severity: f"{(count / total * 100):.1f}%"
-            for severity, count in vulnerabilities.items
+            for severity, count in vulnerabilities.items()
         }
 
     def _analyze_vulnerability_trend(self, current: Dict[str, int], historical: Dict[str, int]) -> str:
@@ -415,8 +415,8 @@ class SecurityAssessor:
         Returns:
             Trend description
         """
-        current_total = sum(current.values)
-        historical_avg = sum(historical.values) / 3  # 3-year average
+        current_total = sum(current.values())
+        historical_avg = sum(historical.values()) / 3  # 3-year average
 
         if current_total < historical_avg * 0.7:
             return "Improving - fewer vulnerabilities than historical average"
@@ -432,9 +432,9 @@ class SecurityAssessor:
         Returns:
             Complete security analysis
         """
-        security_score = self.calculate_security_score
-        compliance = self.assess_compliance
-        vulnerabilities = self.identify_vulnerabilities
+        security_score = self.calculate_security_score()
+        compliance = self.assess_compliance()
+        vulnerabilities = self.identify_vulnerabilities()
 
         # Generate recommendations
         recommendations = self._generate_security_recommendations(
@@ -489,7 +489,7 @@ class SecurityAssessor:
             recommendations.append("Implement additional security features (MFA, audit logging, RBAC)")
 
         # Compliance recommendations
-        for standard, assessment in compliance.items:
+        for standard, assessment in compliance.items():
             if assessment['readiness_level'] == "Not Ready":
                 recommendations.append(f"{standard}: {assessment['recommendation']}")
 

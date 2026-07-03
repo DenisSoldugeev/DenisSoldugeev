@@ -59,7 +59,7 @@ class TechDebtAnalyzer:
     def analyze_system(self, system_data: Dict) -> Dict:
         """Analyze a system for technical debt"""
         results = {
-            'timestamp': datetime.now.isoformat,
+            'timestamp': datetime.now().isoformat(),
             'system_name': system_data.get('name', 'Unknown'),
             'debt_score': 0,
             'debt_level': '',
@@ -72,7 +72,7 @@ class TechDebtAnalyzer:
         
         # Calculate debt scores by category
         total_debt_score = 0
-        for category, config in self.debt_categories.items:
+        for category, config in self.debt_categories.items():
             category_score = self._calculate_category_score(
                 system_data.get(category, {}), 
                 config['indicators']
@@ -144,7 +144,7 @@ class TechDebtAnalyzer:
         """Prioritize technical debt reduction actions"""
         actions = []
         
-        for category, scores in category_scores.items:
+        for category, scores in category_scores.items():
             if scores['raw_score'] > 60:  # Focus on high debt areas
                 priority = self._calculate_priority(
                     scores['raw_score'],
@@ -341,7 +341,7 @@ class TechDebtAnalyzer:
             recommendations.append('Focus on prevention over correction')
         
         # Category-specific recommendations
-        for category, scores in results['category_scores'].items:
+        for category, scores in results['category_scores'].items():
             if scores['raw_score'] > 70:
                 if category == 'architecture':
                     recommendations.append(f'Consider hiring architecture specialist')
@@ -359,7 +359,7 @@ class TechDebtAnalyzer:
 
 def analyze_technical_debt(system_config: Dict) -> str:
     """Main function to analyze technical debt"""
-    analyzer = TechDebtAnalyzer
+    analyzer = TechDebtAnalyzer()
     results = analyzer.analyze_system(system_config)
     
     # Format output
@@ -373,8 +373,8 @@ def analyze_technical_debt(system_config: Dict) -> str:
         "Category Breakdown:"
     ]
     
-    for category, scores in results['category_scores'].items:
-        output.append(f"  {category.title}: {scores['raw_score']:.1f} ({scores['level']})")
+    for category, scores in results['category_scores'].items():
+        output.append(f"  {category.title()}: {scores['raw_score']:.1f} ({scores['level']})")
     
     output.extend([
         f"",
@@ -396,7 +396,7 @@ def analyze_technical_debt(system_config: Dict) -> str:
     ])
     
     for i, action in enumerate(results['prioritized_actions'][:3], 1):
-        output.append(f"\n{i}. {action['category'].title} (Priority: {action['priority']:.0f})")
+        output.append(f"\n{i}. {action['category'].title()} (Priority: {action['priority']:.0f})")
         for item in action['action_items'][:3]:
             output.append(f"   - {item}")
     

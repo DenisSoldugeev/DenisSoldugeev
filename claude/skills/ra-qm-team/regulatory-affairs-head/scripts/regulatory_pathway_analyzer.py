@@ -156,7 +156,7 @@ class RegulatoryPathwayAnalyzer:
 
     def analyze_fda_pathway(self, device: DeviceProfile) -> PathwayOption:
         """Determine optimal FDA pathway."""
-        device_class = device.device_class.upper.replace("IIA", "II").replace("IIB", "II")
+        device_class = device.device_class.upper().replace("IIA", "II").replace("IIB", "II")
 
         if device_class == "I":
             pathway_data = self.FDA_PATHWAYS["I"]
@@ -199,7 +199,7 @@ class RegulatoryPathwayAnalyzer:
 
     def analyze_eu_mdr_pathway(self, device: DeviceProfile) -> PathwayOption:
         """Determine optimal EU MDR pathway."""
-        device_class = device.device_class.lower.replace("iia", "IIa").replace("iib", "IIb")
+        device_class = device.device_class.lower().replace("iia", "IIa").replace("iib", "IIb")
 
         if device_class in ["i", "1"]:
             pathway_data = self.EU_MDR_PATHWAYS["I"]
@@ -458,34 +458,34 @@ def format_analysis_text(analysis: PathwayAnalysis) -> str:
     return "\n".join(lines)
 
 
-def interactive_mode:
+def interactive_mode():
     """Interactive device profiling."""
     print("=" * 60)
     print("Regulatory Pathway Analyzer - Interactive Mode")
     print("=" * 60)
 
     device = DeviceProfile(
-        device_name=input("\nDevice Name: ").strip,
-        intended_use=input("Intended Use: ").strip,
-        device_class=input("Device Class (I/IIa/IIb/III): ").strip,
-        novel_technology=input("Novel technology? (y/n): ").strip.lower == 'y',
-        predicate_available=input("Predicate device available? (y/n): ").strip.lower == 'y',
-        implantable=input("Implantable? (y/n): ").strip.lower == 'y',
-        life_sustaining=input("Life-sustaining? (y/n): ").strip.lower == 'y',
-        software_component=input("Software component? (y/n): ").strip.lower == 'y',
-        ai_ml_component=input("AI/ML component? (y/n): ").strip.lower == 'y',
+        device_name=input("\nDevice Name: ").strip(),
+        intended_use=input("Intended Use: ").strip(),
+        device_class=input("Device Class (I/IIa/IIb/III): ").strip(),
+        novel_technology=input("Novel technology? (y/n): ").strip().lower() == 'y',
+        predicate_available=input("Predicate device available? (y/n): ").strip().lower() == 'y',
+        implantable=input("Implantable? (y/n): ").strip().lower() == 'y',
+        life_sustaining=input("Life-sustaining? (y/n): ").strip().lower() == 'y',
+        software_component=input("Software component? (y/n): ").strip().lower() == 'y',
+        ai_ml_component=input("AI/ML component? (y/n): ").strip().lower() == 'y',
     )
 
-    markets = input("Target markets (comma-separated, e.g., US-FDA,EU-MDR): ").strip
+    markets = input("Target markets (comma-separated, e.g., US-FDA,EU-MDR): ").strip()
     if markets:
-        device.target_markets = [m.strip for m in markets.split(",")]
+        device.target_markets = [m.strip() for m in markets.split(",")]
 
-    analyzer = RegulatoryPathwayAnalyzer
+    analyzer = RegulatoryPathwayAnalyzer()
     analysis = analyzer.analyze(device)
     print("\n" + format_analysis_text(analysis))
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Regulatory Pathway Analyzer for Medical Devices")
     parser.add_argument("--device-name", type=str, help="Device name")
     parser.add_argument("--device-class", type=str, choices=["I", "IIa", "IIb", "III"], help="Device classification")
@@ -499,10 +499,10 @@ def main:
     parser.add_argument("--output", choices=["text", "json"], default="text", help="Output format")
     parser.add_argument("--interactive", action="store_true", help="Interactive mode")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.interactive:
-        interactive_mode
+        interactive_mode()
         return
 
     if args.data:
@@ -521,7 +521,7 @@ def main:
             ai_ml_component=args.ai_ml,
         )
         if args.market != "all":
-            device.target_markets = [m.strip for m in args.market.split(",")]
+            device.target_markets = [m.strip() for m in args.market.split(",")]
     else:
         # Demo mode
         device = DeviceProfile(
@@ -535,7 +535,7 @@ def main:
             target_markets=["US-FDA", "EU-MDR"]
         )
 
-    analyzer = RegulatoryPathwayAnalyzer
+    analyzer = RegulatoryPathwayAnalyzer()
     analysis = analyzer.analyze(device)
 
     if args.output == "json":
@@ -554,4 +554,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

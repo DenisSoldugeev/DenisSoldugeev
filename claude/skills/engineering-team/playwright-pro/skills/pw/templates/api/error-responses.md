@@ -18,24 +18,24 @@ const validHeaders = {
   'Content-Type': 'application/json',
 };
 
-test.describe('API Error Responses',  => {
+test.describe('API Error Responses', () => {
   // 400 Bad Request
   test('POST with invalid body returns 400', async ({ request }) => {
     const res = await request.post('{{apiBaseUrl}}/{{entityName}}s', {
       headers: validHeaders,
       data: { name: '' }, // name too short / blank
     });
-    expect(res.status).toBe(400);
-    const body = await res.json;
+    expect(res.status()).toBe(400);
+    const body = await res.json();
     expect(body.message ?? body.error).toMatch(/bad request|invalid/i);
-    expect(body.errors ?? body.details).toBeDefined;
+    expect(body.errors ?? body.details).toBeDefined();
   });
 
   // 401 Unauthorized
   test('request without token returns 401', async ({ request }) => {
     const res = await request.get('{{apiBaseUrl}}/{{entityName}}s');
-    expect(res.status).toBe(401);
-    const body = await res.json;
+    expect(res.status()).toBe(401);
+    const body = await res.json();
     expect(body.message ?? body.error).toMatch(/unauthorized|authentication/i);
   });
 
@@ -44,16 +44,16 @@ test.describe('API Error Responses',  => {
     const res = await request.get('{{apiBaseUrl}}/admin/users', {
       headers: { 'Authorization': `Bearer {{userToken}}` },
     });
-    expect(res.status).toBe(403);
-    const body = await res.json;
+    expect(res.status()).toBe(403);
+    const body = await res.json();
     expect(body.message ?? body.error).toMatch(/forbidden|insufficient.*permission/i);
   });
 
   // 404 Not Found
   test('GET non-existent resource returns 404', async ({ request }) => {
     const res = await request.get('{{apiBaseUrl}}/{{entityName}}s/999999', { headers: validHeaders });
-    expect(res.status).toBe(404);
-    const body = await res.json;
+    expect(res.status()).toBe(404);
+    const body = await res.json();
     expect(body.message ?? body.error).toMatch(/not found/i);
   });
 
@@ -63,9 +63,9 @@ test.describe('API Error Responses',  => {
       headers: validHeaders,
       data: { description: 'no name provided' },
     });
-    expect([422, 400]).toContain(res.status);
-    const body = await res.json;
-    expect(body.errors ?? body.details).toBeDefined;
+    expect([422, 400]).toContain(res.status());
+    const body = await res.json();
+    expect(body.errors ?? body.details).toBeDefined();
   });
 
   // 429 Too Many Requests (handled in rate-limiting template — kept here for completeness)
@@ -73,7 +73,7 @@ test.describe('API Error Responses',  => {
     let lastStatus = 0;
     for (let i = 0; i < {{rateLimitThreshold}} + 1; i++) {
       const res = await request.get('{{apiBaseUrl}}/{{rateLimitedEndpoint}}', { headers: validHeaders });
-      lastStatus = res.status;
+      lastStatus = res.status();
       if (lastStatus === 429) break;
     }
     expect(lastStatus).toBe(429);
@@ -85,9 +85,9 @@ test.describe('API Error Responses',  => {
       route.fulfill({ status: 500, body: JSON.stringify({ error: 'Internal Server Error' }) })
     );
     const res = await page.request.get('{{apiBaseUrl}}/{{entityName}}s', { headers: validHeaders });
-    expect(res.status).toBe(500);
-    const body = await res.json;
-    expect(body.error ?? body.message).toBeTruthy;
+    expect(res.status()).toBe(500);
+    const body = await res.json();
+    expect(body.error ?? body.message).toBeTruthy();
   });
 
   // Edge case: error response has consistent shape
@@ -98,9 +98,9 @@ test.describe('API Error Responses',  => {
     ];
     for (const ep of endpoints) {
       const res = await request[ep.method](ep.url, { headers: ep.headers });
-      if (res.status >= 400) {
-        const body = await res.json;
-        expect(body.error ?? body.message ?? body.errors).toBeDefined;
+      if (res.status() >= 400) {
+        const body = await res.json();
+        expect(body.error ?? body.message ?? body.errors).toBeDefined();
       }
     }
   });
@@ -116,30 +116,30 @@ const { test, expect } = require('@playwright/test');
 
 const headers = { 'Authorization': `Bearer {{apiToken}}`, 'Content-Type': 'application/json' };
 
-test.describe('API Error Responses',  => {
+test.describe('API Error Responses', () => {
   test('POST with invalid body returns 400', async ({ request }) => {
     const res = await request.post('{{apiBaseUrl}}/{{entityName}}s', {
       headers,
       data: { name: '' },
     });
-    expect(res.status).toBe(400);
+    expect(res.status()).toBe(400);
   });
 
   test('no token returns 401', async ({ request }) => {
     const res = await request.get('{{apiBaseUrl}}/{{entityName}}s');
-    expect(res.status).toBe(401);
+    expect(res.status()).toBe(401);
   });
 
   test('regular user on admin endpoint returns 403', async ({ request }) => {
     const res = await request.get('{{apiBaseUrl}}/admin/users', {
       headers: { 'Authorization': `Bearer {{userToken}}` },
     });
-    expect(res.status).toBe(403);
+    expect(res.status()).toBe(403);
   });
 
   test('non-existent resource returns 404', async ({ request }) => {
     const res = await request.get('{{apiBaseUrl}}/{{entityName}}s/999999', { headers });
-    expect(res.status).toBe(404);
+    expect(res.status()).toBe(404);
   });
 });
 ```

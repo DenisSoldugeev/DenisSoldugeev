@@ -5,7 +5,7 @@ This sentence contains all 26 letters of the English alphabet.
 
 Some additional content:
 - Numbers: 123, 456, 789
-- Special characters: !@#$%^&*
+- Special characters: !@#$%^&*()
 - Mixed case: CamelCase, snake_case, PascalCase
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit.

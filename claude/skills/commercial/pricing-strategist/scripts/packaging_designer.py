@@ -67,7 +67,7 @@ def assign_tiers(features: list[Feature], segments: list[str], profile: str) -> 
     enterprise_seg = segments[-1] if segments else None
 
     for f in features:
-        avg_fit = sum(f.segment_fit.values) / len(f.segment_fit) if f.segment_fit else 0.5
+        avg_fit = sum(f.segment_fit.values()) / len(f.segment_fit) if f.segment_fit else 0.5
         enterprise_fit = f.segment_fit.get(enterprise_seg, avg_fit) if enterprise_seg else avg_fit
 
         # High importance + broad fit → Good
@@ -202,7 +202,7 @@ def render_markdown(tiers: dict[str, Tier], flags: list[str], profile: str, segm
     return "\n".join(lines)
 
 
-def sample_input -> dict[str, Any]:
+def sample_input() -> dict[str, Any]:
     return {
         "segments": ["SMB", "Mid-market", "Enterprise"],
         "current_pricing": {"good": 49, "better": 149, "best": 499},
@@ -221,17 +221,17 @@ def sample_input -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(description=__doc__.splitlines[0])
+    p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--input", type=Path, help="Path to features JSON.")
-    p.add_argument("--profile", default="saas", choices=list(PROFILES.keys), help="Industry profile.")
+    p.add_argument("--profile", default="saas", choices=list(PROFILES.keys()), help="Industry profile.")
     p.add_argument("--output", default="markdown", choices=["markdown", "json"], help="Output format.")
     p.add_argument("--sample", action="store_true", help="Run with built-in sample data.")
     args = p.parse_args(argv)
 
     if args.sample:
-        data = sample_input
+        data = sample_input()
     elif args.input:
-        data = json.loads(args.input.read_text)
+        data = json.loads(args.input.read_text())
     else:
         p.error("Provide --input or --sample.")
         return 2
@@ -254,7 +254,7 @@ def main(argv: list[str] | None = None) -> int:
                     "price": t.price,
                     "features": [{"name": f.name, "importance": f.importance, "cost_to_serve": f.cost_to_serve} for f in t.features],
                 }
-                for k, t in tiers.items
+                for k, t in tiers.items()
             },
             "anti_pattern_flags": flags,
         }
@@ -265,4 +265,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

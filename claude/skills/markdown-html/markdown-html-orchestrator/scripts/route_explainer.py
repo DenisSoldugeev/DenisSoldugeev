@@ -29,7 +29,7 @@ from typing import Any
 
 # Bridge to the design-system config so we can refuse if not onboarded
 _DESIGN_SYSTEM_SCRIPTS = (
-    Path(__file__).resolve.parent.parent.parent / "design-system" / "scripts"
+    Path(__file__).resolve().parent.parent.parent / "design-system" / "scripts"
 )
 sys.path.insert(0, str(_DESIGN_SYSTEM_SCRIPTS))
 try:
@@ -38,13 +38,13 @@ except ImportError:
     cfg = None
 
 
-def _design_system_status -> dict[str, Any]:
+def _design_system_status() -> dict[str, Any]:
     if cfg is None:
         return {"onboarded": False, "reason": "config_loader not importable"}
     if os.environ.get("MARKDOWN_HTML_NO_CONFIG") == "1":
         return {"onboarded": True, "reason": "bypass env set", "bypass": True}
-    if cfg.setup_completed:
-        c = cfg.load_config
+    if cfg.setup_completed():
+        c = cfg.load_config()
         return {
             "onboarded": True,
             "default_output_dir": c.get("default_output_dir"),
@@ -59,7 +59,7 @@ def explain(classification: dict[str, Any]) -> dict[str, Any]:
     verdict = classification["verdict"]
     line_count = classification["line_count"]
     below_min = classification["below_min_lines"]
-    ds = _design_system_status
+    ds = _design_system_status()
 
     refusals: list[str] = []
 
@@ -151,8 +151,8 @@ def main(argv: list[str]) -> int:
         with open(args.classification_file, encoding="utf-8") as f:
             classification = json.load(f)
     else:
-        if sys.stdin.isatty:
-            parser.print_help
+        if sys.stdin.isatty():
+            parser.print_help()
             return 0
         classification = json.load(sys.stdin)
 

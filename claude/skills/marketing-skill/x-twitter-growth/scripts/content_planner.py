@@ -141,7 +141,7 @@ def generate_plan(niche: str, posts_per_day: int, weeks: int, start_date: dateti
 
 def print_plan(plans: list, niche: str):
     print(f"\n{'='*70}")
-    print(f"  X/TWITTER CONTENT PLAN — {niche.upper}")
+    print(f"  X/TWITTER CONTENT PLAN — {niche.upper()}")
     print(f"{'='*70}")
 
     for week in plans:
@@ -176,7 +176,7 @@ def print_plan(plans: list, niche: str):
     print(f"{'='*70}\n")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Generate X/Twitter content calendars",
         formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -187,13 +187,13 @@ def main:
     parser.add_argument("--start", default="", help="Start date YYYY-MM-DD (default: next Monday)")
     parser.add_argument("--json", action="store_true", help="Output JSON")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.start:
         start = datetime.strptime(args.start, "%Y-%m-%d")
     else:
-        today = datetime.now
-        days_until_monday = (7 - today.weekday) % 7
+        today = datetime.now()
+        days_until_monday = (7 - today.weekday()) % 7
         if days_until_monday == 0:
             days_until_monday = 7
         start = today + timedelta(days=days_until_monday)
@@ -207,4 +207,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

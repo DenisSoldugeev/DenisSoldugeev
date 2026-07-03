@@ -48,7 +48,7 @@ class Curves:
 
 def build_price_grid(respondents: list[dict[str, float]]) -> list[float]:
     """Build a sorted unique-price grid from all responses."""
-    prices: set[float] = set
+    prices: set[float] = set()
     for r in respondents:
         for k in ("too_cheap", "bargain", "getting_expensive", "too_expensive"):
             v = r.get(k)
@@ -225,7 +225,7 @@ def synthetic_sample(n: int = 50, seed: int = 17) -> list[dict[str, float]]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(description=__doc__.splitlines[0])
+    p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--input", type=Path, help="Path to survey JSON: {respondents: [{too_cheap, bargain, getting_expensive, too_expensive}]}.")
     p.add_argument("--output", default="markdown", choices=["markdown", "json"], help="Output format.")
     p.add_argument("--sample", action="store_true", help="Run with synthetic 50-respondent sample.")
@@ -234,7 +234,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.sample:
         respondents = synthetic_sample(50)
     elif args.input:
-        data = json.loads(args.input.read_text)
+        data = json.loads(args.input.read_text())
         respondents = data.get("respondents", data) if isinstance(data, dict) else data
     else:
         p.error("Provide --input or --sample.")
@@ -262,4 +262,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

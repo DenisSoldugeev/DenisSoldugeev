@@ -69,7 +69,7 @@ class ReviewAnalyzer:
         detailed_sentiments = []
 
         for review in reviews:
-            text = review.get('text', '').lower
+            text = review.get('text', '').lower()
             rating = review.get('rating', 3)
 
             # Calculate sentiment score
@@ -126,10 +126,10 @@ class ReviewAnalyzer:
         all_phrases = []
 
         for review in reviews:
-            text = review.get('text', '').lower
+            text = review.get('text', '').lower()
             # Clean text
             text = re.sub(r'[^\w\s]', ' ', text)
-            words = text.split
+            words = text.split()
 
             # Filter out common words
             stop_words = {
@@ -194,7 +194,7 @@ class ReviewAnalyzer:
             if rating > rating_threshold:
                 continue
 
-            text = review.get('text', '').lower
+            text = review.get('text', '').lower()
 
             # Check for issue keywords
             mentioned_issues = []
@@ -212,7 +212,7 @@ class ReviewAnalyzer:
                 })
 
         # Group by issue type
-        issue_frequency = Counter
+        issue_frequency = Counter()
         for issue in issues:
             for keyword in issue['issue_keywords']:
                 issue_frequency[keyword] += 1
@@ -254,7 +254,7 @@ class ReviewAnalyzer:
         feature_requests = []
 
         for review in reviews:
-            text = review.get('text', '').lower
+            text = review.get('text', '').lower()
             rating = review.get('rating', 3)
 
             # Check for feature request indicators
@@ -305,7 +305,7 @@ class ReviewAnalyzer:
         """
         trends = []
 
-        for period, reviews in reviews_by_period.items:
+        for period, reviews in reviews_by_period.items():
             sentiment = self.analyze_sentiment(reviews)
 
             trends.append({
@@ -483,16 +483,16 @@ class ReviewAnalyzer:
             elif any(kw in word for kw in pricing_keywords):
                 themes['pricing'].append(word)
 
-        return {k: v for k, v in themes.items if v}  # Remove empty categories
+        return {k: v for k, v in themes.items() if v}  # Remove empty categories
 
     def _generate_theme_insights(self, themes: Dict[str, List[str]]) -> List[str]:
         """Generate insights from themes."""
         insights = []
 
-        for category, keywords in themes.items:
+        for category, keywords in themes.items():
             if keywords:
                 insights.append(
-                    f"{category.title}: Users frequently mention {', '.join(keywords[:3])}"
+                    f"{category.title()}: Users frequently mention {', '.join(keywords[:3])}"
                 )
 
         return insights[:5]
@@ -518,7 +518,7 @@ class ReviewAnalyzer:
             else:
                 categories['compatibility'].append(issue)
 
-        return {k: v for k, v in categories.items if v}
+        return {k: v for k, v in categories.items() if v}
 
     def _calculate_issue_severity(
         self,
@@ -528,7 +528,7 @@ class ReviewAnalyzer:
         """Calculate severity scores for each issue category."""
         severity_scores = {}
 
-        for category, issues in categorized_issues.items:
+        for category, issues in categorized_issues.items():
             count = len(issues)
             percentage = (count / total_reviews) * 100 if total_reviews > 0 else 0
 
@@ -554,7 +554,7 @@ class ReviewAnalyzer:
     ) -> List[Dict[str, Any]]:
         """Rank issues by severity score."""
         ranked = sorted(
-            [{'category': cat, **data} for cat, data in severity_scores.items],
+            [{'category': cat, **data} for cat, data in severity_scores.items()],
             key=lambda x: x['severity_score'],
             reverse=True
         )
@@ -568,7 +568,7 @@ class ReviewAnalyzer:
         """Generate recommendations for addressing issues."""
         recommendations = []
 
-        for category, score_data in severity_scores.items:
+        for category, score_data in severity_scores.items():
             if score_data['priority'] == 'critical':
                 recommendations.append(
                     f"URGENT: Address {category} issues immediately - affecting {score_data['percentage']}% of reviews"
@@ -586,7 +586,7 @@ class ReviewAnalyzer:
         sentences = text.split('.')
         for sentence in sentences:
             if any(keyword in sentence for keyword in self.FEATURE_REQUEST_KEYWORDS):
-                return sentence.strip
+                return sentence.strip()
         return text[:100]  # Fallback
 
     def _cluster_feature_requests(
@@ -598,9 +598,9 @@ class ReviewAnalyzer:
         clusters = {}
 
         for request in feature_requests:
-            text = request['request_text'].lower
+            text = request['request_text'].lower()
             # Extract key words
-            words = [w for w in text.split if len(w) > 4]
+            words = [w for w in text.split() if len(w) > 4]
 
             # Try to find matching cluster
             matched = False
@@ -616,7 +616,7 @@ class ReviewAnalyzer:
 
         return [
             {'feature_theme': theme, 'request_count': len(requests), 'examples': requests[:3]}
-            for theme, requests in clusters.items
+            for theme, requests in clusters.items()
         ]
 
     def _prioritize_feature_requests(

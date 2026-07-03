@@ -54,7 +54,7 @@ SAMPLE_TITLE = "How to Reduce Churn in SaaS: 7 Proven Tactics That Actually Work
 
 def count_syllables(word: str) -> int:
     """Approximate syllable count using vowel-group heuristic."""
-    word = word.lower.strip(".,!?;:")
+    word = word.lower().strip(".,!?;:")
     if not word:
         return 0
     vowels = "aeiouy"
@@ -78,7 +78,7 @@ def flesch_reading_ease(text: str) -> float:
     Higher = easier. Target: 60-70 for professional content.
     """
     sentences = re.split(r'[.!?]+', text)
-    sentences = [s.strip for s in sentences if s.strip]
+    sentences = [s.strip() for s in sentences if s.strip()]
     n_sentences = max(1, len(sentences))
 
     words = re.findall(r'\b[a-zA-Z]+\b', text)
@@ -111,8 +111,8 @@ def score_readability(text: str) -> dict:
 
     # Sentence length variance
     sentences = re.split(r'[.!?]+', text)
-    sentences = [s.strip for s in sentences if len(s.split) > 2]
-    lengths = [len(s.split) for s in sentences]
+    sentences = [s.strip() for s in sentences if len(s.split()) > 2]
+    lengths = [len(s.split()) for s in sentences]
     if len(lengths) > 1:
         mean_len = sum(lengths) / len(lengths)
         variance = sum((l - mean_len) ** 2 for l in lengths) / len(lengths)
@@ -132,9 +132,9 @@ def score_readability(text: str) -> dict:
 
 def score_seo(text: str, title: str = "", keyword: str = "") -> dict:
     """Score SEO signals 0-25 (25% of total)."""
-    text_lower = text.lower
-    title_lower = title.lower
-    keyword_lower = keyword.lower
+    text_lower = text.lower()
+    title_lower = title.lower()
+    keyword_lower = keyword.lower()
 
     points = 0
     signals = {}
@@ -157,7 +157,7 @@ def score_seo(text: str, title: str = "", keyword: str = "") -> dict:
     # Keyword density (target 0.5-2%)
     words = re.findall(r'\b\w+\b', text_lower)
     n_words = max(1, len(words))
-    kw_words = keyword_lower.split
+    kw_words = keyword_lower.split()
     kw_count = 0
     for i in range(len(words) - len(kw_words) + 1):
         if words[i:i+len(kw_words)] == kw_words:
@@ -192,15 +192,15 @@ def score_structure(text: str) -> dict:
     points = 0
     signals = {}
 
-    lines = text.strip.split('\n')
+    lines = text.strip().split('\n')
 
     # Intro: first non-empty paragraph
-    paragraphs = [p.strip for p in text.split('\n\n') if p.strip]
+    paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
     signals["paragraph_count"] = len(paragraphs)
 
     # Has intro (first paragraph isn't a heading)
     if paragraphs and not paragraphs[0].startswith('#'):
-        intro_words = len(paragraphs[0].split)
+        intro_words = len(paragraphs[0].split())
         signals["intro_word_count"] = intro_words
         if 30 <= intro_words <= 200:
             points += 7
@@ -221,16 +221,16 @@ def score_structure(text: str) -> dict:
 
     # Has conclusion (last substantial paragraph)
     last_para = paragraphs[-1] if paragraphs else ""
-    conclusion_words = len(last_para.split)
+    conclusion_words = len(last_para.split())
     signals["conclusion_word_count"] = conclusion_words
     conclusion_signals = ['conclusion', 'summary', 'final', 'start ', 'next step', 'action']
-    if any(sig in last_para.lower for sig in conclusion_signals) and conclusion_words >= 20:
+    if any(sig in last_para.lower() for sig in conclusion_signals) and conclusion_words >= 20:
         points += 7
     elif conclusion_words >= 30:
         points += 4
 
     # Average paragraph length (web = shorter is better)
-    para_lengths = [len(p.split) for p in paragraphs if not p.startswith('#')]
+    para_lengths = [len(p.split()) for p in paragraphs if not p.startswith('#')]
     if para_lengths:
         avg_para_len = sum(para_lengths) / len(para_lengths)
         signals["avg_paragraph_word_count"] = round(avg_para_len, 1)
@@ -247,7 +247,7 @@ def score_engagement(text: str) -> dict:
     """Score engagement signals 0-25 (25% of total)."""
     points = 0
     signals = {}
-    text_lower = text.lower
+    text_lower = text.lower()
 
     # Questions (engage readers, prompt thought)
     question_count = len(re.findall(r'\?', text))
@@ -329,16 +329,16 @@ def print_report(result: dict, title: str, keyword: str) -> None:
     bar_filled = int(total / 5)
     bar = "█" * bar_filled + "░" * (20 - bar_filled)
 
-    print
+    print()
     print("╔══════════════════════════════════════════╗")
     print("║         CONTENT SCORER — REPORT          ║")
     print("╚══════════════════════════════════════════╝")
     print(f"  Title:   {title[:55] or '(not provided)'}")
     print(f"  Keyword: {keyword or '(not provided)'}")
-    print
+    print()
     print(f"  TOTAL SCORE:  {total}/100  [{grade}]")
     print(f"  [{bar}]")
-    print
+    print()
     print("  ── Section Breakdown ──────────────────────")
 
     sections = [
@@ -354,7 +354,7 @@ def print_report(result: dict, title: str, keyword: str) -> None:
         bar2 = "█" * bar2_filled + "░" * (10 - bar2_filled)
         print(f"  {label:<14} {sc:>2}/{mx}  [{bar2}]")
 
-    print
+    print()
     print("  ── Key Signals ────────────────────────────")
 
     r = s["readability"]
@@ -376,7 +376,7 @@ def print_report(result: dict, title: str, keyword: str) -> None:
     print(f"  Stats/numbers:         {en.get('numbers_and_stats', 0)}")
     print(f"  Examples:              {en.get('example_signals', 0)}")
 
-    print
+    print()
     print("  ── Recommendations ────────────────────────")
     if r["flesch_reading_ease"] < 55:
         print("  ⚠ Readability is low — shorten sentences and use simpler words")
@@ -397,10 +397,10 @@ def print_report(result: dict, title: str, keyword: str) -> None:
     else:
         print(f"  ❌ Score below 70 — address recommendations before publishing")
 
-    print
+    print()
 
 
-def main:
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -419,7 +419,7 @@ def main:
         "--json", action="store_true",
         help="Also output results as JSON."
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     title = ""
     keyword = args.keyword
@@ -435,19 +435,19 @@ def main:
         # Read from file
         try:
             with open(args.file, 'r', encoding='utf-8') as f:
-                text = f.read
+                text = f.read()
         except FileNotFoundError:
             print(f"Error: file not found: {args.file}", file=sys.stderr)
             sys.exit(1)
 
         # Extract title from first H1 or first line
         for line in text.split('\n'):
-            line = line.strip
+            line = line.strip()
             if line.startswith('# '):
-                title = line[2:].strip
+                title = line[2:].strip()
                 break
             elif line.startswith('Title:'):
-                title = line[6:].strip
+                title = line[6:].strip()
                 break
         if not title and text:
             title = text.split('\n')[0][:80]
@@ -461,4 +461,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

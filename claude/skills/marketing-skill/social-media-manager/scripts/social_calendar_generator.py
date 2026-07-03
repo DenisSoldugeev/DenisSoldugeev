@@ -110,8 +110,8 @@ def build_pillar_sequence(pillars: list, length: int) -> list:
 # ---------------------------------------------------------------------------
 
 def next_monday(from_date: date = None) -> date:
-    d = from_date or date.today
-    days_ahead = (0 - d.weekday) % 7
+    d = from_date or date.today()
+    days_ahead = (0 - d.weekday()) % 7
     if days_ahead == 0:
         days_ahead = 7
     return d + timedelta(days=days_ahead)
@@ -130,7 +130,7 @@ def build_calendar(config: dict) -> dict:
     if start_raw:
         start = parse_date(start_raw)
     else:
-        start = next_monday
+        start = next_monday()
 
     pillar_map = {p["name"]: p for p in pillars}
 
@@ -151,7 +151,7 @@ def build_calendar(config: dict) -> dict:
                 if day_count >= ppw:
                     break
                 d      = week_start + timedelta(days=day_offset)
-                d_name = WEEKDAY_NAMES[d.weekday]
+                d_name = WEEKDAY_NAMES[d.weekday()]
                 if d_name in best_days:
                     post_dates.append(d)
                     day_count += 1
@@ -165,8 +165,8 @@ def build_calendar(config: dict) -> dict:
             hints   = CONTENT_TYPE_HINTS.get(pillar_name, ["Post"])
             ct_hint = hints[i % len(hints)]
             posts.append({
-                "date":         post_date.isoformat,
-                "weekday":      WEEKDAY_NAMES[post_date.weekday],
+                "date":         post_date.isoformat(),
+                "weekday":      WEEKDAY_NAMES[post_date.weekday()],
                 "week_number":  (post_date - start).days // 7 + 1,
                 "platform":     pname,
                 "pillar":       pillar_name,
@@ -180,7 +180,7 @@ def build_calendar(config: dict) -> dict:
         dist = defaultdict(int)
         for p in posts:
             dist[p["pillar"]] += 1
-        dist_pct = {k: round(v / total_posts * 100) for k, v in dist.items}
+        dist_pct = {k: round(v / total_posts * 100) for k, v in dist.items()}
 
         calendar_by_platform[pname] = {
             "platform":            pname,
@@ -195,14 +195,14 @@ def build_calendar(config: dict) -> dict:
 
     # Global summary
     all_posts = []
-    for pc in calendar_by_platform.values:
+    for pc in calendar_by_platform.values():
         all_posts.extend(pc["posts"])
     all_posts.sort(key=lambda p: (p["date"], p["platform"]))
 
     return {
         "meta": {
-            "start_date":     start.isoformat,
-            "end_date":       (start + timedelta(weeks=weeks) - timedelta(days=1)).isoformat,
+            "start_date":     start.isoformat(),
+            "end_date":       (start + timedelta(weeks=weeks) - timedelta(days=1)).isoformat(),
             "weeks":          weeks,
             "platforms":      [p["name"] for p in platforms],
             "total_posts":    len(all_posts),
@@ -225,10 +225,10 @@ def build_markdown(result: dict) -> str:
                  f"| **{m['weeks']} weeks** | **{m['total_posts']} total posts**\n")
 
     # Per-platform distribution
-    for pname, pc in result["platforms"].items:
+    for pname, pc in result["platforms"].items():
         lines.append(f"## {pname}  ({pc['total_posts']} posts)\n")
         lines.append("**Pillar distribution:**")
-        for pillar, count in pc["pillar_distribution"].items:
+        for pillar, count in pc["pillar_distribution"].items():
             pct = pc["pillar_pct"][pillar]
             lines.append(f"- {pillar}: {count} posts ({pct}%)")
         lines.append("")
@@ -247,9 +247,9 @@ def build_markdown(result: dict) -> str:
             if post["week_number"] == week_num:
                 week_posts[post["date"]][post["platform"]] = post
 
-        for day_date in sorted(week_posts.keys):
+        for day_date in sorted(week_posts.keys()):
             day_posts = week_posts[day_date]
-            weekday   = list(day_posts.values)[0]["weekday"] if day_posts else ""
+            weekday   = list(day_posts.values())[0]["weekday"] if day_posts else ""
             cells     = []
             for pname in m["platforms"]:
                 if pname in day_posts:
@@ -264,12 +264,12 @@ def build_markdown(result: dict) -> str:
 
     # Legend
     lines.append("## Content Pillars\n")
-    for pc in result["platforms"].values:
+    for pc in result["platforms"].values():
         break
     from_meta = result["meta"]["pillars"]
     lines.append("| Pillar | Description |")
     lines.append("|---|---|")
-    for pname, pc in result["platforms"].items:
+    for pname, pc in result["platforms"].items():
         # Get pillar descriptions from first platform's posts
         pillar_desc = {}
         for post in pc["posts"]:
@@ -297,13 +297,13 @@ def pretty_print(result: dict) -> None:
     print(f"  Total posts: {m['total_posts']}")
     print(f"  Pillars    : {', '.join(m['pillars'])}")
 
-    for pname, pc in result["platforms"].items:
+    for pname, pc in result["platforms"].items():
         print(f"\n  {'─'*60}")
-        print(f"  📣  {pname.upper}  — {pc['total_posts']} posts  "
+        print(f"  📣  {pname.upper()}  — {pc['total_posts']} posts  "
               f"({pc['posts_per_week']}/week)")
         print(f"  Best days: {', '.join(pc['best_days'])}")
         print(f"  Pillar distribution:")
-        for pillar, count in pc["pillar_distribution"].items:
+        for pillar, count in pc["pillar_distribution"].items():
             pct = pc["pillar_pct"][pillar]
             bar = "█" * (pct // 5) + "░" * (20 - pct // 5)
             print(f"    {pillar:<16}  {count:>3} posts  {pct:>3}%  {bar}")
@@ -317,7 +317,7 @@ def pretty_print(result: dict) -> None:
     for post in result["timeline"]:
         weeks_data[post["week_number"]].append(post)
 
-    for week_num in sorted(weeks_data.keys):
+    for week_num in sorted(weeks_data.keys()):
         print(f"  WEEK {week_num}")
         print(f"  {'Date':<12} {'Day':<11}" +
               "".join(f" {p:<22}" for p in m["platforms"]))
@@ -328,9 +328,9 @@ def pretty_print(result: dict) -> None:
         for post in weeks_data[week_num]:
             day_map[post["date"]][post["platform"]] = post
 
-        for day_date in sorted(day_map.keys):
+        for day_date in sorted(day_map.keys()):
             dp      = day_map[day_date]
-            weekday = list(dp.values)[0]["weekday"]
+            weekday = list(dp.values())[0]["weekday"]
             row     = f"  {day_date:<12} {weekday:<11}"
             for pname in m["platforms"]:
                 if pname in dp:
@@ -340,7 +340,7 @@ def pretty_print(result: dict) -> None:
                     cell = "—"
                 row += f" {cell:<22}"
             print(row)
-        print
+        print()
 
     print("  💡  TIP: Re-run with --markdown to export a copyable Markdown table.\n")
 
@@ -349,7 +349,7 @@ def pretty_print(result: dict) -> None:
 # CLI
 # ---------------------------------------------------------------------------
 
-def parse_args:
+def parse_args():
     parser = argparse.ArgumentParser(
         description="Generate a social media content calendar with balanced pillar distribution.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -365,11 +365,11 @@ def parse_args:
                         help="Output calendar as JSON")
     parser.add_argument("--markdown", action="store_true",
                         help="Output calendar as Markdown")
-    return parser.parse_args
+    return parser.parse_args()
 
 
-def main:
-    args = parse_args
+def main():
+    args = parse_args()
 
     if args.config:
         with open(args.config) as f:
@@ -396,4 +396,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

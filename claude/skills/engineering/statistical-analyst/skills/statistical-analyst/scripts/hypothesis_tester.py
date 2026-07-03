@@ -191,7 +191,7 @@ def ztest_proportions(cn: int, cx: int, tn: int, tx: int, alpha: float) -> dict:
     }
 
 
-def ttest_means(cm: float, ds: float, cn: int, tm: float, ts: float, tn: int, alpha: float) -> dict:
+def ttest_means(cm: float, cs: float, cn: int, tm: float, ts: float, tn: int, alpha: float) -> dict:
     """Welch's two-sample t-test (unequal variances)."""
     if cn < 2 or tn < 2:
         return {"error": "Each group needs at least 2 observations."}
@@ -382,7 +382,7 @@ def verdict(result: dict) -> str:
     lines += [
         "",
         f"  p-value:    {p:.6f}  (α={alpha})",
-        f"  Result:     {DIRECTION[sig].upper}",
+        f"  Result:     {DIRECTION[sig].upper()}",
     ]
     if ci:
         lines.append(f"  {ci['level']} CI: [{ci['lower']}, {ci['upper']}]")
@@ -406,7 +406,7 @@ def verdict(result: dict) -> str:
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Run hypothesis tests on experiment results.")
     parser.add_argument("--test", choices=["ztest", "ttest", "chi2"], required=True)
     parser.add_argument("--alpha", type=float, default=0.05, help="Significance level (default: 0.05)")
@@ -430,7 +430,7 @@ def main:
     parser.add_argument("--observed", help="Comma-separated observed counts")
     parser.add_argument("--expected", help="Comma-separated expected counts")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.test == "ztest":
         for req in ["control_n", "control_x", "treatment_n", "treatment_x"]:
@@ -454,8 +454,8 @@ def main:
         if not args.observed or not args.expected:
             print("Error: --observed and --expected are required for chi2", file=sys.stderr)
             sys.exit(1)
-        observed = [float(x.strip) for x in args.observed.split(",")]
-        expected = [float(x.strip) for x in args.expected.split(",")]
+        observed = [float(x.strip()) for x in args.observed.split(",")]
+        expected = [float(x.strip()) for x in args.expected.split(",")]
         result = chi2_test(observed, expected, args.alpha)
 
     if args.format == "json":
@@ -468,4 +468,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

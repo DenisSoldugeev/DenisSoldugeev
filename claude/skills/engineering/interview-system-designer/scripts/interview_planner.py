@@ -60,7 +60,7 @@ QUESTION_BANK = {
 
 
 def normalize_level(level: str) -> str:
-    level = level.strip.lower
+    level = level.strip().lower()
     if level in {"staff+", "principal", "lead"}:
         return "staff"
     if level not in BASE_ROUNDS:
@@ -69,7 +69,7 @@ def normalize_level(level: str) -> str:
 
 
 def suggested_questions(round_name: str) -> List[str]:
-    name = round_name.lower
+    name = round_name.lower()
     if "coding" in name:
         return QUESTION_BANK["coding"]
     if "system" in name or "architecture" in name:
@@ -101,16 +101,16 @@ def generate_plan(role: str, level: str) -> Dict[str, object]:
     }
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate an interview loop plan for a role and level.")
     parser.add_argument("--role", required=True, help="Role name (e.g., Senior Software Engineer)")
     parser.add_argument("--level", required=True, help="Level: junior|mid|senior|staff")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
-    return parser.parse_args
+    return parser.parse_args()
 
 
-def main -> int:
-    args = parse_args
+def main() -> int:
+    args = parse_args()
     plan = generate_plan(args.role, args.level)
 
     if args.json:
@@ -130,4 +130,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main)
+    raise SystemExit(main())

@@ -234,7 +234,7 @@ def scan_documentation(project_dir: Path, patterns: List[str]) -> List[str]:
     ]
 
     for doc_dir in doc_dirs:
-        if not doc_dir.exists:
+        if not doc_dir.exists():
             continue
 
         for pattern in patterns:
@@ -263,7 +263,7 @@ def scan_code_patterns(project_dir: Path, patterns: List[str]) -> List[Dict]:
     ]
 
     for src_dir in src_dirs:
-        if not src_dir.exists:
+        if not src_dir.exists():
             continue
 
         for ext in code_extensions:
@@ -394,7 +394,7 @@ def assess_category(project_dir: Path, category_id: str, category_data: Dict) ->
     total_weight = 0
     weighted_score = 0
 
-    for control_id, control_data in category_data["controls"].items:
+    for control_id, control_data in category_data["controls"].items():
         result = assess_control(project_dir, control_id, control_data)
         control_results.append(result)
         total_weight += control_data["weight"]
@@ -430,7 +430,7 @@ def calculate_risk_level(overall_score: float, vulnerabilities: List[Dict], phi_
         base_score = 4
 
     # Adjust for vulnerabilities
-    critical_vulns = sum(1 for v in vulnerabilities if "password" in v["vulnerability"].lower or "secret" in v["vulnerability"].lower)
+    critical_vulns = sum(1 for v in vulnerabilities if "password" in v["vulnerability"].lower() or "secret" in v["vulnerability"].lower())
     if critical_vulns > 0:
         base_score = min(4, base_score + 1)
 
@@ -504,7 +504,7 @@ def print_text_report(result: Dict) -> None:
         for control in cat["controls"]:
             if control["status"] == "gap":
                 gap_count += 1
-                print(f"  [{cat['category'].upper}] {control['title']}")
+                print(f"  [{cat['category'].upper()}] {control['title']}")
                 print(f"    Requirement: {control['requirement']}")
     if gap_count == 0:
         print("  No critical gaps identified")
@@ -528,11 +528,11 @@ def print_text_report(result: Dict) -> None:
             print(f"  {i}. {rec}")
 
     print("\n" + "=" * 70)
-    print(f"Assessment Date: {datetime.now.strftime('%Y-%m-%d %H:%M')}")
+    print(f"Assessment Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     print("=" * 70)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="HIPAA Risk Assessment Tool for Medical Device Software"
     )
@@ -558,10 +558,10 @@ def main:
         help="Include detailed evidence in output"
     )
 
-    args = parser.parse_args
-    project_dir = Path(args.project_dir).resolve
+    args = parser.parse_args()
+    project_dir = Path(args.project_dir).resolve()
 
-    if not project_dir.exists:
+    if not project_dir.exists():
         print(f"Error: Directory not found: {project_dir}", file=sys.stderr)
         sys.exit(1)
 
@@ -575,12 +575,12 @@ def main:
     total_weight = 0
     weighted_score = 0
 
-    for cat_id, cat_data in categories_to_assess.items:
+    for cat_id, cat_data in categories_to_assess.items():
         cat_result = assess_category(project_dir, cat_id, cat_data)
         category_results.append(cat_result)
 
         # Calculate weighted average
-        cat_weight = sum(c["weight"] for c in cat_data["controls"].values)
+        cat_weight = sum(c["weight"] for c in cat_data["controls"].values())
         total_weight += cat_weight
         weighted_score += (cat_result["score"] * cat_weight) / 100
 
@@ -595,7 +595,7 @@ def main:
 
     result = {
         "project_dir": str(project_dir),
-        "assessment_date": datetime.now.isoformat,
+        "assessment_date": datetime.now().isoformat(),
         "overall_score": overall_score,
         "risk_assessment": risk_assessment,
         "categories": category_results if args.detailed else [
@@ -623,4 +623,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

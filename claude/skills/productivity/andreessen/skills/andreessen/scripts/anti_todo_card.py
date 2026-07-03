@@ -41,18 +41,18 @@ MAX_MUST_DO = 5
 MIN_RECOMMENDED = 3
 
 
-def _default_dir -> Path:
-    return Path(os.environ.get("ANDREESSEN_CARD_DIR", str(Path.home / ".andreessen-cards")))
+def _default_dir() -> Path:
+    return Path(os.environ.get("ANDREESSEN_CARD_DIR", str(Path.home() / ".andreessen-cards")))
 
 
 def _card_path(file_arg: Optional[str], date: str) -> Path:
     if file_arg:
         return Path(file_arg)
-    return _default_dir / f"{date}.json"
+    return _default_dir() / f"{date}.json"
 
 
 def _load(path: Path) -> Optional[Dict[str, Any]]:
-    if not path.exists:
+    if not path.exists():
         return None
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -135,9 +135,9 @@ def render_summary(s: Dict[str, Any]) -> str:
 
 def _match_and_mark_done(card: Dict[str, Any], text: str) -> bool:
     """If a logged accomplishment matches a front must-do, mark it done too."""
-    tl = text.lower
+    tl = text.lower()
     for m in card["front_must_do"]:
-        if not m["done"] and (m["item"].lower in tl or tl in m["item"].lower):
+        if not m["done"] and (m["item"].lower() in tl or tl in m["item"].lower()):
             m["done"] = True
             return True
     return False
@@ -167,11 +167,11 @@ def main(argv: List[str]) -> int:
             print(json.dumps({"card": card, "summary": summary(card)}, indent=2))
         else:
             print(render_card(card))
-            print
+            print()
             print(render_summary(summary(card)))
         return 0
 
-    date = args.date or datetime.date.today.isoformat
+    date = args.date or datetime.date.today().isoformat()
     path = _card_path(args.file, date)
     card = _load(path)
 
@@ -192,7 +192,7 @@ def main(argv: List[str]) -> int:
 
     changed = False
     if args.did:
-        now = datetime.datetime.now.strftime("%H:%M")
+        now = datetime.datetime.now().strftime("%H:%M")
         card["back_anti_todo"].append({"item": args.did, "at": now})
         _match_and_mark_done(card, args.did)
         changed = True

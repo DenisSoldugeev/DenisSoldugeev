@@ -5,17 +5,17 @@ Compliance Checker - Verify security compliance against SOC 2, PCI-DSS, HIPAA, G
 Table of Contents:
     ComplianceChecker - Main class for compliance verification
         __init__         - Initialize with target path and framework
-        check          - Run compliance checks for selected framework
-        check_soc2     - Check SOC 2 Type II controls
-        check_pci_dss  - Check PCI-DSS v4.0 requirements
-        check_hipaa    - Check HIPAA security rule requirements
-        check_gdpr     - Check GDPR data protection requirements
-        _check_encryption_at_rest - Verify data encryption
-        _check_access_controls - Verify access control implementation
-        _check_logging  - Verify audit logging
-        _check_secrets_management - Verify secrets handling
-        _calculate_compliance_score - Calculate overall compliance score
-    main - CLI entry point
+        check()          - Run compliance checks for selected framework
+        check_soc2()     - Check SOC 2 Type II controls
+        check_pci_dss()  - Check PCI-DSS v4.0 requirements
+        check_hipaa()    - Check HIPAA security rule requirements
+        check_gdpr()     - Check GDPR data protection requirements
+        _check_encryption_at_rest() - Verify data encryption
+        _check_access_controls() - Verify access control implementation
+        _check_logging()  - Verify audit logging
+        _check_secrets_management() - Verify secrets handling
+        _calculate_compliance_score() - Calculate overall compliance score
+    main() - CLI entry point
 
 Usage:
     python compliance_checker.py /path/to/project
@@ -68,7 +68,7 @@ class ComplianceChecker:
             verbose: Enable verbose output
         """
         self.target_path = Path(target_path)
-        self.framework = framework.lower
+        self.framework = framework.lower()
         self.verbose = verbose
         self.controls: List[ComplianceControl] = []
         self.files_scanned = 0
@@ -81,26 +81,26 @@ class ComplianceChecker:
             Dict with compliance results
         """
         print(f"Compliance Checker - Scanning: {self.target_path}")
-        print(f"Framework: {self.framework.upper}")
-        print
+        print(f"Framework: {self.framework.upper()}")
+        print()
 
-        if not self.target_path.exists:
+        if not self.target_path.exists():
             return {"status": "error", "message": f"Path not found: {self.target_path}"}
 
-        start_time = datetime.now
+        start_time = datetime.now()
 
         # Run framework-specific checks
         if self.framework in ('soc2', 'all'):
-            self.check_soc2
+            self.check_soc2()
         if self.framework in ('pci-dss', 'all'):
-            self.check_pci_dss
+            self.check_pci_dss()
         if self.framework in ('hipaa', 'all'):
-            self.check_hipaa
+            self.check_hipaa()
         if self.framework in ('gdpr', 'all'):
-            self.check_gdpr
+            self.check_gdpr()
 
-        end_time = datetime.now
-        scan_duration = (end_time - start_time).total_seconds
+        end_time = datetime.now()
+        scan_duration = (end_time - start_time).total_seconds()
 
         # Calculate statistics
         passed = len([c for c in self.controls if c.status == 'passed'])
@@ -108,7 +108,7 @@ class ComplianceChecker:
         warnings = len([c for c in self.controls if c.status == 'warning'])
         na = len([c for c in self.controls if c.status == 'not_applicable'])
 
-        compliance_score = self._calculate_compliance_score
+        compliance_score = self._calculate_compliance_score()
 
         result = {
             "status": "completed",
@@ -137,22 +137,22 @@ class ComplianceChecker:
             print("  Checking SOC 2 Type II controls...")
 
         # CC1: Control Environment - Access Controls
-        self._check_access_controls_soc2
+        self._check_access_controls_soc2()
 
         # CC2: Communication and Information
-        self._check_documentation
+        self._check_documentation()
 
         # CC3: Risk Assessment
-        self._check_risk_assessment
+        self._check_risk_assessment()
 
         # CC6: Logical and Physical Access Controls
-        self._check_authentication
+        self._check_authentication()
 
         # CC7: System Operations
-        self._check_logging
+        self._check_logging()
 
         # CC8: Change Management
-        self._check_change_management
+        self._check_change_management()
 
     def check_pci_dss(self):
         """Check PCI-DSS v4.0 requirements."""
@@ -160,22 +160,22 @@ class ComplianceChecker:
             print("  Checking PCI-DSS v4.0 requirements...")
 
         # Requirement 3: Protect stored cardholder data
-        self._check_data_encryption
+        self._check_data_encryption()
 
         # Requirement 4: Encrypt transmission of cardholder data
-        self._check_transmission_encryption
+        self._check_transmission_encryption()
 
         # Requirement 6: Develop and maintain secure systems
-        self._check_secure_development
+        self._check_secure_development()
 
         # Requirement 8: Identify users and authenticate access
-        self._check_strong_authentication
+        self._check_strong_authentication()
 
         # Requirement 10: Log and monitor all access
-        self._check_audit_logging
+        self._check_audit_logging()
 
         # Requirement 11: Test security of systems regularly
-        self._check_security_testing
+        self._check_security_testing()
 
     def check_hipaa(self):
         """Check HIPAA security rule requirements."""
@@ -183,19 +183,19 @@ class ComplianceChecker:
             print("  Checking HIPAA Security Rule requirements...")
 
         # 164.312(a)(1): Access Control
-        self._check_hipaa_access_control
+        self._check_hipaa_access_control()
 
         # 164.312(b): Audit Controls
-        self._check_hipaa_audit
+        self._check_hipaa_audit()
 
         # 164.312(c)(1): Integrity Controls
-        self._check_hipaa_integrity
+        self._check_hipaa_integrity()
 
         # 164.312(d): Person or Entity Authentication
-        self._check_hipaa_authentication
+        self._check_hipaa_authentication()
 
         # 164.312(e)(1): Transmission Security
-        self._check_hipaa_transmission
+        self._check_hipaa_transmission()
 
     def check_gdpr(self):
         """Check GDPR data protection requirements."""
@@ -203,19 +203,19 @@ class ComplianceChecker:
             print("  Checking GDPR requirements...")
 
         # Article 25: Data protection by design
-        self._check_privacy_by_design
+        self._check_privacy_by_design()
 
         # Article 32: Security of processing
-        self._check_gdpr_security
+        self._check_gdpr_security()
 
         # Article 33/34: Breach notification
-        self._check_breach_notification
+        self._check_breach_notification()
 
         # Article 17: Right to erasure
-        self._check_data_deletion
+        self._check_data_deletion()
 
         # Article 20: Data portability
-        self._check_data_export
+        self._check_data_export()
 
     def _check_access_controls_soc2(self):
         """SOC 2 CC1/CC6: Check access control implementation."""
@@ -278,9 +278,9 @@ class ComplianceChecker:
 
         for doc in doc_files:
             doc_path = self.target_path / doc
-            if doc_path.exists:
+            if doc_path.exists():
                 evidence.append(str(doc))
-                status = 'passed' if 'security' in doc.lower else 'warning'
+                status = 'passed' if 'security' in doc.lower() else 'warning'
                 break
 
         self.controls.append(ComplianceControl(
@@ -312,7 +312,7 @@ class ComplianceChecker:
 
         for config in scan_configs:
             config_path = self.target_path / config
-            if config_path.exists:
+            if config_path.exists():
                 evidence.append(str(config))
                 status = 'passed'
                 break
@@ -326,7 +326,7 @@ class ComplianceChecker:
 
         for config in dep_configs:
             config_path = self.target_path / config
-            if config_path.exists:
+            if config_path.exists():
                 evidence.append(str(config))
                 if status == 'failed':
                     status = 'warning'
@@ -439,7 +439,7 @@ class ComplianceChecker:
 
         for config in ci_configs:
             config_path = self.target_path / config
-            if config_path.exists:
+            if config_path.exists():
                 evidence.append(str(config))
                 status = 'passed'
                 break
@@ -643,7 +643,7 @@ class ComplianceChecker:
         # Check for SAST/DAST configuration
         sast_configs = ['.snyk', '.semgrep.yml', 'sonar-project.properties']
         for config in sast_configs:
-            if (self.target_path / config).exists:
+            if (self.target_path / config).exists():
                 evidence.append(config)
                 if status == 'failed':
                     status = 'warning'
@@ -864,7 +864,7 @@ class ComplianceChecker:
         # Check for incident response documentation
         incident_docs = ['SECURITY.md', 'docs/incident-response.md', '.github/SECURITY.md']
         for doc in incident_docs:
-            if (self.target_path / doc).exists:
+            if (self.target_path / doc).exists():
                 evidence.append(doc)
                 if status == 'failed':
                     status = 'warning'
@@ -1011,10 +1011,10 @@ class ComplianceChecker:
         print("COMPLIANCE CHECK SUMMARY")
         print("=" * 60)
         print(f"Target: {result['target']}")
-        print(f"Framework: {result['framework'].upper}")
+        print(f"Framework: {result['framework'].upper()}")
         print(f"Scan duration: {result['scan_duration_seconds']}s")
         print(f"Compliance score: {result['compliance_score']}% ({result['compliance_level']})")
-        print
+        print()
 
         summary = result['summary']
         print(f"Controls checked: {summary['total']}")
@@ -1029,12 +1029,12 @@ class ComplianceChecker:
         if failed:
             print("\nFailed controls requiring remediation:")
             for control in failed[:5]:
-                print(f"\n  [{control['severity'].upper}] {control['control_id']}")
+                print(f"\n  [{control['severity'].upper()}] {control['control_id']}")
                 print(f"  {control['title']}")
                 print(f"  Recommendation: {control['recommendation']}")
 
 
-def main:
+def main():
     """Main entry point for CLI."""
     parser = argparse.ArgumentParser(
         description="Check compliance against SOC 2, PCI-DSS, HIPAA, GDPR",
@@ -1073,7 +1073,7 @@ Examples:
         help="Output file path"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     checker = ComplianceChecker(
         target_path=args.target,
@@ -1081,7 +1081,7 @@ Examples:
         verbose=args.verbose
     )
 
-    result = checker.check
+    result = checker.check()
 
     if args.json:
         output = json.dumps(result, indent=2)
@@ -1104,4 +1104,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

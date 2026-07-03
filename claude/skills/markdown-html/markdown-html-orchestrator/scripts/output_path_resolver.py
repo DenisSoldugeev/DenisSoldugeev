@@ -38,7 +38,7 @@ from typing import Any
 
 # Bridge to the design-system config
 _DESIGN_SYSTEM_SCRIPTS = (
-    Path(__file__).resolve.parent.parent.parent / "design-system" / "scripts"
+    Path(__file__).resolve().parent.parent.parent / "design-system" / "scripts"
 )
 sys.path.insert(0, str(_DESIGN_SYSTEM_SCRIPTS))
 try:
@@ -61,14 +61,14 @@ def kebab_slug(name: str) -> str:
     """
     base = name.rsplit(".", 1)[0] if "." in name else name
     # Strip non-alphanumerics, collapse to hyphen
-    slug = re.sub(r"[^a-zA-Z0-9]+", "-", base).strip("-").lower
+    slug = re.sub(r"[^a-zA-Z0-9]+", "-", base).strip("-").lower()
     return slug or "untitled"
 
 
 def _writable(path: Path) -> bool:
-    p = path.expanduser
+    p = path.expanduser()
     parent = p.parent if p.suffix else p
-    while not parent.exists:
+    while not parent.exists():
         if parent.parent == parent:
             return False
         parent = parent.parent
@@ -77,13 +77,13 @@ def _writable(path: Path) -> bool:
 
 def _resolve_base_dir(out_override: str | None) -> Path:
     if out_override:
-        return Path(out_override).expanduser
+        return Path(out_override).expanduser()
     if cfg is not None and not os.environ.get("MARKDOWN_HTML_NO_CONFIG") == "1":
-        config = cfg.load_config
+        config = cfg.load_config()
         default_dir = config.get("default_output_dir") or "./markdown-html-out/"
     else:
         default_dir = "./markdown-html-out/"
-    return Path(default_dir).expanduser
+    return Path(default_dir).expanduser()
 
 
 def resolve(
@@ -106,10 +106,10 @@ def resolve(
     target = base_dir / f"{filename_base}.html"
 
     collision_info: dict[str, Any] = {"existed": False, "strategy": None}
-    if target.exists:
+    if target.exists():
         collision_info["existed"] = True
         if on_collision == "timestamp":
-            stamp = _dt.datetime.now.strftime("%Y%m%dT%H%M%S")
+            stamp = _dt.datetime.now().strftime("%Y%m%dT%H%M%S")
             target = base_dir / f"{filename_base}-{stamp}.html"
             collision_info["strategy"] = "timestamp"
         elif on_collision == "overwrite":
@@ -118,12 +118,12 @@ def resolve(
         else:  # suffix
             for n in range(2, 1000):
                 candidate = base_dir / f"{filename_base}-{n}.html"
-                if not candidate.exists:
+                if not candidate.exists():
                     target = candidate
                     collision_info["strategy"] = f"suffix-{n}"
                     break
             else:
-                stamp = _dt.datetime.now.strftime("%Y%m%dT%H%M%S")
+                stamp = _dt.datetime.now().strftime("%Y%m%dT%H%M%S")
                 target = base_dir / f"{filename_base}-{stamp}.html"
                 collision_info["strategy"] = "timestamp-after-suffix-exhausted"
 
@@ -158,7 +158,7 @@ def main(argv: list[str]) -> int:
     elif args.input:
         result = resolve(args.input, args.out, args.doctype, args.on_collision)
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     if not result["writable"]:

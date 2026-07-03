@@ -38,10 +38,10 @@ class TimelineReconstructor:
     
     def __init__(self):
         """Initialize the reconstructor with phase detection rules and templates."""
-        self.phase_patterns = self._load_phase_patterns
-        self.event_types = self._load_event_types
-        self.severity_mapping = self._load_severity_mapping
-        self.gap_thresholds = self._load_gap_thresholds
+        self.phase_patterns = self._load_phase_patterns()
+        self.event_types = self._load_event_types()
+        self.severity_mapping = self._load_severity_mapping()
+        self.gap_thresholds = self._load_gap_thresholds()
     
     def _load_phase_patterns(self) -> Dict[str, Dict]:
         """Load patterns for identifying incident phases."""
@@ -202,9 +202,9 @@ class TimelineReconstructor:
             "timeline": {
                 "total_events": len(events),
                 "time_range": {
-                    "start": events[0].timestamp.isoformat,
-                    "end": events[-1].timestamp.isoformat,
-                    "duration_minutes": int((events[-1].timestamp - events[0].timestamp).total_seconds / 60)
+                    "start": events[0].timestamp.isoformat(),
+                    "end": events[-1].timestamp.isoformat(),
+                    "duration_minutes": int((events[-1].timestamp - events[0].timestamp).total_seconds() / 60)
                 },
                 "phases": [self._phase_to_dict(phase) for phase in phases],
                 "events": [self._event_to_dict(event) for event in events]
@@ -213,7 +213,7 @@ class TimelineReconstructor:
             "gap_analysis": gap_analysis,
             "narrative": narrative,
             "summary": summary,
-            "reconstruction_timestamp": datetime.now(timezone.utc).isoformat
+            "reconstruction_timestamp": datetime.now(timezone.utc).isoformat()
         }
     
     def _parse_events(self, events_data: List[Dict]) -> List[Event]:
@@ -239,7 +239,7 @@ class TimelineReconstructor:
                 actor = event_dict.get("actor", event_dict.get("user", "system"))
                 
                 # Extract metadata
-                metadata = {k: v for k, v in event_dict.items 
+                metadata = {k: v for k, v in event_dict.items() 
                            if k not in ["timestamp", "time", "source", "type", "message", "severity", "actor"]}
                 
                 event = Event(
@@ -294,16 +294,16 @@ class TimelineReconstructor:
     
     def _classify_event_type(self, event_dict: Dict) -> str:
         """Classify event type based on source and content."""
-        source = event_dict.get("source", "").lower
-        message = event_dict.get("message", "").lower
-        event_type = event_dict.get("type", "").lower
+        source = event_dict.get("source", "").lower()
+        message = event_dict.get("message", "").lower()
+        event_type = event_dict.get("type", "").lower()
         
         # Check explicit type first
         if event_type in self.event_types:
             return event_type
         
         # Classify based on source and content
-        for type_name, type_info in self.event_types.items:
+        for type_name, type_info in self.event_types.items():
             # Check source patterns
             if any(src in source for src in type_info["sources"]):
                 return type_name
@@ -316,7 +316,7 @@ class TimelineReconstructor:
     
     def _parse_severity(self, severity_str: str) -> int:
         """Parse severity string to numeric value."""
-        severity_clean = str(severity_str).lower.strip
+        severity_clean = str(severity_str).lower().strip()
         return self.severity_mapping.get(severity_clean, 0)
     
     def _detect_phases(self, events: List[Event]) -> List[Phase]:
@@ -335,8 +335,8 @@ class TimelineReconstructor:
                         name=current_phase,
                         start_time=phase_events[0].timestamp,
                         end_time=phase_events[-1].timestamp,
-                        duration=(phase_events[-1].timestamp - phase_events[0].timestamp).total_seconds / 60,
-                        events=phase_events.copy,
+                        duration=(phase_events[-1].timestamp - phase_events[0].timestamp).total_seconds() / 60,
+                        events=phase_events.copy(),
                         description=self.phase_patterns[current_phase]["description"]
                     )
                     phases.append(phase_obj)
@@ -353,7 +353,7 @@ class TimelineReconstructor:
                 name=current_phase,
                 start_time=phase_events[0].timestamp,
                 end_time=phase_events[-1].timestamp,
-                duration=(phase_events[-1].timestamp - phase_events[0].timestamp).total_seconds / 60,
+                duration=(phase_events[-1].timestamp - phase_events[0].timestamp).total_seconds() / 60,
                 events=phase_events,
                 description=self.phase_patterns[current_phase]["description"]
             )
@@ -363,12 +363,12 @@ class TimelineReconstructor:
     
     def _identify_phase(self, event: Event) -> str:
         """Identify which phase an event belongs to."""
-        message_lower = event.message.lower
+        message_lower = event.message.lower()
         
         # Score each phase based on keywords and event type
         phase_scores = {}
         
-        for phase_name, pattern_info in self.phase_patterns.items:
+        for phase_name, pattern_info in self.phase_patterns.items():
             score = 0
             
             # Keyword matching
@@ -387,7 +387,7 @@ class TimelineReconstructor:
             phase_scores[phase_name] = score
         
         # Return highest scoring phase, default to triage
-        if phase_scores and max(phase_scores.values) > 0:
+        if phase_scores and max(phase_scores.values()) > 0:
             return max(phase_scores, key=phase_scores.get)
         
         return "triage"  # Default phase
@@ -402,14 +402,14 @@ class TimelineReconstructor:
         
         for next_phase in phases[1:]:
             if (next_phase.name == current_phase.name and 
-                (next_phase.start_time - current_phase.end_time).total_seconds < 300):  # 5 min gap
+                (next_phase.start_time - current_phase.end_time).total_seconds() < 300):  # 5 min gap
                 # Merge phases
                 merged_events = current_phase.events + next_phase.events
                 current_phase = Phase(
                     name=current_phase.name,
                     start_time=current_phase.start_time,
                     end_time=next_phase.end_time,
-                    duration=(next_phase.end_time - current_phase.start_time).total_seconds / 60,
+                    duration=(next_phase.end_time - current_phase.start_time).total_seconds() / 60,
                     events=merged_events,
                     description=current_phase.description
                 )
@@ -427,7 +427,7 @@ class TimelineReconstructor:
         
         start_time = events[0].timestamp
         end_time = events[-1].timestamp
-        total_duration = (end_time - start_time).total_seconds / 60
+        total_duration = (end_time - start_time).total_seconds() / 60
         
         # Phase timing metrics
         phase_durations = {phase.name: phase.duration for phase in phases}
@@ -441,14 +441,14 @@ class TimelineReconstructor:
         mitigation_start = None
         for phase in phases:
             if phase.name == "mitigation":
-                mitigation_start = (phase.start_time - start_time).total_seconds / 60
+                mitigation_start = (phase.start_time - start_time).total_seconds() / 60
                 break
         
         # Time to resolution
         resolution_time = None
         for phase in phases:
             if phase.name == "resolution":
-                resolution_time = (phase.start_time - start_time).total_seconds / 60
+                resolution_time = (phase.start_time - start_time).total_seconds() / 60
                 break
         
         # Communication frequency
@@ -470,7 +470,7 @@ class TimelineReconstructor:
                 "detection_duration_minutes": round(detection_time, 1),
                 "time_to_mitigation_minutes": round(mitigation_start or 0, 1),
                 "time_to_resolution_minutes": round(resolution_time or 0, 1),
-                "phase_durations": {k: round(v, 1) for k, v in phase_durations.items}
+                "phase_durations": {k: round(v, 1) for k, v in phase_durations.items()}
             },
             "activity_metrics": {
                 "total_events": len(events),
@@ -499,7 +499,7 @@ class TimelineReconstructor:
             current_phase = phases[i]
             next_phase = phases[i + 1]
             
-            transition_gap = (next_phase.start_time - current_phase.end_time).total_seconds / 60
+            transition_gap = (next_phase.start_time - current_phase.end_time).total_seconds() / 60
             threshold_key = f"{current_phase.name}_to_{next_phase.name}"
             threshold = self.gap_thresholds.get(threshold_key, self.gap_thresholds["phase_transition"])
             
@@ -516,7 +516,7 @@ class TimelineReconstructor:
         # Check communication gaps
         comm_events = [e for e in events if e.type == "communication"]
         for i in range(len(comm_events) - 1):
-            gap_minutes = (comm_events[i+1].timestamp - comm_events[i].timestamp).total_seconds / 60
+            gap_minutes = (comm_events[i+1].timestamp - comm_events[i].timestamp).total_seconds() / 60
             if gap_minutes > self.gap_thresholds["communication_gap"]:
                 gaps.append({
                     "type": "communication_gap",
@@ -571,7 +571,7 @@ class TimelineReconstructor:
             
             phase_narratives.append({
                 "phase": phase.name,
-                "start_time": phase.start_time.isoformat,
+                "start_time": phase.start_time.isoformat(),
                 "duration_minutes": round(phase.duration, 1),
                 "narrative": narrative_text,
                 "key_events": len(key_events),
@@ -581,7 +581,7 @@ class TimelineReconstructor:
         # Create overall summary
         start_time = events[0].timestamp
         end_time = events[-1].timestamp
-        total_duration = (end_time - start_time).total_seconds / 60
+        total_duration = (end_time - start_time).total_seconds() / 60
         
         summary = f"""Incident Timeline Summary:
 The incident began at {start_time.strftime('%Y-%m-%d %H:%M:%S UTC')} and concluded at {end_time.strftime('%Y-%m-%d %H:%M:%S UTC')}, lasting approximately {total_duration:.0f} minutes.
@@ -591,7 +591,7 @@ The incident progressed through {len(phases)} distinct phases: {', '.join(p.name
 Key milestones:"""
         
         for phase in phases:
-            summary += f"\n- {phase.name.title}: {phase.start_time.strftime('%H:%M')} ({phase.duration:.0f} min)"
+            summary += f"\n- {phase.name.title()}: {phase.start_time.strftime('%H:%M')} ({phase.duration:.0f} min)"
         
         return {
             "summary": summary,
@@ -619,7 +619,7 @@ Key milestones:"""
         key_events.extend(high_severity_events[:3])
         
         # Remove duplicates while preserving order
-        seen = set
+        seen = set()
         unique_events = []
         for event in key_events:
             event_key = (event.timestamp, event.message)
@@ -654,7 +654,7 @@ Key milestones:"""
                 additional_details=f"This phase lasted {phase.duration:.0f} minutes with {len(phase.events)} total events."
             )
         elif phase.name == "triage":
-            actions = [e.message for e in key_events if "investigating" in e.message.lower or "checking" in e.message.lower]
+            actions = [e.message for e in key_events if "investigating" in e.message.lower() or "checking" in e.message.lower()]
             investigation_text = "performed various diagnostic activities" if not actions else f"focused on {actions[0]}"
             return template.format(
                 first_event=first_event,
@@ -688,7 +688,7 @@ Key milestones:"""
         
         # Duration contributes to complexity
         if events:
-            duration_hours = (events[-1].timestamp - events[0].timestamp).total_seconds / 3600
+            duration_hours = (events[-1].timestamp - events[0].timestamp).total_seconds() / 3600
             score += min(duration_hours / 2, 2.0)
         
         return min(score, 10.0)
@@ -709,8 +709,8 @@ Key milestones:"""
             phase_analysis[phase.name] = {
                 "duration_minutes": round(phase.duration, 1),
                 "event_count": len(phase.events),
-                "start_time": phase.start_time.isoformat,
-                "end_time": phase.end_time.isoformat
+                "start_time": phase.start_time.isoformat(),
+                "end_time": phase.end_time.isoformat()
             }
         
         # Actor involvement
@@ -720,8 +720,8 @@ Key milestones:"""
         
         return {
             "incident_overview": {
-                "start_time": start_time.isoformat,
-                "end_time": end_time.isoformat,
+                "start_time": start_time.isoformat(),
+                "end_time": end_time.isoformat(),
                 "total_duration_minutes": round(duration_minutes, 1),
                 "total_events": len(events),
                 "phases_detected": len(phases)
@@ -740,7 +740,7 @@ Key milestones:"""
     def _event_to_dict(self, event: Event) -> Dict:
         """Convert Event namedtuple to dictionary."""
         return {
-            "timestamp": event.timestamp.isoformat,
+            "timestamp": event.timestamp.isoformat(),
             "source": event.source,
             "type": event.type,
             "message": event.message,
@@ -753,8 +753,8 @@ Key milestones:"""
         """Convert Phase namedtuple to dictionary."""
         return {
             "name": phase.name,
-            "start_time": phase.start_time.isoformat,
-            "end_time": phase.end_time.isoformat,
+            "start_time": phase.start_time.isoformat(),
+            "end_time": phase.end_time.isoformat(),
             "duration_minutes": round(phase.duration, 1),
             "event_count": len(phase.events),
             "description": phase.description
@@ -793,7 +793,7 @@ def format_text_output(result: Dict) -> str:
     # Phase summary
     output.append("PHASES:")
     for phase in timeline["phases"]:
-        output.append(f"  {phase['name'].upper}:")
+        output.append(f"  {phase['name'].upper()}:")
         output.append(f"    Start: {phase['start_time']}")
         output.append(f"    Duration: {phase['duration_minutes']} minutes")
         output.append(f"    Events: {phase['event_count']}")
@@ -823,7 +823,7 @@ def format_text_output(result: Dict) -> str:
     if "gap_analysis" in result and result["gap_analysis"]["gaps"]:
         output.append("GAP ANALYSIS:")
         for gap in result["gap_analysis"]["gaps"][:5]:  # Show first 5 gaps
-            output.append(f"  {gap['type'].replace('_', ' ').title}: {gap['gap_minutes']} min gap (threshold: {gap['threshold_minutes']} min)")
+            output.append(f"  {gap['type'].replace('_', ' ').title()}: {gap['gap_minutes']} min gap (threshold: {gap['threshold_minutes']} min)")
         output.append("")
     
     output.append("=" * 80)
@@ -865,7 +865,7 @@ def format_markdown_output(result: Dict) -> str:
     output.append("")
     
     for phase in timeline["phases"]:
-        output.append(f"### {phase['name'].title} Phase")
+        output.append(f"### {phase['name'].title()} Phase")
         output.append("")
         output.append(f"**Duration:** {phase['duration_minutes']} minutes  ")
         output.append(f"**Start:** {phase['start_time']}  ")
@@ -886,7 +886,7 @@ def format_markdown_output(result: Dict) -> str:
     return "\n".join(output)
 
 
-def main:
+def main():
     """Main function with argument parsing and execution."""
     parser = argparse.ArgumentParser(
         description="Reconstruct incident timeline from timestamped events",
@@ -947,15 +947,15 @@ Input JSON format:
         help="Minimum number of events required (default: 1)"
     )
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
-    reconstructor = TimelineReconstructor
+    reconstructor = TimelineReconstructor()
     
     try:
         # Read input
-        if args.input == "-" or (not args.input and not sys.stdin.isatty):
+        if args.input == "-" or (not args.input and not sys.stdin.isatty()):
             # Read from stdin
-            input_text = sys.stdin.read.strip
+            input_text = sys.stdin.read().strip()
             if not input_text:
                 parser.error("No input provided")
             events_data = json.loads(input_text)
@@ -1004,4 +1004,4 @@ Input JSON format:
 
 
 if __name__ == "__main__":
-    main
+    main()

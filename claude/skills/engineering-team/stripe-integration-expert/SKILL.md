@@ -104,10 +104,10 @@ import { getAuthUser } from "@/lib/auth"
 import { db } from "@/lib/db"
 
 export async function POST(req: Request) {
-  const user = await getAuthUser
+  const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const { priceId, interval = "monthly" } = await req.json
+  const { priceId, interval = "monthly" } = await req.json()
 
   // Get or create Stripe customer
   let stripeCustomerId = user.stripeCustomerId
@@ -174,7 +174,7 @@ export async function changeSubscriptionPlan(
 // Preview proration before confirming upgrade
 export async function previewProration(subscriptionId: string, newPriceId: string) {
   const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-  const prorationDate = Math.floor(Date.now / 1000)
+  const prorationDate = Math.floor(Date.now() / 1000)
 
   const invoice = await stripe.invoices.retrieveUpcoming({
     customer: subscription.customer as string,
@@ -210,12 +210,12 @@ async function hasProcessedEvent(eventId: string): Promise<boolean> {
 }
 
 async function markEventProcessed(eventId: string, type: string) {
-  await db.stripeEvent.create({ data: { id: eventId, type, processedAt: new Date } })
+  await db.stripeEvent.create({ data: { id: eventId, type, processedAt: new Date() } })
 }
 
 export async function POST(req: Request) {
-  const body = await req.text
-  const signature = headers.get("stripe-signature")!
+  const body = await req.text()
+  const signature = headers().get("stripe-signature")!
 
   let event: Stripe.Event
   try {
@@ -361,7 +361,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
 export async function reportUsage(subscriptionItemId: string, quantity: number) {
   await stripe.subscriptionItems.createUsageRecord(subscriptionItemId, {
     quantity,
-    timestamp: Math.floor(Date.now / 1000),
+    timestamp: Math.floor(Date.now() / 1000),
     action: "increment",
   })
 }
@@ -391,8 +391,8 @@ import { NextResponse } from "next/server"
 import { stripe } from "@/lib/stripe"
 import { getAuthUser } from "@/lib/auth"
 
-export async function POST {
-  const user = await getAuthUser
+export async function POST() {
+  const user = await getAuthUser()
   if (!user?.stripeCustomerId) {
     return NextResponse.json({ error: "No billing account" }, { status: 400 })
   }
@@ -450,14 +450,14 @@ export function isSubscriptionActive(user: { subscriptionStatus: string | null, 
   if (user.subscriptionStatus === "active" || user.subscriptionStatus === "trialing") return true
   // Grace period: past_due but not yet expired
   if (user.subscriptionStatus === "past_due" && user.stripeCurrentPeriodEnd) {
-    return user.stripeCurrentPeriodEnd > new Date
+    return user.stripeCurrentPeriodEnd > new Date()
   }
   return false
 }
 
 // Middleware usage
-export async function requireActiveSubscription {
-  const user = await getAuthUser
+export async function requireActiveSubscription() {
+  const user = await getAuthUser()
   if (!isSubscriptionActive(user)) {
     redirect("/billing?reason=subscription_required")
   }

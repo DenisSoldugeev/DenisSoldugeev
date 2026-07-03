@@ -664,7 +664,7 @@ remote_state {
   }
   config = {
     bucket         = "my-org-terraform-state"
-    key            = "${path_relative_to_include}/terraform.tfstate"
+    key            = "${path_relative_to_include()}/terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true
     dynamodb_table = "terraform-locks"
@@ -677,7 +677,7 @@ remote_state {
 ```hcl
 # prod/vpc/terragrunt.hcl
 include "root" {
-  path = find_in_parent_folders
+  path = find_in_parent_folders()
 }
 
 terraform {
@@ -715,7 +715,7 @@ inputs = {
 
 ### One-liner (any tool)
 ```bash
-git clone 
+git clone /claude-skills.git
 cp -r claude-skills/engineering/terraform-patterns ~/.claude/skills/
 ```
 

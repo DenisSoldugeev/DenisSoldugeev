@@ -61,7 +61,7 @@ JARGON_WORDS = {
 # ---------------------------------------------------------------------------
 
 def tokenize(headline: str) -> list:
-    return re.findall(r"\b\w+(?:[-']\w+)*\b", headline.lower)
+    return re.findall(r"\b\w+(?:[-']\w+)*\b", headline.lower())
 
 
 def score_power_words(tokens: list) -> tuple:
@@ -212,20 +212,20 @@ def print_result(result: dict):
 # Main
 # ---------------------------------------------------------------------------
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Headline scorer — rates headlines 0-100 across 6 dimensions."
     )
     parser.add_argument("headline", nargs="?", help="Single headline to score")
     parser.add_argument("--file", help="Text file with one headline per line")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.headline:
         headlines = [args.headline]
     elif args.file:
         with open(args.file, "r", encoding="utf-8") as f:
-            headlines = [line.strip for line in f if line.strip]
+            headlines = [line.strip() for line in f if line.strip()]
     else:
         headlines = DEMO_HEADLINES
         if not args.json:
@@ -253,4 +253,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

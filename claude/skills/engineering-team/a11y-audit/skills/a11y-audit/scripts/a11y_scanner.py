@@ -104,7 +104,7 @@ def check_img_missing_alt(tag, attrs, fp, ln, snip):
 def check_img_empty_alt_informative(tag, attrs, fp, ln, snip):
     if tag == "img" and attrs.get("alt") == "" and attrs.get("src", ""):
         src = attrs.get("src", "")
-        if not any(kw in src.lower for kw in ("spacer", "border", "decorat", "bg")):
+        if not any(kw in src.lower() for kw in ("spacer", "border", "decorat", "bg")):
             return _find("img-alt-empty-informative", "images", "serious",
                           "<img> has empty alt but may be informative",
                           fp, ln, snip, "1.1.1 Non-text Content",
@@ -140,7 +140,7 @@ def check_input_no_aria_label(tag, attrs, fp, ln, snip):
 def check_orphan_label(lines, fp):
     """Labels whose 'for' points to a non-existent id."""
     findings = []
-    ids = set
+    ids = set()
     label_fors = []
     for ln, line in enumerate(lines, 1):
         for m in re.finditer(r'\bid\s*=\s*["\']([^"\']+)["\']', line):
@@ -159,7 +159,7 @@ def check_fieldset_legend(lines, fp):
     """Radio/checkbox groups without fieldset."""
     findings = []
     radio_lines = []
-    has_fieldset = any("fieldset" in l.lower for l in lines)
+    has_fieldset = any("fieldset" in l.lower() for l in lines)
     for ln, line in enumerate(lines, 1):
         if re.search(r'type\s*=\s*["\'](?:radio|checkbox)["\']', line, re.I):
             radio_lines.append((ln, line))
@@ -241,7 +241,7 @@ def check_landmarks(lines, fp):
 
 def check_tabindex_positive(tag, attrs, fp, ln, snip):
     ti = attrs.get("tabindex", "")
-    if isinstance(ti, str) and ti.lstrip("-").isdigit and int(ti) > 0:
+    if isinstance(ti, str) and ti.lstrip("-").isdigit() and int(ti) > 0:
         return _find("keyboard-tabindex-positive", "keyboard", "serious",
                       f"tabindex={ti} creates unexpected tab order",
                       fp, ln, snip, "2.4.3 Focus Order",
@@ -249,7 +249,7 @@ def check_tabindex_positive(tag, attrs, fp, ln, snip):
 
 def check_click_no_keyboard(tag, attrs, fp, ln, snip):
     has_click = "onClick" in attrs or "onclick" in attrs or "@click" in attrs or "on:click" in attrs
-    has_key = any(k for k in attrs if "keydown" in k.lower or "keyup" in k.lower or "keypress" in k.lower)
+    has_key = any(k for k in attrs if "keydown" in k.lower() or "keyup" in k.lower() or "keypress" in k.lower())
     if tag in ("div", "span", "td", "li", "p", "section") and has_click and not has_key:
         if attrs.get("role") not in ("button", "link", "tab", "menuitem"):
             return _find("keyboard-click-no-key", "keyboard", "critical",
@@ -271,7 +271,7 @@ def check_autofocus_misuse(tag, attrs, fp, ln, snip):
 def check_invalid_aria(tag, attrs, fp, ln, snip):
     findings = []
     for key in attrs:
-        if key.startswith("aria-") and key.lower not in VALID_ARIA_ATTRS:
+        if key.startswith("aria-") and key.lower() not in VALID_ARIA_ATTRS:
             findings.append(_find("aria-invalid-attr", "aria", "serious",
                                   f"Invalid ARIA attribute: {key}",
                                   fp, ln, snip, "4.1.2 Name, Role, Value",
@@ -377,9 +377,9 @@ def check_table_headers(lines, fp):
             has_caption = False
             has_aria_label = "aria-label" in line
         if in_table:
-            if "<th" in line.lower:
+            if "<th" in line.lower():
                 has_th = True
-            if "<caption" in line.lower:
+            if "<caption" in line.lower():
                 has_caption = True
             if re.search(r"</table>", line, re.I):
                 if not has_th:
@@ -416,12 +416,12 @@ def check_media_captions_block(lines, fp):
             in_video = True
             video_start = ln
             has_track = False
-            has_controls = "controls" in line.lower
-            has_autoplay = "autoplay" in line.lower
+            has_controls = "controls" in line.lower()
+            has_autoplay = "autoplay" in line.lower()
         if in_video:
             if re.search(r'<track\b[^>]*kind\s*=\s*["\']captions["\']', line, re.I):
                 has_track = True
-            if "controls" in line.lower:
+            if "controls" in line.lower():
                 has_controls = True
             if re.search(r"</video>", line, re.I) or (re.search(r"<video\b", line, re.I) and "/>" in line):
                 if not has_track:
@@ -440,7 +440,7 @@ def check_media_captions_block(lines, fp):
     # Single-line video tags
     for ln, line in enumerate(lines, 1):
         if re.search(r"<audio\b", line, re.I):
-            if "autoplay" in line.lower and "controls" not in line.lower:
+            if "autoplay" in line.lower() and "controls" not in line.lower():
                 findings.append(_find("media-audio-autoplay", "media", "serious",
                                       "<audio> has autoplay without controls",
                                       fp, ln, _snippet(line), "1.4.2 Audio Control",
@@ -478,14 +478,14 @@ def scan_file(filepath: str) -> List[Finding]:
     findings: List[Finding] = []
     try:
         with open(filepath, "r", encoding="utf-8", errors="replace") as f:
-            lines = f.readlines
+            lines = f.readlines()
     except (OSError, IOError):
         return findings
 
     # Tag-level checks
     for ln, line in enumerate(lines, 1):
         for m in TAG_RE.finditer(line):
-            tag = m.group(1).lower
+            tag = m.group(1).lower()
             attr_str = m.group(2)
             attrs = _attrs(attr_str)
             snip = _snippet(line)
@@ -517,7 +517,7 @@ def collect_files(path: str) -> List[str]:
     files = []
     if os.path.isfile(path):
         _, ext = os.path.splitext(path)
-        if ext.lower in SUPPORTED_EXTENSIONS:
+        if ext.lower() in SUPPORTED_EXTENSIONS:
             files.append(path)
         return files
     for root, dirs, filenames in os.walk(path):
@@ -528,9 +528,9 @@ def collect_files(path: str) -> List[str]:
         )]
         for fname in filenames:
             _, ext = os.path.splitext(fname)
-            if ext.lower in SUPPORTED_EXTENSIONS:
+            if ext.lower() in SUPPORTED_EXTENSIONS:
                 files.append(os.path.join(root, fname))
-    files.sort
+    files.sort()
     return files
 
 
@@ -559,7 +559,7 @@ def format_human(findings: List[Finding], files_scanned: int) -> str:
         severity_counts[f.severity] = severity_counts.get(f.severity, 0) + 1
     for sev in ("critical", "serious", "moderate", "minor"):
         if sev in severity_counts:
-            lines.append(f"  {sev.upper:10s}: {severity_counts[sev]}")
+            lines.append(f"  {sev.upper():10s}: {severity_counts[sev]}")
     lines.append("")
 
     # Summary by category
@@ -574,7 +574,7 @@ def format_human(findings: List[Finding], files_scanned: int) -> str:
     # Detailed findings sorted by severity then file
     sorted_findings = sorted(findings, key=lambda f: (SEVERITY_ORDER.get(f.severity, 9), f.file, f.line))
     for i, f in enumerate(sorted_findings, 1):
-        lines.append(f"[{f.severity.upper}] {f.rule_id}")
+        lines.append(f"[{f.severity.upper()}] {f.rule_id}")
         lines.append(f"  File: {f.file}:{f.line}")
         lines.append(f"  WCAG: {f.wcag_criterion}")
         lines.append(f"  Issue: {f.message}")
@@ -607,7 +607,7 @@ def format_json(findings: List[Finding], files_scanned: int) -> str:
 # CLI
 # ---------------------------------------------------------------------------
 
-def build_parser -> argparse.ArgumentParser:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="a11y_scanner",
         description="Scan frontend codebases for WCAG 2.2 accessibility violations.",
@@ -638,9 +638,9 @@ def build_parser -> argparse.ArgumentParser:
     return parser
 
 
-def main:
-    parser = build_parser
-    args = parser.parse_args
+def main():
+    parser = build_parser()
+    args = parser.parse_args()
 
     path = os.path.abspath(args.path)
     if not os.path.exists(path):
@@ -661,7 +661,7 @@ def main:
 
     # Filter by severity if requested
     if args.severity:
-        allowed = {s.strip.lower for s in args.severity.split(",")}
+        allowed = {s.strip().lower() for s in args.severity.split(",")}
         all_findings = [f for f in all_findings if f.severity in allowed]
 
     # Output
@@ -681,4 +681,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

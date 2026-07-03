@@ -7,7 +7,7 @@ description: "Core engineering team roles: architect, frontend/backend/fullstack
 
 Core engineering team roles: architect, frontend/backend/fullstack, QA, DevOps, SecOps, data, ML, code review.
 
-37 skills. Load the specific sub-skill SKILL.md you need on demand.
+38 skills. Load the specific sub-skill SKILL.md you need on demand.
 
 | Skill | Path | Focus |
 |-------|------|-------|
@@ -19,13 +19,14 @@ Core engineering team roles: architect, frontend/backend/fullstack, QA, DevOps, 
 | cloud-security | `cloud-security/SKILL.md` | Use when assessing cloud infrastructure for security misconfigurations, IAM privilege escalation paths, S3 pub… |
 | code-reviewer | `code-reviewer/SKILL.md` | Code review automation for TypeScript, JavaScript, Python, Go, Swift, Kotlin, C#, .NET, Java, C, C++, Rust, Ru… |
 | email-template-builder | `email-template-builder/SKILL.md` | Build complete transactional email systems: React Email templates, provider integration (Resend, Postmark, Sen… |
-| engineering-skills | `engineering-skills/SKILL.md` | 23 engineering agent skills and plugins for Claude Code, Codex, Gemini CLI, Cursor, OpenClaw, and 6 more tools… |
+| engineering-skills | `engineering-skills/SKILL.md` | Index of the engineering-team skills bundle for Claude Code, Codex, Gemini CLI, Cursor, OpenClaw, and 6 more t… |
 | epic-design | `epic-design/SKILL.md` | > |
 | gcp-cloud-architect | `gcp-cloud-architect/SKILL.md` | Design GCP architectures for startups and enterprises. Use when asked to design Google Cloud infrastructure, d… |
-| google-workspace-cli | `google-workspace-cli/skills/google-workspace-cli/SKILL.md` | Google Workspace administration via the gws CLI. Install, authenticate, and automate Gmail, Drive, Sheets, Cal… |
+| google-workspace-cli | `google-workspace-cli/skills/google-workspace-cli/SKILL.md` | Google Workspace administration via the gws CLI (github.com/googleworkspace/cli). Install, authenticate, and a… |
 | incident-commander | `incident-commander/SKILL.md` | Comprehensive incident response framework from detection through resolution and post-incident review. Battle-t… |
 | incident-response | `incident-response/SKILL.md` | Use when a security incident has been detected or declared and needs classification, triage, escalation path d… |
 | ms365-tenant-manager | `ms365-tenant-manager/SKILL.md` | Microsoft 365 tenant administration for Global Administrators. Automate M365 tenant setup, Office 365 admin ta… |
+| named-persona-adversarial-review | `named-persona-adversarial-review/SKILL.md` | Code review through the lens of real engineers' documented philosophies (Torvalds, Thompson, Carmack, Kent Bec… |
 | playwright-pro | `playwright-pro/skills/browserstack/SKILL.md` | >- |
 | red-team | `red-team/SKILL.md` | Use when planning or executing authorized red team engagements, attack path analysis, or offensive security si… |
 | security-pen-testing | `security-pen-testing/SKILL.md` | Use when the user asks to perform security audits, penetration testing, vulnerability scanning, OWASP Top 10 c… |
@@ -39,10 +40,10 @@ Core engineering team roles: architect, frontend/backend/fullstack, QA, DevOps, 
 | senior-frontend | `senior-frontend/SKILL.md` | Frontend development skill for React, Next.js, TypeScript, and Tailwind CSS applications. Use when building Re… |
 | senior-fullstack | `senior-fullstack/SKILL.md` | Fullstack development toolkit with project scaffolding for Next.js, FastAPI, MERN, and Django stacks, code qua… |
 | senior-ml-engineer | `senior-ml-engineer/SKILL.md` | ML engineering skill for productionizing models, building MLOps pipelines, and integrating LLMs. Covers model … |
-| senior-prompt-engineer | `senior-prompt-engineer/SKILL.md` | This skill should be used when the user asks to "optimize prompts", "design prompt templates", "evaluate LLM o… |
+| senior-prompt-engineer | `senior-prompt-engineer/SKILL.md` | Use when the user asks to optimize prompts, design prompt templates, evaluate LLM outputs with an eval set, me… |
 | senior-qa | `senior-qa/SKILL.md` | Generates unit tests, integration tests, and E2E tests for React/Next.js applications. Scans components to cre… |
 | senior-secops | `senior-secops/SKILL.md` | Senior SecOps engineer skill for application security, vulnerability management, compliance verification, and … |
-| senior-security | `senior-security/SKILL.md` | Security engineering toolkit for threat modeling, vulnerability analysis, secure architecture, and penetration… |
+| senior-security | `senior-security/SKILL.md` | Use when the user asks for STRIDE threat modeling, DREAD risk scoring, data-flow-diagram threat analysis, or a… |
 | snowflake-development | `snowflake-development/skills/snowflake-development/SKILL.md` | Use when writing Snowflake SQL, building data pipelines with Dynamic Tables or Streams/Tasks, using Cortex AI … |
 | stripe-integration-expert | `stripe-integration-expert/SKILL.md` | Production-grade Stripe integrations: subscriptions with trials and proration, one-time payments, usage-based … |
 | tdd-guide | `tdd-guide/SKILL.md` | Test-driven development skill for writing unit tests, generating test fixtures and mocks, analyzing coverage g… |

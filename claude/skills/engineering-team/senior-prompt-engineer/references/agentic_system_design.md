@@ -263,7 +263,7 @@ class ToolRegistry:
 
     def get_schemas(self):
         """Get all tool schemas for LLM."""
-        return [t["schema"] for t in self.tools.values]
+        return [t["schema"] for t in self.tools.values()]
 
     def execute(self, name, arguments):
         """Execute a tool by name."""
@@ -282,7 +282,7 @@ def tool_use_agent(query, registry):
         # Call LLM with tools
         response = llm.chat(
             messages=messages,
-            tools=registry.get_schemas,
+            tools=registry.get_schemas(),
             tool_choice="auto"
         )
 
@@ -466,7 +466,7 @@ class AgentMemory:
         self.working_memory.append({
             "role": role,
             "content": content,
-            "timestamp": datetime.now
+            "timestamp": datetime.now()
         })
 
         # Trim if too long
@@ -586,10 +586,10 @@ def self_ask_agent(query, tools):
         response = llm.generate(prompt)
 
         if response.startswith("Final Answer:"):
-            return response.replace("Final Answer:", "").strip
+            return response.replace("Final Answer:", "").strip()
 
         # Answer follow-up question
-        follow_up = response.replace("Follow-up:", "").strip
+        follow_up = response.replace("Follow-up:", "").strip()
         answer = simple_qa(follow_up, tools)
         context.append({"q": follow_up, "a": answer})
 ```
@@ -604,10 +604,10 @@ class ExpertRouter:
 
     def __init__(self):
         self.experts = {
-            "code": CodeAgent,
-            "math": MathAgent,
-            "research": ResearchAgent,
-            "general": GeneralAgent
+            "code": CodeAgent(),
+            "math": MathAgent(),
+            "research": ResearchAgent(),
+            "general": GeneralAgent()
         }
 
     def route(self, query):
@@ -622,7 +622,7 @@ class ExpertRouter:
         Query: {query}
         Category:
         """
-        category = llm.generate(prompt).strip.lower
+        category = llm.generate(prompt).strip().lower()
         return self.experts.get(category, self.experts["general"])
 
     def process(self, query):

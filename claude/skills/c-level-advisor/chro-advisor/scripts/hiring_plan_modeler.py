@@ -63,7 +63,7 @@ class HiringPlan:
 
 def quarter_to_sortkey(q: str) -> tuple[int, int]:
     """Parse 'Q2-2025' → (2025, 2)"""
-    parts = q.upper.split("-")
+    parts = q.upper().split("-")
     if len(parts) == 2:
         q_num = int(parts[0].replace("Q", ""))
         year = int(parts[1])
@@ -196,9 +196,9 @@ def assess_risks(plan: HiringPlan, totals: dict) -> list[dict]:
     # High concentration in one quarter
     quarters = get_quarters(plan.hires)
     q_counts = {q: sum(1 for h in plan.hires if h.quarter == q) for q in quarters}
-    max_q = max(q_counts.values) if q_counts else 0
+    max_q = max(q_counts.values()) if q_counts else 0
     if max_q > len(plan.hires) * 0.5 and max_q > 4:
-        heavy_q = [q for q, c in q_counts.items if c == max_q][0]
+        heavy_q = [q for q, c in q_counts.items() if c == max_q][0]
         risks.append({
             "severity": "MEDIUM",
             "category": "Hiring Execution",
@@ -279,7 +279,7 @@ def print_report(plan: HiringPlan):
 
     print(SEP)
     print(f"  HIRING PLAN: {plan.company}")
-    print(f"  Period: {plan.plan_period}  |  Generated: {date.today.isoformat}")
+    print(f"  Period: {plan.plan_period}  |  Generated: {date.today().isoformat()}")
     print(SEP)
 
     totals = compute_totals(plan)
@@ -297,7 +297,7 @@ def print_report(plan: HiringPlan):
     print(f"  Target revenue:          {fmt(plan.target_revenue):>12}")
     print(f"  Revenue/employee now:    {fmt(int(totals['revenue_per_employee_current'])):>12}")
     print(f"  Revenue/employee target: {fmt(int(totals['revenue_per_employee_target'])):>12}")
-    print
+    print()
     print(f"  Total annual comp added: {fmt(totals['total_annual_comp_added']):>12}")
     print(f"  Total first-year cost:   {fmt(totals['total_first_year_cost']):>12}")
     print(f"  Fully loaded (w/ ramp):  {fmt(totals['total_fully_loaded_first_year']):>12}")
@@ -309,7 +309,7 @@ def print_report(plan: HiringPlan):
     print(sep)
     print(f"  {'Quarter':<10} {'New Hires':>10} {'HC (EOP)':>10} {'Comp Added':>14} {'1yr Cost':>14} {'Recruiter $':>12}")
     print(f"  {'-'*10} {'-'*10} {'-'*10} {'-'*14} {'-'*14} {'-'*12}")
-    for q, data in q_summary.items:
+    for q, data in q_summary.items():
         print(f"  {q:<10} {data['new_hires']:>10} {data['headcount_eop']:>10} "
               f"{fmt(data['total_annual_comp_added']):>14} "
               f"{fmt(data['total_first_year_cost']):>14} "
@@ -320,7 +320,7 @@ def print_report(plan: HiringPlan):
     print(sep)
     print(f"  {'Function':<18} {'Hires':>7} {'Annual Comp':>14} {'1yr Cost':>14}")
     print(f"  {'-'*18} {'-'*7} {'-'*14} {'-'*14}")
-    for fn, data in sorted(fn_summary.items, key=lambda x: -x[1]["count"]):
+    for fn, data in sorted(fn_summary.items(), key=lambda x: -x[1]["count"]):
         print(f"  {fn:<18} {data['count']:>7} {fmt(data['total_comp']):>14} {fmt(data['total_first_year']):>14}")
 
     # Hire detail
@@ -346,7 +346,7 @@ def print_report(plan: HiringPlan):
         print(f"\n  [{marker}] {risk['category']}")
         # Wrap finding
         finding = risk["finding"]
-        words = finding.split
+        words = finding.split()
         line = "  Finding: "
         for w in words:
             if len(line) + len(w) + 1 > WIDTH - 2:
@@ -354,10 +354,10 @@ def print_report(plan: HiringPlan):
                 line = "           " + w + " "
             else:
                 line += w + " "
-        if line.strip:
+        if line.strip():
             print(line)
         reco = risk["recommendation"]
-        words = reco.split
+        words = reco.split()
         line = "  Action:  "
         for w in words:
             if len(line) + len(w) + 1 > WIDTH - 2:
@@ -365,7 +365,7 @@ def print_report(plan: HiringPlan):
                 line = "           " + w + " "
             else:
                 line += w + " "
-        if line.strip:
+        if line.strip():
             print(line)
 
     print(f"\n{SEP}\n")
@@ -373,7 +373,7 @@ def print_report(plan: HiringPlan):
 
 def export_csv(plan: HiringPlan) -> str:
     """Return CSV of hire detail."""
-    output = io.StringIO
+    output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow(["Role", "Function", "Level", "Quarter", "Priority",
                      "Base Salary", "Bonus Target", "Equity Annual", "Benefits",
@@ -385,14 +385,14 @@ def export_csv(plan: HiringPlan) -> str:
                          h.base_salary, c["target_bonus"], h.equity_annual_usd, h.benefits_annual,
                          c["total_comp"], c["recruiter_fee"], c["overhead"], c["first_year_total"],
                          h.ramp_months, h.open_to_internal, h.business_case])
-    return output.getvalue
+    return output.getvalue()
 
 
 # ---------------------------------------------------------------------------
 # Sample data
 # ---------------------------------------------------------------------------
 
-def build_sample_plan -> HiringPlan:
+def build_sample_plan() -> HiringPlan:
     """Sample Series A → B hiring plan."""
     plan = HiringPlan(
         company="AcmeTech (Series A)",
@@ -534,7 +534,7 @@ def load_plan_from_json(path: str) -> HiringPlan:
     return plan
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Hiring Plan Modeler — build headcount plans with cost projections",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -549,12 +549,12 @@ Examples:
     parser.add_argument("--config", help="Path to JSON plan file")
     parser.add_argument("--export-csv", action="store_true", help="Export hire detail as CSV")
     parser.add_argument("--export-json", action="store_true", help="Export sample plan as JSON template")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.config:
         plan = load_plan_from_json(args.config)
     else:
-        plan = build_sample_plan
+        plan = build_sample_plan()
 
     if args.export_json:
         data = asdict(plan)
@@ -569,4 +569,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

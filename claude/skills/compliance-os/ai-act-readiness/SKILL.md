@@ -68,16 +68,16 @@ The EU AI Act compliance operator pressure-tests any AI system before EU deploym
 
 ```bash
 # 1. Risk classification
-python ../../ra-qm-team/skills/eu-ai-act-specialist/scripts/ai_system_risk_classifier.py systems.json
+python ra-qm-team/skills/eu-ai-act-specialist/scripts/ai_system_risk_classifier.py systems.json
 
 # 2. If high-risk: conformity assessment
-python ../../ra-qm-team/skills/eu-ai-act-specialist/scripts/conformity_assessment_planner.py system.json
+python ra-qm-team/skills/eu-ai-act-specialist/scripts/conformity_assessment_planner.py system.json
 
 # 3. Per-role obligation matrix
-python ../../ra-qm-team/skills/eu-ai-act-specialist/scripts/ai_act_obligation_tracker.py roles.json
+python ra-qm-team/skills/eu-ai-act-specialist/scripts/ai_act_obligation_tracker.py roles.json
 
 # 4. Cross-framework reuse (ISO 42001 etc.)
-python ../../skills/compliance-os/scripts/cross_framework_mapper.py program.json
+python ../../compliance-os/scripts/cross_framework_mapper.py program.json
 ```
 
 ## Output Format
@@ -141,8 +141,8 @@ python ../../skills/compliance-os/scripts/cross_framework_mapper.py program.json
 ## Related
 
 - Agent: [`ds-ai-act-compliance`](../../agents/ds-ai-act-compliance.md)
-- Skill: [`eu-ai-act-specialist`](../../ra-qm-team/compliance-team-eu-ai-act/skills/eu-ai-act-specialist/SKILL.md)
-- Adjacent: `../../skills/compliance-os/`, `../aims-audit/`, `../compliance-readiness/`, `../../../ra-qm-team/skills/gdpr-dsgvo-expert/`
+- Skill: [`eu-ai-act-specialist`](../../../ra-qm-team/skills/eu-ai-act-specialist/SKILL.md)
+- Adjacent: `../../compliance-os/`, `../aims-audit/`, `../compliance-readiness/`, `../../../ra-qm-team/skills/gdpr-dsgvo-expert/`
 
 ---
 

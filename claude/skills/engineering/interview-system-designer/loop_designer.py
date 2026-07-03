@@ -25,9 +25,9 @@ class InterviewLoopDesigner:
     """Designs comprehensive interview loops based on role requirements."""
     
     def __init__(self):
-        self.competency_frameworks = self._init_competency_frameworks
-        self.role_templates = self._init_role_templates
-        self.interviewer_skills = self._init_interviewer_skills
+        self.competency_frameworks = self._init_competency_frameworks()
+        self.role_templates = self._init_role_templates()
+        self.interviewer_skills = self._init_interviewer_skills()
         
     def _init_competency_frameworks(self) -> Dict[str, Dict]:
         """Initialize competency frameworks for different roles."""
@@ -242,8 +242,8 @@ class InterviewLoopDesigner:
         """Generate a complete interview loop for the specified role and level."""
         
         # Normalize inputs
-        role_key = role.lower.replace(" ", "_").replace("-", "_")
-        level_key = level.lower
+        role_key = role.lower().replace(" ", "_").replace("-", "_")
+        level_key = level.lower()
         
         # Get role template and competency requirements
         if role_key not in self.competency_frameworks:
@@ -265,8 +265,8 @@ class InterviewLoopDesigner:
             "role": role,
             "level": level,
             "team": team,
-            "generated_at": datetime.now.isoformat,
-            "total_duration_minutes": sum(round_info["duration_minutes"] for round_info in rounds.values),
+            "generated_at": datetime.now().isoformat(),
+            "total_duration_minutes": sum(round_info["duration_minutes"] for round_info in rounds.values()),
             "total_rounds": len(rounds),
             "rounds": rounds,
             "suggested_schedule": schedule,
@@ -308,7 +308,7 @@ class InterviewLoopDesigner:
     
     def _find_closest_level(self, role_key: str, level_key: str) -> str:
         """Find the closest matching level for the role."""
-        available_levels = list(self.competency_frameworks[role_key].keys)
+        available_levels = list(self.competency_frameworks[role_key].keys())
         
         level_mappings = {
             "entry": "junior",
@@ -339,8 +339,8 @@ class InterviewLoopDesigner:
         rounds = {}
         
         # Determine which rounds to include
-        core_rounds = role_template["core_rounds"].copy
-        optional_rounds = role_template["optional_rounds"].copy
+        core_rounds = role_template["core_rounds"].copy()
+        optional_rounds = role_template["optional_rounds"].copy()
         
         # Add optional rounds based on level
         if level_key in ["senior", "staff", "principal"]:
@@ -356,11 +356,11 @@ class InterviewLoopDesigner:
                 core_rounds.append("domain_expertise")
         
         # Define round details
-        round_definitions = self._get_round_definitions
+        round_definitions = self._get_round_definitions()
         
         for i, round_type in enumerate(core_rounds, 1):
             if round_type in round_definitions:
-                round_def = round_definitions[round_type].copy
+                round_def = round_definitions[round_type].copy()
                 round_def["order"] = i
                 round_def["focus_areas"] = self._customize_focus_areas(round_type, competency_req, custom_competencies)
                 rounds[f"round_{i}_{round_type}"] = round_def
@@ -473,7 +473,7 @@ class InterviewLoopDesigner:
     
     def _create_schedule(self, rounds: Dict[str, Dict]) -> Dict[str, Any]:
         """Create a suggested interview schedule."""
-        sorted_rounds = sorted(rounds.items, key=lambda x: x[1]["order"])
+        sorted_rounds = sorted(rounds.items(), key=lambda x: x[1]["order"])
         
         # Calculate optimal scheduling
         total_duration = sum(round_info["duration_minutes"] for _, round_info in sorted_rounds)
@@ -655,11 +655,11 @@ class InterviewLoopDesigner:
         """Define interviewer skill requirements for each round."""
         requirements = {}
         
-        for round_name, round_info in rounds.items:
+        for round_name, round_info in rounds.items():
             round_type = round_name.split("_", 2)[-1]  # Extract round type
             
             if round_type in self.interviewer_skills:
-                skill_req = self.interviewer_skills[round_type].copy
+                skill_req = self.interviewer_skills[round_type].copy()
                 skill_req["suggested_interviewers"] = self._suggest_interviewer_profiles(round_type)
                 requirements[round_name] = skill_req
             else:
@@ -739,7 +739,7 @@ def format_human_readable(loop_data: Dict[str, Any]) -> str:
     output = []
     
     # Header
-    output.append(f"Interview Loop Design for {loop_data['role']} ({loop_data['level'].title} Level)")
+    output.append(f"Interview Loop Design for {loop_data['role']} ({loop_data['level'].title()} Level)")
     output.append("=" * 60)
     
     if loop_data.get('team'):
@@ -754,11 +754,11 @@ def format_human_readable(loop_data: Dict[str, Any]) -> str:
     output.append("INTERVIEW ROUNDS")
     output.append("-" * 40)
     
-    sorted_rounds = sorted(loop_data['rounds'].items, key=lambda x: x[1]['order'])
+    sorted_rounds = sorted(loop_data['rounds'].items(), key=lambda x: x[1]['order'])
     for round_name, round_info in sorted_rounds:
         output.append(f"\nRound {round_info['order']}: {round_info['name']}")
         output.append(f"Duration: {round_info['duration_minutes']} minutes")
-        output.append(f"Format: {round_info['format'].replace('_', ' ').title}")
+        output.append(f"Format: {round_info['format'].replace('_', ' ').title()}")
         
         output.append("Objectives:")
         for obj in round_info['objectives']:
@@ -766,35 +766,35 @@ def format_human_readable(loop_data: Dict[str, Any]) -> str:
         
         output.append("Focus Areas:")
         for area in round_info['focus_areas']:
-            output.append(f"  • {area.replace('_', ' ').title}")
+            output.append(f"  • {area.replace('_', ' ').title()}")
     
     # Suggested Schedule
     output.append("\nSUGGESTED SCHEDULE")
     output.append("-" * 40)
     
     schedule = loop_data['suggested_schedule']
-    output.append(f"Schedule Type: {schedule['type'].replace('_', ' ').title}")
+    output.append(f"Schedule Type: {schedule['type'].replace('_', ' ').title()}")
     
-    for day_name, day_info in schedule['day_structure'].items:
-        output.append(f"\n{day_name.replace('_', ' ').title}:")
+    for day_name, day_info in schedule['day_structure'].items():
+        output.append(f"\n{day_name.replace('_', ' ').title()}:")
         output.append(f"Time: {day_info['start_time']} - {day_info['end_time']}")
         
         for item in day_info['rounds']:
             if item['type'] == 'interview':
                 output.append(f"  {item['start_time']}-{item['end_time']}: {item['title']} ({item['duration_minutes']}min)")
             else:
-                output.append(f"  {item['start_time']}-{item['end_time']}: {item['type'].title} ({item['duration_minutes']}min)")
+                output.append(f"  {item['start_time']}-{item['end_time']}: {item['type'].title()} ({item['duration_minutes']}min)")
     
     # Interviewer Requirements
     output.append("\nINTERVIEWER REQUIREMENTS")
     output.append("-" * 40)
     
-    for round_name, requirements in loop_data['interviewer_requirements'].items:
-        round_display = round_name.split("_", 2)[-1].replace("_", " ").title
+    for round_name, requirements in loop_data['interviewer_requirements'].items():
+        round_display = round_name.split("_", 2)[-1].replace("_", " ").title()
         output.append(f"\n{round_display}:")
         output.append(f"Required Skills: {', '.join(requirements['required_skills'])}")
         output.append(f"Suggested Interviewers: {', '.join(requirements['suggested_interviewers'])}")
-        output.append(f"Calibration Level: {requirements['calibration_level'].title}")
+        output.append(f"Calibration Level: {requirements['calibration_level'].title()}")
     
     # Scorecard Overview
     output.append("\nSCORECARD TEMPLATE")
@@ -802,12 +802,12 @@ def format_human_readable(loop_data: Dict[str, Any]) -> str:
     
     scorecard = loop_data['scorecard_template']
     output.append("Scoring Scale:")
-    for score, description in scorecard['scoring_scale'].items:
+    for score, description in scorecard['scoring_scale'].items():
         output.append(f"  {score}: {description}")
     
     output.append("\nEvaluation Dimensions:")
     for dim in scorecard['dimensions']:
-        output.append(f"  • {dim['dimension'].replace('_', ' ').title} (Weight: {dim['weight']})")
+        output.append(f"  • {dim['dimension'].replace('_', ' ').title()} (Weight: {dim['weight']})")
     
     # Calibration Notes
     output.append("\nCALIBRATION NOTES")
@@ -823,7 +823,7 @@ def format_human_readable(loop_data: Dict[str, Any]) -> str:
     return "\n".join(output)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Generate calibrated interview loops for specific roles and levels")
     parser.add_argument("--role", type=str, help="Job role title (e.g., 'Senior Software Engineer')")
     parser.add_argument("--level", type=str, help="Experience level (junior, mid, senior, staff, principal)")
@@ -833,9 +833,9 @@ def main:
     parser.add_argument("--output", type=str, help="Output directory or file path")
     parser.add_argument("--format", choices=["json", "text", "both"], default="both", help="Output format")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
-    designer = InterviewLoopDesigner
+    designer = InterviewLoopDesigner()
     
     # Handle input
     if args.input:
@@ -867,7 +867,7 @@ def main:
         if args.output:
             output_path = args.output
             if os.path.isdir(output_path):
-                safe_role = "".join(c for c in role.lower if c.isalnum or c in (' ', '-', '_')).replace(' ', '_')
+                safe_role = "".join(c for c in role.lower() if c.isalnum() or c in (' ', '-', '_')).replace(' ', '_')
                 base_filename = f"{safe_role}_{level}_interview_loop"
                 json_path = os.path.join(output_path, f"{base_filename}.json")
                 text_path = os.path.join(output_path, f"{base_filename}.txt")
@@ -876,7 +876,7 @@ def main:
                 json_path = output_path if output_path.endswith('.json') else f"{output_path}.json"
                 text_path = output_path.replace('.json', '.txt') if output_path.endswith('.json') else f"{output_path}.txt"
         else:
-            safe_role = "".join(c for c in role.lower if c.isalnum or c in (' ', '-', '_')).replace(' ', '_')
+            safe_role = "".join(c for c in role.lower() if c.isalnum() or c in (' ', '-', '_')).replace(' ', '_')
             base_filename = f"{safe_role}_{level}_interview_loop"
             json_path = f"{base_filename}.json"
             text_path = f"{base_filename}.txt"
@@ -894,10 +894,10 @@ def main:
         
         # Always print summary to stdout
         print("\nInterview Loop Summary:")
-        print(f"Role: {loop_data['role']} ({loop_data['level'].title})")
+        print(f"Role: {loop_data['role']} ({loop_data['level'].title()})")
         print(f"Total Duration: {loop_data['total_duration_minutes']} minutes")
         print(f"Number of Rounds: {loop_data['total_rounds']}")
-        print(f"Schedule Type: {loop_data['suggested_schedule']['type'].replace('_', ' ').title}")
+        print(f"Schedule Type: {loop_data['suggested_schedule']['type'].replace('_', ' ').title()}")
         
     except Exception as e:
         print(f"Error generating interview loop: {e}")
@@ -905,4 +905,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

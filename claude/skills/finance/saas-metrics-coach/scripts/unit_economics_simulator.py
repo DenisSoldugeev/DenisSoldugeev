@@ -187,7 +187,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--json", action="store_true", help="Output JSON format")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     results = simulate(
         mrr=args.mrr,

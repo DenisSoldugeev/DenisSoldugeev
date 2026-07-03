@@ -37,7 +37,7 @@ Detection methods:
 | SEC-10 | Sessions invalidated on logout (server-side) | manual | high | all |
 | SEC-11 | CSP headers configured | auto | high | all |
 | SEC-12 | JWT not using alg:none or weak secrets | auto | critical | all |
-| SEC-13 | No eval or dangerouslySetInnerHTML without sanitization | auto | high | js/ts |
+| SEC-13 | No eval() or dangerouslySetInnerHTML without sanitization | auto | high | js/ts |
 | SEC-14 | No sensitive data in URL parameters or logs | auto | high | all |
 | SEC-15 | Cookie security flags set (HttpOnly, Secure, SameSite) | auto | high | all |
 | SEC-16 | File upload validates type, size, no path traversal | auto | high | all |
@@ -320,8 +320,8 @@ full-page crashes.
 
 ### CODE-02: Error handling on async operations
 
-Search for async functions and .then chains. Check if they have
-corresponding try/catch or .catch handlers.
+Search for async functions and .then() chains. Check if they have
+corresponding try/catch or .catch() handlers.
 
 Remediation: Wrap every async operation in try/catch. Log errors
 and show appropriate UI feedback.

@@ -8,6 +8,8 @@ formatting, and compliance with tier-specific requirements.
 
 Usage:
     python skill_validator.py <skill_path> [--tier TIER] [--json] [--verbose]
+
+Author: Claude Skills Engineering Team
 Version: 1.0.0
 Dependencies: Python Standard Library Only
 """
@@ -27,12 +29,12 @@ except ImportError:
         @staticmethod
         def safe_load(text):
             result = {}
-            for line in text.strip.splitlines:
+            for line in text.strip().splitlines():
                 if ':' in line:
                     key, _, value = line.partition(':')
-                    result[key.strip] = value.strip
+                    result[key.strip()] = value.strip()
             return result if result else None
-    yaml = _YamlStub
+    yaml = _YamlStub()
 import datetime as dt
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
@@ -48,7 +50,7 @@ class ValidationReport:
     
     def __init__(self, skill_path: str):
         self.skill_path = skill_path
-        self.timestamp = dt.datetime.now(dt.timezone.utc).isoformat.replace("+00:00", "Z")
+        self.timestamp = dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z")
         self.checks = {}
         self.warnings = []
         self.errors = []
@@ -82,7 +84,7 @@ class ValidationReport:
             self.overall_score = 0.0
             return
             
-        total_score = sum(check["score"] for check in self.checks.values)
+        total_score = sum(check["score"] for check in self.checks.values())
         max_score = len(self.checks) * 1.0
         self.overall_score = (total_score / max_score) * 100 if max_score > 0 else 0.0
         
@@ -139,7 +141,7 @@ class SkillValidator:
     ]
     
     def __init__(self, skill_path: str, target_tier: Optional[str] = None, verbose: bool = False):
-        self.skill_path = Path(skill_path).resolve
+        self.skill_path = Path(skill_path).resolve()
         self.target_tier = target_tier
         self.verbose = verbose
         self.report = ValidationReport(str(self.skill_path))
@@ -155,24 +157,24 @@ class SkillValidator:
             self.log_verbose(f"Starting validation of {self.skill_path}")
             
             # Check if path exists
-            if not self.skill_path.exists:
+            if not self.skill_path.exists():
                 self.report.add_error(f"Skill path does not exist: {self.skill_path}")
                 return self.report
                 
-            if not self.skill_path.is_dir:
+            if not self.skill_path.is_dir():
                 self.report.add_error(f"Skill path is not a directory: {self.skill_path}")
                 return self.report
                 
             # Run all validation checks
-            self._validate_required_files
-            self._validate_skill_md
-            self._validate_readme
-            self._validate_directory_structure
-            self._validate_python_scripts
-            self._validate_tier_compliance
+            self._validate_required_files()
+            self._validate_skill_md()
+            self._validate_readme()
+            self._validate_directory_structure()
+            self._validate_python_scripts()
+            self._validate_tier_compliance()
             
             # Calculate overall score
-            self.report.calculate_overall_score
+            self.report.calculate_overall_score()
             
             self.log_verbose(f"Validation completed. Score: {self.report.overall_score:.1f}")
             
@@ -187,7 +189,7 @@ class SkillValidator:
         
         # Check SKILL.md
         skill_md_path = self.skill_path / "SKILL.md"
-        if skill_md_path.exists:
+        if skill_md_path.exists():
             self.report.add_check("skill_md_exists", True, "SKILL.md found", 1.0)
         else:
             self.report.add_check("skill_md_exists", False, "SKILL.md missing", 0.0)
@@ -195,7 +197,7 @@ class SkillValidator:
             
         # Check README.md
         readme_path = self.skill_path / "README.md"
-        if readme_path.exists:
+        if readme_path.exists():
             self.report.add_check("readme_exists", True, "README.md found", 1.0)
         else:
             self.report.add_check("readme_exists", False, "README.md missing", 0.0)
@@ -207,13 +209,13 @@ class SkillValidator:
         self.log_verbose("Validating SKILL.md...")
         
         skill_md_path = self.skill_path / "SKILL.md"
-        if not skill_md_path.exists:
+        if not skill_md_path.exists():
             return
             
         try:
             content = skill_md_path.read_text(encoding='utf-8')
             lines = content.split('\n')
-            line_count = len([line for line in lines if line.strip])
+            line_count = len([line for line in lines if line.strip()])
             
             # Check line count
             min_lines = self._get_tier_requirement("min_skill_md_lines", 100)
@@ -248,7 +250,7 @@ class SkillValidator:
                                          "Frontmatter closing marker not found", 0.0)
                     return
                     
-                frontmatter_text = content[3:end_marker].strip
+                frontmatter_text = content[3:end_marker].strip()
                 frontmatter = yaml.safe_load(frontmatter_text)
                 
                 if not isinstance(frontmatter, dict):
@@ -303,14 +305,14 @@ class SkillValidator:
         self.log_verbose("Validating README.md...")
         
         readme_path = self.skill_path / "README.md"
-        if not readme_path.exists:
+        if not readme_path.exists():
             return
             
         try:
             content = readme_path.read_text(encoding='utf-8')
             
             # Check minimum content length
-            if len(content.strip) >= 200:
+            if len(content.strip()) >= 200:
                 self.report.add_check("readme_substantial", True,
                                      "README.md has substantial content", 1.0)
             else:
@@ -333,7 +335,7 @@ class SkillValidator:
         missing_required = []
         for dir_name in required_dirs:
             dir_path = self.skill_path / dir_name
-            if dir_path.exists and dir_path.is_dir:
+            if dir_path.exists() and dir_path.is_dir():
                 self.report.add_check(f"dir_{dir_name}_exists", True,
                                      f"{dir_name}/ directory found", 1.0)
             else:
@@ -348,7 +350,7 @@ class SkillValidator:
         missing_optional = []
         for dir_name in optional_dirs:
             dir_path = self.skill_path / dir_name
-            if not (dir_path.exists and dir_path.is_dir):
+            if not (dir_path.exists() and dir_path.is_dir()):
                 missing_optional.append(dir_name)
                 
         if missing_optional:
@@ -359,7 +361,7 @@ class SkillValidator:
         self.log_verbose("Validating Python scripts...")
         
         scripts_dir = self.skill_path / "scripts"
-        if not scripts_dir.exists:
+        if not scripts_dir.exists():
             return
             
         python_files = list(scripts_dir.glob("*.py"))
@@ -388,7 +390,7 @@ class SkillValidator:
             
             # Count lines of code (excluding empty lines and comments)
             lines = content.split('\n')
-            loc = len([line for line in lines if line.strip and not line.strip.startswith('#')])
+            loc = len([line for line in lines if line.strip() and not line.strip().startswith('#')])
             
             # Check script size against tier requirements
             size_range = self._get_tier_requirement("script_size_range", (100, 1000))
@@ -555,27 +557,27 @@ class ReportFormatter:
         lines.append("")
         
         # Group checks by category
-        structure_checks = {k: v for k, v in report.checks.items if k.startswith(('skill_md', 'readme', 'dir_'))}
-        script_checks = {k: v for k, v in report.checks.items if k.startswith('script_')}
-        other_checks = {k: v for k, v in report.checks.items if k not in structure_checks and k not in script_checks}
+        structure_checks = {k: v for k, v in report.checks.items() if k.startswith(('skill_md', 'readme', 'dir_'))}
+        script_checks = {k: v for k, v in report.checks.items() if k.startswith('script_')}
+        other_checks = {k: v for k, v in report.checks.items() if k not in structure_checks and k not in script_checks}
         
         if structure_checks:
             lines.append("STRUCTURE VALIDATION:")
-            for check_name, result in structure_checks.items:
+            for check_name, result in structure_checks.items():
                 status = "✓ PASS" if result["passed"] else "✗ FAIL"
                 lines.append(f"  {status}: {result['message']}")
             lines.append("")
             
         if script_checks:
             lines.append("SCRIPT VALIDATION:")
-            for check_name, result in script_checks.items:
+            for check_name, result in script_checks.items():
                 status = "✓ PASS" if result["passed"] else "✗ FAIL"
                 lines.append(f"  {status}: {result['message']}")
             lines.append("")
             
         if other_checks:
             lines.append("OTHER CHECKS:")
-            for check_name, result in other_checks.items:
+            for check_name, result in other_checks.items():
                 status = "✓ PASS" if result["passed"] else "✗ FAIL"
                 lines.append(f"  {status}: {result['message']}")
             lines.append("")
@@ -601,7 +603,7 @@ class ReportFormatter:
         return "\n".join(lines)
 
 
-def main:
+def main():
     """Main entry point"""
     parser = argparse.ArgumentParser(
         description="Validate skill directories against quality standards",
@@ -631,12 +633,12 @@ Tier Options:
                        action="store_true",
                        help="Enable verbose logging")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Create validator and run validation
         validator = SkillValidator(args.skill_path, args.tier, args.verbose)
-        report = validator.validate_skill_structure
+        report = validator.validate_skill_structure()
         
         # Format and output report
         if args.json:
@@ -657,9 +659,9 @@ Tier Options:
         print(f"Validation failed: {str(e)}", file=sys.stderr)
         if args.verbose:
             import traceback
-            traceback.print_exc
+            traceback.print_exc()
         sys.exit(1)
 
 
 if __name__ == "__main__":
-    main
+    main()

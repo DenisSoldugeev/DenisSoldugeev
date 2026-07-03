@@ -43,7 +43,7 @@ ACTION_FLOWS = {
             "Login wall check (halt if detected)",
             "Notebook discovery (find by name or navigate URL)",
             "Open notebook → screenshot",
-            "Locate chat input via find",
+            "Locate chat input via find()",
             "Type question (user's natural phrasing)",
             "Submit (Enter or send button)",
             "Wait 3-5s (synchronous; chat is fast)",
@@ -155,7 +155,7 @@ def route(action: str, **params) -> Dict[str, Any]:
     if action not in VALID_ACTIONS:
         raise ValueError(f"Invalid action '{action}'. Pick from: {VALID_ACTIONS}")
 
-    flow_template = ACTION_FLOWS[action].copy
+    flow_template = ACTION_FLOWS[action].copy()
     flow_template["action"] = action
     flow_template["parameters"] = params
 
@@ -198,7 +198,7 @@ def render_human(result: Dict[str, Any]) -> str:
     out.append(f"Action: {result['action']}")
     out.append("")
     out.append("Parameters:")
-    for k, v in result.get("parameters", {}).items:
+    for k, v in result.get("parameters", {}).items():
         if v:
             display = v if len(str(v)) < 80 else str(v)[:77] + "..."
             out.append(f"  {k}: {display}")
@@ -259,7 +259,7 @@ def main(argv: List[str]) -> int:
         except ValueError as e:
             print(f"error: {e}", file=sys.stderr); return 2
     else:
-        parser.print_help; return 0
+        parser.print_help(); return 0
 
     if args.output == "json":
         print(json.dumps(result, indent=2))

@@ -1,6 +1,6 @@
 ---
 name: ds-ceo-advisor
-description: Strategic leadership advisor for CEOs covering vision, strategy, board management, investor relations, and organizational culture
+description: Strategic leadership advisor for CEOs covering vision, strategy, board management, investor relations, and organizational culture. Use when a founder or CEO faces a company-level strategic decision — e.g., preparing the narrative and metrics for a quarterly board meeting, or stress-testing a pivot or market-expansion decision against vision, runway, and stakeholder expectations.
 skills: c-level-advisor/skills/ceo-advisor
 domain: c-level
 model: opus
@@ -348,7 +348,7 @@ esac
 
 ## References
 
-- **Skill Documentation:** [../../c-level-advisor/skills/ceo-advisor/SKILL.md](../../skills/c-level-advisor/ceo-advisor/SKILL.md)
+- **Skill Documentation:** [../../c-level-advisor/skills/ceo-advisor/SKILL.md](../../c-level-advisor/skills/ceo-advisor/SKILL.md)
 - **C-Level Domain Guide:** [../../c-level-advisor/CLAUDE.md](../../c-level-advisor/CLAUDE.md)
 - **Agent Development Guide:** [../CLAUDE.md](../CLAUDE.md)
 

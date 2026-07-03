@@ -1,6 +1,6 @@
 ---
 name: "ciso-review"
-description: "/ds:ciso-review <plan> — Risk-paranoid interrogation of any plan that touches data, compliance, or production access."
+description: "/ds:ciso-review <plan> — Risk-paranoid interrogation of any plan that touches data, compliance, or production access. Use when launching features that handle customer data, before a SOC 2 / ISO audit, or after any incident or near-miss."
 ---
 
 # /ds:ciso-review — CISO Forcing Questions
@@ -53,8 +53,8 @@ The risk-paranoid threat-modeler. Six questions before any production change tha
 ## Workflow
 
 ```bash
-python ../../../skills/ciso-advisor/scripts/risk_quantifier.py
-python ../../../skills/ciso-advisor/scripts/compliance_tracker.py
+python ../../../ciso-advisor/scripts/risk_quantifier.py
+python ../../../ciso-advisor/scripts/compliance_tracker.py
 ```
 
 ## Output Format

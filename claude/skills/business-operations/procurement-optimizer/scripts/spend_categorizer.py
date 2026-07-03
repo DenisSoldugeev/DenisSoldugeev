@@ -161,9 +161,9 @@ class LineItem:
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> "LineItem":
         return cls(
-            supplier=str(d.get("supplier", "")).strip,
-            description=str(d.get("description", "")).strip,
-            category_hint=str(d.get("category_hint", "")).strip,
+            supplier=str(d.get("supplier", "")).strip(),
+            description=str(d.get("description", "")).strip(),
+            category_hint=str(d.get("category_hint", "")).strip(),
             annual_spend=float(d.get("annual_spend", 0.0)),
             frequency=str(d.get("frequency", "annual")),
             currency=str(d.get("currency", "USD")),
@@ -187,7 +187,7 @@ class Categorized:
 
 def categorize(item: LineItem, profile: str) -> Categorized:
     """Categorize one line item using keyword match + profile priority for ties."""
-    haystack = " ".join([item.supplier, item.description, item.category_hint]).lower
+    haystack = " ".join([item.supplier, item.description, item.category_hint]).lower()
 
     matches: list[tuple[str, str, str]] = []
     for keywords, cat in CATEGORY_MAP:
@@ -224,13 +224,13 @@ def aggregate_by_class(items: list[Categorized]) -> dict[str, dict[str, Any]]:
             "spend": 0.0,
             "prior_year_spend": 0.0,
             "supplier_count": 0,
-            "suppliers": set,
+            "suppliers": set(),
         })
         bucket["spend"] += c.item.annual_spend
         if c.item.prior_year_spend is not None:
             bucket["prior_year_spend"] += c.item.prior_year_spend
         bucket["suppliers"].add(c.item.supplier)
-    for b in agg.values:
+    for b in agg.values():
         b["supplier_count"] = len(b["suppliers"])
         b["suppliers"] = sorted(b["suppliers"])
     return agg
@@ -238,8 +238,8 @@ def aggregate_by_class(items: list[Categorized]) -> dict[str, dict[str, Any]]:
 
 def pareto_breakdown(agg: dict[str, dict[str, Any]]) -> tuple[list[str], float, float]:
     """Return the 20% of categories driving most spend, and the cumulative % they cover."""
-    sorted_cats = sorted(agg.items, key=lambda kv: -kv[1]["spend"])
-    total_spend = sum(b["spend"] for b in agg.values) or 1.0
+    sorted_cats = sorted(agg.items(), key=lambda kv: -kv[1]["spend"])
+    total_spend = sum(b["spend"] for b in agg.values()) or 1.0
     top_20_count = max(1, len(sorted_cats) // 5)
     top_classes = [cls for cls, _ in sorted_cats[:top_20_count]]
     top_spend = sum(agg[cls]["spend"] for cls in top_classes)
@@ -249,7 +249,7 @@ def pareto_breakdown(agg: dict[str, dict[str, Any]]) -> tuple[list[str], float, 
 def yoy_growth(agg: dict[str, dict[str, Any]]) -> list[tuple[str, float, float, float]]:
     """Return (class, this_year, prior_year, pct_growth) sorted by % growth desc."""
     rows: list[tuple[str, float, float, float]] = []
-    for cls, b in agg.items:
+    for cls, b in agg.items():
         py = b["prior_year_spend"]
         ty = b["spend"]
         if py > 0:
@@ -266,7 +266,7 @@ def render_markdown(
     categorized: list[Categorized],
     agg: dict[str, dict[str, Any]],
 ) -> str:
-    total = sum(b["spend"] for b in agg.values)
+    total = sum(b["spend"] for b in agg.values())
     top_classes, top_spend, top_pct = pareto_breakdown(agg)
 
     lines: list[str] = []
@@ -286,7 +286,7 @@ def render_markdown(
     lines.append("## All categories ranked by spend\n")
     lines.append("| Class | Family | Segment | Spend | Suppliers |")
     lines.append("|---|---|---|---:|---:|")
-    for cls, b in sorted(agg.items, key=lambda kv: -kv[1]["spend"]):
+    for cls, b in sorted(agg.items(), key=lambda kv: -kv[1]["spend"]):
         lines.append(
             f"| {cls} | {b['family']} | {b['segment']} | "
             f"${b['spend']:,.0f} | {b['supplier_count']} |"
@@ -308,7 +308,7 @@ def render_markdown(
     by_class: dict[str, list[Categorized]] = {}
     for c in categorized:
         by_class.setdefault(c.class_, []).append(c)
-    for cls in sorted(by_class.keys):
+    for cls in sorted(by_class.keys()):
         lines.append(f"### {cls}\n")
         lines.append("| Supplier | Description | Annual spend |")
         lines.append("|---|---|---:|")
@@ -363,7 +363,7 @@ def main(argv: list[str] | None = None) -> int:
         "--profile",
         type=str,
         default="tech-startup",
-        choices=sorted(PROFILE_PRIORITIES.keys),
+        choices=sorted(PROFILE_PRIORITIES.keys()),
         help="Industry profile (default: tech-startup)",
     )
     p.add_argument("--output", type=str, help="Path to write markdown report")
@@ -374,12 +374,12 @@ def main(argv: list[str] | None = None) -> int:
         data = SAMPLE_INPUT
     elif args.input:
         try:
-            data = json.loads(Path(args.input).read_text)
+            data = json.loads(Path(args.input).read_text())
         except Exception as e:
             print(f"error reading {args.input}: {e}", file=sys.stderr)
             return 2
     else:
-        p.print_help
+        p.print_help()
         return 0
 
     items = [LineItem.from_dict(d) for d in data]
@@ -396,4 +396,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

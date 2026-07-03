@@ -5,6 +5,8 @@ Rollback Generator - Generate comprehensive rollback procedures for migrations
 This tool takes a migration plan and generates detailed rollback procedures for each phase,
 including data rollback scripts, service rollback steps, validation checks, and communication
 templates to ensure safe and reliable migration reversals.
+
+Author: Migration Architect Skill
 Version: 1.0.0
 License: MIT
 """
@@ -119,9 +121,9 @@ class RollbackGenerator:
     """Main rollback generator class"""
     
     def __init__(self):
-        self.rollback_templates = self._load_rollback_templates
-        self.validation_templates = self._load_validation_templates
-        self.communication_templates = self._load_communication_templates
+        self.rollback_templates = self._load_rollback_templates()
+        self.validation_templates = self._load_validation_templates()
+        self.communication_templates = self._load_communication_templates()
     
     def _load_rollback_templates(self) -> Dict[str, Any]:
         """Load rollback script templates for different migration types"""
@@ -287,7 +289,7 @@ Incident Commander: {incident_commander}
     
     def generate_rollback_runbook(self, migration_plan: Dict[str, Any]) -> RollbackRunbook:
         """Generate comprehensive rollback runbook from migration plan"""
-        runbook_id = f"rb_{hashlib.md5(str(migration_plan).encode).hexdigest[:8]}"
+        runbook_id = f"rb_{hashlib.md5(str(migration_plan).encode()).hexdigest()[:8]}"
         migration_id = migration_plan.get("migration_id", "unknown")
         migration_type = migration_plan.get("migration_type", "unknown")
         
@@ -318,7 +320,7 @@ Incident Commander: {incident_commander}
         return RollbackRunbook(
             runbook_id=runbook_id,
             migration_id=migration_id,
-            created_at=datetime.datetime.now.isoformat,
+            created_at=datetime.datetime.now().isoformat(),
             rollback_phases=rollback_phases,
             trigger_conditions=trigger_conditions,
             data_recovery_plan=data_recovery_plan,
@@ -370,7 +372,7 @@ Incident Commander: {incident_commander}
         templates = self.rollback_templates.get(migration_type, {})
         
         if migration_type == "database":
-            if "migration" in phase_name.lower or "cutover" in phase_name.lower:
+            if "migration" in phase_name.lower() or "cutover" in phase_name.lower():
                 # Data rollback steps
                 steps.extend([
                     RollbackStep(
@@ -401,7 +403,7 @@ Incident Commander: {incident_commander}
                     )
                 ])
             
-            if "preparation" in phase_name.lower:
+            if "preparation" in phase_name.lower():
                 # Schema rollback steps
                 steps.append(
                     RollbackStep(
@@ -409,7 +411,7 @@ Incident Commander: {incident_commander}
                         name="Drop migration artifacts",
                         description="Remove temporary migration tables and procedures",
                         script_type="sql",
-                        script_content="-- Drop migration artifacts\nDROP TABLE IF EXISTS migration_log;\nDROP PROCEDURE IF EXISTS migrate_data;",
+                        script_content="-- Drop migration artifacts\nDROP TABLE IF EXISTS migration_log;\nDROP PROCEDURE IF EXISTS migrate_data();",
                         estimated_duration_minutes=5,
                         dependencies=[],
                         validation_commands=["SELECT COUNT(*) FROM information_schema.tables WHERE table_name LIKE '%migration%';"],
@@ -420,7 +422,7 @@ Incident Commander: {incident_commander}
                 )
         
         elif migration_type == "service":
-            if "cutover" in phase_name.lower:
+            if "cutover" in phase_name.lower():
                 # Service rollback steps
                 steps.extend([
                     RollbackStep(
@@ -885,14 +887,14 @@ Executive On-Call: {executive_on_call}
         if phase_index > 0:
             prerequisites.append("Previous rollback phase completed successfully")
         
-        if "cutover" in phase_name.lower:
+        if "cutover" in phase_name.lower():
             prerequisites.extend([
                 "Traffic redirection capabilities confirmed",
                 "Load balancer configuration backed up",
                 "DNS changes prepared for quick execution"
             ])
         
-        if "data" in phase_name.lower or "migration" in phase_name.lower:
+        if "data" in phase_name.lower() or "migration" in phase_name.lower():
             prerequisites.extend([
                 "Database backup verified and accessible",
                 "Data validation queries prepared",
@@ -930,7 +932,7 @@ Executive On-Call: {executive_on_call}
                 "Prepare customer communication if needed"
             ])
         
-        if "cutover" in phase_name.lower:
+        if "cutover" in phase_name.lower():
             base_requirements.append("Immediate notification when traffic is redirected")
         
         return base_requirements
@@ -958,8 +960,8 @@ Executive On-Call: {executive_on_call}
         # Escalation Matrix
         output.append("ESCALATION MATRIX")
         output.append("-" * 40)
-        for level, details in runbook.escalation_matrix.items:
-            output.append(f"{level.upper}:")
+        for level, details in runbook.escalation_matrix.items():
+            output.append(f"{level.upper()}:")
             output.append(f"  Trigger: {details['trigger']}")
             output.append(f"  Response Time: {details['response_time_minutes']} minutes")
             output.append(f"  Contacts: {', '.join(details['contacts'])}")
@@ -981,11 +983,11 @@ Executive On-Call: {executive_on_call}
         output.append("ROLLBACK PHASES")
         output.append("-" * 40)
         for i, phase in enumerate(runbook.rollback_phases, 1):
-            output.append(f"{i}. {phase.phase_name.upper}")
+            output.append(f"{i}. {phase.phase_name.upper()}")
             output.append(f"   Description: {phase.description}")
-            output.append(f"   Urgency: {phase.urgency_level.upper}")
+            output.append(f"   Urgency: {phase.urgency_level.upper()}")
             output.append(f"   Duration: {phase.estimated_duration_minutes} minutes")
-            output.append(f"   Risk Level: {phase.risk_level.upper}")
+            output.append(f"   Risk Level: {phase.risk_level.upper()}")
             
             if phase.prerequisites:
                 output.append("   Prerequisites:")
@@ -1044,14 +1046,14 @@ Executive On-Call: {executive_on_call}
         return "\n".join(output)
 
 
-def main:
+def main():
     """Main function with command line interface"""
     parser = argparse.ArgumentParser(description="Generate comprehensive rollback runbooks from migration plans")
     parser.add_argument("--input", "-i", required=True, help="Input migration plan file (JSON)")
     parser.add_argument("--output", "-o", help="Output file for rollback runbook (JSON)")
     parser.add_argument("--format", "-f", choices=["json", "text", "both"], default="both", help="Output format")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Load migration plan
@@ -1064,7 +1066,7 @@ def main:
             return 1
         
         # Generate rollback runbook
-        generator = RollbackGenerator
+        generator = RollbackGenerator()
         runbook = generator.generate_rollback_runbook(migration_plan)
         
         # Output results
@@ -1104,4 +1106,4 @@ def main:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

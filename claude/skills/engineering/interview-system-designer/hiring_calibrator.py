@@ -27,9 +27,9 @@ class HiringCalibrator:
     """Analyzes interview data for bias detection and calibration issues."""
     
     def __init__(self):
-        self.bias_thresholds = self._init_bias_thresholds
-        self.calibration_standards = self._init_calibration_standards
-        self.demographic_categories = self._init_demographic_categories
+        self.bias_thresholds = self._init_bias_thresholds()
+        self.calibration_standards = self._init_calibration_standards()
+        self.demographic_categories = self._init_demographic_categories()
         
     def _init_bias_thresholds(self) -> Dict[str, float]:
         """Initialize statistical thresholds for bias detection."""
@@ -98,7 +98,7 @@ class HiringCalibrator:
         analysis_results = {
             "analysis_type": analysis_type,
             "data_summary": self._generate_data_summary(processed_data),
-            "generated_at": datetime.now.isoformat
+            "generated_at": datetime.now().isoformat()
         }
         
         if analysis_type in ["comprehensive", "bias"]:
@@ -148,7 +148,7 @@ class HiringCalibrator:
             return False
         
         # Validate score values are numeric and in valid range (1-4)
-        for competency, score in record["scores"].items:
+        for competency, score in record["scores"].items():
             if not isinstance(score, (int, float)) or not (1 <= score <= 4):
                 return False
         
@@ -156,14 +156,14 @@ class HiringCalibrator:
     
     def _standardize_record(self, record: Dict[str, Any]) -> Dict[str, Any]:
         """Standardize record format and add computed fields."""
-        standardized = record.copy
+        standardized = record.copy()
         
         # Calculate average score
-        scores = list(record["scores"].values)
+        scores = list(record["scores"].values())
         standardized["average_score"] = statistics.mean(scores)
         
         # Standardize recommendation to binary
-        recommendation = record["overall_recommendation"].lower
+        recommendation = record["overall_recommendation"].lower()
         standardized["hire_decision"] = recommendation in ["hire", "strong hire", "yes"]
         
         # Parse date if string
@@ -171,7 +171,7 @@ class HiringCalibrator:
             try:
                 standardized["date"] = datetime.fromisoformat(record["date"].replace("Z", "+00:00"))
             except ValueError:
-                standardized["date"] = datetime.now
+                standardized["date"] = datetime.now()
         
         # Add demographic info if available
         for category in self.demographic_categories:
@@ -179,7 +179,7 @@ class HiringCalibrator:
                 standardized[category] = "unknown"
         
         # Add level normalization
-        role = record.get("role", "").lower
+        role = record.get("role", "").lower()
         if any(level in role for level in ["junior", "associate", "entry"]):
             standardized["normalized_level"] = "junior"
         elif any(level in role for level in ["senior", "sr"]):
@@ -205,15 +205,15 @@ class HiringCalibrator:
         hire_decisions = []
         
         for record in data:
-            all_scores.extend(record["scores"].values)
+            all_scores.extend(record["scores"].values())
             all_average_scores.append(record["average_score"])
             hire_decisions.append(record["hire_decision"])
         
         # Date range
         dates = [record["date"] for record in data if record["date"]]
         date_range = {
-            "start_date": min(dates).isoformat if dates else None,
-            "end_date": max(dates).isoformat if dates else None,
+            "start_date": min(dates).isoformat() if dates else None,
+            "end_date": max(dates).isoformat() if dates else None,
             "total_days": (max(dates) - min(dates)).days if len(dates) > 1 else 0
         }
         
@@ -282,7 +282,7 @@ class HiringCalibrator:
         
         # Calculate statistics for each group
         group_stats = {}
-        for group, records in demographic_groups.items:
+        for group, records in demographic_groups.items():
             if len(records) >= self.bias_thresholds["minimum_sample_size"]:
                 scores = [r["average_score"] for r in records]
                 hire_rate = sum(r["hire_decision"] for r in records) / len(records)
@@ -302,7 +302,7 @@ class HiringCalibrator:
         bias_details = {}
         
         # Check for significant differences in hire rates
-        hire_rates = [stats["hire_rate"] for stats in group_stats.values]
+        hire_rates = [stats["hire_rate"] for stats in group_stats.values()]
         max_hire_rate_diff = max(hire_rates) - min(hire_rates)
         
         if max_hire_rate_diff > self.bias_thresholds["demographic_parity_threshold"]:
@@ -314,7 +314,7 @@ class HiringCalibrator:
             }
         
         # Check for significant differences in scoring
-        mean_scores = [stats["mean_score"] for stats in group_stats.values]
+        mean_scores = [stats["mean_score"] for stats in group_stats.values()]
         max_score_diff = max(mean_scores) - min(mean_scores)
         
         if max_score_diff > 0.5:  # Half point difference threshold
@@ -343,7 +343,7 @@ class HiringCalibrator:
         
         # Calculate statistics per interviewer
         interviewer_analysis = {}
-        for interviewer_id, records in interviewer_stats.items:
+        for interviewer_id, records in interviewer_stats.items():
             if len(records) >= self.bias_thresholds["minimum_sample_size"]:
                 scores = [r["average_score"] for r in records]
                 hire_rate = sum(r["hire_decision"] for r in records) / len(records)
@@ -359,11 +359,11 @@ class HiringCalibrator:
         
         # Identify outlier interviewers
         if len(interviewer_analysis) > 1:
-            overall_mean_score = statistics.mean([stats["mean_score"] for stats in interviewer_analysis.values])
-            overall_hire_rate = statistics.mean([stats["hire_rate"] for stats in interviewer_analysis.values])
+            overall_mean_score = statistics.mean([stats["mean_score"] for stats in interviewer_analysis.values()])
+            overall_hire_rate = statistics.mean([stats["hire_rate"] for stats in interviewer_analysis.values()])
             
             outlier_interviewers = {}
-            for interviewer_id, stats in interviewer_analysis.items:
+            for interviewer_id, stats in interviewer_analysis.items():
                 issues = []
                 
                 # Check for score inflation/deflation
@@ -427,12 +427,12 @@ class HiringCalibrator:
             interviewer_variations = {}
             if len(interviewer_competency_scores) > 1:
                 interviewer_means = {interviewer: statistics.mean(scores) 
-                                   for interviewer, scores in interviewer_competency_scores.items
+                                   for interviewer, scores in interviewer_competency_scores.items()
                                    if len(scores) >= 3}
                 
                 if len(interviewer_means) > 1:
-                    mean_of_means = statistics.mean(interviewer_means.values)
-                    for interviewer, mean_score in interviewer_means.items:
+                    mean_of_means = statistics.mean(interviewer_means.values())
+                    for interviewer, mean_score in interviewer_means.items():
                         deviation = abs(mean_score - mean_of_means)
                         if deviation > 0.5:  # More than half point deviation
                             interviewer_variations[interviewer] = {
@@ -461,7 +461,7 @@ class HiringCalibrator:
             candidate_interviewers[record["candidate_id"]].append(record)
         
         multi_interviewer_candidates = {
-            candidate: records for candidate, records in candidate_interviewers.items
+            candidate: records for candidate, records in candidate_interviewers.items()
             if len(records) > 1
         }
         
@@ -475,7 +475,7 @@ class HiringCalibrator:
         agreement_stats = []
         score_correlations = []
         
-        for candidate, records in multi_interviewer_candidates.items:
+        for candidate, records in multi_interviewer_candidates.items():
             candidate_scores = []
             interviewer_pairs = []
             
@@ -535,14 +535,14 @@ class HiringCalibrator:
             avg_score = record["average_score"]
             all_average_scores.append(avg_score)
             
-            for competency, score in record["scores"].items:
+            for competency, score in record["scores"].items():
                 if not target_competencies or competency in target_competencies:
                     all_individual_scores.append(score)
                     score_distribution[str(int(score))] += 1
         
         # Calculate distribution percentages
-        total_scores = sum(score_distribution.values)
-        score_percentages = {score: count/total_scores for score, count in score_distribution.items}
+        total_scores = sum(score_distribution.values())
+        score_percentages = {score: count/total_scores for score, count in score_distribution.items()}
         
         # Compare against expected distribution
         expected_dist = self.calibration_standards["score_distribution"]["expected_distribution"]
@@ -575,7 +575,7 @@ class HiringCalibrator:
             level = record.get("normalized_level", "unknown")
             level_groups[level].append(record["hire_decision"])
         
-        for level, decisions in level_groups.items:
+        for level, decisions in level_groups.items():
             if len(decisions) >= self.bias_thresholds["minimum_sample_size"]:
                 pass_rate = sum(decisions) / len(decisions)
                 expected_rate = self.calibration_standards["pass_rates"].get(f"{level}_level", 0.15)
@@ -631,7 +631,7 @@ class HiringCalibrator:
         
         # Calculate metrics for each period
         period_metrics = {}
-        for period_key, records in period_groups.items:
+        for period_key, records in period_groups.items():
             if len(records) >= 3:  # Minimum for meaningful metrics
                 scores = [r["average_score"] for r in records]
                 hire_rate = sum(r["hire_decision"] for r in records) / len(records)
@@ -647,7 +647,7 @@ class HiringCalibrator:
             return {"error": "Insufficient periods for trend analysis"}
         
         # Analyze trends
-        sorted_periods = sorted(period_metrics.keys)
+        sorted_periods = sorted(period_metrics.keys())
         mean_scores = [period_metrics[p]["mean_score"] for p in sorted_periods]
         hire_rates = [period_metrics[p]["hire_rate"] for p in sorted_periods]
         
@@ -754,7 +754,7 @@ class HiringCalibrator:
         for record in data:
             interviewer_records[record["interviewer_id"]].append(record)
         
-        for interviewer_id, records in interviewer_records.items:
+        for interviewer_id, records in interviewer_records.items():
             if len(records) >= 3:
                 consistency = self._calculate_interviewer_consistency(records)
                 interviewer_consistency_scores.append(consistency)
@@ -777,7 +777,7 @@ class HiringCalibrator:
         
         # Demographic bias factors
         demographic_bias = bias_analysis.get("demographic_bias", {})
-        for demo, analysis in demographic_bias.items:
+        for demo, analysis in demographic_bias.items():
             if analysis.get("bias_detected"):
                 bias_factors.append(0.3)  # Each demographic bias adds 0.3
         
@@ -786,12 +786,12 @@ class HiringCalibrator:
         outlier_interviewers = interviewer_bias.get("outlier_interviewers", {})
         if outlier_interviewers:
             # Scale by severity and number of outliers
-            total_severity = sum(info["severity"] for info in outlier_interviewers.values)
+            total_severity = sum(info["severity"] for info in outlier_interviewers.values())
             bias_factors.append(min(0.5, total_severity * 0.1))
         
         # Competency bias factors  
         competency_bias = bias_analysis.get("competency_bias", {})
-        for comp, analysis in competency_bias.items:
+        for comp, analysis in competency_bias.items():
             if analysis.get("bias_detected"):
                 bias_factors.append(0.2)  # Each competency bias adds 0.2
         
@@ -875,12 +875,12 @@ class HiringCalibrator:
         bias_analysis = analysis.get("bias_analysis", {})
         
         # Demographic bias recommendations
-        for demo, demo_analysis in bias_analysis.get("demographic_bias", {}).items:
+        for demo, demo_analysis in bias_analysis.get("demographic_bias", {}).items():
             if demo_analysis.get("bias_detected"):
                 recommendations.append({
                     "priority": "high",
                     "category": "bias_mitigation",
-                    "title": f"Address {demo.replace('_', ' ').title} Bias",
+                    "title": f"Address {demo.replace('_', ' ').title()} Bias",
                     "description": demo_analysis.get("recommendation", f"Implement bias mitigation strategies for {demo}"),
                     "actions": [
                         "Conduct unconscious bias training focused on this demographic",
@@ -894,7 +894,7 @@ class HiringCalibrator:
         interviewer_analysis = bias_analysis.get("interviewer_bias", {})
         outlier_interviewers = interviewer_analysis.get("outlier_interviewers", {})
         
-        for interviewer_id, outlier_info in outlier_interviewers.items:
+        for interviewer_id, outlier_info in outlier_interviewers.items():
             issues = outlier_info["issues"]
             priority = "high" if outlier_info["severity"] >= 3 else "medium"
             
@@ -1005,7 +1005,7 @@ class HiringCalibrator:
             return ["All interviewers performing within expected ranges"]
         
         recommendations = []
-        for interviewer, info in outlier_interviewers.items:
+        for interviewer, info in outlier_interviewers.items():
             issues = info["issues"]
             if len(issues) >= 2:
                 recommendations.append(f"Interviewer {interviewer}: Requires comprehensive recalibration - multiple issues detected")
@@ -1038,7 +1038,7 @@ class HiringCalibrator:
         issues = 0
         
         # Check distribution deviations
-        for score_level, analysis in distribution.items:
+        for score_level, analysis in distribution.items():
             if analysis["significant_deviation"]:
                 issues += 1
         
@@ -1076,7 +1076,7 @@ class HiringCalibrator:
                 insights.append("Consider if hiring bar has raised or candidate pool declined")
         
         # Check for consistency
-        period_values = list(period_metrics.values)
+        period_values = list(period_metrics.values())
         hire_rates = [p["hire_rate"] for p in period_values]
         hire_rate_variance = statistics.variance(hire_rates) if len(hire_rates) > 1 else 0
         
@@ -1094,10 +1094,10 @@ class HiringCalibrator:
         interviewer_scores = defaultdict(list)
         
         for record in data:
-            interviewer_scores[record["interviewer_id"]].extend(record["scores"].values)
+            interviewer_scores[record["interviewer_id"]].extend(record["scores"].values())
         
         consistency_analysis = {}
-        for interviewer, scores in interviewer_scores.items:
+        for interviewer, scores in interviewer_scores.items():
             if len(scores) >= 10:  # Need sufficient data
                 consistency_analysis[interviewer] = {
                     "mean_score": round(statistics.mean(scores), 2),
@@ -1116,7 +1116,7 @@ def format_human_readable(calibration_report: Dict[str, Any]) -> str:
     # Header
     output.append("HIRING CALIBRATION ANALYSIS REPORT")
     output.append("=" * 60)
-    output.append(f"Analysis Type: {calibration_report.get('analysis_type', 'N/A').title}")
+    output.append(f"Analysis Type: {calibration_report.get('analysis_type', 'N/A').title()}")
     output.append(f"Generated: {calibration_report.get('generated_at', 'N/A')}")
     
     if "error" in calibration_report:
@@ -1142,7 +1142,7 @@ def format_human_readable(calibration_report: Dict[str, Any]) -> str:
         output.append(f"\nCALIBRATION HEALTH SCORE")
         output.append("-" * 30)
         output.append(f"Overall Score: {health_score.get('overall_score', 0):.3f}")
-        output.append(f"Health Category: {health_score.get('health_category', 'Unknown').title}")
+        output.append(f"Health Category: {health_score.get('health_category', 'Unknown').title()}")
         
         if health_score.get("improvement_priority"):
             output.append(f"Priority Areas: {', '.join(health_score['improvement_priority'])}")
@@ -1158,15 +1158,15 @@ def format_human_readable(calibration_report: Dict[str, Any]) -> str:
         demographic_bias = bias_analysis.get("demographic_bias", {})
         if demographic_bias:
             output.append(f"\nDemographic Bias Issues:")
-            for demo, analysis in demographic_bias.items:
-                output.append(f"  • {demo.replace('_', ' ').title}: {analysis.get('bias_details', {}).keys}")
+            for demo, analysis in demographic_bias.items():
+                output.append(f"  • {demo.replace('_', ' ').title()}: {analysis.get('bias_details', {}).keys()}")
         
         # Interviewer bias
         interviewer_bias = bias_analysis.get("interviewer_bias", {})
         outlier_interviewers = interviewer_bias.get("outlier_interviewers", {})
         if outlier_interviewers:
             output.append(f"\nOutlier Interviewers:")
-            for interviewer, info in outlier_interviewers.items:
+            for interviewer, info in outlier_interviewers.items():
                 issues = ", ".join(info["issues"])
                 output.append(f"  • {interviewer}: {issues}")
     
@@ -1175,7 +1175,7 @@ def format_human_readable(calibration_report: Dict[str, Any]) -> str:
     if calibration_analysis and "error" not in calibration_analysis:
         output.append(f"\nCALIBRATION CONSISTENCY")
         output.append("-" * 30)
-        output.append(f"Quality: {calibration_analysis.get('calibration_quality', 'Unknown').title}")
+        output.append(f"Quality: {calibration_analysis.get('calibration_quality', 'Unknown').title()}")
         output.append(f"Agreement Rate: {calibration_analysis.get('agreement_within_one_point_rate', 0):.1%}")
         output.append(f"Score Std Dev: {calibration_analysis.get('mean_score_standard_deviation', 0):.3f}")
     
@@ -1184,7 +1184,7 @@ def format_human_readable(calibration_report: Dict[str, Any]) -> str:
     if scoring_analysis:
         output.append(f"\nSCORING PATTERNS")
         output.append("-" * 30)
-        output.append(f"Overall Assessment: {scoring_analysis.get('overall_assessment', 'Unknown').title}")
+        output.append(f"Overall Assessment: {scoring_analysis.get('overall_assessment', 'Unknown').title()}")
         
         score_stats = scoring_analysis.get("score_statistics", {})
         output.append(f"Mean Score: {score_stats.get('mean_score', 0):.2f} (Target: {score_stats.get('target_mean', 0):.2f})")
@@ -1205,7 +1205,7 @@ def format_human_readable(calibration_report: Dict[str, Any]) -> str:
         output.append(f"\nTOP RECOMMENDATIONS")
         output.append("-" * 30)
         for i, rec in enumerate(recommendations[:5], 1):  # Show top 5
-            output.append(f"{i}. {rec['title']} ({rec['priority'].title} Priority)")
+            output.append(f"{i}. {rec['title']} ({rec['priority'].title()} Priority)")
             output.append(f"   {rec['description']}")
             if rec.get('actions'):
                 output.append(f"   Actions: {len(rec['actions'])} specific action items")
@@ -1213,7 +1213,7 @@ def format_human_readable(calibration_report: Dict[str, Any]) -> str:
     return "\n".join(output)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Analyze interview data for bias and calibration issues")
     parser.add_argument("--input", type=str, required=True, help="Input JSON file with interview results data")
     parser.add_argument("--analysis-type", type=str, choices=["comprehensive", "bias", "calibration", "interviewer", "scoring"], 
@@ -1225,7 +1225,7 @@ def main:
     parser.add_argument("--output", type=str, help="Output file path")
     parser.add_argument("--format", choices=["json", "text", "both"], default="both", help="Output format")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     # Load input data
     try:
@@ -1246,7 +1246,7 @@ def main:
         sys.exit(1)
     
     # Initialize calibrator and run analysis
-    calibrator = HiringCalibrator
+    calibrator = HiringCalibrator()
     
     competencies = args.competencies.split(',') if args.competencies else None
     
@@ -1265,7 +1265,7 @@ def main:
             json_path = output_path if output_path.endswith('.json') else f"{output_path}.json"
             text_path = output_path.replace('.json', '.txt') if output_path.endswith('.json') else f"{output_path}.txt"
         else:
-            base_filename = f"calibration_report_{datetime.now.strftime('%Y%m%d_%H%M%S')}"
+            base_filename = f"calibration_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
             json_path = f"{base_filename}.json"
             text_path = f"{base_filename}.txt"
         
@@ -1286,7 +1286,7 @@ def main:
             print(f"Error: {results['error']}")
         else:
             health_score = results.get("calibration_health_score", {})
-            print(f"Health Score: {health_score.get('overall_score', 0):.3f} ({health_score.get('health_category', 'Unknown').title})")
+            print(f"Health Score: {health_score.get('overall_score', 0):.3f} ({health_score.get('health_category', 'Unknown').title()})")
             
             bias_score = results.get("bias_analysis", {}).get("overall_bias_score", 0)
             print(f"Bias Score: {bias_score:.3f} (Lower is better)")
@@ -1295,7 +1295,7 @@ def main:
             print(f"Recommendations Generated: {len(recommendations)}")
             
             if recommendations:
-                print(f"Top Priority: {recommendations[0]['title']} ({recommendations[0]['priority'].title})")
+                print(f"Top Priority: {recommendations[0]['title']} ({recommendations[0]['priority'].title()})")
         
     except Exception as e:
         print(f"Error during analysis: {e}")
@@ -1303,4 +1303,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

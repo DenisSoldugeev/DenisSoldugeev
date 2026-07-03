@@ -28,7 +28,7 @@ const server = new Server(
   { capabilities: { tools: {} } },
 );
 
-server.setRequestHandler(ListToolsRequestSchema, async  => ({
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
     {
       name: 'testrail_get_projects',
@@ -173,7 +173,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     switch (name) {
       case 'testrail_get_projects': {
-        const projects = await client.getProjects;
+        const projects = await client.getProjects();
         return { content: [{ type: 'text', text: JSON.stringify(projects, null, 2) }] };
       }
 
@@ -262,9 +262,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 });
 
-async function main {
-  const transport = new StdioServerTransport;
+async function main() {
+  const transport = new StdioServerTransport();
   await server.connect(transport);
 }
 
-main.catch(console.error);
+main().catch(console.error);

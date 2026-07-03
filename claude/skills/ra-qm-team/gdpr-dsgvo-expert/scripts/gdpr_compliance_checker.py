@@ -175,10 +175,10 @@ def scan_file_for_patterns(
 
     try:
         with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
-            content = f.read
+            content = f.read()
             lines = content.split("\n")
 
-        for pattern_name, pattern_info in patterns.items:
+        for pattern_name, pattern_info in patterns.items():
             regex = re.compile(pattern_info["pattern"], re.IGNORECASE)
 
             for line_num, line in enumerate(lines, 1):
@@ -189,7 +189,7 @@ def scan_file_for_patterns(
                         "line": line_num,
                         "pattern": pattern_name,
                         "matches": len(matches) if isinstance(matches, list) else 1,
-                        **{k: v for k, v in pattern_info.items if k != "pattern"}
+                        **{k: v for k, v in pattern_info.items() if k != "pattern"}
                     })
 
     except Exception as e:
@@ -207,8 +207,8 @@ def analyze_project(project_path: Path) -> Dict:
 
     # Scan all relevant files
     for filepath in project_path.rglob("*"):
-        if filepath.is_file and not should_skip(filepath):
-            if filepath.suffix.lower in SCANNABLE_EXTENSIONS:
+        if filepath.is_file() and not should_skip(filepath):
+            if filepath.suffix.lower() in SCANNABLE_EXTENSIONS:
                 files_scanned += 1
 
                 # Check for personal data patterns
@@ -222,14 +222,14 @@ def analyze_project(project_path: Path) -> Dict:
                 )
 
     # Check for specific config files
-    for config_name, config_info in CONFIG_PATTERNS.items:
+    for config_name, config_info in CONFIG_PATTERNS.items():
         for config_file in config_info["files"]:
             config_path = project_path / config_file
-            if config_path.exists:
+            if config_path.exists():
                 try:
                     with open(config_path, "r") as f:
-                        content = f.read
-                    if config_info["check"] not in content.lower:
+                        content = f.read()
+                    if config_info["check"] not in content.lower():
                         config_findings.append({
                             "file": str(config_path),
                             "config": config_name,
@@ -300,7 +300,7 @@ def generate_recommendations(
 ) -> List[Dict]:
     """Generate prioritized recommendations."""
     recommendations = []
-    seen_issues = set
+    seen_issues = set()
 
     # Critical issues first
     for finding in code_issues:
@@ -317,7 +317,7 @@ def generate_recommendations(
                 seen_issues.add(issue_key)
 
     # Special category data
-    special_category_files = set
+    special_category_files = set()
     for finding in personal_data:
         if finding.get("category") == "special_category":
             special_category_files.add(finding.get("file"))
@@ -365,12 +365,12 @@ def print_report(analysis: Dict) -> None:
     print("=" * 60)
     print("GDPR COMPLIANCE ASSESSMENT REPORT")
     print("=" * 60)
-    print
+    print()
     print(f"Compliance Score: {summary['compliance_score']}/100")
-    print(f"Status: {summary['status'].upper}")
+    print(f"Status: {summary['status'].upper()}")
     print(f"Assessment: {summary['status_description']}")
     print(f"Files Scanned: {summary['files_scanned']}")
-    print
+    print()
 
     counts = summary["issue_counts"]
     print("--- ISSUE SUMMARY ---")
@@ -378,7 +378,7 @@ def print_report(analysis: Dict) -> None:
     print(f"  High: {counts['high']}")
     print(f"  Medium: {counts['medium']}")
     print(f"  Config Issues: {counts['config_issues']}")
-    print
+    print()
 
     if analysis["recommendations"]:
         print("--- PRIORITIZED RECOMMENDATIONS ---")
@@ -387,14 +387,14 @@ def print_report(analysis: Dict) -> None:
             print(f"   GDPR Article: {rec['gdpr_article']}")
             print(f"   Action: {rec['action']}")
 
-    print
+    print()
     print("=" * 60)
     print("Note: This is an automated assessment. Manual review by a")
     print("qualified Data Protection Officer is recommended.")
     print("=" * 60)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Scan project for GDPR compliance issues"
     )
@@ -414,10 +414,10 @@ def main:
         help="Write output to file"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    project_path = Path(args.project_path).resolve
-    if not project_path.exists:
+    project_path = Path(args.project_path).resolve()
+    if not project_path.exists():
         print(f"Error: Path does not exist: {project_path}", file=sys.stderr)
         sys.exit(1)
 
@@ -440,4 +440,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -156,7 +156,7 @@ Secrets in CI/CD pipelines require careful handling to avoid exposure in logs, a
 - Use **repository secrets** or **environment secrets** via `${{ secrets.SECRET_NAME }}`.
 - Prefer **OIDC federation** (`aws-actions/configure-aws-credentials` with `role-to-assume`) over long-lived access keys.
 - Environment secrets with required reviewers add approval gates for production deployments.
-- GitHub automatically masks secrets in logs, but avoid `echo` or `toJSON` on secret values.
+- GitHub automatically masks secrets in logs, but avoid `echo` or `toJSON()` on secret values.
 
 ### GitLab CI
 

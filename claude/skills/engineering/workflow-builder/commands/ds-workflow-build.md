@@ -62,10 +62,10 @@ export CLAUDE_CODE_WORKFLOWS=1   # the feature is off by default
 ## The Hard Rules (validator enforces)
 
 1. `meta` is a pure literal and the first statement — no variables, spreads, template strings, or calls.
-2. No `Date.now`, `Math.random`, or argless `new Date` — they break resume.
-3. No filesystem / Node APIs in the orchestrator — that work goes inside `agent`.
-4. `parallel` takes thunks (` => agent(...)`); default to `pipeline` unless a stage needs the whole prior set.
-5. Guard every open-ended loop with a counter or `budget.remaining`.
+2. No `Date.now()`, `Math.random()`, or argless `new Date()` — they break resume.
+3. No filesystem / Node APIs in the orchestrator — that work goes inside `agent()`.
+4. `parallel()` takes thunks (`() => agent(...)`); default to `pipeline()` unless a stage needs the whole prior set.
+5. Guard every open-ended loop with a counter or `budget.remaining()`.
 6. `results.filter(Boolean)` before using parallel/pipeline output.
 
 ## Output Format

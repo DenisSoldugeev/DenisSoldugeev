@@ -99,16 +99,16 @@ SUSPICIOUS_PATTERNS = [
 # ---------------------------------------------------------------------------
 
 def count_chars(text):
-    return len(text.strip)
+    return len(text.strip())
 
 
 def check_all_caps(text):
     """Returns True if more than 30% of alpha chars are uppercase — not counting acronyms."""
-    words = text.split
+    words = text.split()
     violations = []
     for word in words:
         alpha = re.sub(r'[^a-zA-Z]', '', word)
-        if len(alpha) > 3 and alpha.isupper:
+        if len(alpha) > 3 and alpha.isupper():
             violations.append(word)
     return violations
 
@@ -119,12 +119,12 @@ def check_excessive_punctuation(text):
 
 
 def check_trademark_mentions(text):
-    lowered = text.lower
+    lowered = text.lower()
     return [term for term in TRADEMARKED_TERMS if re.search(r'\b' + term + r'\b', lowered)]
 
 
 def check_prohibited_phrases(text):
-    lowered = text.lower
+    lowered = text.lower()
     return [phrase for phrase in PROHIBITED_PHRASES if phrase in lowered]
 
 
@@ -151,7 +151,7 @@ def score_ad(issues):
         "count_too_few": 10,
         "count_too_many": 5,
     }
-    for category, items in issues.items:
+    for category, items in issues.items():
         if items:
             score -= deductions.get(category, 5) * (1 if isinstance(items, bool) else min(len(items), 3))
     return max(0, score)
@@ -308,7 +308,7 @@ def validate_generic(ad, platform_key):
 
 
 def validate_ad(ad):
-    platform = ad.get("platform", "").lower
+    platform = ad.get("platform", "").lower()
 
     if platform == "google_rsa":
         return validate_google_rsa(ad)
@@ -329,7 +329,7 @@ def validate_ad(ad):
 def format_report(ad, char_lines, issues):
     platform = ad.get("platform", "unknown")
     spec = PLATFORM_SPECS.get(platform, {})
-    platform_name = spec.get("name", platform.upper)
+    platform_name = spec.get("name", platform.upper())
 
     score = score_ad(issues)
     grade = "🟢 Excellent" if score >= 85 else "🟡 Needs Work" if score >= 60 else "🔴 High Risk"
@@ -355,7 +355,7 @@ def format_report(ad, char_lines, issues):
             "count_too_few": "⚠️  Too few elements",
             "count_too_many": "⚠️  Too many elements",
         }
-        for category, items in issues.items:
+        for category, items in issues.items():
             label = category_labels.get(category, category)
             lines.append(f"  {label}: {', '.join(str(i) for i in items)}")
     else:
@@ -415,7 +415,7 @@ SAMPLE_ADS = [
 # Main
 # ---------------------------------------------------------------------------
 
-def main:
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -427,7 +427,7 @@ def main:
         help="Path to a JSON file containing ad data. "
              "If omitted, reads from stdin or runs embedded sample."
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Load from file or stdin, else use sample
     ads = None
@@ -440,8 +440,8 @@ def main:
         except Exception as e:
             print(f"Error reading file: {e}", file=sys.stderr)
             sys.exit(1)
-    elif not sys.stdin.isatty:
-        raw = sys.stdin.read.strip
+    elif not sys.stdin.isatty():
+        raw = sys.stdin.read().strip()
         if raw:
             try:
                 data = json.loads(raw)
@@ -468,7 +468,7 @@ def main:
         results.append({
             "platform": ad.get("platform"),
             "score": score,
-            "issues": {k: v for k, v in issues.items},
+            "issues": {k: v for k, v in issues.items()},
             "passed": score >= 70,
         })
 
@@ -487,4 +487,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

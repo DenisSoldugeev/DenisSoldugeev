@@ -31,7 +31,7 @@ def load_yaml_as_json(content: str) -> Dict:
     array_indent = -1
 
     for line in lines:
-        stripped = line.lstrip
+        stripped = line.lstrip()
         if not stripped or stripped.startswith('#'):
             continue
 
@@ -39,26 +39,26 @@ def load_yaml_as_json(content: str) -> Dict:
 
         # Pop stack until we find the right level
         while len(stack) > 1 and stack[-1][1] >= indent:
-            stack.pop
+            stack.pop()
 
         current_obj = stack[-1][0]
 
         if stripped.startswith('- '):
             # Array item
-            value = stripped[2:].strip
+            value = stripped[2:].strip()
             if isinstance(current_obj, list):
                 if ':' in value:
                     # Object in array
                     key, val = value.split(':', 1)
-                    new_obj = {key.strip: val.strip.strip('"').strip("'")}
+                    new_obj = {key.strip(): val.strip().strip('"').strip("'")}
                     current_obj.append(new_obj)
                     stack.append((new_obj, indent))
                 else:
                     current_obj.append(value.strip('"').strip("'"))
         elif ':' in stripped:
             key, value = stripped.split(':', 1)
-            key = key.strip
-            value = value.strip
+            key = key.strip()
+            value = value.strip()
 
             if value == '':
                 # Check next line for array or object
@@ -68,15 +68,15 @@ def load_yaml_as_json(content: str) -> Dict:
             elif value.startswith('[') and value.endswith(']'):
                 # Inline array
                 items = value[1:-1].split(',')
-                current_obj[key] = [i.strip.strip('"').strip("'") for i in items if i.strip]
+                current_obj[key] = [i.strip().strip('"').strip("'") for i in items if i.strip()]
             else:
                 # Simple value
                 value = value.strip('"').strip("'")
-                if value.lower == 'true':
+                if value.lower() == 'true':
                     value = True
-                elif value.lower == 'false':
+                elif value.lower() == 'false':
                     value = False
-                elif value.isdigit:
+                elif value.isdigit():
                     value = int(value)
                 current_obj[key] = value
 
@@ -85,7 +85,7 @@ def load_yaml_as_json(content: str) -> Dict:
 
 def load_spec(spec_path: Path) -> Dict:
     """Load OpenAPI spec from YAML or JSON file."""
-    content = spec_path.read_text
+    content = spec_path.read_text()
 
     if spec_path.suffix in ['.yaml', '.yml']:
         try:
@@ -128,7 +128,7 @@ def openapi_type_to_ts(schema: Dict) -> str:
         if properties:
             props = []
             required = schema.get('required', [])
-            for name, prop in properties.items:
+            for name, prop in properties.items():
                 ts_type = openapi_type_to_ts(prop)
                 optional = '?' if name not in required else ''
                 props.append(f'  {name}{optional}: {ts_type};')
@@ -145,7 +145,7 @@ def openapi_type_to_ts(schema: Dict) -> str:
 def generate_zod_schema(schema: Dict, name: str) -> str:
     """Generate Zod validation schema from OpenAPI schema."""
     if not schema:
-        return f'export const {name}Schema = z.unknown;'
+        return f'export const {name}Schema = z.unknown();'
 
     def schema_to_zod(s: Dict) -> str:
         if '$ref' in s:
@@ -155,7 +155,7 @@ def generate_zod_schema(schema: Dict, name: str) -> str:
         s_type = s.get('type', 'unknown')
 
         if s_type == 'string':
-            zod = 'z.string'
+            zod = 'z.string()'
             if 'minLength' in s:
                 zod += f'.min({s["minLength"]})'
             if 'maxLength' in s:
@@ -163,16 +163,16 @@ def generate_zod_schema(schema: Dict, name: str) -> str:
             if 'pattern' in s:
                 zod += f'.regex(/{s["pattern"]}/)'
             if s.get('format') == 'email':
-                zod += '.email'
+                zod += '.email()'
             if s.get('format') == 'uuid':
-                zod += '.uuid'
+                zod += '.uuid()'
             if 'enum' in s:
                 values = ', '.join(f"'{v}'" for v in s['enum'])
                 return f'z.enum([{values}])'
             return zod
 
         if s_type == 'integer':
-            zod = 'z.number.int'
+            zod = 'z.number().int()'
             if 'minimum' in s:
                 zod += f'.min({s["minimum"]})'
             if 'maximum' in s:
@@ -180,7 +180,7 @@ def generate_zod_schema(schema: Dict, name: str) -> str:
             return zod
 
         if s_type == 'number':
-            zod = 'z.number'
+            zod = 'z.number()'
             if 'minimum' in s:
                 zod += f'.min({s["minimum"]})'
             if 'maximum' in s:
@@ -188,7 +188,7 @@ def generate_zod_schema(schema: Dict, name: str) -> str:
             return zod
 
         if s_type == 'boolean':
-            return 'z.boolean'
+            return 'z.boolean()'
 
         if s_type == 'array':
             items_zod = schema_to_zod(s.get('items', {}))
@@ -198,18 +198,18 @@ def generate_zod_schema(schema: Dict, name: str) -> str:
             properties = s.get('properties', {})
             required = s.get('required', [])
             if not properties:
-                return 'z.record(z.unknown)'
+                return 'z.record(z.unknown())'
 
             props = []
-            for prop_name, prop_schema in properties.items:
+            for prop_name, prop_schema in properties.items():
                 prop_zod = schema_to_zod(prop_schema)
                 if prop_name not in required:
-                    prop_zod += '.optional'
+                    prop_zod += '.optional()'
                 props.append(f'  {prop_name}: {prop_zod},')
 
             return 'z.object({\n' + '\n'.join(props) + '\n})'
 
-        return 'z.unknown'
+        return 'z.unknown()'
 
     return f'export const {name}Schema = {schema_to_zod(schema)};'
 
@@ -217,16 +217,16 @@ def generate_zod_schema(schema: Dict, name: str) -> str:
 def to_camel_case(s: str) -> str:
     """Convert string to camelCase."""
     s = re.sub(r'[^a-zA-Z0-9]', ' ', s)
-    words = s.split
+    words = s.split()
     if not words:
         return s
-    return words[0].lower + ''.join(w.capitalize for w in words[1:])
+    return words[0].lower() + ''.join(w.capitalize() for w in words[1:])
 
 
 def to_pascal_case(s: str) -> str:
     """Convert string to PascalCase."""
     s = re.sub(r'[^a-zA-Z0-9]', ' ', s)
-    return ''.join(w.capitalize for w in s.split)
+    return ''.join(w.capitalize() for w in s.split())
 
 
 def extract_path_params(path: str) -> List[str]:
@@ -256,22 +256,22 @@ class APIScaffolder:
 
     def run(self) -> Dict:
         """Execute scaffolding process."""
-        print(f"API Scaffolder - {self.framework.capitalize}")
+        print(f"API Scaffolder - {self.framework.capitalize()}")
         print(f"Spec: {self.spec_path}")
         print(f"Output: {self.output_dir}")
         print("-" * 50)
 
-        self.validate
-        self.load_spec
-        self.ensure_output_dir
+        self.validate()
+        self.load_spec()
+        self.ensure_output_dir()
 
         if self.types_only:
-            self.generate_types
+            self.generate_types()
         else:
-            self.generate_types
-            self.generate_validators
-            self.generate_routes
-            self.generate_index
+            self.generate_types()
+            self.generate_validators()
+            self.generate_routes()
+            self.generate_index()
 
         return {
             'status': 'success',
@@ -279,13 +279,13 @@ class APIScaffolder:
             'output': str(self.output_dir),
             'framework': self.framework,
             'generated_files': self.generated_files,
-            'routes_count': len(self.get_operations),
-            'types_count': len(self.get_schemas),
+            'routes_count': len(self.get_operations()),
+            'types_count': len(self.get_schemas()),
         }
 
     def validate(self):
         """Validate inputs."""
-        if not self.spec_path.exists:
+        if not self.spec_path.exists():
             raise FileNotFoundError(f"Spec file not found: {self.spec_path}")
 
         if self.framework not in self.SUPPORTED_FRAMEWORKS:
@@ -313,12 +313,12 @@ class APIScaffolder:
         operations = []
         paths = self.spec.get('paths', {})
 
-        for path, methods in paths.items:
+        for path, methods in paths.items():
             if not isinstance(methods, dict):
                 continue
 
-            for method, details in methods.items:
-                if method.lower not in ['get', 'post', 'put', 'patch', 'delete']:
+            for method, details in methods.items():
+                if method.lower() not in ['get', 'post', 'put', 'patch', 'delete']:
                     continue
 
                 if not isinstance(details, dict):
@@ -328,7 +328,7 @@ class APIScaffolder:
 
                 operations.append({
                     'path': path,
-                    'method': method.lower,
+                    'method': method.lower(),
                     'operation_id': op_id,
                     'summary': details.get('summary', ''),
                     'parameters': details.get('parameters', []),
@@ -341,16 +341,16 @@ class APIScaffolder:
 
     def generate_types(self):
         """Generate TypeScript type definitions."""
-        schemas = self.get_schemas
+        schemas = self.get_schemas()
 
         lines = [
             '// Auto-generated TypeScript types',
             f'// Generated from: {self.spec_path.name}',
-            f'// Date: {datetime.now.isoformat}',
+            f'// Date: {datetime.now().isoformat()}',
             '',
         ]
 
-        for name, schema in schemas.items:
+        for name, schema in schemas.items():
             ts_type = openapi_type_to_ts(schema)
             if ts_type.startswith('{'):
                 lines.append(f'export interface {name} {ts_type}')
@@ -359,7 +359,7 @@ class APIScaffolder:
             lines.append('')
 
         # Generate request/response types from operations
-        for op in self.get_operations:
+        for op in self.get_operations():
             op_name = to_pascal_case(op['operation_id'])
 
             # Request body type
@@ -392,7 +392,7 @@ class APIScaffolder:
 
     def generate_validators(self):
         """Generate Zod validation schemas."""
-        schemas = self.get_schemas
+        schemas = self.get_schemas()
 
         lines = [
             "import { z } from 'zod';",
@@ -402,7 +402,7 @@ class APIScaffolder:
             '',
         ]
 
-        for name, schema in schemas.items:
+        for name, schema in schemas.items():
             zod_schema = generate_zod_schema(schema, name)
             lines.append(zod_schema)
             lines.append(f'export type {name} = z.infer<typeof {name}Schema>;')
@@ -429,7 +429,7 @@ class APIScaffolder:
             '      });',
             '    }',
             '    req.body = result.data;',
-            '    next;',
+            '    next();',
             '  };',
             '}',
         ])
@@ -441,7 +441,7 @@ class APIScaffolder:
 
     def generate_routes(self):
         """Generate route handlers."""
-        operations = self.get_operations
+        operations = self.get_operations()
 
         # Group by tag
         routes_by_tag: Dict[str, List[Dict]] = {}
@@ -452,7 +452,7 @@ class APIScaffolder:
             routes_by_tag[tag].append(op)
 
         # Generate a route file per tag
-        for tag, ops in routes_by_tag.items:
+        for tag, ops in routes_by_tag.items():
             self.generate_route_file(tag, ops)
 
     def generate_route_file(self, tag: str, operations: List[Dict]):
@@ -464,7 +464,7 @@ class APIScaffolder:
             "import { validate } from './validators';",
             "import * as schemas from './validators';",
             '',
-            f'const router = Router;',
+            f'const router = Router();',
             '',
         ]
 
@@ -489,7 +489,7 @@ class APIScaffolder:
             lines.append(f'/**')
             if summary:
                 lines.append(f' * {summary}')
-            lines.append(f' * {method.upper} {op["path"]}')
+            lines.append(f' * {method.upper()} {op["path"]}')
             lines.append(f' */')
 
             middleware = ''
@@ -512,7 +512,7 @@ class APIScaffolder:
             if method == 'post':
                 lines.append("    res.status(201).json({ message: 'Created' });")
             elif method == 'delete':
-                lines.append("    res.status(204).send;")
+                lines.append("    res.status(204).send();")
             else:
                 lines.append("    res.json({ message: 'OK' });")
 
@@ -531,10 +531,10 @@ class APIScaffolder:
 
     def generate_index(self):
         """Generate index file that combines all routes."""
-        operations = self.get_operations
+        operations = self.get_operations()
 
         # Get unique tags
-        tags = set
+        tags = set()
         for op in operations:
             tag = op['tags'][0] if op['tags'] else 'default'
             tags.add(tag)
@@ -550,14 +550,14 @@ class APIScaffolder:
 
         lines.extend([
             '',
-            'const router = Router;',
+            'const router = Router();',
             '',
         ])
 
         for tag in sorted(tags):
             tag_name = to_camel_case(tag)
             # Use tag as base path
-            base_path = '/' + tag.lower.replace(' ', '-')
+            base_path = '/' + tag.lower().replace(' ', '-')
             lines.append(f"router.use('{base_path}', {tag_name}Routes);")
 
         lines.extend([
@@ -571,7 +571,7 @@ class APIScaffolder:
         print(f"  Generated: {index_file}")
 
 
-def main:
+def main():
     """CLI entry point."""
     parser = argparse.ArgumentParser(
         description='Generate Express.js routes from OpenAPI specification',
@@ -615,7 +615,7 @@ Examples:
         help='Output results as JSON'
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         scaffolder = APIScaffolder(
@@ -626,7 +626,7 @@ Examples:
             verbose=args.verbose,
         )
 
-        results = scaffolder.run
+        results = scaffolder.run()
 
         print("-" * 50)
         print(f"Generated {results['routes_count']} route handlers")
@@ -642,4 +642,4 @@ Examples:
 
 
 if __name__ == '__main__':
-    main
+    main()

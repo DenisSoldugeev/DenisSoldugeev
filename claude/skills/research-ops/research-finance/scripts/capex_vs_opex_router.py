@@ -89,7 +89,7 @@ SAMPLE = {
 
 
 def route_item(item: dict, standard: str) -> dict:
-    phase = (item.get("phase") or "").lower
+    phase = (item.get("phase") or "").lower()
     crit = item.get("criteria", {}) or {}
     met = [c for c in IAS38_CRITERIA if crit.get(c)]
     missing = [c for c in IAS38_CRITERIA if not crit.get(c)]
@@ -162,7 +162,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--sample", action="store_true", help="use the embedded sample")
     args = p.parse_args(argv)
 
-    conf = _cfg.load_config if _cfg else {}
+    conf = _cfg.load_config() if _cfg else {}
     profile = args.profile or conf.get("default_profile", "biotech")
     cli_standard = args.standard or conf.get("accounting_standard", "ifrs")
     data = SAMPLE if (args.sample or not args.input) else json.load(open(args.input))
@@ -186,4 +186,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

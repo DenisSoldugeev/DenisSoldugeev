@@ -114,14 +114,14 @@ SAMPLE_INPUT = {
 
 
 def tokenize(text: str) -> set[str]:
-    tokens = re.findall(r"[a-zA-Z0-9./]+", text.lower)
+    tokens = re.findall(r"[a-zA-Z0-9./]+", text.lower())
     return {t for t in tokens if t not in STOPWORDS and len(t) > 1}
 
 
 def score_match(requirement: dict[str, Any], proof: dict[str, Any]) -> tuple[int, list[str]]:
     """Return (match_count, matched_tags)."""
     req_tokens = tokenize(requirement["text"])
-    matched = [tag for tag in proof.get("requirement_match_tags", []) if tag.lower in req_tokens]
+    matched = [tag for tag in proof.get("requirement_match_tags", []) if tag.lower() in req_tokens]
     return len(matched), matched
 
 
@@ -240,12 +240,12 @@ def render_markdown(result: dict[str, Any]) -> str:
         out.append("")
 
     out.append("## Win-theme coverage\n")
-    for theme, info in result["win_theme_report"].items:
+    for theme, info in result["win_theme_report"].items():
         ids = ", ".join(info["requirement_ids"]) or "(none)"
         out.append(f"- **{theme}** — threads through {info['count']} req(s): {ids} → **{info['verdict']}**")
     out.append("")
 
-    decorative = [t for t, info in result["win_theme_report"].items if info["verdict"] == "DECORATIVE"]
+    decorative = [t for t, info in result["win_theme_report"].items() if info["verdict"] == "DECORATIVE"]
     if decorative:
         out.append("### Decorative themes (flagged)\n")
         out.append("These themes appear in <2 requirements and are decorative, not strategic. "
@@ -268,12 +268,12 @@ def main(argv: list[str] | None = None) -> int:
         payload = SAMPLE_INPUT
     elif args.input:
         path = Path(args.input)
-        if not path.exists:
+        if not path.exists():
             print(f"ERROR: input file not found: {args.input}", file=sys.stderr)
             return 1
         payload = json.loads(path.read_text(encoding="utf-8"))
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     result = build_matrix(payload)
@@ -285,4 +285,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -18,7 +18,7 @@ Detailed patterns and anti-patterns for Snowflake SQL development and data pipel
 
 ```sql
 WITH raw AS (
-    SELECT * FROM raw_events WHERE event_date = CURRENT_DATE
+    SELECT * FROM raw_events WHERE event_date = CURRENT_DATE()
 ),
 cleaned AS (
     SELECT
@@ -47,7 +47,7 @@ SELECT * FROM enriched;
 MERGE INTO dim_customers t
 USING (
     SELECT customer_id, name, email, updated_at,
-           ROW_NUMBER OVER (PARTITION BY customer_id ORDER BY updated_at DESC) AS rn
+           ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY updated_at DESC) AS rn
     FROM staging_customers
 ) s
 ON t.customer_id = s.customer_id AND s.rn = 1
@@ -156,7 +156,7 @@ daily_aggregates (DT, TARGET_LAG = '1 hour')
 **Check refresh mode:**
 ```sql
 SELECT name, refresh_mode, refresh_mode_reason
-FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLES)
+FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLES())
 WHERE name = 'MY_DT';
 ```
 
@@ -165,26 +165,26 @@ WHERE name = 'MY_DT';
 ```sql
 -- Check DT health and lag
 SELECT name, scheduling_state, last_completed_refresh_state,
-       data_timestamp, DATEDIFF('minute', data_timestamp, CURRENT_TIMESTAMP) AS lag_minutes
-FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLES);
+       data_timestamp, DATEDIFF('minute', data_timestamp, CURRENT_TIMESTAMP()) AS lag_minutes
+FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLES());
 
 -- Check refresh history for failures
 SELECT name, state, state_message, refresh_trigger
-FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLE_REFRESH_HISTORY)
+FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLE_REFRESH_HISTORY())
 WHERE state = 'FAILED'
 ORDER BY refresh_end_time DESC
 LIMIT 10;
 
 -- Examine graph dependencies
 SELECT name, qualified_name, refresh_mode
-FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLE_GRAPH_HISTORY);
+FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLE_GRAPH_HISTORY());
 ```
 
 ### DT Constraints
 
 - No views between two DTs in the DAG.
 - `SELECT *` breaks on upstream schema changes.
-- Cannot use non-deterministic functions (e.g., `CURRENT_TIMESTAMP`) -- use a column from the source instead.
+- Cannot use non-deterministic functions (e.g., `CURRENT_TIMESTAMP()`) -- use a column from the source instead.
 - Change tracking must be enabled on source tables: `ALTER TABLE src SET CHANGE_TRACKING = TRUE;`
 
 ---
@@ -197,12 +197,12 @@ FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLE_GRAPH_HISTORY);
 CREATE OR REPLACE TASK parent_task
     WAREHOUSE = transform_wh
     SCHEDULE = 'USING CRON 0 */1 * * * America/Los_Angeles'
-    AS CALL process_stage_1;
+    AS CALL process_stage_1();
 
 CREATE OR REPLACE TASK child_task
     WAREHOUSE = transform_wh
     AFTER parent_task
-    AS CALL process_stage_2;
+    AS CALL process_stage_2();
 
 -- Resume in reverse order: children first, then parent
 ALTER TASK child_task RESUME;
@@ -229,7 +229,7 @@ CREATE STREAM event_stream ON TABLE events APPEND_ONLY = TRUE;
 CREATE OR REPLACE TASK lightweight_task
     USER_TASK_MANAGED_INITIAL_WAREHOUSE_SIZE = 'XSMALL'
     SCHEDULE = '5 MINUTE'
-    AS INSERT INTO audit_log SELECT CURRENT_TIMESTAMP, 'heartbeat';
+    AS INSERT INTO audit_log SELECT CURRENT_TIMESTAMP(), 'heartbeat';
 ```
 
 ---
@@ -261,7 +261,7 @@ SELECT SYSTEM$PIPE_STATUS('my_pipe');
 -- Recent load history
 SELECT * FROM TABLE(INFORMATION_SCHEMA.COPY_HISTORY(
     TABLE_NAME => 'raw_table',
-    START_TIME => DATEADD(HOUR, -24, CURRENT_TIMESTAMP)
+    START_TIME => DATEADD(HOUR, -24, CURRENT_TIMESTAMP())
 ));
 ```
 
@@ -277,5 +277,5 @@ SELECT * FROM TABLE(INFORMATION_SCHEMA.COPY_HISTORY(
 | Single warehouse for everything | Workloads compete for resources | Separate warehouses per workload |
 | `FLOAT` for money | Rounding errors | `NUMBER(19,4)` or integer cents |
 | Missing `RESUME` after task creation | Task never runs | Always `ALTER TASK ... RESUME` |
-| `CURRENT_TIMESTAMP` in DT query | Forces full refresh mode | Use a timestamp column from the source |
+| `CURRENT_TIMESTAMP()` in DT query | Forces full refresh mode | Use a timestamp column from the source |
 | Scanning VARIANT without casting | "Numeric value not recognized" errors | Always cast: `col:field::TYPE` |

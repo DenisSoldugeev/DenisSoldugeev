@@ -74,15 +74,15 @@ function UserCardContainer({ userId }: { userId: string }) {
 function useUsers(filters: Filters) {
   return useQuery({
     queryKey: ["users", filters],
-    queryFn:  => api.getUsers(filters),
+    queryFn: () => api.getUsers(filters),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 30 * 60 * 1000,   // 30 minutes
   });
 }
 
 // Mutations with optimistic updates
-function useUpdateUser {
-  const queryClient = useQueryClient;
+function useUpdateUser() {
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: api.updateUser,
@@ -97,7 +97,7 @@ function useUpdateUser {
     onError: (err, newUser, context) => {
       queryClient.setQueryData(["users"], context.previous);
     },
-    onSettled:  => {
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
@@ -167,25 +167,25 @@ class PostgresUserRepository implements UserRepository {
 
 ```typescript
 // Express middleware chain
-app.use(cors);
-app.use(helmet);
-app.use(requestId);
-app.use(logger);
-app.use(authenticate);
-app.use(rateLimit);
+app.use(cors());
+app.use(helmet());
+app.use(requestId());
+app.use(logger());
+app.use(authenticate());
+app.use(rateLimit());
 app.use("/api", routes);
-app.use(errorHandler);
+app.use(errorHandler());
 
 // Custom middleware example
-function requestId {
+function requestId() {
   return (req: Request, res: Response, next: NextFunction) => {
-    req.id = req.headers["x-request-id"] || crypto.randomUUID;
+    req.id = req.headers["x-request-id"] || crypto.randomUUID();
     res.setHeader("x-request-id", req.id);
-    next;
+    next();
   };
 }
 
-function errorHandler {
+function errorHandler() {
   return (err: Error, req: Request, res: Response, next: NextFunction) => {
     const status = err instanceof AppError ? err.status : 500;
     const message = status === 500 ? "Internal Server Error" : err.message;
@@ -352,7 +352,7 @@ async function transferFunds(from: string, to: string, amount: number) {
     });
 
     if (sender.balance < 0) {
-      throw new InsufficientFundsError;
+      throw new InsufficientFundsError();
     }
 
     await tx.account.update({
@@ -414,7 +414,7 @@ async function getUser(id: string): Promise<User> {
 
   // 2. Fetch from database
   const user = await db.user.findUnique({ where: { id } });
-  if (!user) throw new NotFoundError;
+  if (!user) throw new NotFoundError();
 
   // 3. Store in cache
   await redis.set(cacheKey, JSON.stringify(user), "EX", 3600);
@@ -528,7 +528,7 @@ function requireAuth(req, res, next) {
   if (!req.session.userId) {
     return res.status(401).json({ error: "Authentication required" });
   }
-  next;
+  next();
 }
 ```
 

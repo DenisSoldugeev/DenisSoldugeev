@@ -117,12 +117,12 @@ def classify_requirement(text: str) -> tuple[str, dict[str, Any]]:
 
     nice_match = NICE_CUES.search(text)
     if nice_match:
-        evidence["matched_cues"].append(nice_match.group(0).lower)
+        evidence["matched_cues"].append(nice_match.group(0).lower())
         return "NICE-TO-HAVE", evidence
 
     mand_match = MANDATORY_CUES.search(text)
     if mand_match:
-        evidence["matched_cues"].append(mand_match.group(0).lower)
+        evidence["matched_cues"].append(mand_match.group(0).lower())
         return "MANDATORY", evidence
 
     points_match = POINTS_PATTERN.search(text)
@@ -133,7 +133,7 @@ def classify_requirement(text: str) -> tuple[str, dict[str, Any]]:
 
     weight_match = WEIGHTED_CUES.search(text)
     if weight_match:
-        evidence["matched_cues"].append(weight_match.group(0).lower)
+        evidence["matched_cues"].append(weight_match.group(0).lower())
         return "WEIGHTED", evidence
 
     return "UNCLASSIFIED", evidence
@@ -143,13 +143,13 @@ def split_sections(text: str) -> list[dict[str, Any]]:
     """Split document into sections by markdown headings."""
     sections: list[dict[str, Any]] = []
     current = {"heading": "(preamble)", "level": 0, "body": []}
-    for line in text.splitlines:
+    for line in text.splitlines():
         m = HEADING_PATTERN.match(line)
         if m:
             if current["body"] or current["heading"] != "(preamble)":
                 sections.append(current)
             current = {
-                "heading": m.group(2).strip,
+                "heading": m.group(2).strip(),
                 "level": len(m.group(1)),
                 "body": [],
             }
@@ -166,11 +166,11 @@ def extract_requirements(sections: list[dict[str, Any]]) -> list[dict[str, Any]]
     for sec in sections:
         section_label = sec["heading"]
         for raw_line in sec["body"]:
-            line = raw_line.strip
+            line = raw_line.strip()
             if not line or line.startswith("#"):
                 continue
             m = REQ_LINE_PATTERN.match(raw_line)
-            text = m.group(2).strip if m else line
+            text = m.group(2).strip() if m else line
             # Only count lines that contain at least one classification cue or a points tag.
             if not (
                 MANDATORY_CUES.search(text)
@@ -194,10 +194,10 @@ def extract_requirements(sections: list[dict[str, Any]]) -> list[dict[str, Any]]
 def extract_scoring(text: str) -> list[dict[str, Any]]:
     """Find lines with explicit point weights."""
     scoring: list[dict[str, Any]] = []
-    for line in text.splitlines:
+    for line in text.splitlines():
         m = POINTS_PATTERN.search(line)
         if m:
-            scoring.append({"weight": int(m.group(1)), "line": line.strip})
+            scoring.append({"weight": int(m.group(1)), "line": line.strip()})
     return scoring
 
 
@@ -208,11 +208,11 @@ def extract_deadline(text: str) -> str | None:
 
 def extract_format_notes(text: str) -> list[str]:
     notes: list[str] = []
-    for line in text.splitlines:
-        if FORMAT_PATTERN.search(line) and len(line.strip) < 200:
-            notes.append(line.strip)
+    for line in text.splitlines():
+        if FORMAT_PATTERN.search(line) and len(line.strip()) < 200:
+            notes.append(line.strip())
     # Dedupe while preserving order.
-    seen: set[str] = set
+    seen: set[str] = set()
     out: list[str] = []
     for n in notes:
         if n not in seen:
@@ -244,7 +244,7 @@ def render_markdown(parsed: dict[str, Any]) -> str:
     out.append(f"**Requirements detected:** {parsed['requirement_count']}")
     out.append(f"**Deadline:** {parsed['deadline'] or '(not detected)'}\n")
     out.append("## Requirement breakdown\n")
-    for tag, count in parsed["tag_breakdown"].items:
+    for tag, count in parsed["tag_breakdown"].items():
         out.append(f"- {tag}: {count}")
     out.append("\n## Requirements\n")
     for r in parsed["requirements"]:
@@ -281,12 +281,12 @@ def main(argv: list[str] | None = None) -> int:
         text = SAMPLE_RFP
     elif args.input:
         path = Path(args.input)
-        if not path.exists:
+        if not path.exists():
             print(f"ERROR: input file not found: {args.input}", file=sys.stderr)
             return 1
         text = path.read_text(encoding="utf-8")
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     parsed = parse(text)
@@ -298,4 +298,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

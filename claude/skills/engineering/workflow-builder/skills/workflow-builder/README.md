@@ -7,7 +7,7 @@ Intake-first authoring of deterministic multi-agent **workflow `.js` files** for
 | Tool | Purpose |
 |---|---|
 | `workflow_intake.py` | Classify a (vague) task → recommended topology + runner-up + per-stage model plan + budget guard + rationale. |
-| `validate_workflow.py` | Lint a workflow `.js`: pure-literal `meta`, no non-determinism, no Node/FS APIs, `parallel` thunks, guarded loops, `filter(Boolean)`, size cap. PASS / WARN / FAIL with line numbers. |
+| `validate_workflow.py` | Lint a workflow `.js`: pure-literal `meta`, no non-determinism, no Node/FS APIs, `parallel()` thunks, guarded loops, `filter(Boolean)`, size cap. PASS / WARN / FAIL with line numbers. |
 | `scaffold_workflow.py` | Emit a runnable starter for any of 5 topologies (fan-out, pipeline, barrier, loop, judge-panel). |
 
 All three run with `--sample` (no args) and `--help`.

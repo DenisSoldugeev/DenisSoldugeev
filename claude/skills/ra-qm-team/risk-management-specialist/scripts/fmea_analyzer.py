@@ -130,8 +130,8 @@ class FMEAAnalyzer:
     def analyze_entries(self, entries: List[FMEAEntry]) -> Dict:
         """Analyze all FMEA entries and generate summary."""
         for entry in entries:
-            entry.calculate_rpn
-            entry.calculate_revised_rpn
+            entry.calculate_rpn()
+            entry.calculate_revised_rpn()
 
         rpns = [e.rpn for e in entries if e.rpn > 0]
         revised_rpns = [e.revised_rpn for e in entries if e.revised_rpn > 0]
@@ -250,8 +250,8 @@ class FMEAAnalyzer:
             revised_occurrence=data.get("revised_occurrence", 0),
             revised_detection=data.get("revised_detection", 0)
         )
-        entry.calculate_rpn
-        entry.calculate_revised_rpn
+        entry.calculate_rpn()
+        entry.calculate_revised_rpn()
         return entry
 
     def generate_report(self, product_process: str, team: List[str], entries_data: List[Dict]) -> FMEAReport:
@@ -264,7 +264,7 @@ class FMEAAnalyzer:
             fmea_type=self.fmea_type.value,
             product_process=product_process,
             team=team,
-            date=datetime.now.strftime("%Y-%m-%d"),
+            date=datetime.now().strftime("%Y-%m-%d"),
             entries=entries,
             summary=summary,
             risk_reduction_actions=actions
@@ -275,7 +275,7 @@ def format_fmea_text(report: FMEAReport) -> str:
     """Format FMEA report as text."""
     lines = [
         "=" * 80,
-        f"{report.fmea_type.upper} REPORT",
+        f"{report.fmea_type.upper()} REPORT",
         "=" * 80,
         f"Product/Process: {report.product_process}",
         f"Date: {report.date}",
@@ -357,14 +357,14 @@ def format_fmea_text(report: FMEAReport) -> str:
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="FMEA Analyzer for Medical Device Risk Management")
     parser.add_argument("--type", choices=["design", "process"], default="design", help="FMEA type")
     parser.add_argument("--data", type=str, help="JSON file with FMEA data")
     parser.add_argument("--output", choices=["text", "json"], default="text", help="Output format")
     parser.add_argument("--interactive", action="store_true", help="Interactive mode")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     fmea_type = FMEAType.DESIGN if args.type == "design" else FMEAType.PROCESS
     analyzer = FMEAAnalyzer(fmea_type)
@@ -439,4 +439,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

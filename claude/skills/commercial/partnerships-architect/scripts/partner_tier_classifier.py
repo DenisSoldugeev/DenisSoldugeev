@@ -231,7 +231,7 @@ def _check_si_floors(partner: dict, profile: dict) -> tuple[bool, list[str]]:
     ide = partner.get("independent_demand_evidence", {}) or {}
     ecr = float(ide.get("end_customer_relationships_pct", 0))
     sts = int(ide.get("sales_team_size", 0))
-    ptype = (partner.get("partner_type") or "").lower
+    ptype = (partner.get("partner_type") or "").lower()
     fails: list[str] = []
     if ecr < profile["si_floor_ecr"]:
         fails.append(
@@ -256,7 +256,7 @@ def _check_strategic_floors(partner: dict, profile: dict) -> tuple[bool, list[st
     sourced = int(ide.get("named_accounts_sourced_count", 0))
     dr = int(com.get("dedicated_resources", 0))
     mdf = float(com.get("joint_marketing_spend", 0))
-    targets = (com.get("sales_targets") or "").lower
+    targets = (com.get("sales_targets") or "").lower()
     fails: list[str] = []
     if sourced < profile["strategic_floor_sourced"]:
         fails.append(
@@ -348,7 +348,7 @@ def classify(partner: dict, profile_name: str = "saas") -> ClassificationVerdict
         raise ValueError(f"Unknown profile '{profile_name}'. Choose from {list(PROFILES)}.")
     profile = PROFILES[profile_name]
 
-    ptype = (partner.get("partner_type") or "").lower
+    ptype = (partner.get("partner_type") or "").lower()
     warnings: list[str] = []
     if ptype not in VALID_PARTNER_TYPES:
         warnings.append(
@@ -518,4 +518,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

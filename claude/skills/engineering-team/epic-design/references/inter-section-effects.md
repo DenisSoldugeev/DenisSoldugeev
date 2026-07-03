@@ -49,7 +49,7 @@ This is THE signature technique for product brands. A product image (juice bottl
 ```
 
 ```javascript
-function initFloatingProduct {
+function initFloatingProduct() {
   const wrapper = document.querySelector('.inter-section-product-wrapper');
   const productImg = wrapper.querySelector('img');
   const heroSection = document.querySelector('.hero-section');
@@ -145,7 +145,7 @@ function initFloatingProduct {
 The same DOM element appears to travel between completely different layout positions across sections. In the hero it's large and centered; in the feature section it's small and left-aligned; in the detail section it's full-width. One smooth morph connects them all.
 
 ```javascript
-function initFlipMorphSections {
+function initFlipMorphSections() {
   gsap.registerPlugin(Flip);
 
   // The product element exists in one place in the DOM
@@ -176,15 +176,15 @@ function initFlipMorphSections {
   ScrollTrigger.create({
     trigger: '.feature-section',
     start: 'top 60%',
-    onEnter:  => morphToPosition(positions.feature),
-    onLeaveBack:  => morphToPosition(positions.hero),
+    onEnter: () => morphToPosition(positions.feature),
+    onLeaveBack: () => morphToPosition(positions.hero),
   });
 
   ScrollTrigger.create({
     trigger: '.detail-section',
     start: 'top 60%',
-    onEnter:  => morphToPosition(positions.detail),
-    onLeaveBack:  => morphToPosition(positions.feature),
+    onEnter: () => morphToPosition(positions.detail),
+    onLeaveBack: () => morphToPosition(positions.feature),
   });
 }
 ```
@@ -444,7 +444,7 @@ The section below is revealed by the section above peeling away — like turning
 ```
 
 ```javascript
-function initSectionPeel {
+function initSectionPeel() {
   const upper = document.querySelector('.peel-upper');
   const lower = document.querySelector('.peel-lower');
 

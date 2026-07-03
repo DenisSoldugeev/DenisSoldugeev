@@ -53,11 +53,11 @@ BLOOM_LEVEL_ORDER = ["remember", "understand", "apply", "analyze", "evaluate", "
 
 def classify_question(question: str) -> Dict[str, Any]:
     """Classify question by Bloom level."""
-    q_lower = question.lower
+    q_lower = question.lower()
     detected_levels: List[str] = []
     matched_phrases: Dict[str, List[str]] = {}
 
-    for level, verbs in BLOOM_VERBS.items:
+    for level, verbs in BLOOM_VERBS.items():
         for verb in verbs:
             if re.search(rf"\b{re.escape(verb)}\b", q_lower):
                 if level not in detected_levels:
@@ -66,7 +66,7 @@ def classify_question(question: str) -> Dict[str, Any]:
 
     if not detected_levels:
         # Default heuristic: if starts with "what/why/how", probably understand or apply
-        if q_lower.strip.startswith(("what", "why", "how")):
+        if q_lower.strip().startswith(("what", "why", "how")):
             detected_levels = ["understand"]
             matched_phrases["understand"] = ["(inferred from interrogative)"]
         else:
@@ -165,13 +165,13 @@ def main(argv: List[str]) -> int:
         elif args.questions_file:
             from pathlib import Path
             p = Path(args.questions_file)
-            if not p.exists:
+            if not p.exists():
                 print(f"error: {args.questions_file} not found", file=sys.stderr); return 2
             data = json.loads(p.read_text(encoding="utf-8"))
             for item in data:
                 results.append(validate_against_audience(item["question"], item["audience"]))
         else:
-            parser.print_help; return 0
+            parser.print_help(); return 0
     except ValueError as e:
         print(f"error: {e}", file=sys.stderr); return 2
 
@@ -187,7 +187,7 @@ def main(argv: List[str]) -> int:
                 print(f"      Suggested upgrades:")
                 for s in r["suggested_upgrades"]:
                     print(f"        - {s}")
-            print
+            print()
     fail_count = sum(1 for r in results if r["verdict"] == "FAIL")
     return 1 if fail_count > 0 else 0
 

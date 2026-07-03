@@ -309,7 +309,7 @@ try:
     elif args.command == "batch":
         result = batch_process_with_monitoring(args.directory, args.parallel, args.filter)
     else:
-        parser.print_help
+        parser.print_help()
         sys.exit(1)
     
     # Multiple output format support

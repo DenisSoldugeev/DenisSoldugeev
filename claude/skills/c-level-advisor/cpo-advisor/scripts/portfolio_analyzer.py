@@ -10,7 +10,7 @@ Usage:
     python portfolio_analyzer.py --input data.json   # Run with your data
     python portfolio_analyzer.py --json              # Output raw JSON
 
-JSON input format: see sample_data function below.
+JSON input format: see sample_data() function below.
 """
 
 import json
@@ -23,7 +23,7 @@ from typing import Optional
 # Sample data
 # ---------------------------------------------------------------------------
 
-def sample_data -> dict:
+def sample_data() -> dict:
     """
     Sample portfolio. Replace with real product data.
 
@@ -494,7 +494,7 @@ def render_report(result: dict) -> str:
 # Main
 # ---------------------------------------------------------------------------
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Portfolio Analyzer — BCG matrix classification and investment recommendations",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -510,7 +510,7 @@ def main:
         action="store_true",
         help="Output raw JSON result",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.input:
         try:
@@ -524,7 +524,7 @@ def main:
             sys.exit(1)
     else:
         print("No input file provided — running with sample data.\n")
-        data = sample_data
+        data = sample_data()
 
     result = analyze_portfolio(data)
 
@@ -532,7 +532,7 @@ def main:
         # Make result JSON-serializable
         def clean(obj):
             if isinstance(obj, dict):
-                return {k: clean(v) for k, v in obj.items}
+                return {k: clean(v) for k, v in obj.items()}
             elif isinstance(obj, list):
                 return [clean(v) for v in obj]
             elif isinstance(obj, float):
@@ -544,4 +544,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

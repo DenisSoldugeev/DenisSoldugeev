@@ -75,7 +75,7 @@ class PatternDetector:
 
     def __init__(self, project_path: Path):
         self.project_path = project_path
-        self.directories: Set[str] = set
+        self.directories: Set[str] = set()
         self.files: Dict[str, List[str]] = defaultdict(list)  # dir -> files
         self.detected_pattern: Optional[str] = None
         self.confidence: float = 0
@@ -83,16 +83,16 @@ class PatternDetector:
 
     def scan(self) -> Dict:
         """Scan project and detect patterns."""
-        self._scan_structure
-        self._detect_pattern
-        self._assign_layers
+        self._scan_structure()
+        self._detect_pattern()
+        self._assign_layers()
 
         return {
             'detected_pattern': self.detected_pattern,
             'confidence': self.confidence,
             'directories': list(self.directories),
             'layer_assignments': self.layer_assignments,
-            'pattern_scores': {p: d['weight'] for p, d in self.PATTERNS.items},
+            'pattern_scores': {p: d['weight'] for p, d in self.PATTERNS.items()},
         }
 
     def _scan_structure(self):
@@ -100,26 +100,26 @@ class PatternDetector:
         ignore_dirs = {'.git', 'node_modules', '__pycache__', '.venv', 'venv',
                        'dist', 'build', '.next', 'coverage', '.pytest_cache'}
 
-        for item in self.project_path.iterdir:
-            if item.is_dir and item.name not in ignore_dirs and not item.name.startswith('.'):
-                self.directories.add(item.name.lower)
+        for item in self.project_path.iterdir():
+            if item.is_dir() and item.name not in ignore_dirs and not item.name.startswith('.'):
+                self.directories.add(item.name.lower())
 
                 # Scan files in directory
                 try:
                     for f in item.rglob('*'):
-                        if f.is_file:
-                            self.files[item.name.lower].append(f.name.lower)
+                        if f.is_file():
+                            self.files[item.name.lower()].append(f.name.lower())
                 except PermissionError:
                     pass
 
     def _detect_pattern(self):
         """Detect the primary architectural pattern."""
-        for pattern, config in self.PATTERNS.items:
+        for pattern, config in self.PATTERNS.items():
             score = 0
 
             # Check directory structure
             for struct in config['structure']:
-                if struct.lower in self.directories:
+                if struct.lower() in self.directories:
                     score += 2
 
             # Check indicator presence in directory names
@@ -129,7 +129,7 @@ class PatternDetector:
                         score += 1
 
             # Check file patterns
-            all_files = [f for files in self.files.values for f in files]
+            all_files = [f for files in self.files.values() for f in files]
             for indicator in config['indicators']:
                 matching_files = sum(1 for f in all_files if indicator in f)
                 score += min(matching_files // 5, 3)  # Cap contribution
@@ -137,7 +137,7 @@ class PatternDetector:
             config['weight'] = score
 
         # Find best match
-        best_pattern = max(self.PATTERNS.items, key=lambda x: x[1]['weight'])
+        best_pattern = max(self.PATTERNS.items(), key=lambda x: x[1]['weight'])
         if best_pattern[1]['weight'] > 3:
             self.detected_pattern = best_pattern[0]
             max_possible = len(best_pattern[1]['structure']) * 2 + len(best_pattern[1]['indicators']) * 2
@@ -149,7 +149,7 @@ class PatternDetector:
     def _assign_layers(self):
         """Assign directories to architectural layers."""
         for dir_name in self.directories:
-            for layer, indicators in self.LAYER_HIERARCHY.items:
+            for layer, indicators in self.LAYER_HIERARCHY.items():
                 for indicator in indicators:
                     if indicator in dir_name:
                         self.layer_assignments[dir_name] = layer
@@ -178,10 +178,10 @@ class CodeAnalyzer:
 
     def analyze(self) -> Dict:
         """Run code analysis."""
-        self._analyze_file_sizes
-        self._analyze_imports
-        self._detect_god_classes
-        self._check_naming_conventions
+        self._analyze_file_sizes()
+        self._analyze_imports()
+        self._detect_god_classes()
+        self._check_naming_conventions()
 
         return {
             'issues': self.issues,
@@ -338,7 +338,7 @@ class CodeAnalyzer:
 
         # Check directory naming
         for dir_path in self.project_path.rglob('*'):
-            if not dir_path.is_dir:
+            if not dir_path.is_dir():
                 continue
             if any(ignored in dir_path.parts for ignored in ignore_dirs):
                 continue
@@ -385,7 +385,7 @@ class LayerViolationDetector:
 
     def detect(self) -> List[Dict]:
         """Detect layer violations."""
-        self._analyze_imports
+        self._analyze_imports()
         return self.violations
 
     def _analyze_imports(self):
@@ -404,7 +404,7 @@ class LayerViolationDetector:
                     if len(rel_path.parts) < 2:
                         continue
 
-                    source_dir = rel_path.parts[0].lower
+                    source_dir = rel_path.parts[0].lower()
                     source_layer = self.layer_assignments.get(source_dir)
 
                     if not source_layer or source_layer == 'unknown':
@@ -420,7 +420,7 @@ class LayerViolationDetector:
                         if not target_dir:
                             continue
 
-                        target_layer = self.layer_assignments.get(target_dir.lower)
+                        target_layer = self.layer_assignments.get(target_dir.lower())
                         if not target_layer or target_layer == 'unknown':
                             continue
 
@@ -484,7 +484,7 @@ class ProjectArchitect:
 
         # Pattern detection
         pattern_detector = PatternDetector(self.project_path)
-        pattern_result = pattern_detector.scan
+        pattern_result = pattern_detector.scan()
 
         if self.verbose:
             print(f"Detected pattern: {pattern_result['detected_pattern']} "
@@ -492,7 +492,7 @@ class ProjectArchitect:
 
         # Code analysis
         code_analyzer = CodeAnalyzer(self.project_path, self.verbose)
-        code_result = code_analyzer.analyze
+        code_result = code_analyzer.analyze()
 
         if self.verbose:
             print(f"Found {len(code_result['issues'])} code issues")
@@ -502,7 +502,7 @@ class ProjectArchitect:
             self.project_path,
             pattern_result['layer_assignments']
         )
-        violations = violation_detector.detect
+        violations = violation_detector.detect()
 
         if self.verbose:
             print(f"Found {len(violations)} layer violations")
@@ -576,7 +576,7 @@ class ProjectArchitect:
             )
 
         # Missing layer recommendations
-        assigned_layers = set(pattern_result['layer_assignments'].values)
+        assigned_layers = set(pattern_result['layer_assignments'].values())
         if pattern in ['layered', 'clean', 'hexagonal']:
             expected_layers = {'presentation', 'application', 'domain', 'infrastructure'}
             missing = expected_layers - assigned_layers - {'unknown'}
@@ -597,12 +597,12 @@ def print_human_report(report: Dict):
 
     arch = report['architecture']
     print(f"\n--- Architecture Pattern ---")
-    print(f"Detected: {arch['detected_pattern'].replace('_', ' ').title}")
+    print(f"Detected: {arch['detected_pattern'].replace('_', ' ').title()}")
     print(f"Confidence: {arch['confidence']}%")
 
     if arch['layer_assignments']:
         print(f"\nLayer Assignments:")
-        for dir_name, layer in sorted(arch['layer_assignments'].items):
+        for dir_name, layer in sorted(arch['layer_assignments'].items()):
             if layer != 'unknown':
                 status = "OK"
             else:
@@ -618,7 +618,7 @@ def print_human_report(report: Dict):
     if report['code_quality']['issues']:
         print(f"\n--- Code Issues ---")
         for issue in report['code_quality']['issues'][:10]:
-            severity = issue['severity'].upper
+            severity = issue['severity'].upper()
             print(f"  [{severity}] {issue.get('file', 'N/A')}")
             print(f"          {issue['message']}")
             if 'suggestion' in issue:
@@ -644,7 +644,7 @@ def print_human_report(report: Dict):
     print("\n" + "=" * 60)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description='Analyze project architecture and detect patterns and issues',
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -689,20 +689,20 @@ Detects:
         help='Save report to file'
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    project_path = Path(args.project_path).resolve
-    if not project_path.exists:
+    project_path = Path(args.project_path).resolve()
+    if not project_path.exists():
         print(f"Error: Project path does not exist: {project_path}", file=sys.stderr)
         sys.exit(1)
 
-    if not project_path.is_dir:
+    if not project_path.is_dir():
         print(f"Error: Project path is not a directory: {project_path}", file=sys.stderr)
         sys.exit(1)
 
     # Run analysis
     architect = ProjectArchitect(project_path, verbose=args.verbose)
-    report = architect.analyze
+    report = architect.analyze()
 
     # Handle specific checks
     if args.check == 'pattern':
@@ -724,7 +724,7 @@ Detects:
         if issues:
             print(f"Found {len(issues)} code issue(s):")
             for issue in issues[:10]:
-                print(f"  [{issue['severity'].upper}] {issue['message']}")
+                print(f"  [{issue['severity'].upper()}] {issue['message']}")
             sys.exit(1 if any(i['severity'] == 'warning' for i in issues) else 0)
         else:
             print("No code issues found.")
@@ -746,4 +746,4 @@ Detects:
 
 
 if __name__ == '__main__':
-    main
+    main()

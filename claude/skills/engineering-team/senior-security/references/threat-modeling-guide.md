@@ -52,6 +52,7 @@ THREAT MODEL REPORT
 System: [System Name]
 Version: [Version]
 Date: [Date]
+Author: [Name]
 
 1. SYSTEM OVERVIEW
    - Purpose: [Description]

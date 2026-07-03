@@ -93,8 +93,8 @@ class CAPATracker:
 
     def __init__(self, capas: List[CAPA]):
         self.capas = capas
-        self.today = datetime.now
-        self._calculate_derived_fields
+        self.today = datetime.now()
+        self._calculate_derived_fields()
 
     def _calculate_derived_fields(self):
         """Calculate days open and overdue status."""
@@ -305,7 +305,7 @@ def format_text_output(metrics: CAPAMetrics, aging: Dict) -> str:
         "=" * 70,
         "CAPA STATUS REPORT",
         "=" * 70,
-        f"Generated: {datetime.now.strftime('%Y-%m-%d %H:%M')}",
+        f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
         "",
         "SUMMARY METRICS",
         "-" * 40,
@@ -320,7 +320,7 @@ def format_text_output(metrics: CAPAMetrics, aging: Dict) -> str:
         "-" * 40,
     ]
 
-    for status, count in metrics.by_status.items:
+    for status, count in metrics.by_status.items():
         bar = "█" * min(count, 20)
         lines.append(f"  {status:<25} {bar} {count}")
 
@@ -330,7 +330,7 @@ def format_text_output(metrics: CAPAMetrics, aging: Dict) -> str:
         "-" * 40,
     ])
 
-    for severity, count in metrics.by_severity.items:
+    for severity, count in metrics.by_severity.items():
         bar = "█" * min(count, 20)
         lines.append(f"  {severity:<25} {bar} {count}")
 
@@ -340,7 +340,7 @@ def format_text_output(metrics: CAPAMetrics, aging: Dict) -> str:
         "-" * 40,
     ])
 
-    for source, count in metrics.by_source.items:
+    for source, count in metrics.by_source.items():
         bar = "█" * min(count, 20)
         lines.append(f"  {source:<25} {bar} {count}")
 
@@ -350,7 +350,7 @@ def format_text_output(metrics: CAPAMetrics, aging: Dict) -> str:
         "-" * 40,
     ])
 
-    for bucket, capas in aging.items:
+    for bucket, capas in aging.items():
         lines.append(f"  {bucket}: {len(capas)} CAPA(s)")
 
     if metrics.overdue_list:
@@ -385,7 +385,7 @@ def format_text_output(metrics: CAPAMetrics, aging: Dict) -> str:
     return "\n".join(lines)
 
 
-def interactive_mode:
+def interactive_mode():
     """Run interactive CAPA entry mode."""
     print("=" * 60)
     print("CAPA Tracker - Interactive Mode")
@@ -395,15 +395,15 @@ def interactive_mode:
     print("\nEnter CAPAs (blank CAPA number to finish):\n")
 
     while True:
-        capa_num = input("CAPA Number (e.g., CAPA-2024-001): ").strip
+        capa_num = input("CAPA Number (e.g., CAPA-2024-001): ").strip()
         if not capa_num:
             break
 
-        title = input("Title: ").strip
-        description = input("Description: ").strip
+        title = input("Title: ").strip()
+        description = input("Description: ").strip()
 
         print("Source options: C=Complaint, A=Audit, N=Nonconformance, M=Management Review, T=Trend, O=Other")
-        source_input = input("Source [C/A/N/M/T/O]: ").strip.upper
+        source_input = input("Source [C/A/N/M/T/O]: ").strip().upper()
         source_map = {
             "C": CAPASource.COMPLAINT,
             "A": CAPASource.AUDIT,
@@ -415,7 +415,7 @@ def interactive_mode:
         source = source_map.get(source_input, CAPASource.OTHER)
 
         print("Severity: C=Critical, M=Major, I=Minor")
-        severity_input = input("Severity [C/M/I]: ").strip.upper
+        severity_input = input("Severity [C/M/I]: ").strip().upper()
         severity_map = {
             "C": CAPASeverity.CRITICAL,
             "M": CAPASeverity.MAJOR,
@@ -424,7 +424,7 @@ def interactive_mode:
         severity = severity_map.get(severity_input, CAPASeverity.MINOR)
 
         print("Status: O=Open, I=Investigation, P=Action Planning, M=Implementation, V=Verification, E=Closed Effective, N=Closed Ineffective")
-        status_input = input("Status [O/I/P/M/V/E/N]: ").strip.upper
+        status_input = input("Status [O/I/P/M/V/E/N]: ").strip().upper()
         status_map = {
             "O": CAPAStatus.OPEN,
             "I": CAPAStatus.INVESTIGATION,
@@ -436,13 +436,13 @@ def interactive_mode:
         }
         status = status_map.get(status_input, CAPAStatus.OPEN)
 
-        open_date = input("Open Date (YYYY-MM-DD): ").strip
-        target_date = input("Target Date (YYYY-MM-DD): ").strip
-        owner = input("Owner: ").strip
+        open_date = input("Open Date (YYYY-MM-DD): ").strip()
+        target_date = input("Target Date (YYYY-MM-DD): ").strip()
+        owner = input("Owner: ").strip()
 
         close_date = None
         if status in [CAPAStatus.CLOSED_EFFECTIVE, CAPAStatus.CLOSED_INEFFECTIVE]:
-            close_date = input("Close Date (YYYY-MM-DD): ").strip
+            close_date = input("Close Date (YYYY-MM-DD): ").strip()
 
         capas.append(CAPA(
             capa_number=capa_num,
@@ -464,12 +464,12 @@ def interactive_mode:
         return
 
     tracker = CAPATracker(capas)
-    metrics = tracker.calculate_metrics
-    aging = tracker.get_aging_report
+    metrics = tracker.calculate_metrics()
+    aging = tracker.get_aging_report()
     print("\n" + format_text_output(metrics, aging))
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="CAPA Tracking and Metrics Tool"
     )
@@ -495,10 +495,10 @@ def main:
         help="Generate sample CAPA data file"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.interactive:
-        interactive_mode
+        interactive_mode()
         return
 
     if args.sample:
@@ -552,17 +552,17 @@ def main:
         capas = []
         for c in data.get("capas", []):
             try:
-                source = CAPASource[c.get("source", "OTHER").upper]
+                source = CAPASource[c.get("source", "OTHER").upper()]
             except KeyError:
                 source = CAPASource.OTHER
 
             try:
-                severity = CAPASeverity[c.get("severity", "MINOR").upper]
+                severity = CAPASeverity[c.get("severity", "MINOR").upper()]
             except KeyError:
                 severity = CAPASeverity.MINOR
 
             try:
-                status = CAPAStatus[c.get("status", "OPEN").upper]
+                status = CAPAStatus[c.get("status", "OPEN").upper()]
             except KeyError:
                 status = CAPAStatus.OPEN
 
@@ -621,8 +621,8 @@ def main:
         ]
 
     tracker = CAPATracker(capas)
-    metrics = tracker.calculate_metrics
-    aging = tracker.get_aging_report
+    metrics = tracker.calculate_metrics()
+    aging = tracker.get_aging_report()
 
     if args.output == "json":
         output = {
@@ -635,4 +635,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -55,17 +55,17 @@ def extract_frontmatter_description(text: str) -> str:
     match = re.search(r"^description:\s*(.*)$(?:\n[ ]+(.*))*", block, re.MULTILINE)
     if not match:
         return ""
-    val = match.group(1).strip
+    val = match.group(1).strip()
     if val == ">" or val == "|":
         # Folded scalar — collect indented continuation lines
-        lines_iter = iter(block.splitlines)
+        lines_iter = iter(block.splitlines())
         for line in lines_iter:
-            if line.strip.startswith("description:"):
+            if line.strip().startswith("description:"):
                 break
         collected = []
         for line in lines_iter:
             if line.startswith(" ") or line.startswith("\t"):
-                collected.append(line.strip)
+                collected.append(line.strip())
             else:
                 break
         val = " ".join(collected)
@@ -135,7 +135,7 @@ def check_consistent_terminology(text: str) -> Dict[str, Any]:
         ("user", "developer"),
     ]
     findings = []
-    text_lower = text.lower
+    text_lower = text.lower()
     for a, b in synonyms:
         if re.search(rf"\b{re.escape(a)}\b", text_lower) and re.search(rf"\b{re.escape(b)}\b", text_lower):
             findings.append(f"Both '{a}' and '{b}' used")
@@ -192,7 +192,7 @@ def analyze(folder: str) -> Dict[str, Any]:
             "overall": "FAIL",
         }
     with open(skill_md, "r", encoding="utf-8") as f:
-        text = f.read
+        text = f.read()
 
     checks = [
         check_description_has_trigger(text),
@@ -237,7 +237,7 @@ def render_text(r: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Run Matt Pocock's 6-item review checklist on a skill folder.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -245,7 +245,7 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to skill folder (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         folder = args.path
@@ -265,4 +265,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

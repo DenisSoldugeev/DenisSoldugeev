@@ -9,7 +9,7 @@ This reference covers Playwright's Python async API for browser automation tasks
 ```python
 from playwright.async_api import async_playwright
 
-async with async_playwright as p:
+async with async_playwright() as p:
     # Chromium (recommended for most automation)
     browser = await p.chromium.launch(headless=True)
 
@@ -46,8 +46,8 @@ context = await browser.new_context(
 )
 
 # Multiple contexts share one browser (resource efficient)
-context_a = await browser.new_context  # User A session
-context_b = await browser.new_context  # User B session
+context_a = await browser.new_context()  # User A session
+context_b = await browser.new_context()  # User B session
 ```
 
 ### Storage State (Session Persistence)
@@ -65,7 +65,7 @@ context = await browser.new_context(storage_state="auth_state.json")
 ### Basic Navigation
 
 ```python
-page = await context.new_page
+page = await context.new_page()
 
 # Navigate with different wait strategies
 await page.goto("https://example.com")                          # Default: "load"
@@ -96,7 +96,7 @@ await page.wait_for_url(re.compile(r"/dashboard/\d+"))
 async with page.expect_response("**/api/data*") as resp_info:
     await page.click("button.load")
 response = await resp_info.value
-json_data = await response.json
+json_data = await response.json()
 
 # Wait for page load state
 await page.wait_for_load_state("networkidle")
@@ -108,9 +108,9 @@ await page.wait_for_timeout(1000)  # milliseconds
 ### Navigation History
 
 ```python
-await page.go_back
-await page.go_forward
-await page.reload
+await page.go_back()
+await page.go_forward()
+await page.reload()
 ```
 
 ## Element Interaction
@@ -127,7 +127,7 @@ elements = await page.query_selector_all("div.product")
 
 # Locator API (recommended — auto-waits, re-queries on each action)
 locator = page.locator("div.product")
-count = await locator.count
+count = await locator.count()
 first = locator.first
 nth = locator.nth(2)
 ```
@@ -193,7 +193,7 @@ await page.set_input_files("input[type='file']", ["/path/a.pdf", "/path/b.pdf"])
 await page.set_input_files("input[type='file']", [])
 
 # Non-standard upload (drag-and-drop zones)
-async with page.expect_file_chooser as fc_info:
+async with page.expect_file_chooser() as fc_info:
     await page.click("div.upload-zone")
 file_chooser = await fc_info.value
 await file_chooser.set_files("/path/to/file.pdf")
@@ -230,17 +230,17 @@ scroll_height = await page.evaluate("document.body.scrollHeight")
 
 # Evaluate on a specific element
 text = await page.eval_on_selector("h1", "el => el.textContent")
-texts = await page.eval_on_selector_all("li", "els => els.map(e => e.textContent.trim)")
+texts = await page.eval_on_selector_all("li", "els => els.map(e => e.textContent.trim())")
 
 # Complex extraction
 data = await page.evaluate("""
-     => {
+    () => {
         const rows = document.querySelectorAll('table tbody tr');
         return Array.from(rows).map(row => {
             const cells = row.querySelectorAll('td');
             return {
-                name: cells[0]?.textContent.trim,
-                value: cells[1]?.textContent.trim,
+                name: cells[0]?.textContent.trim(),
+                value: cells[1]?.textContent.trim(),
             };
         });
     }
@@ -263,7 +263,7 @@ await page.locator("div.chart").screenshot(path="chart.png")
 await page.pdf(path="page.pdf", format="A4", print_background=True)
 
 # Screenshot as bytes (for processing without saving)
-buffer = await page.screenshot
+buffer = await page.screenshot()
 ```
 
 ## Network Interception
@@ -278,19 +278,19 @@ page.on("response", lambda response: print(f"{response.status} {response.url}"))
 async with page.expect_response("**/api/products*") as resp:
     await page.click("button.load")
 response = await resp.value
-data = await response.json
+data = await response.json()
 ```
 
 ### Blocking Resources (Speed Up Scraping)
 
 ```python
 # Block images, fonts, and CSS to speed up scraping
-await page.route("**/*.{png,jpg,jpeg,gif,svg,woff,woff2,ttf}", lambda route: route.abort)
-await page.route("**/*.css", lambda route: route.abort)
+await page.route("**/*.{png,jpg,jpeg,gif,svg,woff,woff2,ttf}", lambda route: route.abort())
+await page.route("**/*.css", lambda route: route.abort())
 
 # Block specific domains (ads, analytics)
-await page.route("**/google-analytics.com/**", lambda route: route.abort)
-await page.route("**/facebook.com/**", lambda route: route.abort)
+await page.route("**/google-analytics.com/**", lambda route: route.abort())
+await page.route("**/facebook.com/**", lambda route: route.abort())
 ```
 
 ### Modifying Requests
@@ -314,16 +314,16 @@ await page.route("**/api/data", lambda route: route.fulfill(
 
 ```python
 # Auto-accept all dialogs
-page.on("dialog", lambda dialog: dialog.accept)
+page.on("dialog", lambda dialog: dialog.accept())
 
 # Handle specific dialog types
 async def handle_dialog(dialog):
     if dialog.type == "confirm":
-        await dialog.accept
+        await dialog.accept()
     elif dialog.type == "prompt":
         await dialog.accept("my input")
     elif dialog.type == "alert":
-        await dialog.dismiss
+        await dialog.dismiss()
 
 page.on("dialog", handle_dialog)
 ```
@@ -332,7 +332,7 @@ page.on("dialog", handle_dialog)
 
 ```python
 # Wait for download to start
-async with page.expect_download as dl_info:
+async with page.expect_download() as dl_info:
     await page.click("a.download-link")
 download = await dl_info.value
 
@@ -340,7 +340,7 @@ download = await dl_info.value
 await download.save_as("/path/to/downloads/" + download.suggested_filename)
 
 # Get download as bytes
-path = await download.path  # Temp file path
+path = await download.path()  # Temp file path
 
 # Set download behavior at context level
 context = await browser.new_context(accept_downloads=True)
@@ -351,7 +351,7 @@ context = await browser.new_context(accept_downloads=True)
 ```python
 # Access iframe by selector
 frame = page.frame_locator("iframe#content")
-await frame.locator("button.submit").click
+await frame.locator("button.submit").click()
 
 # Access frame by name
 frame = page.frame(name="editor")
@@ -365,7 +365,7 @@ for frame in page.frames:
 
 ```python
 # Get all cookies
-cookies = await context.cookies
+cookies = await context.cookies()
 
 # Get cookies for specific URL
 cookies = await context.cookies(["https://example.com"])
@@ -381,7 +381,7 @@ await context.add_cookies([{
 }])
 
 # Clear cookies
-await context.clear_cookies
+await context.clear_cookies()
 ```
 
 ## Concurrency Patterns
@@ -392,14 +392,14 @@ await context.clear_cookies
 # Open multiple tabs in the same session
 pages = []
 for url in urls:
-    page = await context.new_page
+    page = await context.new_page()
     await page.goto(url)
     pages.append(page)
 
 # Process all pages
 for page in pages:
     data = await extract_data(page)
-    await page.close
+    await page.close()
 ```
 
 ### Multiple Contexts for Parallel Sessions
@@ -409,10 +409,10 @@ import asyncio
 
 async def scrape_with_context(browser, url):
     context = await browser.new_context(user_agent=random.choice(USER_AGENTS))
-    page = await context.new_page
+    page = await context.new_page()
     await page.goto(url)
     data = await extract_data(page)
-    await context.close
+    await context.close()
     return data
 
 # Run 5 concurrent scraping tasks
@@ -427,20 +427,20 @@ Init scripts run before any page script, in every new page/context.
 ```python
 # Remove webdriver flag
 await context.add_init_script("""
-    Object.defineProperty(navigator, 'webdriver', {get:  => undefined});
+    Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
 """)
 
 # Override plugins (headless Chrome has empty plugins)
 await context.add_init_script("""
     Object.defineProperty(navigator, 'plugins', {
-        get:  => [1, 2, 3, 4, 5],
+        get: () => [1, 2, 3, 4, 5],
     });
 """)
 
 # Override languages
 await context.add_init_script("""
     Object.defineProperty(navigator, 'languages', {
-        get:  => ['en-US', 'en'],
+        get: () => ['en-US', 'en'],
     });
 """)
 
@@ -457,11 +457,11 @@ await context.add_init_script(path="stealth.js")
 await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
 
 # Scroll element into view
-await page.locator("div.target").scroll_into_view_if_needed
+await page.locator("div.target").scroll_into_view_if_needed()
 
 # Smooth scroll simulation
 await page.evaluate("""
-    async  => {
+    async () => {
         const delay = ms => new Promise(r => setTimeout(r, ms));
         for (let i = 0; i < document.body.scrollHeight; i += 300) {
             window.scrollTo(0, i);
@@ -485,8 +485,8 @@ await page.keyboard.press("Control+v")
 
 ```python
 # Playwright pierces open shadow DOM with >> operator
-await page.locator("my-component >> .inner-button").click
+await page.locator("my-component >> .inner-button").click()
 
 # Or use the css= engine with >> for chained piercing
-await page.locator("css=host-element >> css=.shadow-child").click
+await page.locator("css=host-element >> css=.shadow-child").click()
 ```

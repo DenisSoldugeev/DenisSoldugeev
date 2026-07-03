@@ -58,8 +58,8 @@ idempotency_table = dynamodb.Table('idempotency')
 def handler(event, context):
     # Generate idempotency key
     idempotency_key = hashlib.sha256(
-        f"{event['orderId']}-{event['action']}".encode
-    ).hexdigest
+        f"{event['orderId']}-{event['action']}".encode()
+    ).hexdigest()
 
     # Check if already processed
     try:
@@ -77,7 +77,7 @@ def handler(event, context):
         Item={
             'pk': idempotency_key,
             'result': result,
-            'ttl': int(time.time) + 86400  # 24h TTL
+            'ttl': int(time.time()) + 86400  # 24h TTL
         }
     )
 
@@ -94,7 +94,7 @@ from aws_xray_sdk.core import patch_all
 # SDK initialization happens once
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('my-table')
-patch_all
+patch_all()
 
 def handler(event, context):
     # Handler code uses pre-initialized resources
@@ -527,19 +527,19 @@ import boto3
 app = Flask(__name__)
 
 @app.route('/health')
-def health:
+def health():
     checks = {
-        'database': check_database,
-        'cache': check_cache,
-        'external_api': check_external_api
+        'database': check_database(),
+        'cache': check_cache(),
+        'external_api': check_external_api()
     }
 
-    status = 'healthy' if all(checks.values) else 'unhealthy'
+    status = 'healthy' if all(checks.values()) else 'unhealthy'
     code = 200 if status == 'healthy' else 503
 
     return jsonify({'status': status, 'checks': checks}), code
 
-def check_database:
+def check_database():
     try:
         # Quick connectivity test
         db.execute('SELECT 1')

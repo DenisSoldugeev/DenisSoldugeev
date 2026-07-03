@@ -124,8 +124,8 @@ class GtmPlan:
 
 def _validate(gtm: dict) -> list[str]:
     errs: list[str] = []
-    tier = (gtm.get("partner_tier") or "").upper
-    motion = (gtm.get("sales_motion") or "").lower
+    tier = (gtm.get("partner_tier") or "").upper()
+    motion = (gtm.get("sales_motion") or "").lower()
     if tier not in VALID_TIERS:
         errs.append(f"partner_tier '{tier}' not in {VALID_TIERS}")
         return errs
@@ -245,8 +245,8 @@ def plan_gtm(gtm: dict, profile_name: str = "saas") -> GtmPlan:
     plan = GtmPlan(
         partner_name=str(gtm.get("partner_name", "UNSPECIFIED")),
         profile=profile_name,
-        partner_tier=(gtm.get("partner_tier") or "").upper,
-        sales_motion=(gtm.get("sales_motion") or "").lower,
+        partner_tier=(gtm.get("partner_tier") or "").upper(),
+        sales_motion=(gtm.get("sales_motion") or "").lower(),
         target_segments=list(gtm.get("target_segments", []) or []),
         joint_value_proposition=str(gtm.get("joint_value_proposition", "")),
         validation_errors=errs,
@@ -369,4 +369,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

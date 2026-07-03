@@ -119,7 +119,7 @@ class Resource:
     def __init__(self, data: Dict[str, Any]):
         self.id: str = data.get("id", "")
         self.name: str = data.get("name", "")
-        self.role: str = data.get("role", "").lower
+        self.role: str = data.get("role", "").lower()
         self.skills: List[str] = data.get("skills", [])
         self.skill_levels: Dict[str, float] = data.get("skill_levels", {})
         self.hourly_rate: float = data.get("hourly_rate", 0)
@@ -131,15 +131,15 @@ class Resource:
         self.time_zone: str = data.get("time_zone", "")
         
         # Calculate derived metrics
-        self._calculate_effective_capacity
-        self._determine_role_config
+        self._calculate_effective_capacity()
+        self._determine_role_config()
     
     def _calculate_effective_capacity(self):
         """Calculate effective weekly capacity accounting for overhead."""
         base_capacity = self.max_hours_per_week
         
         # Apply overhead factors
-        overhead_total = sum(CAPACITY_FACTORS.values)
+        overhead_total = sum(CAPACITY_FACTORS.values())
         self.effective_hours_per_week = base_capacity * (1 - overhead_total)
         
         # Current available capacity
@@ -179,18 +179,18 @@ class Project:
     def __init__(self, data: Dict[str, Any]):
         self.id: str = data.get("id", "")
         self.name: str = data.get("name", "")
-        self.priority: str = data.get("priority", "medium").lower
-        self.complexity: str = data.get("complexity", "moderate").lower
+        self.priority: str = data.get("priority", "medium").lower()
+        self.complexity: str = data.get("complexity", "moderate").lower()
         self.estimated_hours: int = data.get("estimated_hours", 0)
         self.start_date: str = data.get("start_date", "")
         self.target_end_date: str = data.get("target_end_date", "")
         self.required_skills: List[str] = data.get("required_skills", [])
         self.skill_requirements: Dict[str, int] = data.get("skill_requirements", {})
         self.current_allocation: List[Dict[str, Any]] = data.get("current_allocation", [])
-        self.status: str = data.get("status", "planned").lower
+        self.status: str = data.get("status", "planned").lower()
         
         # Calculate derived metrics
-        self._calculate_project_metrics
+        self._calculate_project_metrics()
     
     def _calculate_project_metrics(self):
         """Calculate project-specific metrics."""
@@ -303,7 +303,7 @@ def analyze_resource_utilization(resources: List[Resource]) -> Dict[str, Any]:
         "utilization_categories": {
             k: [{"id": r.id, "name": r.name, "role": r.role, "utilization": r.current_utilization}
                 for r in v]
-            for k, v in utilization_categories.items
+            for k, v in utilization_categories.items()
         },
         "role_analysis": role_analysis,
         "capacity_alerts": _generate_capacity_alerts(utilization_categories)
@@ -338,13 +338,13 @@ def analyze_project_capacity_requirements(projects: List[Project]) -> Dict[str, 
     skill_demand = {}
     for project in projects:
         if project.status != "completed":
-            for skill, hours in project.skill_requirements.items:
+            for skill, hours in project.skill_requirements.items():
                 if skill not in skill_demand:
                     skill_demand[skill] = 0
                 skill_demand[skill] += hours
     
     # Sort skills by demand
-    sorted_skill_demand = sorted(skill_demand.items, key=lambda x: x[1], reverse=True)
+    sorted_skill_demand = sorted(skill_demand.items(), key=lambda x: x[1], reverse=True)
     
     return {
         "project_stats": project_stats,
@@ -460,8 +460,8 @@ def simulate_capacity_scenarios(resources: List[Resource], projects: List[Projec
         scenario_params = scenario.get("parameters", {})
         
         # Create copies for simulation
-        sim_resources = [Resource(r.__dict__.copy) for r in resources]
-        sim_projects = [Project(p.__dict__.copy) for p in projects]
+        sim_resources = [Resource(r.__dict__.copy()) for r in resources]
+        sim_projects = [Project(p.__dict__.copy()) for p in projects]
         
         # Apply scenario changes
         if scenario_type == "add_resource":
@@ -489,7 +489,7 @@ def simulate_capacity_scenarios(resources: List[Resource], projects: List[Projec
             for resource in sim_resources:
                 if resource.id == resource_id:
                     resource.current_utilization = new_utilization
-                    resource._calculate_effective_capacity
+                    resource._calculate_effective_capacity()
         
         # Analyze scenario results
         resource_analysis = analyze_resource_utilization(sim_resources)
@@ -568,7 +568,7 @@ def generate_capacity_recommendations(analysis_results: Dict[str, Any]) -> List[
     # Skill-based recommendations
     skill_demand = project_analysis.get("skill_demand", {})
     if skill_demand:
-        top_skill = list(skill_demand.keys)[0]
+        top_skill = list(skill_demand.keys())[0]
         top_demand = skill_demand[top_skill]
         recommendations.append(f"High demand for {top_skill} skills ({top_demand} hours). Consider training or specialized hiring.")
     
@@ -588,7 +588,7 @@ def generate_capacity_recommendations(analysis_results: Dict[str, Any]) -> List[
 
 def analyze_capacity(data: Dict[str, Any]) -> CapacityAnalysisResult:
     """Perform comprehensive capacity analysis."""
-    result = CapacityAnalysisResult
+    result = CapacityAnalysisResult()
     
     try:
         # Parse resource and project data
@@ -671,9 +671,9 @@ def format_text_output(result: CapacityAnalysisResult) -> str:
     lines.append("-"*30)
     
     utilization_categories = resource_analysis.get("utilization_categories", {})
-    for category, resources in utilization_categories.items:
+    for category, resources in utilization_categories.items():
         if resources:
-            lines.append(f"{category.replace('_', ' ').title}: {len(resources)} resources")
+            lines.append(f"{category.replace('_', ' ').title()}: {len(resources)} resources")
             for resource in resources[:3]:  # Show top 3
                 lines.append(f"  - {resource['name']} ({resource['role']}): {resource['utilization']:.1%}")
             if len(resources) > 3:
@@ -710,7 +710,7 @@ def format_text_output(result: CapacityAnalysisResult) -> str:
     if skill_demand:
         lines.append("TOP SKILL DEMANDS")
         lines.append("-"*30)
-        for skill, hours in list(skill_demand.items)[:5]:
+        for skill, hours in list(skill_demand.items())[:5]:
             lines.append(f"{skill}: {hours} hours needed")
         lines.append("")
     
@@ -738,7 +738,7 @@ def format_text_output(result: CapacityAnalysisResult) -> str:
     if scenario_analysis:
         lines.append("SCENARIO ANALYSIS")
         lines.append("-"*30)
-        for scenario_name, results in scenario_analysis.items:
+        for scenario_name, results in scenario_analysis.items():
             lines.append(f"{scenario_name}:")
             lines.append(f"  Utilization: {results['resource_utilization']:.1%}")
             lines.append(f"  Capacity gaps: {results['capacity_gaps']:.0f}h/week")
@@ -795,7 +795,7 @@ def format_json_output(result: CapacityAnalysisResult) -> Dict[str, Any]:
 # CLI Interface
 # ---------------------------------------------------------------------------
 
-def main -> int:
+def main() -> int:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Analyze resource capacity and allocation across project portfolio"
@@ -811,7 +811,7 @@ def main -> int:
         help="Output format (default: text)"
     )
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Load and validate data
@@ -843,4 +843,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

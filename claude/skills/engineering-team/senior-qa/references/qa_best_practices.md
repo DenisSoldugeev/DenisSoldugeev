@@ -61,8 +61,8 @@ export function createUserService(
 const userService = createUserService(prisma, emailService);
 
 // Usage in tests
-const mockDb = { user: { create: jest.fn } };
-const mockEmail = { send: jest.fn };
+const mockDb = { user: { create: jest.fn() } };
+const mockEmail = { send: jest.fn() };
 const testService = createUserService(mockDb, mockEmail);
 ```
 
@@ -73,9 +73,9 @@ Pure functions are deterministic and have no side effects, making them trivial t
 **Impure (Hard to Test):**
 
 ```typescript
-function formatTimestamp {
-  const now = new Date;
-  return `${now.getFullYear}-${now.getMonth + 1}-${now.getDate}`;
+function formatTimestamp() {
+  const now = new Date();
+  return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
 }
 ```
 
@@ -83,7 +83,7 @@ function formatTimestamp {
 
 ```typescript
 function formatTimestamp(date: Date): string {
-  return `${date.getFullYear}-${date.getMonth + 1}-${date.getDate}`;
+  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 }
 
 // Test
@@ -98,7 +98,7 @@ Separate business logic from UI and I/O operations.
 
 ```typescript
 // Component with embedded business logic
-function CheckoutForm {
+function CheckoutForm() {
   const [total, setTotal] = useState(0);
 
   const handleSubmit = async (items: CartItem[]) => {
@@ -143,7 +143,7 @@ export function calculateTax(subtotal: number, rate = 0.08): number {
 }
 
 // Custom hook for order logic (testable with renderHook)
-export function useCheckout {
+export function useCheckout() {
   const [total, setTotal] = useState(0);
   const mutation = useMutation(createOrder);
 
@@ -160,9 +160,9 @@ export function useCheckout {
 }
 
 // Component (integration testable)
-function CheckoutForm {
-  const { checkout, total, isLoading } = useCheckout;
-  return <form onSubmit={ => checkout(items)}>...</form>;
+function CheckoutForm() {
+  const { checkout, total, isLoading } = useCheckout();
+  return <form onSubmit={() => checkout(items)}>...</form>;
 }
 ```
 
@@ -174,8 +174,8 @@ function CheckoutForm {
 | Callbacks over side effects | High | `onSubmit={handleSubmit}` |
 | Controlled components | High | `<Input value={value} onChange={...}>` |
 | Render props | Medium | `<DataProvider render={data => ...}>` |
-| Internal state | Low | `const [x, setX] = useState` |
-| Global state | Low | `useGlobalStore` |
+| Internal state | Low | `const [x, setX] = useState()` |
+| Global state | Low | `useGlobalStore()` |
 
 ---
 
@@ -188,53 +188,53 @@ Good test names document expected behavior and help diagnose failures.
 **Pattern 1: should [expected behavior] when [condition]**
 
 ```typescript
-describe('LoginForm',  => {
-  it('should display error message when credentials are invalid',  => {});
-  it('should redirect to dashboard when login succeeds',  => {});
-  it('should disable submit button when form is submitting',  => {});
+describe('LoginForm', () => {
+  it('should display error message when credentials are invalid', () => {});
+  it('should redirect to dashboard when login succeeds', () => {});
+  it('should disable submit button when form is submitting', () => {});
 });
 ```
 
 **Pattern 2: [method/action] [expected result]**
 
 ```typescript
-describe('calculateDiscount',  => {
-  it('returns 0 for orders under $50',  => {});
-  it('returns 10% for orders $50-$99',  => {});
-  it('returns 20% for orders $100+',  => {});
+describe('calculateDiscount', () => {
+  it('returns 0 for orders under $50', () => {});
+  it('returns 10% for orders $50-$99', () => {});
+  it('returns 20% for orders $100+', () => {});
 });
 ```
 
 **Pattern 3: given [context], when [action], then [result]**
 
 ```typescript
-describe('ShoppingCart',  => {
-  it('given an empty cart, when adding an item, then cart count is 1',  => {});
-  it('given items in cart, when removing all, then cart is empty',  => {});
+describe('ShoppingCart', () => {
+  it('given an empty cart, when adding an item, then cart count is 1', () => {});
+  it('given items in cart, when removing all, then cart is empty', () => {});
 });
 ```
 
 ### Describe Block Organization
 
 ```typescript
-describe('UserService',  => {
-  describe('createUser',  => {
-    describe('with valid input',  => {
-      it('creates user in database',  => {});
-      it('sends welcome email',  => {});
-      it('returns user with id',  => {});
+describe('UserService', () => {
+  describe('createUser', () => {
+    describe('with valid input', () => {
+      it('creates user in database', () => {});
+      it('sends welcome email', () => {});
+      it('returns user with id', () => {});
     });
 
-    describe('with invalid input',  => {
-      it('throws ValidationError for missing email',  => {});
-      it('throws ValidationError for invalid email format',  => {});
-      it('throws ConflictError for duplicate email',  => {});
+    describe('with invalid input', () => {
+      it('throws ValidationError for missing email', () => {});
+      it('throws ValidationError for invalid email format', () => {});
+      it('throws ConflictError for duplicate email', () => {});
     });
   });
 
-  describe('deleteUser',  => {
-    it('removes user from database',  => {});
-    it('throws NotFoundError for non-existent user',  => {});
+  describe('deleteUser', () => {
+    it('removes user from database', () => {});
+    it('throws NotFoundError for non-existent user', () => {});
   });
 });
 ```
@@ -257,7 +257,7 @@ The AAA pattern structures tests into three clear phases.
 ### Structure
 
 ```typescript
-it('calculates total with discount',  => {
+it('calculates total with discount', () => {
   // Arrange - Set up test data and conditions
   const items = [
     { name: 'Widget', price: 100, quantity: 2 },
@@ -276,7 +276,7 @@ it('calculates total with discount',  => {
 ### Async Example
 
 ```typescript
-it('fetches user profile', async  => {
+it('fetches user profile', async () => {
   // Arrange
   const userId = '123';
   server.use(
@@ -289,17 +289,17 @@ it('fetches user profile', async  => {
   render(<UserProfile userId={userId} />);
 
   // Assert
-  await expect(screen.findByText('John')).resolves.toBeInTheDocument;
+  await expect(screen.findByText('John')).resolves.toBeInTheDocument();
 });
 ```
 
 ### Component Testing Example
 
 ```typescript
-it('submits form with user input', async  => {
+it('submits form with user input', async () => {
   // Arrange
-  const user = userEvent.setup;
-  const onSubmit = jest.fn;
+  const user = userEvent.setup();
+  const onSubmit = jest.fn();
   render(<ContactForm onSubmit={onSubmit} />);
 
   // Act
@@ -333,22 +333,22 @@ Isolated tests are independent, repeatable, and can run in any order.
 ### State Isolation
 
 ```typescript
-describe('CartService',  => {
+describe('CartService', () => {
   let cartService: CartService;
 
   // Fresh instance for each test
-  beforeEach( => {
-    cartService = new CartService;
+  beforeEach(() => {
+    cartService = new CartService();
   });
 
-  it('adds item to empty cart',  => {
+  it('adds item to empty cart', () => {
     cartService.addItem({ id: '1', quantity: 1 });
-    expect(cartService.getItems).toHaveLength(1);
+    expect(cartService.getItems()).toHaveLength(1);
   });
 
-  it('starts with empty cart',  => {
+  it('starts with empty cart', () => {
     // Not affected by previous test
-    expect(cartService.getItems).toHaveLength(0);
+    expect(cartService.getItems()).toHaveLength(0);
   });
 });
 ```
@@ -356,24 +356,24 @@ describe('CartService',  => {
 ### Database Isolation
 
 ```typescript
-describe('UserRepository',  => {
-  beforeAll(async  => {
+describe('UserRepository', () => {
+  beforeAll(async () => {
     // Connect to test database
     await db.connect(process.env.TEST_DATABASE_URL);
   });
 
-  beforeEach(async  => {
+  beforeEach(async () => {
     // Clean database before each test
     await db.query('TRUNCATE users CASCADE');
   });
 
-  afterAll(async  => {
-    await db.disconnect;
+  afterAll(async () => {
+    await db.disconnect();
   });
 
-  it('creates user', async  => {
+  it('creates user', async () => {
     const user = await userRepo.create({ email: 'test@example.com' });
-    expect(user.id).toBeDefined;
+    expect(user.id).toBeDefined();
   });
 });
 ```
@@ -381,17 +381,17 @@ describe('UserRepository',  => {
 ### API Mocking Isolation
 
 ```typescript
-describe('ProductList',  => {
+describe('ProductList', () => {
   // Reset handlers after each test
-  afterEach( => server.resetHandlers);
+  afterEach(() => server.resetHandlers());
 
-  it('shows products from API', async  => {
+  it('shows products from API', async () => {
     // Default handler returns products
     render(<ProductList />);
-    await expect(screen.findByText('Widget')).resolves.toBeInTheDocument;
+    await expect(screen.findByText('Widget')).resolves.toBeInTheDocument();
   });
 
-  it('shows error on API failure', async  => {
+  it('shows error on API failure', async () => {
     // Override handler for this test only
     server.use(
       rest.get('/api/products', (req, res, ctx) =>
@@ -400,13 +400,13 @@ describe('ProductList',  => {
     );
 
     render(<ProductList />);
-    await expect(screen.findByText('Error')).resolves.toBeInTheDocument;
+    await expect(screen.findByText('Error')).resolves.toBeInTheDocument();
   });
 
-  it('shows products again', async  => {
+  it('shows products again', async () => {
     // Back to default handler (server.resetHandlers ran)
     render(<ProductList />);
-    await expect(screen.findByText('Widget')).resolves.toBeInTheDocument;
+    await expect(screen.findByText('Widget')).resolves.toBeInTheDocument();
   });
 });
 ```
@@ -416,10 +416,10 @@ describe('ProductList',  => {
 | Aspect | Solution |
 |--------|----------|
 | Global state | Reset in beforeEach |
-| Timers | jest.useFakeTimers + jest.useRealTimers |
+| Timers | jest.useFakeTimers() + jest.useRealTimers() |
 | DOM | RTL's cleanup (automatic) |
 | Database | Truncate tables or use transactions |
-| API mocks | server.resetHandlers |
+| API mocks | server.resetHandlers() |
 | File system | Use temp directories, clean up in afterEach |
 | Environment vars | Restore in afterEach |
 
@@ -435,18 +435,18 @@ Flaky tests pass and fail intermittently without code changes.
 
 ```typescript
 // Flaky - race condition
-it('shows loading then data',  => {
+it('shows loading then data', () => {
   render(<UserProfile />);
-  expect(screen.getByText('Loading')).toBeInTheDocument;
-  expect(screen.getByText('John')).toBeInTheDocument; // May fail
+  expect(screen.getByText('Loading')).toBeInTheDocument();
+  expect(screen.getByText('John')).toBeInTheDocument(); // May fail
 });
 
 // Fixed - proper async handling
-it('shows loading then data', async  => {
+it('shows loading then data', async () => {
   render(<UserProfile />);
-  expect(screen.getByText('Loading')).toBeInTheDocument;
-  await waitFor( => {
-    expect(screen.getByText('John')).toBeInTheDocument;
+  expect(screen.getByText('Loading')).toBeInTheDocument();
+  await waitFor(() => {
+    expect(screen.getByText('John')).toBeInTheDocument();
   });
 });
 ```
@@ -455,13 +455,13 @@ it('shows loading then data', async  => {
 
 ```typescript
 // Flaky - random data
-it('sorts users alphabetically',  => {
-  const users = [createUser, createUser, createUser];
+it('sorts users alphabetically', () => {
+  const users = [createUser(), createUser(), createUser()];
   // Names are random, order unpredictable
 });
 
 // Fixed - deterministic data
-it('sorts users alphabetically',  => {
+it('sorts users alphabetically', () => {
   const users = [
     createUser({ name: 'Charlie' }),
     createUser({ name: 'Alice' }),
@@ -476,33 +476,33 @@ it('sorts users alphabetically',  => {
 
 ```typescript
 // Flaky - relies on previous test
-describe('Counter',  => {
-  const counter = new Counter; // Shared instance!
+describe('Counter', () => {
+  const counter = new Counter(); // Shared instance!
 
-  it('increments',  => {
-    counter.increment;
+  it('increments', () => {
+    counter.increment();
     expect(counter.value).toBe(1);
   });
 
-  it('starts at zero',  => {
+  it('starts at zero', () => {
     expect(counter.value).toBe(0); // Fails! Value is 1
   });
 });
 
 // Fixed - fresh instance per test
-describe('Counter',  => {
+describe('Counter', () => {
   let counter: Counter;
 
-  beforeEach( => {
-    counter = new Counter;
+  beforeEach(() => {
+    counter = new Counter();
   });
 
-  it('increments',  => {
-    counter.increment;
+  it('increments', () => {
+    counter.increment();
     expect(counter.value).toBe(1);
   });
 
-  it('starts at zero',  => {
+  it('starts at zero', () => {
     expect(counter.value).toBe(0); // Passes
   });
 });
@@ -512,20 +512,20 @@ describe('Counter',  => {
 
 ```typescript
 // Flaky - real network call
-it('fetches data', async  => {
+it('fetches data', async () => {
   const data = await fetch('https://api.example.com/data');
-  expect(data).toBeDefined;
+  expect(data).toBeDefined();
 });
 
 // Fixed - mock the network
-it('fetches data', async  => {
+it('fetches data', async () => {
   server.use(
     rest.get('https://api.example.com/data', (req, res, ctx) =>
       res(ctx.json({ value: 42 }))
     )
   );
 
-  const data = await fetchData;
+  const data = await fetchData();
   expect(data.value).toBe(42);
 });
 ```
@@ -558,7 +558,7 @@ module.exports = {
 
 ```typescript
 // Temporarily skip flaky test
-it.skip('flaky test to fix',  => {
+it.skip('flaky test to fix', () => {
   // TODO: Fix timing issue in #123
 });
 
@@ -627,7 +627,7 @@ Keep tests maintainable as the codebase evolves.
 ```typescript
 // __tests__/helpers/assertions.ts
 export function expectLoadingState(container: HTMLElement) {
-  expect(within(container).getByRole('progressbar')).toBeInTheDocument;
+  expect(within(container).getByRole('progressbar')).toBeInTheDocument();
 }
 
 export function expectErrorState(container: HTMLElement, message: string) {
@@ -635,7 +635,7 @@ export function expectErrorState(container: HTMLElement, message: string) {
 }
 
 // Usage
-it('shows loading state',  => {
+it('shows loading state', () => {
   render(<DataList />);
   expectLoadingState(screen.getByTestId('data-list'));
 });
@@ -645,7 +645,7 @@ it('shows loading state',  => {
 
 ```typescript
 // Instead of repeating setup
-function renderWithUser(ui: ReactElement, user = createUser) {
+function renderWithUser(ui: ReactElement, user = createUser()) {
   return {
     user,
     ...render(<AuthProvider user={user}>{ui}</AuthProvider>),
@@ -704,14 +704,14 @@ export function createUserResponse(overrides = {}) {
  *
  * Setup: docker-compose up -d postgres
  */
-describe('OrderProcessor',  => {
+describe('OrderProcessor', () => {
   /**
    * Verifies that orders with backordered items
    * are split into separate fulfillment batches.
    *
    * Related: JIRA-1234
    */
-  it('splits orders with backordered items',  => {});
+  it('splits orders with backordered items', () => {});
 });
 ```
 
@@ -749,17 +749,17 @@ npx jest --verbose --no-coverage
 ### React Testing Library Debugging
 
 ```typescript
-it('renders user profile', async  => {
+it('renders user profile', async () => {
   render(<UserProfile userId="123" />);
 
   // Print current DOM
-  screen.debug;
+  screen.debug();
 
   // Print specific element
   screen.debug(screen.getByRole('heading'));
 
   // Log accessible roles
-  screen.logTestingPlaygroundURL; // Opens interactive playground
+  screen.logTestingPlaygroundURL(); // Opens interactive playground
 
   // Check what queries would match
   const element = screen.getByRole('button');
@@ -787,7 +787,7 @@ npx playwright show-trace trace.zip
 ```typescript
 test('debug this', async ({ page }) => {
   await page.goto('/');
-  await page.pause; // Opens inspector
+  await page.pause(); // Opens inspector
   await page.click('button');
 });
 ```
@@ -796,7 +796,7 @@ test('debug this', async ({ page }) => {
 
 | Symptom | Likely Cause | Debug Approach |
 |---------|--------------|----------------|
-| "Unable to find element" | Wrong query or element not rendered | `screen.debug`, check async |
+| "Unable to find element" | Wrong query or element not rendered | `screen.debug()`, check async |
 | "Expected X, received Y" | Logic error or stale mock | Log intermediate values |
 | "Timeout exceeded" | Slow async or missing await | Increase timeout, check promises |
 | "Cannot read property of undefined" | Missing mock or setup | Check beforeEach, mock returns |
@@ -806,10 +806,10 @@ test('debug this', async ({ page }) => {
 
 ```typescript
 // Add logging for intermittent failures
-it('processes order', async  => {
-  console.log('Test started at', Date.now);
+it('processes order', async () => {
+  console.log('Test started at', Date.now());
 
-  const order = await createOrder;
+  const order = await createOrder();
   console.log('Order created:', order.id);
 
   const result = await processOrder(order);

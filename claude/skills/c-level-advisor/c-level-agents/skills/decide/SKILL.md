@@ -1,6 +1,6 @@
 ---
 name: "decide"
-description: "/ds:decide <memo> — Log a decision to two-layer memory via decision-logger. Approved memo becomes durable; raw transcripts kept for reference."
+description: "/ds:decide <memo> — Log a decision to two-layer memory via decision-logger. Approved memo becomes durable; raw transcripts kept for reference. Use when the founder has approved a boardroom memo and the decision must become durable company memory — e.g. right after /ds:boardroom concludes."
 ---
 
 # /ds:decide — Log the Decision

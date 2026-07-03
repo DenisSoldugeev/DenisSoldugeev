@@ -68,7 +68,7 @@ def load_controls_from_csv(filepath: str) -> Dict[str, Dict]:
                 if control_id:
                     controls[control_id] = {
                         "name": row.get("name", "Unknown"),
-                        "risk": row.get("risk", "medium").lower,
+                        "risk": row.get("risk", "medium").lower(),
                     }
     except FileNotFoundError:
         print(f"Error: File not found: {filepath}", file=sys.stderr)
@@ -103,7 +103,7 @@ def generate_audit_plan(
     plan = {
         "metadata": {
             "year": year,
-            "generated": datetime.now.isoformat,
+            "generated": datetime.now().isoformat(),
             "methodology": "ISO 27001 Risk-Based Internal Auditing",
             "total_controls": len(controls),
         },
@@ -117,7 +117,7 @@ def generate_audit_plan(
     }
 
     # Assign controls to quarters based on risk
-    for control_id, control_data in controls.items:
+    for control_id, control_data in controls.items():
         risk = control_data.get("risk", "medium")
         frequency = AUDIT_FREQUENCY.get(risk, 1)
         audit_dates = calculate_audit_dates(year, frequency)
@@ -160,7 +160,7 @@ def generate_audit_plan(
     # Calculate summary statistics
     risk_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
     total_audits = 0
-    for control_data in plan["controls"].values:
+    for control_data in plan["controls"].values():
         risk_counts[control_data["risk"]] += 1
         total_audits += control_data["frequency"]
 
@@ -197,7 +197,7 @@ def format_markdown(plan: Dict[str, Any]) -> str:
         f"",
     ]
 
-    for quarter, data in plan["schedule"].items:
+    for quarter, data in plan["schedule"].items():
         lines.extend([
             f"## {quarter}: {data['month']}",
             f"",
@@ -207,7 +207,7 @@ def format_markdown(plan: Dict[str, Any]) -> str:
         for audit in data["audits"]:
             lines.append(
                 f"| {audit['control_id']} | {audit['control_name']} | "
-                f"{audit['risk_level'].capitalize} | {audit['target_date']} |"
+                f"{audit['risk_level'].capitalize()} | {audit['target_date']} |"
             )
         lines.append("")
 
@@ -225,14 +225,14 @@ def format_markdown(plan: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="ISMS Audit Scheduler - Risk-based audit planning"
     )
     parser.add_argument(
         "--year", "-y",
         type=int,
-        default=datetime.now.year,
+        default=datetime.now().year,
         help="Audit plan year (default: current year)"
     )
     parser.add_argument(
@@ -250,7 +250,7 @@ def main:
         help="Output format (default: json)"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Load controls
     controls = None
@@ -276,4 +276,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

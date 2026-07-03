@@ -210,11 +210,11 @@ def render_text(r: Dict[str, Any], source: str) -> str:
     lines.append(f"Total obligations: {r['total_obligations']}")
     lines.append("")
     lines.append("By deadline phase:")
-    for phase, n in sorted(r["by_phase"].items, key=lambda x: PHASE_DATES.get(x[0], "")):
+    for phase, n in sorted(r["by_phase"].items(), key=lambda x: PHASE_DATES.get(x[0], "")):
         lines.append(f"  {PHASE_DATES.get(phase, '?')}  {phase:35s}  {n} obligations")
     lines.append("")
     lines.append("By role:")
-    for role, n in sorted(r["by_role"].items):
+    for role, n in sorted(r["by_role"].items()):
         lines.append(f"  {role:30s}  {n} obligations")
     lines.append("")
     lines.append("-" * 72)
@@ -236,7 +236,7 @@ def render_text(r: Dict[str, Any], source: str) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="EU AI Act per-role obligation matrix with phasing deadlines.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -244,7 +244,7 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to roles JSON (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
@@ -270,4 +270,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

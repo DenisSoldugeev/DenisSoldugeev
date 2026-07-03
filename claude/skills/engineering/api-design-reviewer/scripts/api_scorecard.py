@@ -75,7 +75,7 @@ class APIScorecard:
     
     def calculate_overall_score(self) -> None:
         """Calculate overall weighted score and grade."""
-        self.overall_score = sum(score.weighted_score for score in self.category_scores.values)
+        self.overall_score = sum(score.weighted_score for score in self.category_scores.values())
         
         if self.overall_score >= 90:
             self.overall_grade = "A"
@@ -91,16 +91,16 @@ class APIScorecard:
     def get_top_recommendations(self, limit: int = 5) -> List[str]:
         """Get top recommendations across all categories."""
         all_recommendations = []
-        for category_score in self.category_scores.values:
+        for category_score in self.category_scores.values():
             for rec in category_score.recommendations:
-                all_recommendations.append(f"{category_score.category.value.title}: {rec}")
+                all_recommendations.append(f"{category_score.category.value.title()}: {rec}")
         
         # Sort by category weight (highest impact first)
         weighted_recs = []
-        for category_score in sorted(self.category_scores.values, 
+        for category_score in sorted(self.category_scores.values(), 
                                    key=lambda x: x.weight, reverse=True):
             for rec in category_score.recommendations[:2]:  # Top 2 per category
-                weighted_recs.append(f"{category_score.category.value.title}: {rec}")
+                weighted_recs.append(f"{category_score.category.value.title()}: {rec}")
         
         return weighted_recs[:limit]
 
@@ -109,7 +109,7 @@ class APIScoringEngine:
     """Main API scoring engine."""
     
     def __init__(self):
-        self.scorecard = APIScorecard
+        self.scorecard = APIScorecard()
         self.spec: Optional[Dict] = None
         
         # Regex patterns for validation
@@ -132,20 +132,20 @@ class APIScoringEngine:
     def score_api(self, spec: Dict[str, Any]) -> APIScorecard:
         """Generate comprehensive API scorecard."""
         self.spec = spec
-        self.scorecard = APIScorecard
+        self.scorecard = APIScorecard()
         
         # Extract basic API info
-        self._extract_api_info
+        self._extract_api_info()
         
         # Score each category
-        self._score_consistency
-        self._score_documentation
-        self._score_security
-        self._score_usability
-        self._score_performance
+        self._score_consistency()
+        self._score_documentation()
+        self._score_security()
+        self._score_usability()
+        self._score_performance()
         
         # Calculate overall score
-        self.scorecard.calculate_overall_score
+        self.scorecard.calculate_overall_score()
         
         return self.scorecard
     
@@ -164,10 +164,10 @@ class APIScoringEngine:
         
         # Count total endpoints
         endpoint_count = 0
-        for path_obj in paths.values:
+        for path_obj in paths.values():
             if isinstance(path_obj, dict):
-                endpoint_count += len([m for m in path_obj.keys 
-                                     if m.upper in self.http_methods])
+                endpoint_count += len([m for m in path_obj.keys() 
+                                     if m.upper() in self.http_methods])
         
         self.scorecard.total_endpoints = endpoint_count
     
@@ -182,13 +182,13 @@ class APIScoringEngine:
         )
         
         consistency_checks = [
-            self._check_naming_consistency,
-            self._check_response_consistency,
-            self._check_error_format_consistency,
-            self._check_parameter_consistency,
-            self._check_url_structure_consistency,
-            self._check_http_method_consistency,
-            self._check_status_code_consistency
+            self._check_naming_consistency(),
+            self._check_response_consistency(),
+            self._check_error_format_consistency(),
+            self._check_parameter_consistency(),
+            self._check_url_structure_consistency(),
+            self._check_http_method_consistency(),
+            self._check_status_code_consistency()
         ]
         
         # Average the consistency scores
@@ -220,7 +220,7 @@ class APIScoringEngine:
         passed_checks = 0
         
         # Check path naming (should be kebab-case)
-        for path in paths.keys:
+        for path in paths.keys():
             segments = [seg for seg in path.split('/') if seg and not seg.startswith('{')]
             for segment in segments:
                 total_checks += 1
@@ -228,15 +228,15 @@ class APIScoringEngine:
                     passed_checks += 1
         
         # Check schema naming (should be PascalCase)
-        for schema_name in schemas.keys:
+        for schema_name in schemas.keys():
             total_checks += 1
             if self.pascal_case_pattern.match(schema_name):
                 passed_checks += 1
         
         # Check property naming within schemas
-        for schema in schemas.values:
+        for schema in schemas.values():
             if isinstance(schema, dict) and 'properties' in schema:
-                for prop_name in schema['properties'].keys:
+                for prop_name in schema['properties'].keys():
                     total_checks += 1
                     if self.camel_case_pattern.match(prop_name):
                         passed_checks += 1
@@ -250,16 +250,16 @@ class APIScoringEngine:
         response_patterns = []
         total_responses = 0
         
-        for path_obj in paths.values:
+        for path_obj in paths.values():
             if not isinstance(path_obj, dict):
                 continue
                 
-            for method, operation in path_obj.items:
-                if method.upper not in self.http_methods or not isinstance(operation, dict):
+            for method, operation in path_obj.items():
+                if method.upper() not in self.http_methods or not isinstance(operation, dict):
                     continue
                 
                 responses = operation.get('responses', {})
-                for status_code, response in responses.items:
+                for status_code, response in responses.items():
                     if not isinstance(response, dict):
                         continue
                         
@@ -267,7 +267,7 @@ class APIScoringEngine:
                     content = response.get('content', {})
                     
                     # Analyze response structure
-                    for media_type, media_obj in content.items:
+                    for media_type, media_obj in content.items():
                         schema = media_obj.get('schema', {})
                         pattern = self._extract_schema_pattern(schema)
                         response_patterns.append(pattern)
@@ -282,7 +282,7 @@ class APIScoringEngine:
             pattern_counts[pattern_key] = pattern_counts.get(pattern_key, 0) + 1
         
         # Most common pattern should dominate for good consistency
-        max_count = max(pattern_counts.values) if pattern_counts else 0
+        max_count = max(pattern_counts.values()) if pattern_counts else 0
         consistency_ratio = max_count / len(response_patterns) if response_patterns else 1
         
         return consistency_ratio * 100
@@ -307,21 +307,21 @@ class APIScoringEngine:
         paths = self.spec.get('paths', {})
         error_responses = []
         
-        for path_obj in paths.values:
+        for path_obj in paths.values():
             if not isinstance(path_obj, dict):
                 continue
                 
-            for method, operation in path_obj.items:
-                if method.upper not in self.http_methods:
+            for method, operation in path_obj.items():
+                if method.upper() not in self.http_methods:
                     continue
                 
                 responses = operation.get('responses', {})
-                for status_code, response in responses.items:
+                for status_code, response in responses.items():
                     try:
                         code_int = int(status_code)
                         if code_int >= 400:  # Error responses
                             content = response.get('content', {})
-                            for media_type, media_obj in content.items:
+                            for media_type, media_obj in content.items():
                                 schema = media_obj.get('schema', {})
                                 error_responses.append(self._extract_schema_pattern(schema))
                     except ValueError:
@@ -336,7 +336,7 @@ class APIScoringEngine:
             pattern_key = json.dumps(pattern, sort_keys=True)
             pattern_counts[pattern_key] = pattern_counts.get(pattern_key, 0) + 1
         
-        max_count = max(pattern_counts.values) if pattern_counts else 0
+        max_count = max(pattern_counts.values()) if pattern_counts else 0
         consistency_ratio = max_count / len(error_responses) if error_responses else 1
         
         return consistency_ratio * 100
@@ -349,12 +349,12 @@ class APIScoringEngine:
         path_params = []
         header_params = []
         
-        for path_obj in paths.values:
+        for path_obj in paths.values():
             if not isinstance(path_obj, dict):
                 continue
                 
-            for method, operation in path_obj.items:
-                if method.upper not in self.http_methods:
+            for method, operation in path_obj.items():
+                if method.upper() not in self.http_methods:
                     continue
                 
                 parameters = operation.get('parameters', [])
@@ -401,7 +401,7 @@ class APIScoringEngine:
         
         # Check for consistent versioning
         versioned_paths = 0
-        for path in paths.keys:
+        for path in paths.keys():
             if re.search(r'/v\d+/', path):
                 versioned_paths += 1
         
@@ -413,7 +413,7 @@ class APIScoringEngine:
         
         # Check for reasonable path depth
         reasonable_depth = 0
-        for path in paths.keys:
+        for path in paths.keys():
             segments = [seg for seg in path.split('/') if seg]
             if 2 <= len(segments) <= 5:  # Reasonable depth
                 reasonable_depth += 1
@@ -422,7 +422,7 @@ class APIScoringEngine:
         
         # Check for RESTful resource patterns
         restful_patterns = 0
-        for path in paths.keys:
+        for path in paths.keys():
             # Look for patterns like /resources/{id} or /resources
             if re.match(r'^/[a-z-]+(/\{[^}]+\})?(/[a-z-]+)*$', path):
                 restful_patterns += 1
@@ -430,7 +430,7 @@ class APIScoringEngine:
         structure_score += (restful_patterns / total_paths) * 30
         
         # Check for consistent trailing slash usage
-        with_slash = sum(1 for path in paths.keys if path.endswith('/'))
+        with_slash = sum(1 for path in paths.keys() if path.endswith('/'))
         without_slash = total_paths - with_slash
         
         # Either all or none should have trailing slashes
@@ -448,13 +448,13 @@ class APIScoringEngine:
         method_usage = {}
         total_operations = 0
         
-        for path, path_obj in paths.items:
+        for path, path_obj in paths.items():
             if not isinstance(path_obj, dict):
                 continue
                 
-            for method in path_obj.keys:
-                if method.upper in self.http_methods:
-                    method_upper = method.upper
+            for method in path_obj.keys():
+                if method.upper() in self.http_methods:
+                    method_upper = method.upper()
                     total_operations += 1
                     
                     # Analyze method usage patterns
@@ -471,7 +471,7 @@ class APIScoringEngine:
             return 0
         
         # Calculate appropriateness score
-        total_appropriate = sum(data['appropriate'] for data in method_usage.values)
+        total_appropriate = sum(data['appropriate'] for data in method_usage.values())
         return (total_appropriate / total_operations) * 100
     
     def _is_method_usage_appropriate(self, path: str, method: str, operation: Dict) -> bool:
@@ -500,22 +500,22 @@ class APIScoringEngine:
         method_status_patterns = {}
         total_operations = 0
         
-        for path_obj in paths.values:
+        for path_obj in paths.values():
             if not isinstance(path_obj, dict):
                 continue
                 
-            for method, operation in path_obj.items:
-                if method.upper not in self.http_methods:
+            for method, operation in path_obj.items():
+                if method.upper() not in self.http_methods:
                     continue
                 
                 total_operations += 1
                 responses = operation.get('responses', {})
-                status_codes = set(responses.keys)
+                status_codes = set(responses.keys())
                 
-                if method.upper not in method_status_patterns:
-                    method_status_patterns[method.upper] = []
+                if method.upper() not in method_status_patterns:
+                    method_status_patterns[method.upper()] = []
                 
-                method_status_patterns[method.upper].append(status_codes)
+                method_status_patterns[method.upper()].append(status_codes)
         
         if total_operations == 0:
             return 0
@@ -523,12 +523,12 @@ class APIScoringEngine:
         # Check consistency within each method type
         consistency_scores = []
         
-        for method, status_patterns in method_status_patterns.items:
+        for method, status_patterns in method_status_patterns.items():
             if not status_patterns:
                 continue
             
             # Find common status codes for this method
-            all_codes = set
+            all_codes = set()
             for pattern in status_patterns:
                 all_codes.update(pattern)
             
@@ -560,12 +560,12 @@ class APIScoringEngine:
         )
         
         documentation_checks = [
-            self._check_api_level_documentation,
-            self._check_endpoint_documentation,
-            self._check_schema_documentation,
-            self._check_parameter_documentation,
-            self._check_response_documentation,
-            self._check_example_coverage
+            self._check_api_level_documentation(),
+            self._check_endpoint_documentation(),
+            self._check_schema_documentation(),
+            self._check_parameter_documentation(),
+            self._check_response_documentation(),
+            self._check_example_coverage()
         ]
         
         valid_scores = [s for s in documentation_checks if s is not None]
@@ -615,12 +615,12 @@ class APIScoringEngine:
         total_operations = 0
         documented_operations = 0
         
-        for path_obj in paths.values:
+        for path_obj in paths.values():
             if not isinstance(path_obj, dict):
                 continue
                 
-            for method, operation in path_obj.items:
-                if method.upper not in self.http_methods:
+            for method, operation in path_obj.items():
+                if method.upper() not in self.http_methods:
                     continue
                 
                 total_operations += 1
@@ -649,7 +649,7 @@ class APIScoringEngine:
         total_schemas = len(schemas)
         documented_schemas = 0
         
-        for schema_name, schema in schemas.items:
+        for schema_name, schema in schemas.items():
             if not isinstance(schema, dict):
                 continue
             
@@ -662,7 +662,7 @@ class APIScoringEngine:
             # Property descriptions
             properties = schema.get('properties', {})
             if properties:
-                described_props = sum(1 for prop in properties.values 
+                described_props = sum(1 for prop in properties.values() 
                                     if isinstance(prop, dict) and prop.get('description'))
                 if described_props > len(properties) * 0.5:  # At least 50% documented
                     doc_elements += 1
@@ -670,7 +670,7 @@ class APIScoringEngine:
             # Examples
             if schema.get('example') or any(
                 isinstance(prop, dict) and prop.get('example') 
-                for prop in properties.values
+                for prop in properties.values()
             ):
                 doc_elements += 1
             
@@ -686,12 +686,12 @@ class APIScoringEngine:
         total_params = 0
         documented_params = 0
         
-        for path_obj in paths.values:
+        for path_obj in paths.values():
             if not isinstance(path_obj, dict):
                 continue
                 
-            for method, operation in path_obj.items:
-                if method.upper not in self.http_methods:
+            for method, operation in path_obj.items():
+                if method.upper() not in self.http_methods:
                     continue
                 
                 parameters = operation.get('parameters', [])
@@ -719,16 +719,16 @@ class APIScoringEngine:
         total_responses = 0
         documented_responses = 0
         
-        for path_obj in paths.values:
+        for path_obj in paths.values():
             if not isinstance(path_obj, dict):
                 continue
                 
-            for method, operation in path_obj.items:
-                if method.upper not in self.http_methods:
+            for method, operation in path_obj.items():
+                if method.upper() not in self.http_methods:
                     continue
                 
                 responses = operation.get('responses', {})
-                for status_code, response in responses.items:
+                for status_code, response in responses.items():
                     if not isinstance(response, dict):
                         continue
                     
@@ -748,12 +748,12 @@ class APIScoringEngine:
         total_operations = 0
         operations_with_examples = 0
         
-        for path_obj in paths.values:
+        for path_obj in paths.values():
             if not isinstance(path_obj, dict):
                 continue
                 
-            for method, operation in path_obj.items:
-                if method.upper not in self.http_methods:
+            for method, operation in path_obj.items():
+                if method.upper() not in self.http_methods:
                     continue
                 
                 total_operations += 1
@@ -767,7 +767,7 @@ class APIScoringEngine:
                 
                 # Check response examples
                 responses = operation.get('responses', {})
-                for response in responses.values:
+                for response in responses.values():
                     if isinstance(response, dict) and self._has_examples(response.get('content', {})):
                         has_example = True
                         break
@@ -779,7 +779,7 @@ class APIScoringEngine:
         total_schemas = len(schemas)
         schemas_with_examples = 0
         
-        for schema in schemas.values:
+        for schema in schemas.values():
             if isinstance(schema, dict) and self._schema_has_examples(schema):
                 schemas_with_examples += 1
         
@@ -791,7 +791,7 @@ class APIScoringEngine:
     
     def _has_examples(self, content: Dict[str, Any]) -> bool:
         """Check if content has examples."""
-        for media_type, media_obj in content.items:
+        for media_type, media_obj in content.items():
             if isinstance(media_obj, dict):
                 if media_obj.get('example') or media_obj.get('examples'):
                     return True
@@ -803,7 +803,7 @@ class APIScoringEngine:
             return True
         
         properties = schema.get('properties', {})
-        for prop in properties.values:
+        for prop in properties.values():
             if isinstance(prop, dict) and prop.get('example'):
                 return True
         
@@ -820,11 +820,11 @@ class APIScoringEngine:
         )
         
         security_checks = [
-            self._check_security_schemes,
-            self._check_security_requirements,
-            self._check_https_usage,
-            self._check_authentication_patterns,
-            self._check_sensitive_data_handling
+            self._check_security_schemes(),
+            self._check_security_requirements(),
+            self._check_https_usage(),
+            self._check_authentication_patterns(),
+            self._check_sensitive_data_handling()
         ]
         
         valid_scores = [s for s in security_checks if s is not None]
@@ -855,8 +855,8 @@ class APIScoringEngine:
         
         score = 40  # Base score for having security schemes
         
-        scheme_types = set
-        for scheme in security_schemes.values:
+        scheme_types = set()
+        for scheme in security_schemes.values():
             if isinstance(scheme, dict):
                 scheme_type = scheme.get('type')
                 scheme_types.add(scheme_type)
@@ -879,12 +879,12 @@ class APIScoringEngine:
         total_operations = 0
         secured_operations = 0
         
-        for path_obj in paths.values:
+        for path_obj in paths.values():
             if not isinstance(path_obj, dict):
                 continue
                 
-            for method, operation in path_obj.items:
-                if method.upper not in self.http_methods:
+            for method, operation in path_obj.items():
+                if method.upper() not in self.http_methods:
                     continue
                 
                 total_operations += 1
@@ -924,11 +924,11 @@ class APIScoringEngine:
         
         pattern_scores = []
         
-        for scheme in security_schemes.values:
+        for scheme in security_schemes.values():
             if not isinstance(scheme, dict):
                 continue
             
-            scheme_type = scheme.get('type', '').lower
+            scheme_type = scheme.get('type', '').lower()
             
             if scheme_type == 'oauth2':
                 # OAuth2 is highly recommended
@@ -938,7 +938,7 @@ class APIScoringEngine:
                 else:
                     pattern_scores.append(80)
             elif scheme_type == 'http':
-                scheme_scheme = scheme.get('scheme', '').lower
+                scheme_scheme = scheme.get('scheme', '').lower()
                 if scheme_scheme == 'bearer':
                     pattern_scores.append(85)
                 elif scheme_scheme == 'basic':
@@ -946,7 +946,7 @@ class APIScoringEngine:
                 else:
                     pattern_scores.append(70)
             elif scheme_type == 'apikey':
-                location = scheme.get('in', '').lower
+                location = scheme.get('in', '').lower()
                 if location == 'header':
                     pattern_scores.append(75)
                 else:
@@ -966,21 +966,21 @@ class APIScoringEngine:
         # Look for potential sensitive fields without proper handling
         sensitive_field_names = {'password', 'secret', 'token', 'key', 'ssn', 'credit_card'}
         
-        for schema in schemas.values:
+        for schema in schemas.values():
             if not isinstance(schema, dict):
                 continue
             
             properties = schema.get('properties', {})
-            for prop_name, prop_def in properties.items:
+            for prop_name, prop_def in properties.items():
                 if not isinstance(prop_def, dict):
                     continue
                 
                 # Check for sensitive field names
-                if any(sensitive in prop_name.lower for sensitive in sensitive_field_names):
+                if any(sensitive in prop_name.lower() for sensitive in sensitive_field_names):
                     # Check if it's marked as sensitive (writeOnly, format: password, etc.)
                     if not (prop_def.get('writeOnly') or 
                            prop_def.get('format') == 'password' or
-                           'password' in prop_def.get('description', '').lower):
+                           'password' in prop_def.get('description', '').lower()):
                         score -= 10  # Penalty for exposed sensitive field
         
         return max(score, 0)
@@ -996,11 +996,11 @@ class APIScoringEngine:
         )
         
         usability_checks = [
-            self._check_discoverability,
-            self._check_error_handling,
-            self._check_filtering_and_searching,
-            self._check_resource_relationships,
-            self._check_developer_experience
+            self._check_discoverability(),
+            self._check_error_handling(),
+            self._check_filtering_and_searching(),
+            self._check_resource_relationships(),
+            self._check_developer_experience()
         ]
         
         valid_scores = [s for s in usability_checks if s is not None]
@@ -1033,16 +1033,16 @@ class APIScoringEngine:
         hateoas_score = 0
         total_responses = 0
         
-        for path_obj in paths.values:
+        for path_obj in paths.values():
             if not isinstance(path_obj, dict):
                 continue
                 
-            for method, operation in path_obj.items:
-                if method.upper not in self.http_methods:
+            for method, operation in path_obj.items():
+                if method.upper() not in self.http_methods:
                     continue
                 
                 responses = operation.get('responses', {})
-                for response in responses.values:
+                for response in responses.values():
                     if not isinstance(response, dict):
                         continue
                     
@@ -1050,7 +1050,7 @@ class APIScoringEngine:
                     
                     # Look for link-like properties in response schemas
                     content = response.get('content', {})
-                    for media_obj in content.values:
+                    for media_obj in content.values():
                         schema = media_obj.get('schema', {})
                         if self._has_link_properties(schema):
                             hateoas_score += 1
@@ -1071,7 +1071,7 @@ class APIScoringEngine:
         properties = schema.get('properties', {})
         link_indicators = {'links', '_links', 'href', 'url', 'self', 'next', 'prev'}
         
-        return any(prop_name.lower in link_indicators for prop_name in properties.keys)
+        return any(prop_name.lower() in link_indicators for prop_name in properties.keys())
     
     def _check_error_handling(self) -> float:
         """Check error handling quality."""
@@ -1081,12 +1081,12 @@ class APIScoringEngine:
         operations_with_errors = 0
         detailed_error_responses = 0
         
-        for path_obj in paths.values:
+        for path_obj in paths.values():
             if not isinstance(path_obj, dict):
                 continue
                 
-            for method, operation in path_obj.items:
-                if method.upper not in self.http_methods:
+            for method, operation in path_obj.items():
+                if method.upper() not in self.http_methods:
                     continue
                 
                 total_operations += 1
@@ -1095,17 +1095,17 @@ class APIScoringEngine:
                 # Check for error responses
                 has_error_responses = any(
                     status_code.startswith('4') or status_code.startswith('5')
-                    for status_code in responses.keys
+                    for status_code in responses.keys()
                 )
                 
                 if has_error_responses:
                     operations_with_errors += 1
                     
                     # Check for detailed error schemas
-                    for status_code, response in responses.items:
+                    for status_code, response in responses.items():
                         if (status_code.startswith('4') or status_code.startswith('5')) and isinstance(response, dict):
                             content = response.get('content', {})
-                            for media_obj in content.values:
+                            for media_obj in content.values():
                                 schema = media_obj.get('schema', {})
                                 if self._has_detailed_error_schema(schema):
                                     detailed_error_responses += 1
@@ -1138,7 +1138,7 @@ class APIScoringEngine:
         collection_endpoints = 0
         endpoints_with_filtering = 0
         
-        for path, path_obj in paths.items:
+        for path, path_obj in paths.items():
             if not isinstance(path_obj, dict):
                 continue
             
@@ -1153,7 +1153,7 @@ class APIScoringEngine:
                     filter_params = {'filter', 'search', 'q', 'query', 'limit', 'page', 'offset'}
                     
                     has_filtering = any(
-                        isinstance(param, dict) and param.get('name', '').lower in filter_params
+                        isinstance(param, dict) and param.get('name', '').lower() in filter_params
                         for param in parameters
                     )
                     
@@ -1171,7 +1171,7 @@ class APIScoringEngine:
         nested_resources = 0
         total_resource_paths = 0
         
-        for path in paths.keys:
+        for path in paths.keys():
             # Skip root paths
             if path.count('/') >= 3:  # e.g., /api/users/123/orders
                 total_resource_paths += 1
@@ -1180,7 +1180,7 @@ class APIScoringEngine:
         
         # Look for relationship fields in schemas
         schemas_with_relations = 0
-        for schema in schemas.values:
+        for schema in schemas.values():
             if not isinstance(schema, dict):
                 continue
             
@@ -1188,8 +1188,8 @@ class APIScoringEngine:
             relation_indicators = {'id', '_id', 'ref', 'link', 'relationship'}
             
             has_relations = any(
-                any(indicator in prop_name.lower for indicator in relation_indicators)
-                for prop_name in properties.keys
+                any(indicator in prop_name.lower() for indicator in relation_indicators)
+                for prop_name in properties.keys()
             )
             
             if has_relations:
@@ -1206,19 +1206,19 @@ class APIScoringEngine:
         factors = []
         
         # Factor 1: Consistent response structure
-        factors.append(self._check_response_consistency)
+        factors.append(self._check_response_consistency())
         
         # Factor 2: Clear operation IDs
         paths = self.spec.get('paths', {})
         total_operations = 0
         operations_with_ids = 0
         
-        for path_obj in paths.values:
+        for path_obj in paths.values():
             if not isinstance(path_obj, dict):
                 continue
                 
-            for method, operation in path_obj.items:
-                if method.upper not in self.http_methods:
+            for method, operation in path_obj.items():
+                if method.upper() not in self.http_methods:
                     continue
                 
                 total_operations += 1
@@ -1232,7 +1232,7 @@ class APIScoringEngine:
         avg_path_complexity = 0
         if paths:
             complexities = []
-            for path in paths.keys:
+            for path in paths.keys():
                 segments = [seg for seg in path.split('/') if seg]
                 complexities.append(len(segments))
             
@@ -1260,11 +1260,11 @@ class APIScoringEngine:
         )
         
         performance_checks = [
-            self._check_caching_headers,
-            self._check_pagination_patterns,
-            self._check_compression_support,
-            self._check_efficiency_patterns,
-            self._check_batch_operations
+            self._check_caching_headers(),
+            self._check_pagination_patterns(),
+            self._check_compression_support(),
+            self._check_efficiency_patterns(),
+            self._check_batch_operations()
         ]
         
         valid_scores = [s for s in performance_checks if s is not None]
@@ -1293,7 +1293,7 @@ class APIScoringEngine:
         get_operations = 0
         cacheable_operations = 0
         
-        for path_obj in paths.values:
+        for path_obj in paths.values():
             if not isinstance(path_obj, dict):
                 continue
             
@@ -1303,14 +1303,14 @@ class APIScoringEngine:
                 
                 # Check for caching-related headers in responses
                 responses = get_operation.get('responses', {})
-                for response in responses.values:
+                for response in responses.values():
                     if not isinstance(response, dict):
                         continue
                     
                     headers = response.get('headers', {})
                     cache_headers = {'cache-control', 'etag', 'last-modified', 'expires'}
                     
-                    if any(header.lower in cache_headers for header in headers.keys):
+                    if any(header.lower() in cache_headers for header in headers.keys()):
                         cacheable_operations += 1
                         break
         
@@ -1323,7 +1323,7 @@ class APIScoringEngine:
         collection_endpoints = 0
         paginated_endpoints = 0
         
-        for path, path_obj in paths.items:
+        for path, path_obj in paths.items():
             if not isinstance(path_obj, dict):
                 continue
             
@@ -1338,7 +1338,7 @@ class APIScoringEngine:
                     pagination_params = {'limit', 'offset', 'page', 'pagesize', 'per_page', 'cursor'}
                     
                     has_pagination = any(
-                        isinstance(param, dict) and param.get('name', '').lower in pagination_params
+                        isinstance(param, dict) and param.get('name', '').lower() in pagination_params
                         for param in parameters
                     )
                     
@@ -1358,7 +1358,7 @@ class APIScoringEngine:
         compression_mentions = 0
         for server in servers:
             if isinstance(server, dict):
-                description = server.get('description', '').lower
+                description = server.get('description', '').lower()
                 if any(term in description for term in ['gzip', 'compress', 'deflate']):
                     compression_mentions += 1
         
@@ -1377,7 +1377,7 @@ class APIScoringEngine:
         total_get_operations = 0
         operations_with_selection = 0
         
-        for path_obj in paths.values:
+        for path_obj in paths.values():
             if not isinstance(path_obj, dict):
                 continue
             
@@ -1390,7 +1390,7 @@ class APIScoringEngine:
                 selection_params = {'fields', 'select', 'include', 'exclude'}
                 
                 has_selection = any(
-                    isinstance(param, dict) and param.get('name', '').lower in selection_params
+                    isinstance(param, dict) and param.get('name', '').lower() in selection_params
                     for param in parameters
                 )
                 
@@ -1407,15 +1407,15 @@ class APIScoringEngine:
         batch_indicators = ['batch', 'bulk', 'multi']
         batch_endpoints = 0
         
-        for path in paths.keys:
-            if any(indicator in path.lower for indicator in batch_indicators):
+        for path in paths.keys():
+            if any(indicator in path.lower() for indicator in batch_indicators):
                 batch_endpoints += 1
         
         # Look for array-based request bodies (indicating batch operations)
         array_operations = 0
         total_post_put_operations = 0
         
-        for path_obj in paths.values:
+        for path_obj in paths.values():
             if not isinstance(path_obj, dict):
                 continue
             
@@ -1427,7 +1427,7 @@ class APIScoringEngine:
                     request_body = operation.get('requestBody', {})
                     content = request_body.get('content', {})
                     
-                    for media_obj in content.values:
+                    for media_obj in content.values():
                         schema = media_obj.get('schema', {})
                         if schema.get('type') == 'array':
                             array_operations += 1
@@ -1452,10 +1452,10 @@ class APIScoringEngine:
             },
             "api_info": self.scorecard.api_info,
             "categories": {},
-            "topRecommendations": self.scorecard.get_top_recommendations
+            "topRecommendations": self.scorecard.get_top_recommendations()
         }
         
-        for category, score in self.scorecard.category_scores.items:
+        for category, score in self.scorecard.category_scores.items():
             report_data["categories"][category.value] = {
                 "score": round(score.score, 2),
                 "grade": score.letter_grade,
@@ -1486,17 +1486,17 @@ class APIScoringEngine:
         
         # Sort categories by weight (most important first)
         sorted_categories = sorted(
-            self.scorecard.category_scores.items,
+            self.scorecard.category_scores.items(),
             key=lambda x: x[1].weight,
             reverse=True
         )
         
         for category, score in sorted_categories:
-            category_name = category.value.title.replace('_', ' ')
+            category_name = category.value.title().replace('_', ' ')
             
             lines.extend([
                 "",
-                f"📊 {category_name.upper} - Grade: {score.letter_grade} ({score.score:.1f}/100)",
+                f"📊 {category_name.upper()} - Grade: {score.letter_grade} ({score.score:.1f}/100)",
                 f"   Weight: {score.weight}% | Contribution: {score.weighted_score:.1f} points",
                 "   " + "─" * 50
             ])
@@ -1568,7 +1568,7 @@ class APIScoringEngine:
         return "\n".join(lines)
 
 
-def main:
+def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Generate comprehensive API design quality scorecard",
@@ -1604,7 +1604,7 @@ Examples:
         help='Exit with code 1 if grade is below minimum'
     )
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     # Load specification file
     try:
@@ -1618,7 +1618,7 @@ Examples:
         return 1
     
     # Initialize scoring engine and generate scorecard
-    engine = APIScoringEngine
+    engine = APIScoringEngine()
     
     try:
         scorecard = engine.score_api(spec)
@@ -1628,9 +1628,9 @@ Examples:
     
     # Generate report
     if args.format == 'json':
-        output = engine.generate_json_report
+        output = engine.generate_json_report()
     else:
-        output = engine.generate_text_report
+        output = engine.generate_text_report()
     
     # Write output
     if args.output:
@@ -1658,4 +1658,4 @@ Examples:
 
 
 if __name__ == '__main__':
-    sys.exit(main)
+    sys.exit(main())

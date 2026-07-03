@@ -85,7 +85,7 @@ Common root causes per category:
 
 **Timing:**
 - Missing `await` on a Playwright call
-- `waitForTimeout` that's too short
+- `waitForTimeout()` that's too short
 - Clicking before element is actionable
 - Asserting before data loads
 - Animation interference

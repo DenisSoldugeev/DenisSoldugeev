@@ -40,16 +40,16 @@ export class TestRailClient {
     const response = await fetch(url, options);
 
     if (!response.ok) {
-      const errorText = await response.text;
+      const errorText = await response.text();
       throw new Error(
         `TestRail API error ${response.status}: ${errorText}`,
       );
     }
 
-    return response.json as Promise<T>;
+    return response.json() as Promise<T>;
   }
 
-  async getProjects: Promise<TestRailProject[]> {
+  async getProjects(): Promise<TestRailProject[]> {
     const result = await this.request<{ projects: TestRailProject[] }>(
       'GET',
       'get_projects',

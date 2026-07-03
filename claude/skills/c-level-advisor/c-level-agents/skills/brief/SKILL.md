@@ -1,6 +1,6 @@
 ---
 name: "brief"
-description: "/ds:brief <topic> — Generate a one-page strategy brief from an office-hours intake. First step in the strategic sprint pipeline."
+description: "/ds:brief <topic> — Generate a one-page strategy brief from an office-hours intake. First step in the strategic sprint pipeline. Use when a strategic question needs to be framed before boardroom deliberation — e.g. locking options, assumptions, and success criteria for a pricing change or a market-entry decision."
 ---
 
 # /ds:brief — One-Page Strategy Brief
@@ -68,6 +68,11 @@ A single Markdown file under `~/.claude/briefs/YYYY-MM-DD-<slug>.md` with this s
 - [ ] ds-coo-advisor
 - [ ] ds-chro-advisor
 - [ ] ds-ciso-advisor
+- [ ] ds-general-counsel-advisor
+- [ ] ds-cdo-advisor
+- [ ] ds-caio-advisor
+- [ ] ds-cco-advisor
+- [ ] ds-vpe-advisor
 - [ ] ds-chief-of-staff
 
 ## Success Criteria

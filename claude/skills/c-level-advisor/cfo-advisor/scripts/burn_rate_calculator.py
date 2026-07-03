@@ -237,9 +237,9 @@ def print_summary(name: str, results: list[MonthResult], calc: RunwayCalculator)
     # Decision triggers
     print(f"\n  Decision Triggers:")
     triggers = {9: "⚠️  START FUNDRAISE", 6: "🔴 COST REDUCTION PLAN", 4: "🚨 EXECUTE CUTS / BRIDGE"}
-    shown = set
+    shown = set()
     for r in results:
-        for threshold, label in triggers.items:
+        for threshold, label in triggers.items():
             if r.runway_months <= threshold and threshold not in shown:
                 print(f"    {r.label}: {label} (runway = {r.runway_months:.1f} mo)")
                 shown.add(threshold)
@@ -262,7 +262,7 @@ def print_monthly_table(results: list[MonthResult], max_rows: int = 24) -> None:
 
 
 def export_csv(scenarios: list[tuple[str, list[MonthResult]]]) -> str:
-    buf = io.StringIO
+    buf = io.StringIO()
     writer = csv.writer(buf)
     writer.writerow([
         "Scenario", "Month", "Label", "MRR", "Gross Profit", "Headcount",
@@ -279,14 +279,14 @@ def export_csv(scenarios: list[tuple[str, list[MonthResult]]]) -> str:
                 round(r.cash_start, 2), round(r.cash_end, 2),
                 round(r.runway_months, 2),
             ])
-    return buf.getvalue
+    return buf.getvalue()
 
 
 # ---------------------------------------------------------------------------
 # Sample data
 # ---------------------------------------------------------------------------
 
-def make_sample_configs -> list[ModelConfig]:
+def make_sample_configs() -> list[ModelConfig]:
     """
     Sample company: Series A SaaS startup
       - $3M cash on hand (post Series A)
@@ -347,15 +347,15 @@ def make_sample_configs -> list[ModelConfig]:
 # Entry point
 # ---------------------------------------------------------------------------
 
-def main -> None:
+def main() -> None:
     parser = argparse.ArgumentParser(description="Startup Burn Rate & Runway Calculator")
     parser.add_argument("--csv", action="store_true", help="Export full monthly data as CSV to stdout")
     parser.add_argument("--scenario", choices=["bull", "base", "bear", "distress", "all"], default="all")
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    configs = make_sample_configs
+    configs = make_sample_configs()
     if args.scenario != "all":
-        configs = [c for c in configs if args.scenario.upper in c.name.upper]
+        configs = [c for c in configs if args.scenario.upper() in c.name.upper()]
 
     all_results: list[tuple[str, list[MonthResult]]] = []
 
@@ -367,7 +367,7 @@ def main -> None:
 
     for cfg in configs:
         calc = RunwayCalculator(cfg)
-        results = calc.run
+        results = calc.run()
         all_results.append((cfg.name, results))
         print_summary(cfg.name, results, calc)
         print_monthly_table(results)
@@ -399,4 +399,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

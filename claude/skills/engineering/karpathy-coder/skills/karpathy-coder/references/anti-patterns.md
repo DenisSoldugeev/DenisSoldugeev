@@ -96,7 +96,7 @@ def save_preferences(db, user_id: int, preferences: dict):
   def validate_user(user_data):
 -     # Check email format
 +     """Validate user data."""           # ← docstring added (not asked)
-+     email = user_data.get('email', '').strip
++     email = user_data.get('email', '').strip()
       ...
 +     if len(username) < 3:               # ← username validation (not asked)
 +         raise ValueError("Username too short")
@@ -107,7 +107,7 @@ def save_preferences(db, user_id: int, preferences: dict):
   def validate_user(user_data):
 -     if not user_data.get('email'):
 +     email = user_data.get('email', '')
-+     if not email or not email.strip:
++     if not email or not email.strip():
           raise ValueError("Email required")
 -     if '@' not in user_data['email']:
 +     if '@' not in email:

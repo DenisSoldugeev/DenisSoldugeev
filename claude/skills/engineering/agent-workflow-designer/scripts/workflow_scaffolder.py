@@ -86,16 +86,16 @@ PATTERNS = {
 }
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate a workflow skeleton config from a pattern.")
-    parser.add_argument("pattern", choices=sorted(PATTERNS.keys), help="Workflow pattern")
+    parser.add_argument("pattern", choices=sorted(PATTERNS.keys()), help="Workflow pattern")
     parser.add_argument("--name", default="new-workflow", help="Workflow name")
     parser.add_argument("--output", help="Optional output path for JSON config")
-    return parser.parse_args
+    return parser.parse_args()
 
 
-def main -> int:
-    args = parse_args
+def main() -> int:
+    args = parse_args()
     config = PATTERNS[args.pattern](args.name)
     payload = json.dumps(config, indent=2)
 
@@ -110,4 +110,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main)
+    raise SystemExit(main())

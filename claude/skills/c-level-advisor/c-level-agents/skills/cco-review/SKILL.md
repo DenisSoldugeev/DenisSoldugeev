@@ -1,6 +1,6 @@
 ---
 name: "cco-review"
-description: "/ds:cco-review <plan> — Retention-obsessed Chief Customer Officer interrogation of any plan that touches customer retention, segmentation, CS team sizing, or CS team hiring."
+description: "/ds:cco-review <plan> — Retention-obsessed Chief Customer Officer interrogation of any plan that touches customer retention, segmentation, CS team sizing, or CS team hiring. Use when gross retention is slipping, before approving CSM headcount, or when deciding which customer segments to keep or fire."
 ---
 
 # /ds:cco-review — CCO Forcing Questions
@@ -64,13 +64,13 @@ The retention-obsessed CCO pressure-tests any plan that touches customer experie
 
 ```bash
 # 1. Retention decomposition (always start here)
-python ../../../skills/chief-customer-officer-advisor/scripts/retention_decomposition_analyzer.py cohorts.json
+python ../../../chief-customer-officer-advisor/scripts/retention_decomposition_analyzer.py cohorts.json
 
 # 2. Segmentation audit
-python ../../../skills/chief-customer-officer-advisor/scripts/customer_segmentation_designer.py customers.json
+python ../../../chief-customer-officer-advisor/scripts/customer_segmentation_designer.py customers.json
 
 # 3. Coverage sizing (if making CS team changes)
-python ../../../skills/chief-customer-officer-advisor/scripts/cs_coverage_calculator.py book.json
+python ../../../chief-customer-officer-advisor/scripts/cs_coverage_calculator.py book.json
 ```
 
 ## Output Format
@@ -115,7 +115,7 @@ python ../../../skills/chief-customer-officer-advisor/scripts/cs_coverage_calcul
 - `/ds:cpo-review` — if churn root cause is product_fit or no_value_realized
 - `/ds:cro-review` — if expansion math or comp alignment is in question
 - `/ds:cfo-review` — for CS cost commitments and retention-impact-on-revenue
-- `/ds:chro-review` — for CS hires, comp, ladder
+- `ds-chro-advisor` agent — for CS hires, comp, ladder
 - `/ds:decide` — log the verdict
 - `/ds:freeze 30` — on multi-year CS comp plan changes
 

@@ -146,22 +146,22 @@ class Risk:
         self.id: str = data.get("id", "")
         self.title: str = data.get("title", "")
         self.description: str = data.get("description", "")
-        self.category: str = data.get("category", "technical").lower
+        self.category: str = data.get("category", "technical").lower()
         self.probability: int = max(1, min(5, data.get("probability", 3)))
         self.impact: int = max(1, min(5, data.get("impact", 3)))
         self.owner: str = data.get("owner", "")
-        self.status: str = data.get("status", "open").lower
+        self.status: str = data.get("status", "open").lower()
         self.identified_date: str = data.get("identified_date", "")
         self.target_resolution: Optional[str] = data.get("target_resolution")
-        self.mitigation_strategy: str = data.get("mitigation_strategy", "").lower
+        self.mitigation_strategy: str = data.get("mitigation_strategy", "").lower()
         self.mitigation_actions: List[str] = data.get("mitigation_actions", [])
         self.cost_impact: Optional[float] = data.get("cost_impact")
         self.schedule_impact: Optional[int] = data.get("schedule_impact_days")
         
         # Calculate derived metrics
-        self._calculate_risk_score
-        self._determine_risk_level
-        self._suggest_mitigation_approach
+        self._calculate_risk_score()
+        self._determine_risk_level()
+        self._suggest_mitigation_approach()
     
     def _calculate_risk_score(self):
         """Calculate weighted risk score based on category, probability, and impact."""
@@ -195,7 +195,7 @@ class Risk:
     
     @property
     def is_active(self) -> bool:
-        return self.status.lower in ["open", "identified", "monitoring", "mitigating"]
+        return self.status.lower() in ["open", "identified", "monitoring", "mitigating"]
     
     @property
     def is_overdue(self) -> bool:
@@ -204,7 +204,7 @@ class Risk:
         
         try:
             target_date = datetime.strptime(self.target_resolution, "%Y-%m-%d")
-            return datetime.now > target_date and self.is_active
+            return datetime.now() > target_date and self.is_active
         except ValueError:
             return False
 
@@ -274,7 +274,7 @@ def analyze_risk_categories(risks: List[Risk]) -> Dict[str, Any]:
     category_stats = {}
     active_risks = [r for r in risks if r.is_active]
     
-    for category, config in RISK_CATEGORIES.items:
+    for category, config in RISK_CATEGORIES.items():
         category_risks = [r for r in active_risks if r.category == category]
         
         if category_risks:
@@ -300,7 +300,7 @@ def analyze_risk_categories(risks: List[Risk]) -> Dict[str, Any]:
     
     # Identify highest risk categories
     sorted_categories = sorted(
-        [(cat, stats) for cat, stats in category_stats.items if stats["count"] > 0],
+        [(cat, stats) for cat, stats in category_stats.items() if stats["count"] > 0],
         key=lambda x: x[1]["total_score"],
         reverse=True
     )
@@ -318,7 +318,7 @@ def analyze_mitigation_effectiveness(risks: List[Risk]) -> Dict[str, Any]:
     
     # Mitigation strategy distribution
     strategy_distribution = {}
-    for strategy in MITIGATION_STRATEGIES.keys:
+    for strategy in MITIGATION_STRATEGIES.keys():
         strategy_risks = [r for r in active_risks if r.mitigation_strategy == strategy]
         if strategy_risks:
             strategy_distribution[strategy] = {
@@ -460,7 +460,7 @@ def _calculate_mitigation_coverage(risks: List[Risk]) -> float:
 
 def analyze_risks(data: Dict[str, Any]) -> RiskAnalysisResult:
     """Perform comprehensive risk analysis."""
-    result = RiskAnalysisResult
+    result = RiskAnalysisResult()
     
     try:
         # Parse risk data
@@ -543,7 +543,7 @@ def format_text_output(result: RiskAnalysisResult) -> str:
     for level in ["critical", "high", "medium", "low"]:
         count = distribution.get(level, 0)
         percentage = (count / max(summary["active_risks"], 1)) * 100
-        lines.append(f"{level.title}: {count} ({percentage:.1f}%)")
+        lines.append(f"{level.title()}: {count} ({percentage:.1f}%)")
     lines.append("")
     
     # Risk Matrix Visualization
@@ -567,9 +567,9 @@ def format_text_output(result: RiskAnalysisResult) -> str:
     lines.append("-"*30)
     
     category_stats = category_analysis.get("category_statistics", {})
-    for category, stats in category_stats.items:
+    for category, stats in category_stats.items():
         if stats["count"] > 0:
-            lines.append(f"{category.title}: {stats['count']} risks, "
+            lines.append(f"{category.title()}: {stats['count']} risks, "
                         f"avg score: {stats['average_score']:.1f}, "
                         f"total exposure: {stats['total_score']:.1f}")
     lines.append("")
@@ -590,14 +590,14 @@ def format_text_output(result: RiskAnalysisResult) -> str:
     
     # Find top risks across all categories
     all_risks = []
-    for category_stats in category_stats.values:
+    for category_stats in category_stats.values():
         if "top_risks" in category_stats:
             all_risks.extend(category_stats["top_risks"])
     
     top_risks = sorted(all_risks, key=lambda r: r.risk_score, reverse=True)[:5]
     for i, risk in enumerate(top_risks, 1):
-        lines.append(f"{i}. {risk.title} (Score: {risk.risk_score:.1f}, Level: {risk.risk_level.title})")
-        lines.append(f"   Category: {risk.category.title}, Strategy: {risk.suggested_approach.title}")
+        lines.append(f"{i}. {risk.title} (Score: {risk.risk_score:.1f}, Level: {risk.risk_level.title()})")
+        lines.append(f"   Category: {risk.category.title()}, Strategy: {risk.suggested_approach.title()}")
     lines.append("")
     
     # Recommendations
@@ -628,7 +628,7 @@ def format_json_output(result: RiskAnalysisResult) -> Dict[str, Any]:
                 "status": obj.status
             }
         elif isinstance(obj, dict):
-            return {key: serialize_risks(value) for key, value in obj.items}
+            return {key: serialize_risks(value) for key, value in obj.items()}
         else:
             return obj
     
@@ -647,7 +647,7 @@ def format_json_output(result: RiskAnalysisResult) -> Dict[str, Any]:
 # CLI Interface
 # ---------------------------------------------------------------------------
 
-def main -> int:
+def main() -> int:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Analyze project risks with probability/impact matrix and mitigation recommendations"
@@ -663,7 +663,7 @@ def main -> int:
         help="Output format (default: text)"
     )
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Load and validate data
@@ -695,4 +695,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

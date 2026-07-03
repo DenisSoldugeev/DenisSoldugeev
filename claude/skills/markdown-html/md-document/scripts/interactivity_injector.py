@@ -44,7 +44,7 @@ INJECT_MARKER_ID = "md-document-interactivity-v1"
 # JavaScript payload. Indented carefully so the produced HTML is still readable.
 JS_PAYLOAD_TEMPLATE = """\
 <script id="__MARKER__">
-(function  {
+(function () {
   "use strict";
   var ENABLED = __FEATURES__;
 
@@ -56,10 +56,10 @@ JS_PAYLOAD_TEMPLATE = """\
     Array.prototype.forEach.call(root.children, function (el) {
       if (el.tagName === "H2") {
         if (current) groups.push(current);
-        current = { heading: el, elements: [el], text: el.textContent.toLowerCase };
+        current = { heading: el, elements: [el], text: el.textContent.toLowerCase() };
       } else if (current) {
         current.elements.push(el);
-        current.text += " " + (el.textContent || "").toLowerCase;
+        current.text += " " + (el.textContent || "").toLowerCase();
       }
     });
     if (current) groups.push(current);
@@ -71,8 +71,8 @@ JS_PAYLOAD_TEMPLATE = """\
     var input = document.getElementById("md-search-input");
     if (!input || !ENABLED.search) return;
     var groups = groupSections(root);
-    function apply {
-      var q = input.value.trim.toLowerCase;
+    function apply() {
+      var q = input.value.trim().toLowerCase();
       groups.forEach(function (g) {
         var visible = !q || g.text.indexOf(q) !== -1;
         g.elements.forEach(function (el) { el.hidden = !visible; });
@@ -80,39 +80,39 @@ JS_PAYLOAD_TEMPLATE = """\
     }
     input.addEventListener("input", apply);
     input.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") { input.value = ""; apply; }
+      if (e.key === "Escape") { input.value = ""; apply(); }
     });
   }
 
   // ----- Code-copy -----
-  function wireCopy {
+  function wireCopy() {
     if (!ENABLED.copycode) return;
     Array.prototype.forEach.call(
       document.querySelectorAll("pre .code-copy"),
       function (btn) {
-        btn.addEventListener("click", function  {
+        btn.addEventListener("click", function () {
           var pre = btn.parentElement;
           var code = pre.querySelector("code");
           if (!code) return;
           var text = code.textContent;
-          var done = function  {
+          var done = function () {
             btn.classList.add("copied");
             var original = btn.textContent;
             btn.textContent = "Copied";
-            setTimeout(function  {
+            setTimeout(function () {
               btn.classList.remove("copied");
               btn.textContent = original === "Copied" ? "Copy" : original;
             }, 1200);
           };
           if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(done, function  {
+            navigator.clipboard.writeText(text).then(done, function () {
               // Fallback to execCommand on older browsers
               fallbackCopy(text);
-              done;
+              done();
             });
           } else {
             fallbackCopy(text);
-            done;
+            done();
           }
         });
       }
@@ -125,13 +125,13 @@ JS_PAYLOAD_TEMPLATE = """\
     ta.style.position = "fixed";
     ta.style.opacity = "0";
     document.body.appendChild(ta);
-    ta.select;
+    ta.select();
     try { document.execCommand("copy"); } catch (e) {}
     document.body.removeChild(ta);
   }
 
   // ----- Smooth-scroll for TOC links -----
-  function wireSmoothScroll {
+  function wireSmoothScroll() {
     if (!ENABLED.smoothscroll) return;
     Array.prototype.forEach.call(
       document.querySelectorAll("nav.toc a[href^=\\\"#\\\"]"),
@@ -140,7 +140,7 @@ JS_PAYLOAD_TEMPLATE = """\
           var id = a.getAttribute("href").slice(1);
           var target = document.getElementById(id);
           if (!target) return;
-          e.preventDefault;
+          e.preventDefault();
           target.scrollIntoView({ behavior: "smooth", block: "start" });
           history.replaceState(null, "", "#" + id);
         });
@@ -149,7 +149,7 @@ JS_PAYLOAD_TEMPLATE = """\
   }
 
   // ----- Scrollspy -----
-  function wireScrollSpy {
+  function wireScrollSpy() {
     if (!ENABLED.scrollspy || !("IntersectionObserver" in window)) return;
     var tocLinks = {};
     Array.prototype.forEach.call(
@@ -162,7 +162,7 @@ JS_PAYLOAD_TEMPLATE = """\
     var headings = document.querySelectorAll("main h2[id], main h3[id]");
     if (!headings.length) return;
 
-    function clearActive {
+    function clearActive() {
       Object.keys(tocLinks).forEach(function (k) {
         tocLinks[k].removeAttribute("aria-current");
       });
@@ -175,28 +175,28 @@ JS_PAYLOAD_TEMPLATE = """\
       visible.sort(function (a, b) { return a.boundingClientRect.top - b.boundingClientRect.top; });
       var id = visible[0].target.id;
       var link = tocLinks[id];
-      if (link) { clearActive; link.setAttribute("aria-current", "location"); }
+      if (link) { clearActive(); link.setAttribute("aria-current", "location"); }
     }, { rootMargin: "-20% 0px -70% 0px", threshold: 0 });
 
     Array.prototype.forEach.call(headings, function (h) { observer.observe(h); });
   }
 
   // ----- Boot -----
-  function init {
+  function init() {
     var main = document.querySelector("main");
     if (!main) return;
     wireSearch(main);
-    wireCopy;
-    wireSmoothScroll;
-    wireScrollSpy;
+    wireCopy();
+    wireSmoothScroll();
+    wireScrollSpy();
   }
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {
-    init;
+    init();
   }
-});
+})();
 </script>
 """
 
@@ -224,7 +224,7 @@ def inject(html_text: str, features: list[str]) -> tuple[str, bool]:
     if not m:
         # No </body> tag — append at end
         return (html_text + "\n" + payload, True)
-    new_text = html_text[:m.start] + payload + html_text[m.start:]
+    new_text = html_text[:m.start()] + payload + html_text[m.start():]
     return (new_text, True)
 
 
@@ -240,7 +240,7 @@ def main(argv: list[str]) -> int:
                         help="Inject into a fresh render of the built-in sample doc")
     args = parser.parse_args(argv)
 
-    feats = [f.strip for f in args.features.split(",") if f.strip]
+    feats = [f.strip() for f in args.features.split(",") if f.strip()]
     invalid = [f for f in feats if f not in ALL_FEATURES]
     if invalid:
         print(f"error: unknown feature(s): {invalid}. "
@@ -249,7 +249,7 @@ def main(argv: list[str]) -> int:
 
     if args.sample:
         # Render the sample on the fly so the injector can be exercised standalone
-        sys.path.insert(0, str(Path(__file__).resolve.parent))
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
         import html_renderer
         import markdown_parser
         sections = markdown_parser.parse_markdown(markdown_parser.SAMPLE_MARKDOWN)
@@ -265,11 +265,11 @@ def main(argv: list[str]) -> int:
         return 0
 
     if not args.file:
-        parser.print_help
+        parser.print_help()
         return 0
 
     src = Path(args.file)
-    if not src.exists:
+    if not src.exists():
         print(f"error: file not found: {src}", file=sys.stderr)
         return 2
     original = src.read_text(encoding="utf-8")

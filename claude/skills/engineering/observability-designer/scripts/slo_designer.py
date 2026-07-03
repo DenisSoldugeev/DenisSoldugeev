@@ -220,7 +220,7 @@ class SLODesigner:
     def _create_slo_from_sli(self, sli: Dict[str, Any], targets: Dict[str, float], 
                            service_def: Dict[str, Any]) -> Dict[str, Any]:
         """Create SLO definition from SLI."""
-        sli_name = sli['name'].lower.replace(' ', '_')
+        sli_name = sli['name'].lower().replace(' ', '_')
         
         # Map SLI names to target keys
         target_mapping = {
@@ -259,7 +259,7 @@ class SLODesigner:
         
         slo = {
             'name': f"{sli['name']} SLO",
-            'description': f"Service level objective for {sli['description'].lower}",
+            'description': f"Service level objective for {sli['description'].lower()}",
             'sli_name': sli['name'],
             'target_value': target_value,
             'target_display': target_display,
@@ -290,7 +290,7 @@ class SLODesigner:
                 }
                 
                 budgets = {}
-                for window, seconds in time_windows.items:
+                for window, seconds in time_windows.items():
                     budget_seconds = seconds * error_budget_rate
                     if budget_seconds < 60:
                         budgets[window] = f"{budget_seconds:.1f} seconds"
@@ -339,7 +339,7 @@ class SLODesigner:
     def _get_sli_query_for_burn_rate(self, slo: Dict[str, Any]) -> str:
         """Generate SLI query fragment for burn rate calculation."""
         service_name = slo['service']
-        sli_name = slo['sli_name'].lower.replace(' ', '_')
+        sli_name = slo['sli_name'].lower().replace(' ', '_')
         
         if 'availability' in sli_name or 'success' in sli_name:
             return f"(1 - (sum(rate(http_requests_total{{service='{service_name}',code!~'5..'}})) / sum(rate(http_requests_total{{service='{service_name}'}}))))"
@@ -386,7 +386,7 @@ class SLODesigner:
         }
         
         for slo in slos:
-            if slo['operator'] == '>=' and 'availability' in slo['sli_name'].lower:
+            if slo['operator'] == '>=' and 'availability' in slo['sli_name'].lower():
                 sla_target = max(0.9, slo['target_value'] - sla_buffer)
                 commitment = {
                     'metric': slo['sli_name'],
@@ -437,7 +437,7 @@ class SLODesigner:
         framework = {
             'metadata': {
                 'service': service_def,
-                'generated_at': datetime.utcnow.isoformat + 'Z',
+                'generated_at': datetime.utcnow().isoformat() + 'Z',
                 'framework_version': '1.0'
             },
             'slis': slis,
@@ -553,7 +553,7 @@ class SLODesigner:
         error_budgets = framework['error_budgets']
         
         print(f"\n{'='*60}")
-        print(f"SLO FRAMEWORK SUMMARY FOR {service['name'].upper}")
+        print(f"SLO FRAMEWORK SUMMARY FOR {service['name'].upper()}")
         print(f"{'='*60}")
         
         print(f"\nService Details:")
@@ -567,21 +567,21 @@ class SLODesigner:
             print(f"  {i}. {sli['name']}")
             print(f"     Description: {sli['description']}")
             print(f"     Type: {sli['type']}")
-            print
+            print()
         
         print(f"Service Level Objectives ({len(slos)}):")
         for i, slo in enumerate(slos, 1):
             print(f"  {i}. {slo['name']}")
             print(f"     Target: {slo['target_display']}")
             print(f"     Measurement Window: {slo['measurement_window']}")
-            print
+            print()
         
         print(f"Error Budget Summary:")
         for budget in error_budgets:
             print(f"  {budget['slo_name']}:")
             print(f"    Monthly Budget: {budget['error_budget_percentage']}")
             print(f"    Burn Rate Alerts: {len(budget['burn_rate_alerts'])}")
-            print
+            print()
         
         sla = framework['sla_recommendations']
         if sla['applicable']:
@@ -596,7 +596,7 @@ class SLODesigner:
         print(f"{'='*60}\n")
 
 
-def main:
+def main():
     """Main function for CLI usage."""
     parser = argparse.ArgumentParser(
         description='Generate comprehensive SLO frameworks for services',
@@ -632,19 +632,19 @@ Examples:
     parser.add_argument('--summary-only', action='store_true',
                        help='Only display summary, do not save JSON')
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     if not args.input and not (args.service_type and args.criticality and args.user_facing):
         parser.error("Must provide either --input file or --service-type, --criticality, and --user-facing")
     
-    designer = SLODesigner
+    designer = SLODesigner()
     
     try:
         # Load or create service definition
         if args.input:
             service_def = designer.load_service_definition(args.input)
         else:
-            user_facing = args.user_facing.lower == 'true'
+            user_facing = args.user_facing.lower() == 'true'
             service_def = designer.create_service_definition(
                 args.service_type, args.criticality, user_facing, args.service_name
             )
@@ -667,4 +667,4 @@ Examples:
 
 
 if __name__ == '__main__':
-    main
+    main()

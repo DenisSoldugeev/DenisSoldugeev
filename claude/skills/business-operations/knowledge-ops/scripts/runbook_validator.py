@@ -122,9 +122,9 @@ class StepFinding:
 
 
 def _check_owner(owner: str) -> tuple[bool, str]:
-    if not owner or not owner.strip:
+    if not owner or not owner.strip():
         return False, "missing owner"
-    norm = owner.strip.lower
+    norm = owner.strip().lower()
     for token in VAGUE_OWNER_TOKENS:
         # Vague if owner is ONLY that token (allow named rotations like
         # "SRE on-call (alex)" by checking for parenthetical name OR @).
@@ -157,9 +157,9 @@ def _check_duration(duration_str: str, duration_minutes) -> tuple[bool, str]:
 
 
 def _check_observable(signal: str, kind: str) -> tuple[bool, str]:
-    if not signal or not signal.strip:
+    if not signal or not signal.strip():
         return False, f"missing observable {kind} signal"
-    norm = signal.lower
+    norm = signal.lower()
     for vague in VAGUE_SUCCESS_TOKENS:
         if vague in norm:
             return False, (
@@ -185,14 +185,14 @@ def _check_observable(signal: str, kind: str) -> tuple[bool, str]:
 
 
 def _check_rollback(rollback: str) -> tuple[bool, str]:
-    if not rollback or not rollback.strip:
+    if not rollback or not rollback.strip():
         return False, "missing rollback path"
-    norm = rollback.lower
+    norm = rollback.lower()
     for ok in NO_ROLLBACK_ACCEPTABLE:
         if ok in norm:
             return True, ""
     # If there's substantive text (> 12 chars) describing a step, accept.
-    if len(rollback.strip) >= 12:
+    if len(rollback.strip()) >= 12:
         return True, ""
     return False, (
         f"rollback path too thin ('{rollback}') — either describe the "
@@ -202,9 +202,9 @@ def _check_rollback(rollback: str) -> tuple[bool, str]:
 
 
 def _check_escalation(escalation: str) -> tuple[bool, str]:
-    if not escalation or not escalation.strip:
+    if not escalation or not escalation.strip():
         return False, "missing escalation contact"
-    norm = escalation.strip.lower
+    norm = escalation.strip().lower()
     for token in VAGUE_OWNER_TOKENS:
         if norm == token or norm.startswith(token + " "):
             if "@" not in escalation and "(" not in escalation:
@@ -262,9 +262,9 @@ def validate_step(step: dict, idx: int) -> StepFinding:
 def _parse_markdown(text: str) -> dict:
     """Heuristic parser. Expects steps as '## Step N: title' or
     '### Step N: title' followed by bullet attributes."""
-    lines = text.splitlines
+    lines = text.splitlines()
     name_match = re.search(r"^#\s+(.+)$", text, re.MULTILINE)
-    runbook_name = name_match.group(1).strip if name_match else "(unnamed)"
+    runbook_name = name_match.group(1).strip() if name_match else "(unnamed)"
     steps = []
     current = None
     step_re = re.compile(
@@ -279,13 +279,13 @@ def _parse_markdown(text: str) -> dict:
         if m:
             if current:
                 steps.append(current)
-            current = {"title": m.group(2).strip or f"step {m.group(1)}"}
+            current = {"title": m.group(2).strip() or f"step {m.group(1)}"}
             continue
         if current:
             am = attr_re.match(line)
             if am:
-                key = am.group(1).lower
-                val = am.group(2).strip
+                key = am.group(1).lower()
+                val = am.group(2).strip()
                 if key == "owner":
                     current["owner"] = val
                 elif key == "duration":
@@ -303,7 +303,7 @@ def _parse_markdown(text: str) -> dict:
     return {"runbook_name": runbook_name, "steps": steps}
 
 
-def _sample_runbook -> dict:
+def _sample_runbook() -> dict:
     """Deliberately broken incident-comms runbook to demonstrate
     failure detection."""
     return {
@@ -434,15 +434,15 @@ def main(argv=None) -> int:
     args = p.parse_args(argv)
 
     if args.sample:
-        runbook = _sample_runbook
+        runbook = _sample_runbook()
     elif args.input:
         path = Path(args.input)
-        if not path.exists:
+        if not path.exists():
             print(f"ERROR: input file not found: {args.input}",
                   file=sys.stderr)
             return 2
-        text = path.read_text
-        if path.suffix.lower == ".json":
+        text = path.read_text()
+        if path.suffix.lower() == ".json":
             runbook = json.loads(text)
         else:
             runbook = _parse_markdown(text)
@@ -468,4 +468,4 @@ def main(argv=None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -65,10 +65,10 @@ Every failing test falls into one of four categories:
 ### 4. Apply Targeted Fix
 
 **Timing/Async:**
-- Replace `waitForTimeout` with web-first assertions
+- Replace `waitForTimeout()` with web-first assertions
 - Add `await` to missing Playwright calls
 - Wait for specific network responses before asserting
-- Use `toBeVisible` before interacting with elements
+- Use `toBeVisible()` before interacting with elements
 
 **Test Isolation:**
 - Remove shared mutable state between tests

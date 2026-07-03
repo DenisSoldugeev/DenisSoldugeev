@@ -277,7 +277,7 @@ Disconnect-ExchangeOnline -Confirm:$false
             License recommendations with justification
         """
         # License decision matrix
-        if any(keyword in user_role.lower for keyword in ['ceo', 'cto', 'cfo', 'executive', 'director', 'vp']):
+        if any(keyword in user_role.lower() for keyword in ['ceo', 'cto', 'cfo', 'executive', 'director', 'vp']):
             return {
                 'recommended_license': 'Microsoft 365 E5',
                 'justification': 'Executive level - requires advanced security, compliance, and full feature set',
@@ -290,7 +290,7 @@ Disconnect-ExchangeOnline -Confirm:$false
                 'monthly_cost': 57.00
             }
 
-        elif any(keyword in user_role.lower for keyword in ['admin', 'it', 'security', 'compliance']):
+        elif any(keyword in user_role.lower() for keyword in ['admin', 'it', 'security', 'compliance']):
             return {
                 'recommended_license': 'Microsoft 365 E5',
                 'justification': 'IT/Security role - requires full admin and security capabilities',
@@ -303,7 +303,7 @@ Disconnect-ExchangeOnline -Confirm:$false
                 'monthly_cost': 57.00
             }
 
-        elif department.lower in ['legal', 'finance', 'hr', 'accounting']:
+        elif department.lower() in ['legal', 'finance', 'hr', 'accounting']:
             return {
                 'recommended_license': 'Microsoft 365 E3',
                 'justification': 'Handles sensitive data - requires enhanced security and compliance',
@@ -316,7 +316,7 @@ Disconnect-ExchangeOnline -Confirm:$false
                 'monthly_cost': 36.00
             }
 
-        elif any(keyword in user_role.lower for keyword in ['manager', 'lead', 'supervisor']):
+        elif any(keyword in user_role.lower() for keyword in ['manager', 'lead', 'supervisor']):
             return {
                 'recommended_license': 'Microsoft 365 Business Premium',
                 'justification': 'Management role - needs full productivity suite with security',
@@ -329,7 +329,7 @@ Disconnect-ExchangeOnline -Confirm:$false
                 'monthly_cost': 22.00
             }
 
-        elif any(keyword in user_role.lower for keyword in ['part-time', 'contractor', 'temporary', 'intern']):
+        elif any(keyword in user_role.lower() for keyword in ['part-time', 'contractor', 'temporary', 'intern']):
             return {
                 'recommended_license': 'Microsoft 365 Business Basic',
                 'justification': 'Temporary/part-time role - web apps and basic features sufficient',
@@ -369,18 +369,18 @@ Disconnect-ExchangeOnline -Confirm:$false
         recommended_groups = []
 
         # Department-based groups
-        department = user.get('department', '').lower
+        department = user.get('department', '').lower()
         if department:
-            recommended_groups.append(f"DL-{department.capitalize}")  # Distribution list
-            recommended_groups.append(f"SG-{department.capitalize}")  # Security group
+            recommended_groups.append(f"DL-{department.capitalize()}")  # Distribution list
+            recommended_groups.append(f"SG-{department.capitalize()}")  # Security group
 
         # Location-based groups
-        location = user.get('location', '').lower
+        location = user.get('location', '').lower()
         if location:
-            recommended_groups.append(f"SG-Location-{location.capitalize}")
+            recommended_groups.append(f"SG-Location-{location.capitalize()}")
 
         # Role-based groups
-        job_title = user.get('job_title', '').lower
+        job_title = user.get('job_title', '').lower()
         if any(keyword in job_title for keyword in ['manager', 'director', 'vp', 'executive']):
             recommended_groups.append("SG-Management")
 
@@ -389,7 +389,7 @@ Disconnect-ExchangeOnline -Confirm:$false
 
         # Functional groups
         if user.get('needs_sharepoint_access'):
-            recommended_groups.append(f"SG-SharePoint-{department.capitalize}")
+            recommended_groups.append(f"SG-SharePoint-{department.capitalize()}")
 
         if user.get('needs_project_access'):
             recommended_groups.append("SG-ProjectUsers")
@@ -420,7 +420,7 @@ Disconnect-ExchangeOnline -Confirm:$false
         if username:
             if ' ' in username:
                 errors.append("Username cannot contain spaces")
-            if not username.islower:
+            if not username.islower():
                 warnings.append("Username should be lowercase")
             if len(username) < 3:
                 errors.append("Username must be at least 3 characters")
@@ -445,3 +445,56 @@ Disconnect-ExchangeOnline -Confirm:$false
             'errors': errors,
             'warnings': warnings
         }
+
+
+def main():
+    """CLI entry point."""
+    import argparse
+    import json
+
+    parser = argparse.ArgumentParser(
+        description="Generate M365 user lifecycle PowerShell scripts and license/group recommendations"
+    )
+    parser.add_argument("--domain", required=True, help="Primary tenant domain (e.g. acme.com)")
+    parser.add_argument("--action", required=True, choices=["create", "offboard", "validate", "recommend"],
+                        help="create = bulk user creation script; offboard = offboarding script; "
+                             "validate = check user data; recommend = license + group recommendations")
+    parser.add_argument("--users", help="Users JSON file (list of user objects) for create/validate/recommend")
+    parser.add_argument("--user-email", help="User email for offboard action")
+    parser.add_argument("--output", "-o", help="Output file (default: stdout)")
+    args = parser.parse_args()
+
+    manager = UserLifecycleManager(args.domain)
+
+    if args.action == "offboard":
+        if not args.user_email:
+            parser.error("--user-email is required for --action offboard")
+        result = manager.generate_user_offboarding_script(args.user_email)
+    else:
+        if not args.users:
+            parser.error("--users is required for this action")
+        with open(args.users, "r", encoding="utf-8") as f:
+            users = json.load(f)
+        if isinstance(users, dict):
+            users = users.get("users", [users])
+        if args.action == "create":
+            result = manager.generate_user_creation_script(users)
+        elif args.action == "validate":
+            result = json.dumps([manager.validate_user_data(u) for u in users], indent=2)
+        else:  # recommend
+            result = json.dumps([{
+                "user": u.get("email", u.get("first_name", "unknown")),
+                "licenses": manager.generate_license_assignment_recommendations(
+                    u.get("role", "staff"), u.get("department", "general")),
+                "groups": manager.generate_group_membership_recommendations(u),
+            } for u in users], indent=2)
+
+    if args.output:
+        with open(args.output, "w", encoding="utf-8") as f:
+            f.write(result)
+    else:
+        print(result)
+
+
+if __name__ == "__main__":
+    main()

@@ -20,7 +20,7 @@ from html.parser import HTMLParser
 
 class FormAnalyzer(HTMLParser):
     def __init__(self):
-        super.__init__
+        super().__init__()
         self.forms = []
         self.current_form = None
         self.in_label = False
@@ -34,14 +34,14 @@ class FormAnalyzer(HTMLParser):
         if tag == "form":
             self.current_form = {
                 "action": attrs_dict.get("action", ""),
-                "method": attrs_dict.get("method", "GET").upper,
+                "method": attrs_dict.get("method", "GET").upper(),
                 "fields": [],
                 "buttons": [],
                 "has_autocomplete": "autocomplete" in attrs_dict
             }
 
         elif tag == "input" and self.current_form is not None:
-            input_type = attrs_dict.get("type", "text").lower
+            input_type = attrs_dict.get("type", "text").lower()
             if input_type not in ("hidden", "submit"):
                 self.current_form["fields"].append({
                     "type": input_type,
@@ -89,9 +89,9 @@ class FormAnalyzer(HTMLParser):
 
     def handle_data(self, data):
         if self.in_label:
-            self.current_label += data.strip
+            self.current_label += data.strip()
         if self.in_button:
-            self.current_button += data.strip
+            self.current_button += data.strip()
 
     def handle_endtag(self, tag):
         if tag == "form" and self.current_form:
@@ -123,7 +123,7 @@ def analyze_form(form):
         positives.append(f"Low friction — only {field_count} fields.")
 
     # Phone number field
-    phone_fields = [f for f in fields if "phone" in f["name"].lower or f["type"] == "tel"]
+    phone_fields = [f for f in fields if "phone" in f["name"].lower() or f["type"] == "tel"]
     if phone_fields:
         required_phones = [f for f in phone_fields if f["required"]]
         if required_phones:
@@ -143,7 +143,7 @@ def analyze_form(form):
     # Button text
     weak_ctas = ["submit", "send", "go", "ok"]
     for btn in form["buttons"]:
-        if btn.lower in weak_ctas:
+        if btn.lower() in weak_ctas:
             warnings.append(f'CTA button says "{btn}" — use action-specific text like "Get My Free Report" or "Start Free Trial".')
 
     if not form["buttons"]:
@@ -260,19 +260,19 @@ SAMPLE_HTML = """
 """
 
 
-def main:
+def main():
     use_json = "--json" in sys.argv
     args = [a for a in sys.argv[1:] if a != "--json"]
 
     if args and os.path.isfile(args[0]):
         with open(args[0]) as f:
-            html = f.read
+            html = f.read()
     else:
         if not args:
             print("[Demo mode — analyzing sample lead capture form]")
         html = SAMPLE_HTML
 
-    parser = FormAnalyzer
+    parser = FormAnalyzer()
     parser.feed(html)
 
     if not parser.forms:
@@ -288,4 +288,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

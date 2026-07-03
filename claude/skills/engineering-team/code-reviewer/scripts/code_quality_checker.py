@@ -51,13 +51,13 @@ THRESHOLDS = {
 
 def get_file_extension(filepath: Path) -> str:
     """Get file extension."""
-    return filepath.suffix.lower
+    return filepath.suffix.lower()
 
 
 def detect_language(filepath: Path) -> Optional[str]:
     """Detect programming language from file extension."""
     ext = get_file_extension(filepath)
-    for lang, extensions in LANGUAGE_EXTENSIONS.items:
+    for lang, extensions in LANGUAGE_EXTENSIONS.items():
         if ext in extensions:
             return lang
     return None
@@ -67,7 +67,7 @@ def read_file_content(filepath: Path) -> str:
     """Read file content safely."""
     try:
         with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
-            return f.read
+            return f.read()
     except Exception:
         return ""
 
@@ -105,11 +105,11 @@ def count_lines(content: str) -> Dict[str, int]:
     """Count different types of lines in code."""
     lines = content.split("\n")
     total = len(lines)
-    blank = sum(1 for line in lines if not line.strip)
+    blank = sum(1 for line in lines if not line.strip())
     comment = 0
 
     for line in lines:
-        stripped = line.strip
+        stripped = line.strip()
         if stripped.startswith("#") or stripped.startswith("//"):
             comment += 1
         elif stripped.startswith("/*") or stripped.startswith("'''") or stripped.startswith('"""'):
@@ -199,20 +199,20 @@ def find_functions(content: str, language: str) -> List[Dict]:
     matches = re.finditer(pattern, content, re.MULTILINE)
 
     for match in matches:
-        name = next((g for g in match.groups if g), "anonymous")
-        params_str = match.group(2) if len(match.groups) > 1 and match.group(2) else ""
+        name = next((g for g in match.groups() if g), "anonymous")
+        params_str = match.group(2) if len(match.groups()) > 1 and match.group(2) else ""
 
         # Count parameters
-        params = [p.strip for p in params_str.split(",") if p.strip]
+        params = [p.strip() for p in params_str.split(",") if p.strip()]
         param_count = len(params)
 
         # Estimate function length
-        start_pos = match.end
+        start_pos = match.end()
         remaining = content[start_pos:]
 
         next_func = re.search(pattern, remaining)
         if next_func:
-            func_body = remaining[:next_func.start]
+            func_body = remaining[:next_func.start()]
         else:
             func_body = remaining[:min(2000, len(remaining))]
 
@@ -266,12 +266,12 @@ def find_classes(content: str, language: str) -> List[Dict]:
     for match in matches:
         name = match.group(1)
 
-        start_pos = match.end
+        start_pos = match.end()
         remaining = content[start_pos:]
 
         next_class = re.search(pattern, remaining)
         if next_class:
-            class_body = remaining[:next_class.start]
+            class_body = remaining[:next_class.start()]
         else:
             class_body = remaining
 
@@ -381,7 +381,7 @@ def check_code_smells(content: str, functions: List[Dict], classes: List[Dict]) 
     # Magic numbers
     magic_pattern = r"\b(?<![.\"\'])\d{3,}\b(?!\.\d)"
     for i, line in enumerate(content.split("\n"), 1):
-        if line.strip.startswith(("#", "//", "import", "from")):
+        if line.strip().startswith(("#", "//", "import", "from")):
             continue
         matches = re.findall(magic_pattern, line)
         for match in matches[:1]:  # One per line
@@ -431,7 +431,7 @@ def check_csharp_specific_smells(content: str) -> List[Dict]:
             "location": match.group(1),
         })
 
-    # Blocking on async: .Result, .Wait, .GetAwaiter.GetResult
+    # Blocking on async: .Result, .Wait(), .GetAwaiter().GetResult()
     for match in re.finditer(
         r"\.(?:Result\b|Wait\(\)|GetAwaiter\(\)\.GetResult\(\))", content
     ):
@@ -439,10 +439,10 @@ def check_csharp_specific_smells(content: str) -> List[Dict]:
             "type": "csharp_blocking_async",
             "severity": "high",
             "message": (
-                "Blocking call on async operation ('.Result' / '.Wait' / "
-                "'.GetAwaiter.GetResult') — can deadlock in ASP.NET contexts"
+                "Blocking call on async operation ('.Result' / '.Wait()' / "
+                "'.GetAwaiter().GetResult()') — can deadlock in ASP.NET contexts"
             ),
-            "location": f"offset {match.start}",
+            "location": f"offset {match.start()}",
         })
 
     # Bare catch / catch (Exception) that swallows
@@ -454,7 +454,7 @@ def check_csharp_specific_smells(content: str) -> List[Dict]:
             "type": "csharp_swallowed_exception",
             "severity": "high",
             "message": "Empty catch block swallows exceptions silently",
-            "location": f"offset {match.start}",
+            "location": f"offset {match.start()}",
         })
 
     # IDisposable instantiated but not in `using` — heuristic: `new SomethingClient(`
@@ -472,7 +472,7 @@ def check_csharp_specific_smells(content: str) -> List[Dict]:
                 f"'{match.group(1)}' looks like IDisposable but is not wrapped in "
                 "'using' / 'using var'"
             ),
-            "location": f"offset {match.start}",
+            "location": f"offset {match.start()}",
         })
 
     # HttpClient instantiated with `new` inside a method body (socket exhaustion)
@@ -482,21 +482,21 @@ def check_csharp_specific_smells(content: str) -> List[Dict]:
             "type": "csharp_new_httpclient",
             "severity": "medium",
             "message": (
-                "'new HttpClient' — prefer IHttpClientFactory or a long-lived "
+                "'new HttpClient()' — prefer IHttpClientFactory or a long-lived "
                 "static instance to avoid socket exhaustion"
             ),
-            "location": f"offset {match.start}",
+            "location": f"offset {match.start()}",
         })
 
     # Missing await: `Task.Run(` / async method call assigned but never awaited.
-    # Heuristic: a statement ending in `Async` or `Async(...)` followed by `;`
+    # Heuristic: a statement ending in `Async()` or `Async(...)` followed by `;`
     # with no `await` keyword on the same line.
     for line_no, line in enumerate(content.split("\n"), 1):
-        stripped = line.strip
+        stripped = line.strip()
         if not stripped or stripped.startswith(("//", "/*", "*")):
             continue
         if re.search(r"\b\w+Async\s*\([^)]*\)\s*;\s*$", stripped) and "await " not in stripped:
-            # Skip `return ...Async;` (forwarding the Task is legitimate)
+            # Skip `return ...Async();` (forwarding the Task is legitimate)
             if stripped.startswith("return "):
                 continue
             smells.append({
@@ -537,19 +537,19 @@ def check_java_specific_smells(content: str) -> List[Dict]:
             "type": "java_empty_catch",
             "severity": "high",
             "message": "Empty catch block swallows exceptions silently",
-            "location": f"offset {match.start}",
+            "location": f"offset {match.start()}",
         })
 
-    # printStackTrace as error handling — use a logger instead.
+    # printStackTrace() as error handling — use a logger instead.
     for match in re.finditer(r"\.printStackTrace\s*\(\s*\)", content):
         smells.append({
             "type": "java_print_stack_trace",
             "severity": "medium",
             "message": (
-                "'printStackTrace' is not real error handling — log via a "
+                "'printStackTrace()' is not real error handling — log via a "
                 "proper logger or rethrow with context"
             ),
-            "location": f"offset {match.start}",
+            "location": f"offset {match.start()}",
         })
 
     # InterruptedException caught without restoring the interrupt flag.
@@ -558,16 +558,16 @@ def check_java_specific_smells(content: str) -> List[Dict]:
         content,
         re.DOTALL,
     ):
-        if "interrupt" not in match.group(2):
+        if "interrupt()" not in match.group(2):
             smells.append({
                 "type": "java_swallowed_interrupt",
                 "severity": "high",
                 "message": (
                     "InterruptedException caught without "
-                    "'Thread.currentThread.interrupt' — breaks cooperative "
+                    "'Thread.currentThread().interrupt()' — breaks cooperative "
                     "cancellation"
                 ),
-                "location": f"offset {match.start}",
+                "location": f"offset {match.start()}",
             })
 
     # Closeable resource instantiated outside try-with-resources (leak heuristic).
@@ -584,7 +584,7 @@ def check_java_specific_smells(content: str) -> List[Dict]:
                 f"'{match.group(1)}' looks like an AutoCloseable but is not in a "
                 "try-with-resources statement"
             ),
-            "location": f"offset {match.start}",
+            "location": f"offset {match.start()}",
         })
 
     # Heavy object built per use instead of shared as a singleton.
@@ -598,10 +598,10 @@ def check_java_specific_smells(content: str) -> List[Dict]:
             "type": "java_per_use_heavy_object",
             "severity": "medium",
             "message": (
-                f"'new {match.group(1)}' is expensive — share a singleton "
+                f"'new {match.group(1)}()' is expensive — share a singleton "
                 "instance instead of constructing per call"
             ),
-            "location": f"offset {match.start}",
+            "location": f"offset {match.start()}",
         })
 
     return smells
@@ -626,13 +626,13 @@ def check_c_specific_smells(content: str) -> List[Dict]:
         "sprintf": "no bounds check — prefer snprintf",
         "vsprintf": "no bounds check — prefer vsnprintf",
     }
-    for fn, reason in banned.items:
+    for fn, reason in banned.items():
         for m in re.finditer(rf"\b{fn}\s*\(", content):
             smells.append({
                 "type": f"c_banned_{fn}",
                 "severity": "high",
-                "message": f"'{fn}' is unsafe: {reason}",
-                "location": f"offset {m.start}",
+                "message": f"'{fn}()' is unsafe: {reason}",
+                "location": f"offset {m.start()}",
             })
 
     # 2. Format-string vulnerability — printf/syslog called with a bare
@@ -648,7 +648,7 @@ def check_c_specific_smells(content: str) -> List[Dict]:
                     f"'{fn}({m.group(1)})' uses a non-literal format string "
                     "— CWE-134 format string vulnerability"
                 ),
-                "location": f"offset {m.start}",
+                "location": f"offset {m.start()}",
             })
 
     # 3. Unbounded scanf — `%s` without a width specifier invites overflow.
@@ -665,7 +665,7 @@ def check_c_specific_smells(content: str) -> List[Dict]:
                     "scanf '%s' without a width specifier — unbounded read "
                     "can overflow the destination buffer"
                 ),
-                "location": f"offset {m.start}",
+                "location": f"offset {m.start()}",
             })
 
     # 4. malloc / calloc / realloc result dereferenced without a NULL check
@@ -707,7 +707,7 @@ def check_c_specific_smells(content: str) -> List[Dict]:
             continue
         var = m.group(1)
         for j in range(i + 1, min(i + 3, len(lines))):
-            nxt = lines[j].strip
+            nxt = lines[j].strip()
             if not nxt:
                 continue
             if re.match(rf"^{re.escape(var)}\s*=\s*NULL\s*;", nxt):
@@ -723,7 +723,7 @@ def check_c_specific_smells(content: str) -> List[Dict]:
             })
             break
 
-    # 6. system with a non-string-literal argument — command injection.
+    # 6. system() with a non-string-literal argument — command injection.
     system_pattern = re.compile(r"\bsystem\s*\(\s*(?!\"|NULL\b)(\w+)\s*\)")
     for m in system_pattern.finditer(content):
         smells.append({
@@ -733,7 +733,7 @@ def check_c_specific_smells(content: str) -> List[Dict]:
                 f"'system({m.group(1)})' with a non-literal argument — "
                 "command injection (CWE-78); use execve with validated args"
             ),
-            "location": f"offset {m.start}",
+            "location": f"offset {m.start()}",
         })
 
     return smells
@@ -886,7 +886,7 @@ def analyze_directory(
     if language:
         extensions = LANGUAGE_EXTENSIONS.get(language, [])
     else:
-        for exts in LANGUAGE_EXTENSIONS.values:
+        for exts in LANGUAGE_EXTENSIONS.values():
             extensions.extend(exts)
 
     pattern = "**/*" if recursive else "*"
@@ -942,7 +942,7 @@ def print_report(analysis: Dict) -> None:
         if analysis["smells"]:
             print("\n--- CODE SMELLS ---")
             for smell in analysis["smells"][:10]:
-                print(f"  [{smell['severity'].upper}] {smell['message']} ({smell['location']})")
+                print(f"  [{smell['severity'].upper()}] {smell['message']} ({smell['location']})")
 
         if analysis["solid_violations"]:
             print("\n--- SOLID VIOLATIONS ---")
@@ -962,7 +962,7 @@ def print_report(analysis: Dict) -> None:
     print("\n" + "=" * 60)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Analyze code quality, smells, and SOLID violations"
     )
@@ -978,7 +978,7 @@ def main:
     )
     parser.add_argument(
         "--language", "-l",
-        choices=list(LANGUAGE_EXTENSIONS.keys),
+        choices=list(LANGUAGE_EXTENSIONS.keys()),
         help="Filter by programming language"
     )
     parser.add_argument(
@@ -991,15 +991,15 @@ def main:
         help="Write output to file"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    target = Path(args.path).resolve
+    target = Path(args.path).resolve()
 
-    if not target.exists:
+    if not target.exists():
         print(f"Error: Path does not exist: {target}", file=sys.stderr)
         sys.exit(1)
 
-    if target.is_file:
+    if target.is_file():
         analysis = analyze_file(target)
     else:
         analysis = analyze_directory(target, args.recursive, args.language)
@@ -1017,4 +1017,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

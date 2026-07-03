@@ -18,7 +18,7 @@ WCAG 2.2 AA Level (Section 1.4.3):
 ## Sources
 
 ### 1. WCAG 2.2 — *Understanding Success Criterion 1.4.3: Contrast (Minimum)* (w3.org/WAI/WCAG22)
-The text and the formula. We implement `relative_luminance` per the spec's sRGB-linearization rule and `contrast_ratio` per `(L1 + 0.05) / (L2 + 0.05)`. No deviation.
+The text and the formula. We implement `relative_luminance()` per the spec's sRGB-linearization rule and `contrast_ratio()` per `(L1 + 0.05) / (L2 + 0.05)`. No deviation.
 
 ### 2. WCAG 2.2 — *Understanding Success Criterion 1.4.11: Non-text Contrast* (w3.org/WAI/WCAG22)
 Establishes the 3:1 floor for UI components. Used for `wcag-accent-on-bg` check.
@@ -27,10 +27,10 @@ Establishes the 3:1 floor for UI components. Used for `wcag-accent-on-bg` check.
 Mandates that text can be resized to 200% without loss of content. The converters use `rem` units for type scale (driven by `typography.scale_ratio`) so browser zoom respects user preference.
 
 ### 4. WebAIM — *Contrast Checker* (webaim.org/resources/contrastchecker)
-The de-facto reference implementation. Cross-checked against our `contrast_ratio` — identical results to 2 decimal places.
+The de-facto reference implementation. Cross-checked against our `contrast_ratio()` — identical results to 2 decimal places.
 
 ### 5. Sara Soueidan — *Color Tokens for Accessible Color Systems* (sarasoueidan.com, 2022)
-Articulates the iterative-contrast-walk strategy: when a brand color fails on the link role, lighten or darken until it passes, then snap. The `_ensure_link_contrast` helper is the direct implementation.
+Articulates the iterative-contrast-walk strategy: when a brand color fails on the link role, lighten or darken until it passes, then snap. The `_ensure_link_contrast()` helper is the direct implementation.
 
 ### 6. Léonie Watson — *Accessibility is a Process* (talks across 2018-2024)
 Reinforces that contrast is the lowest-cost-highest-impact accessibility win. Most other a11y improvements take design effort; contrast can be enforced algorithmically.

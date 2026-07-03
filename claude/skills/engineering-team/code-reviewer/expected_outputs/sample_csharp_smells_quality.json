@@ -24,7 +24,7 @@
     {
       "type": "csharp_blocking_async",
       "severity": "high",
-      "message": "Blocking call on async operation ('.Result' / '.Wait' / '.GetAwaiter.GetResult') \u2014 can deadlock in ASP.NET contexts",
+      "message": "Blocking call on async operation ('.Result' / '.Wait()' / '.GetAwaiter().GetResult()') \u2014 can deadlock in ASP.NET contexts",
       "location": "offset 430"
     },
     {
@@ -48,7 +48,7 @@
     {
       "type": "csharp_new_httpclient",
       "severity": "medium",
-      "message": "'new HttpClient' \u2014 prefer IHttpClientFactory or a long-lived static instance to avoid socket exhaustion",
+      "message": "'new HttpClient()' \u2014 prefer IHttpClientFactory or a long-lived static instance to avoid socket exhaustion",
       "location": "offset 606"
     },
     {

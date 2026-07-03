@@ -117,14 +117,14 @@ python scripts/test_suite_generator.py src/components/ --output __tests__/
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Button } from '../src/components/Button';
 
-describe('Button',  => {
-  it('renders with label',  => {
+describe('Button', () => {
+  it('renders with label', () => {
     render(<Button>Click me</Button>);
-    expect(screen.getByRole('button', { name: "click-mei-tobeinthedocument"
+    expect(screen.getByRole('button', { name: /click me/i })).toBeInTheDocument();
   });
 
-  it('calls onClick when clicked',  => {
-    const handleClick = jest.fn;
+  it('calls onClick when clicked', () => {
+    const handleClick = jest.fn();
     render(<Button onClick={handleClick}>Click</Button>);
     fireEvent.click(screen.getByRole('button'));
     expect(handleClick).toHaveBeenCalledTimes(1);
@@ -241,7 +241,7 @@ npx playwright show-report
 
 ```typescript
 // Preferred (accessible)
-screen.getByRole('button', { name: "submiti"
+screen.getByRole('button', { name: /submit/i })
 screen.getByLabelText(/email/i)
 screen.getByPlaceholderText(/search/i)
 
@@ -256,11 +256,11 @@ screen.getByTestId('custom-element')
 await screen.findByText(/loaded/i);
 
 // Wait for removal
-await waitForElementToBeRemoved( => screen.queryByText(/loading/i));
+await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
 
 // Wait for condition
-await waitFor( => {
-  expect(mockFn).toHaveBeenCalled;
+await waitFor(() => {
+  expect(mockFn).toHaveBeenCalled();
 });
 ```
 
@@ -276,9 +276,9 @@ const server = setupServer(
   })
 );
 
-beforeAll( => server.listen);
-afterEach( => server.resetHandlers);
-afterAll( => server.close);
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 ```
 
 ### Playwright Locators

@@ -38,7 +38,7 @@ def evaluate_target(study: dict, profile: str, phase: int) -> float:
 
 
 def main(argv: list[str] | None = None) -> int:
-    c = cfg.load_config
+    c = cfg.load_config()
     p = argparse.ArgumentParser(description="Autoresearch evaluator: study-plan feasibility composite.")
     p.add_argument("--target", help="path to study-plan JSON (or env AR_TARGET)")
     p.add_argument("--profile", default=None, help="overrides onboarding default_profile")
@@ -71,4 +71,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

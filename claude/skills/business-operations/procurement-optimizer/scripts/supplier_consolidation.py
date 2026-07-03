@@ -60,7 +60,7 @@ class Supplier:
         if isinstance(d, date):
             return d
         try:
-            return datetime.strptime(str(d)[:10], "%Y-%m-%d").date
+            return datetime.strptime(str(d)[:10], "%Y-%m-%d").date()
         except ValueError:
             return None
 
@@ -70,7 +70,7 @@ class Supplier:
             name=str(d.get("name", "")),
             category=str(d.get("category", "Uncategorized")),
             annual_spend=float(d.get("annual_spend", 0.0)),
-            criticality=str(d.get("criticality", "tier-3")).lower,
+            criticality=str(d.get("criticality", "tier-3")).lower(),
             contract_term_months=int(d.get("contract_term_months", 12)),
             integration_count_with_other_systems=int(
                 d.get("integration_count_with_other_systems", 0)
@@ -101,7 +101,7 @@ def cluster_by_category(suppliers: list[Supplier]) -> dict[str, list[Supplier]]:
     by_cat: dict[str, list[Supplier]] = {}
     for s in suppliers:
         by_cat.setdefault(s.category, []).append(s)
-    return {cat: members for cat, members in by_cat.items if len(members) >= 2}
+    return {cat: members for cat, members in by_cat.items() if len(members) >= 2}
 
 
 # ---------- Winner selection ----------
@@ -161,7 +161,7 @@ def build_recommendations(
     clusters = cluster_by_category(suppliers)
     recs: list[ClusterRecommendation] = []
 
-    for cat, members in clusters.items:
+    for cat, members in clusters.items():
         winner = pick_winner(members)
         losers = [m for m in members if m.name != winner.name]
         if not losers:
@@ -215,7 +215,7 @@ def renewal_clusters(suppliers: list[Supplier]) -> dict[str, list[Supplier]]:
             continue
         key = s.renewal_date.strftime("%Y-%m")
         by_month.setdefault(key, []).append(s)
-    return {month: members for month, members in by_month.items if len(members) >= 3}
+    return {month: members for month, members in by_month.items() if len(members) >= 3}
 
 
 # ---------- Rendering ----------
@@ -268,7 +268,7 @@ def render_markdown(
         lines.append("No calendar months with ≥ 3 simultaneous renewals. Leverage is preserved.\n")
     else:
         lines.append(f"**{len(renewals)} month(s) have ≥ 3 simultaneous renewals — leverage destroyed:**\n")
-        for month, members in sorted(renewals.items):
+        for month, members in sorted(renewals.items()):
             lines.append(f"### {month} — {len(members)} renewals\n")
             for m in members:
                 lines.append(
@@ -363,7 +363,7 @@ def main(argv: list[str] | None = None) -> int:
         "--profile",
         type=str,
         default="tech-startup",
-        choices=sorted(PROFILE_TIER1_CATEGORIES.keys),
+        choices=sorted(PROFILE_TIER1_CATEGORIES.keys()),
         help="Industry profile (default: tech-startup)",
     )
     p.add_argument("--output", type=str, help="Path to write markdown plan")
@@ -374,12 +374,12 @@ def main(argv: list[str] | None = None) -> int:
         data = SAMPLE_INPUT
     elif args.input:
         try:
-            data = json.loads(Path(args.input).read_text)
+            data = json.loads(Path(args.input).read_text())
         except Exception as e:
             print(f"error reading {args.input}: {e}", file=sys.stderr)
             return 2
     else:
-        p.print_help
+        p.print_help()
         return 0
 
     suppliers = [Supplier.from_dict(d) for d in data]
@@ -396,4 +396,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

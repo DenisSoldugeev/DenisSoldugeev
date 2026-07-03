@@ -96,14 +96,14 @@ Prioritize critical paths.
 Review the quality of these tests:
 
 ```python
-def test_login:
+def test_login():
     result = login("user", "pass")
     assert result is not None
     assert result.status == "success"
     assert result.token != ""
     assert len(result.permissions) > 0
 
-def test_login_fails:
+def test_login_fails():
     result = login("bad", "wrong")
     assert result is None
 ```
@@ -123,13 +123,13 @@ Suggest improvements for:
 Convert these Jest tests to Pytest:
 
 ```javascript
-describe('Calculator',  => {
-  it('should add two numbers',  => {
+describe('Calculator', () => {
+  it('should add two numbers', () => {
     const result = add(2, 3);
     expect(result).toBe(5);
   });
 
-  it('should handle negative numbers',  => {
+  it('should handle negative numbers', () => {
     const result = add(-2, 3);
     expect(result).toBe(1);
   });

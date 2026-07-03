@@ -145,7 +145,7 @@ class AlertOptimizer:
         duration_map = {'s': 1, 'm': 60, 'h': 3600, 'd': 86400}
         match = re.match(r'(\d+)([smhd])', duration_str)
         if match:
-            value, unit = match.groups
+            value, unit = match.groups()
             return int(value) * duration_map.get(unit, 1)
         return 0
 
@@ -201,7 +201,7 @@ class AlertOptimizer:
         }
         
         # Analyze coverage by category
-        covered_categories = set
+        covered_categories = set()
         alert_categories = []
         
         for alert in alerts:
@@ -218,7 +218,7 @@ class AlertOptimizer:
         coverage_analysis['missing_categories'] = list(missing_categories)
         
         # Check for missing golden signals
-        covered_signals = set
+        covered_signals = set()
         for alert in alerts:
             alert_rule = alert.get('expr', alert.get('condition', ''))
             signal = self._identify_golden_signal(alert_rule)
@@ -252,8 +252,8 @@ class AlertOptimizer:
 
     def _classify_alert_category(self, rule: str, alert_name: str) -> str:
         """Classify alert into monitoring category."""
-        rule_lower = rule.lower
-        name_lower = alert_name.lower
+        rule_lower = rule.lower()
+        name_lower = alert_name.lower()
         
         if any(keyword in rule_lower or keyword in name_lower 
                for keyword in ['up', 'down', 'available', 'reachable']):
@@ -283,7 +283,7 @@ class AlertOptimizer:
 
     def _identify_golden_signal(self, rule: str) -> str:
         """Identify which golden signal an alert covers."""
-        rule_lower = rule.lower
+        rule_lower = rule.lower()
         
         if any(keyword in rule_lower for keyword in ['latency', 'response_time', 'duration']):
             return 'latency'
@@ -310,7 +310,7 @@ class AlertOptimizer:
                             if service_name in alert.get('expr', '') or 
                                service_name in alert.get('labels', {}).get('service', '')]
             
-            covered_signals = set
+            covered_signals = set()
             for alert in service_alerts:
                 signal = self._identify_golden_signal(alert.get('expr', ''))
                 if signal:
@@ -376,7 +376,7 @@ class AlertOptimizer:
             alert_signatures[signature].append((i, alert))
         
         # Find exact duplicates
-        for signature, alert_group in alert_signatures.items:
+        for signature, alert_group in alert_signatures.items():
             if len(alert_group) > 1:
                 duplicate_group = {
                     'type': 'exact_duplicate',
@@ -399,10 +399,10 @@ class AlertOptimizer:
         labels = alert.get('labels', {})
         
         # Normalize the expression by removing whitespace and standardizing
-        normalized_expr = re.sub(r'\s+', ' ', expr).strip
+        normalized_expr = re.sub(r'\s+', ' ', expr).strip()
         
         # Create signature from expression and key labels
-        key_labels = {k: v for k, v in labels.items 
+        key_labels = {k: v for k, v in labels.items() 
                      if k in ['service', 'severity', 'team']}
         
         return f"{normalized_expr}::{json.dumps(key_labels, sort_keys=True)}"
@@ -421,7 +421,7 @@ class AlertOptimizer:
             service_groups[key].append((i, alert))
         
         # Look for similar alerts within each group
-        for key, alert_group in service_groups.items:
+        for key, alert_group in service_groups.items():
             if len(alert_group) > 1:
                 similar_alerts = self._identify_similar_alerts(alert_group)
                 if similar_alerts:
@@ -448,13 +448,13 @@ class AlertOptimizer:
         expr = alert.get('expr', alert.get('condition', ''))
         
         # Common metric patterns
-        if 'up' in expr.lower:
+        if 'up' in expr.lower():
             return 'availability'
-        elif any(keyword in expr.lower for keyword in ['latency', 'duration', 'response_time']):
+        elif any(keyword in expr.lower() for keyword in ['latency', 'duration', 'response_time']):
             return 'latency'
-        elif any(keyword in expr.lower for keyword in ['error', 'fail', '5xx']):
+        elif any(keyword in expr.lower() for keyword in ['error', 'fail', '5xx']):
             return 'error_rate'
-        elif any(keyword in expr.lower for keyword in ['cpu', 'memory', 'disk']):
+        elif any(keyword in expr.lower() for keyword in ['cpu', 'memory', 'disk']):
             return 'resource'
         
         return 'other'
@@ -475,7 +475,7 @@ class AlertOptimizer:
             threshold_groups[similarity_key].append((index, alert))
         
         # If multiple alerts have very similar thresholds, they might be redundant
-        for similarity_key, similar_alerts in threshold_groups.items:
+        for similarity_key, similar_alerts in threshold_groups.items():
             if len(similar_alerts) > 1:
                 similar_group = {
                     'type': 'semantic_duplicate',
@@ -530,7 +530,7 @@ class AlertOptimizer:
             percentage_match = re.search(r'([><=])\s*0?\.\d+', expr)
             if percentage_match:
                 operator = percentage_match.group(1)
-                if operator in ['>', '>='] and 'error' in expr.lower:
+                if operator in ['>', '>='] and 'error' in expr.lower():
                     analysis['threshold_issues'].append('Very low error rate threshold')
                     analysis['recommendations'].append('Consider increasing error rate threshold based on SLO')
             
@@ -540,9 +540,9 @@ class AlertOptimizer:
                 analysis['recommendations'].append('Add "for" clause to prevent alert flapping')
             
             # Check for resource utilization thresholds
-            if any(resource in expr.lower for resource in ['cpu', 'memory', 'disk']):
+            if any(resource in expr.lower() for resource in ['cpu', 'memory', 'disk']):
                 threshold_value = self._extract_threshold_from_expression(expr)
-                if threshold_value and threshold_value.replace('.', '').isdigit:
+                if threshold_value and threshold_value.replace('.', '').isdigit():
                     threshold_num = float(threshold_value)
                     if threshold_num < 0.7:  # Less than 70%
                         analysis['threshold_issues'].append('Low resource utilization threshold')
@@ -572,7 +572,7 @@ class AlertOptimizer:
         }
         
         # Count alerts by severity
-        severity_counts = Counter
+        severity_counts = Counter()
         for alert in alerts:
             severity = alert.get('labels', {}).get('severity', 'unknown')
             severity_counts[severity] += 1
@@ -648,9 +648,9 @@ class AlertOptimizer:
             estimate = base_estimates.get(severity, 1)
             
             # Adjust based on alert type
-            if 'error_rate' in expr.lower:
+            if 'error_rate' in expr.lower():
                 estimate *= 1.5  # Error rate alerts tend to be more frequent
-            elif 'availability' in expr.lower or 'up' in expr.lower:
+            elif 'availability' in expr.lower() or 'up' in expr.lower():
                 estimate *= 0.5  # Availability alerts should be rare
             
             total_estimated += estimate
@@ -663,7 +663,7 @@ class AlertOptimizer:
         optimized_alerts = []
         
         for i, alert in enumerate(alerts):
-            optimized_alert = alert.copy
+            optimized_alert = alert.copy()
             alert_name = alert.get('alert', alert.get('name', f'Alert_{i}'))
             
             # Apply noise reduction optimizations
@@ -698,7 +698,7 @@ class AlertOptimizer:
         optimized_config = {
             'alerts': optimized_alerts,
             'optimization_metadata': {
-                'optimized_at': datetime.utcnow.isoformat + 'Z',
+                'optimized_at': datetime.utcnow().isoformat() + 'Z',
                 'original_count': len(alerts),
                 'optimized_count': len(optimized_alerts),
                 'changes_applied': analysis_results.get('optimizations_applied', [])
@@ -710,12 +710,12 @@ class AlertOptimizer:
     def _apply_noise_reduction(self, alert: Dict[str, Any], 
                              noise_analysis: Dict[str, Any]) -> Dict[str, Any]:
         """Apply noise reduction optimizations to an alert."""
-        optimized_alert = alert.copy
+        optimized_alert = alert.copy()
         
         for recommendation in noise_analysis['recommendations']:
             if 'for:' in recommendation and not alert.get('for'):
                 optimized_alert['for'] = '5m'
-            elif 'threshold' in recommendation.lower:
+            elif 'threshold' in recommendation.lower():
                 # This would require more sophisticated threshold adjustment
                 # For now, add annotation for manual review
                 if 'annotations' not in optimized_alert:
@@ -727,7 +727,7 @@ class AlertOptimizer:
     def _apply_threshold_optimization(self, alert: Dict[str, Any], 
                                     threshold_analysis: Dict[str, Any]) -> Dict[str, Any]:
         """Apply threshold optimizations to an alert."""
-        optimized_alert = alert.copy
+        optimized_alert = alert.copy()
         
         # Add 'for' clause if missing
         if 'No hysteresis' in str(threshold_analysis['threshold_issues']):
@@ -744,7 +744,7 @@ class AlertOptimizer:
 
     def _ensure_alert_metadata(self, alert: Dict[str, Any]) -> Dict[str, Any]:
         """Ensure alert has proper metadata."""
-        optimized_alert = alert.copy
+        optimized_alert = alert.copy()
         
         # Ensure annotations exist
         if 'annotations' not in optimized_alert:
@@ -771,7 +771,7 @@ class AlertOptimizer:
     def _remove_duplicate_alerts(self, alerts: List[Dict[str, Any]], 
                                duplicates: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Remove duplicate alerts from the list."""
-        indices_to_remove = set
+        indices_to_remove = set()
         
         for duplicate_group in duplicates:
             if duplicate_group['type'] == 'exact_duplicate':
@@ -828,7 +828,7 @@ class AlertOptimizer:
         analysis_results = {
             'summary': {
                 'total_alerts': len(alerts),
-                'analysis_timestamp': datetime.utcnow.isoformat + 'Z'
+                'analysis_timestamp': datetime.utcnow().isoformat() + 'Z'
             },
             'noisy_alerts': self.analyze_alert_noise(alerts),
             'coverage_gaps': self.identify_coverage_gaps(alerts, services),
@@ -870,10 +870,10 @@ class AlertOptimizer:
     def export_analysis(self, analysis_results: Dict[str, Any], output_file: str, 
                        format_type: str = 'json'):
         """Export analysis results."""
-        if format_type.lower == 'json':
+        if format_type.lower() == 'json':
             with open(output_file, 'w') as f:
                 json.dump(analysis_results, f, indent=2)
-        elif format_type.lower == 'html':
+        elif format_type.lower() == 'html':
             self._export_html_report(analysis_results, output_file)
         else:
             raise ValueError(f"Unsupported format: {format_type}")
@@ -919,7 +919,7 @@ class AlertOptimizer:
     
     <div class="section warning">
         <h2>Alert Fatigue Assessment</h2>
-        <p><strong>Risk Level:</strong> {analysis_results['alert_fatigue_assessment']['risk_level'].upper}</p>
+        <p><strong>Risk Level:</strong> {analysis_results['alert_fatigue_assessment']['risk_level'].upper()}</p>
         <p><strong>Risk Factors:</strong></p>
         <ul>
         {''.join(f'<li>{factor}</li>' for factor in analysis_results['alert_fatigue_assessment']['risk_factors'])}
@@ -957,7 +957,7 @@ class AlertOptimizer:
         
         # Alert fatigue assessment
         fatigue = analysis_results['alert_fatigue_assessment']
-        print(f"\nAlert Fatigue Risk: {fatigue['risk_level'].upper}")
+        print(f"\nAlert Fatigue Risk: {fatigue['risk_level'].upper()}")
         if fatigue['risk_factors']:
             print(f"  Risk Factors:")
             for factor in fatigue['risk_factors']:
@@ -991,7 +991,7 @@ class AlertOptimizer:
         print(f"\n{'='*60}\n")
 
 
-def main:
+def main():
     """Main function for CLI usage."""
     parser = argparse.ArgumentParser(
         description='Analyze and optimize alert configurations',
@@ -1020,9 +1020,9 @@ Examples:
     parser.add_argument('--analyze-only', action='store_true',
                        help='Only perform analysis, do not generate optimized config')
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
-    optimizer = AlertOptimizer
+    optimizer = AlertOptimizer()
     
     try:
         # Load alert configuration
@@ -1056,4 +1056,4 @@ Examples:
 
 
 if __name__ == '__main__':
-    main
+    main()

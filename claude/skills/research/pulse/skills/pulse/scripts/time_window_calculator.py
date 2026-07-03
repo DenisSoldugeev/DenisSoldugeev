@@ -41,7 +41,7 @@ WINDOW_RE = re.compile(r"^(\d+)\s*d(?:ays?)?$", re.IGNORECASE)
 
 def parse_window(window: str) -> int:
     """Return days as int, or raise ValueError."""
-    m = WINDOW_RE.match(window.strip)
+    m = WINDOW_RE.match(window.strip())
     if not m:
         raise ValueError(
             f"Invalid window '{window}'. Expected format like '7d', '14d', '30d', '60d', '90d'."
@@ -76,8 +76,8 @@ def calculate(window: str, reference_date: datetime) -> Dict[str, Any]:
     return {
         "window": window,
         "days": days,
-        "reference_date": reference_date.isoformat,
-        "hn_created_at_min": int(cutoff.timestamp),
+        "reference_date": reference_date.isoformat(),
+        "hn_created_at_min": int(cutoff.timestamp()),
         "reddit_t_param": reddit_t_param(days),
         "web_search_after": cutoff.strftime("%Y-%m-%d"),
         "human_label": f"last {days} days",
@@ -111,7 +111,7 @@ def main(argv: List[str]) -> int:
     args = parser.parse_args(argv)
 
     if not args.window:
-        parser.print_help
+        parser.print_help()
         return 0
 
     if args.reference_date:

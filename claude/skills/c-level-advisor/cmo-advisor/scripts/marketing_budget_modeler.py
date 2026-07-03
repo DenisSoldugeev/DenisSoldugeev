@@ -220,8 +220,8 @@ def build_scenario(
 ) -> ScenarioResult:
     channel_mqls, channel_budget = allocate_mqls(channels, total_mqls, multiplier)
 
-    total_budget = sum(channel_budget.values)
-    total_mqls_allocated = sum(channel_mqls.values)
+    total_budget = sum(channel_budget.values())
+    total_mqls_allocated = sum(channel_mqls.values())
     projected_customers = math.floor(total_mqls_allocated * FUNNEL.mql_to_close)
     projected_arr = projected_customers * ASP_ANNUAL
 
@@ -316,7 +316,7 @@ def print_scenario(result: ScenarioResult, channels: List[Channel]) -> None:
     elif blended_ltv_cac >= 3:
         print("  ✓ HEALTHY")
     else:
-        print
+        print()
     print(f"  Blended payback:         {blended_payback:.1f} months")
     if result.notes:
         print(f"\n  Notes:")
@@ -379,7 +379,7 @@ def print_recommendations(channels: List[Channel]) -> None:
 # Main
 # ---------------------------------------------------------------------------
 
-def main -> None:
+def main() -> None:
     customers = customers_needed(TARGET_NEW_ARR, ASP_ANNUAL)
     total_mqls = mqls_needed_total(customers, FUNNEL.mql_to_close)
 
@@ -437,4 +437,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

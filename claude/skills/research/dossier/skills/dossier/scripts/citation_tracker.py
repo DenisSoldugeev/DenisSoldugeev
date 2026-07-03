@@ -32,7 +32,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 
-SESSIONS_DIR = Path.home / ".dossier_sessions"
+SESSIONS_DIR = Path.home() / ".dossier_sessions"
 VALID_CLASSIFICATIONS = ["supporting", "disconfirming", "inconclusive"]
 VALID_TIERS = ["primary", "secondary", "tertiary"]
 
@@ -43,7 +43,7 @@ def session_path(name: str) -> Path:
 
 def load_session(name: str) -> Dict[str, Any]:
     p = session_path(name)
-    if not p.exists:
+    if not p.exists():
         raise FileNotFoundError(f"Session not found: {name}")
     return json.loads(p.read_text(encoding="utf-8"))
 
@@ -53,12 +53,12 @@ def save_session(name: str, data: Dict[str, Any]) -> None:
     session_path(name).write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
-def now_iso -> str:
-    return datetime.now(timezone.utc).isoformat
+def now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 def action_start(name: str, subject: Optional[str], hypothesis: Optional[str], purpose: Optional[str]) -> Dict[str, Any]:
-    if session_path(name).exists:
+    if session_path(name).exists():
         raise FileExistsError(f"Session already exists: {name}")
     data: Dict[str, Any] = {
         "session": name,
@@ -66,7 +66,7 @@ def action_start(name: str, subject: Optional[str], hypothesis: Optional[str], p
         "hypothesis": hypothesis or "",
         "hypothesis_is_implicit_fallback": False,
         "purpose": purpose or "",
-        "started_at": now_iso,
+        "started_at": now_iso(),
         "ended_at": None,
         "searches": [],
         "received_log": [],
@@ -95,7 +95,7 @@ def action_record_search(name: str, query: str, classification: str) -> Dict[str
     data = load_session(name)
     if classification not in VALID_CLASSIFICATIONS:
         raise ValueError(f"Invalid classification '{classification}'. Pick from: {VALID_CLASSIFICATIONS}")
-    data["searches"].append({"query": query, "classification": classification, "at": now_iso})
+    data["searches"].append({"query": query, "classification": classification, "at": now_iso()})
     data["counts"]["searches"] += 1
     data["counts"][f"{classification}_searches"] += 1
     save_session(name, data)
@@ -104,7 +104,7 @@ def action_record_search(name: str, query: str, classification: str) -> Dict[str
 
 def action_record_received(name: str, count: int) -> Dict[str, Any]:
     data = load_session(name)
-    data["received_log"].append({"count": count, "at": now_iso})
+    data["received_log"].append({"count": count, "at": now_iso()})
     data["counts"]["received_total"] += count
     save_session(name, data)
     return data
@@ -118,7 +118,7 @@ def action_record_cited(name: str, url: str, tier: str, classification: str, tit
         raise ValueError(f"Invalid classification '{classification}'. Pick from: {VALID_CLASSIFICATIONS}")
     if any(c["url"] == url for c in data["cited"]):
         return data
-    data["cited"].append({"url": url, "tier": tier, "classification": classification, "title": title, "at": now_iso})
+    data["cited"].append({"url": url, "tier": tier, "classification": classification, "title": title, "at": now_iso()})
     data["counts"]["cited_total"] += 1
     data["counts"][f"cited_{tier}"] += 1
     data["counts"][f"cited_{classification}"] += 1
@@ -148,7 +148,7 @@ def action_status(name: str) -> Dict[str, Any]:
 def action_close(name: str) -> Dict[str, Any]:
     data = load_session(name)
     if data.get("ended_at") is None:
-        data["ended_at"] = now_iso
+        data["ended_at"] = now_iso()
         save_session(name, data)
     return data
 
@@ -266,7 +266,7 @@ def main(argv: List[str]) -> int:
         else:
             SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
             result = [
-                {"session": p.stem, **{k: v for k, v in json.loads(p.read_text(encoding="utf-8")).items if k in ("subject", "started_at", "ended_at", "counts")}}
+                {"session": p.stem, **{k: v for k, v in json.loads(p.read_text(encoding="utf-8")).items() if k in ("subject", "started_at", "ended_at", "counts")}}
                 for p in sorted(SESSIONS_DIR.glob("*.json"))
             ]
     except (FileNotFoundError, FileExistsError, ValueError) as e:

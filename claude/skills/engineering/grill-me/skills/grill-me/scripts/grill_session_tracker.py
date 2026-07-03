@@ -40,7 +40,7 @@ from question_generator import analyze as analyze_plan, SAMPLE_PLAN  # noqa: E40
 SESSIONS_DIR = os.path.expanduser("~/.grill_sessions")
 
 
-def _ensure_dir -> None:
+def _ensure_dir() -> None:
     os.makedirs(SESSIONS_DIR, exist_ok=True)
 
 
@@ -57,7 +57,7 @@ def _load(name: str) -> Dict[str, Any]:
 
 
 def _save(name: str, data: Dict[str, Any]) -> None:
-    _ensure_dir
+    _ensure_dir()
     with open(_session_path(name), "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
@@ -65,7 +65,7 @@ def _save(name: str, data: Dict[str, Any]) -> None:
 def start_session(name: str, plan_path: str) -> Dict[str, Any]:
     if plan_path:
         with open(plan_path, "r", encoding="utf-8") as f:
-            plan_text = f.read
+            plan_text = f.read()
     else:
         plan_text = SAMPLE_PLAN
         plan_path = "<embedded sample>"
@@ -73,7 +73,7 @@ def start_session(name: str, plan_path: str) -> Dict[str, Any]:
     plan_analysis = analyze_plan(plan_text)
     session = {
         "name": name,
-        "started_at": datetime.now.isoformat(timespec="seconds"),
+        "started_at": datetime.now().isoformat(timespec="seconds"),
         "plan_source": plan_path,
         "total_questions": plan_analysis["total_questions"],
         "questions": plan_analysis["questions"],
@@ -90,7 +90,7 @@ def record_answer(name: str, qid: int, answer: str) -> Dict[str, Any]:
         raise ValueError(f"Session not found: {name}")
     session["answers"][str(qid)] = {
         "answer": answer,
-        "recorded_at": datetime.now.isoformat(timespec="seconds"),
+        "recorded_at": datetime.now().isoformat(timespec="seconds"),
     }
     _save(name, session)
     return session
@@ -119,8 +119,8 @@ def session_status(name: str) -> Dict[str, Any]:
     }
 
 
-def list_sessions -> List[str]:
-    _ensure_dir
+def list_sessions() -> List[str]:
+    _ensure_dir()
     return sorted(
         os.path.splitext(f)[0]
         for f in os.listdir(SESSIONS_DIR)
@@ -133,7 +133,7 @@ def close_session(name: str) -> Dict[str, Any]:
     if not session:
         raise ValueError(f"Session not found: {name}")
     session["status"] = "closed"
-    session["closed_at"] = datetime.now.isoformat(timespec="seconds")
+    session["closed_at"] = datetime.now().isoformat(timespec="seconds")
     _save(name, session)
     return session
 
@@ -157,12 +157,12 @@ def render_status(r: Dict[str, Any]) -> str:
     lines.append("")
     if r["all_answers"]:
         lines.append("Answered:")
-        for qid, ans in sorted(r["all_answers"].items, key=lambda x: int(x[0])):
+        for qid, ans in sorted(r["all_answers"].items(), key=lambda x: int(x[0])):
             lines.append(f"  Q{qid}: {ans['answer'][:100]}")
     return "\n".join(lines)
 
 
-def _build_parser -> argparse.ArgumentParser:
+def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Track grill-me session state across turns.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -198,7 +198,7 @@ def _print_start_summary(session: Dict[str, Any]) -> None:
 
 
 def _action_list(args: argparse.Namespace) -> int:
-    _print_session_list(list_sessions, args.output == "json")
+    _print_session_list(list_sessions(), args.output == "json")
     return 0
 
 
@@ -252,8 +252,8 @@ ACTION_DISPATCH = {
 }
 
 
-def main -> int:
-    args = _build_parser.parse_args
+def main() -> int:
+    args = _build_parser().parse_args()
     handler = ACTION_DISPATCH.get(args.action)
     if handler is None:
         return 0
@@ -261,4 +261,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

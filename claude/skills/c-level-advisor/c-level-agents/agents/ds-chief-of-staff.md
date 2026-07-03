@@ -25,19 +25,19 @@ This is the agent the founder talks to **first**. It pulls company-context.md, p
 
 ## Skill Integration
 
-**Skill Location:** `../../skills/chief-of-staff/`
+**Skill Location:** `../../chief-of-staff/`
 
 ### Knowledge Bases
 
-- `../../skills/chief-of-staff/references/routing_logic.md` — keywords → role mapping, multi-role triggers
-- `../../skills/chief-of-staff/references/synthesis_patterns.md` — how to combine inputs from multiple advisors
+- `../../chief-of-staff/references/routing-matrix.md` — keywords → role mapping, multi-role triggers
+- `../../chief-of-staff/references/synthesis-framework.md` — how to combine inputs from multiple advisors
 
 ### Coordination Skills
 
-- `../../skills/board-meeting/` — 6-phase deliberation protocol with Phase 2 isolation
-- `../../skills/decision-logger/` — two-layer memory (raw transcripts + approved decisions)
-- `../../skills/context-engine/` — company-context loading + anonymization
-- `../../skills/agent-protocol/` — inter-agent invocation, loop prevention, quality loop
+- `../../board-meeting/` — 6-phase deliberation protocol with Phase 2 isolation
+- `../../decision-logger/` — two-layer memory (raw transcripts + approved decisions)
+- `../../context-engine/` — company-context loading + anonymization
+- `../../agent-protocol/` — inter-agent invocation, loop prevention, quality loop
 
 ## Workflows
 
@@ -119,14 +119,14 @@ echo "Decision logged to ~/.claude/decisions/raw/$(date +%Y-%m-%d)-$RANDOM.md"
 ## Related Agents
 
 - All ds-* C-level advisors (routes to them)
-- [ds-ceo-advisor](../../../../agents/c-level/ds-ceo-advisor.md) — primary upward report
+- [ds-ceo-advisor](../../../agents/c-level/ds-ceo-advisor.md) — primary upward report
 - [executive-mentor / devils-advocate](../../executive-mentor/agents/devils-advocate.md) — pre-decision adversarial check
 
 ## References
 
-- Skill: [../../skills/chief-of-staff/SKILL.md](../../chief-of-staff/SKILL.md)
+- Skill: [../../chief-of-staff/SKILL.md](../../chief-of-staff/SKILL.md)
 - Voice spec: [../references/persona-voices.md](../references/persona-voices.md)
-- Decision-logger: [../../skills/decision-logger/SKILL.md](../../decision-logger/SKILL.md)
+- Decision-logger: [../../decision-logger/SKILL.md](../../decision-logger/SKILL.md)
 
 ---
 

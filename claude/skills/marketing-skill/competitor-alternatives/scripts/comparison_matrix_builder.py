@@ -70,7 +70,7 @@ FEATURE_IMPORTANCE = {
 # ---------------------------------------------------------------------------
 
 def normalise_status(s: str) -> str:
-    s = (s or "no").strip.lower
+    s = (s or "no").strip().lower()
     return s if s in STATUS_SCORE else "no"
 
 
@@ -83,7 +83,7 @@ def build_matrix(data: dict) -> dict:
 
     # Collect competitor names (ordered, deduplicated)
     competitors = []
-    seen        = set
+    seen        = set()
     for f in features:
         for c in f.get("competitors", {}):
             if c not in seen:
@@ -106,7 +106,7 @@ def build_matrix(data: dict) -> dict:
 
         you_win   = all(your_s > comp_s[c] for c in competitors) if competitors else False
         you_lose  = any(your_s < comp_s[c] for c in competitors)
-        your_max  = max(comp_s.values) if comp_s else 0
+        your_max  = max(comp_s.values()) if comp_s else 0
         advantage = your_s - your_max   # positive = you're better overall
 
         feature_rows.append({
@@ -139,7 +139,7 @@ def build_matrix(data: dict) -> dict:
 
     # Overall competitive score (average win% across all competitors)
     overall_win_pct = (
-        round(sum(v["win_pct"] for v in comp_scores.values) / len(comp_scores))
+        round(sum(v["win_pct"] for v in comp_scores.values()) / len(comp_scores))
         if comp_scores else 0
     )
 
@@ -190,7 +190,7 @@ def build_markdown(result: dict) -> str:
     lines.append("## Competitive Score Summary\n")
     lines.append("| Competitor | You Win | Tie | You Lose | Win % | Verdict |")
     lines.append("|---|---|---|---|---|---|")
-    for c, s in result["competitor_scores"].items:
+    for c, s in result["competitor_scores"].items():
         lines.append(f"| {c} | {s['wins']} | {s['ties']} | {s['losses']} | "
                      f"**{s['win_pct']}%** | {s['verdict']} |")
     lines.append(f"\n**Overall win rate: {m['overall_win_pct']}% — {m['verdict']}**\n")
@@ -233,7 +233,7 @@ def build_markdown(result: dict) -> str:
 
     # Legend
     lines.append("## Legend\n")
-    for k, v in STATUS_LABEL.items:
+    for k, v in STATUS_LABEL.items():
         lines.append(f"- {v} {STATUS_TEXT[k]}")
     lines.append("")
 
@@ -247,7 +247,7 @@ def build_markdown(result: dict) -> str:
 def pretty_print(result: dict) -> None:
     m = result["meta"]
     print("\n" + "=" * 70)
-    print(f"  COMPETITIVE MATRIX: {m['your_product'].upper} vs {', '.join(m['competitors'])}")
+    print(f"  COMPETITIVE MATRIX: {m['your_product'].upper()} vs {', '.join(m['competitors'])}")
     print("=" * 70)
     print(f"\n  Total features analysed : {m['total_features']}")
     print(f"  Overall win rate        : {m['overall_win_pct']}%  ({m['verdict']})")
@@ -255,7 +255,7 @@ def pretty_print(result: dict) -> None:
     print(f"\n{'─'*70}")
     print(f"  {'COMPETITOR':<22}  {'WIN%':>5}  {'WINS':>5}  {'TIES':>5}  {'LOSSES':>7}  VERDICT")
     print(f"{'─'*70}")
-    for c, s in result["competitor_scores"].items:
+    for c, s in result["competitor_scores"].items():
         bar = "█" * (s["win_pct"] // 10) + "░" * (10 - s["win_pct"] // 10)
         print(f"  {c:<22}  {s['win_pct']:>4}%  {s['wins']:>5}  {s['ties']:>5}  "
               f"{s['losses']:>7}  {bar}  {s['verdict']}")
@@ -324,7 +324,7 @@ DEMO_DATA = {
 # CLI
 # ---------------------------------------------------------------------------
 
-def parse_args:
+def parse_args():
     parser = argparse.ArgumentParser(
         description="Build a competitive feature comparison matrix (stdlib only).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -336,11 +336,11 @@ def parse_args:
                         help="Output analysis as JSON")
     parser.add_argument("--markdown", action="store_true",
                         help="Output comparison table as Markdown")
-    return parser.parse_args
+    return parser.parse_args()
 
 
-def main:
-    args = parse_args
+def main():
+    args = parse_args()
 
     if args.input:
         with open(args.input) as f:
@@ -362,4 +362,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

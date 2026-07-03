@@ -249,7 +249,7 @@
     {
       "id": "DEBT-0027",
       "type": "deprecated_api",
-      "description": "Using deprecated datetime.utcnow method",
+      "description": "Using deprecated datetime.utcnow() method",
       "file_path": "src/utils.py",
       "severity": "low",
       "detected_date": "2024-01-15T09:00:00",
@@ -258,7 +258,7 @@
     {
       "id": "DEBT-0028",
       "type": "logging_issue",
-      "description": "Using print instead of proper logging",
+      "description": "Using print() instead of proper logging",
       "file_path": "src/payment_processor.py",
       "severity": "low",
       "detected_date": "2024-01-15T09:00:00",

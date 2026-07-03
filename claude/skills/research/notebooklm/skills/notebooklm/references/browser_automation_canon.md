@@ -1,4 +1,4 @@
-# Browser Automation Canon — Screenshot-First + find-Before-Click
+# Browser Automation Canon — Screenshot-First + find()-Before-Click
 
 This reference answers exactly one decision: **what discipline does the notebooklm skill follow when controlling NotebookLM's UI, and why?**
 
@@ -28,7 +28,7 @@ Reasons:
 
 The performance cost is negligible (screenshots are fast). The safety benefit is large.
 
-### 2. find-Before-Click
+### 2. find()-Before-Click
 
 **Use semantic element finders before pixel coordinates.**
 
@@ -53,10 +53,10 @@ NotebookLM skill uses generic terms — NOT hardcoded to a specific tool:
 | Skill says | Tool-specific implementation examples |
 |---|---|
 | "browser automation tool" | Claude computer-use, Claude Chrome Extension, Playwright, Puppeteer |
-| "screenshot tool" | `screenshot`, `page.screenshot`, `browser.captureScreenshot` |
-| "find tool" | `find_element`, `page.locator`, `$$(selector)` |
-| "click tool" | `click`, `page.click`, `element.click` |
-| "navigate tool" | `navigate`, `page.goto`, `browser.open` |
+| "screenshot tool" | `screenshot()`, `page.screenshot()`, `browser.captureScreenshot()` |
+| "find tool" | `find_element()`, `page.locator()`, `$$(selector)` |
+| "click tool" | `click()`, `page.click()`, `element.click()` |
+| "navigate tool" | `navigate()`, `page.goto()`, `browser.open()` |
 | "file-upload tool" | Tool-specific file-upload mechanism (not native file picker) |
 
 Why: the skill should work across browser-automation environments. Tool-specific code locks the skill to one harness.
@@ -168,7 +168,7 @@ Opens native file picker, breaks automation. Use the file-upload tool.
 ## Operational Checklist (Per UI Action)
 
 - [ ] Screenshot taken before action
-- [ ] Semantic find attempted before pixel coordinates
+- [ ] Semantic find() attempted before pixel coordinates
 - [ ] Login wall check after navigation
 - [ ] Tool-agnostic vocabulary in skill body
 - [ ] File uploads use file-upload tool, not file picker
@@ -179,7 +179,7 @@ Opens native file picker, breaks automation. Use the file-upload tool.
 
 1. **Anthropic Computer Use documentation (Claude 3.5 Sonnet + later).** Source for the screenshot-first + semantic-find discipline in Claude's official browser automation tool. The patterns in this reference are the production patterns Anthropic recommends.
 
-2. **Playwright documentation — playwright.dev.** Source for the semantic locator patterns (`page.locator`, role-based selectors, accessibility tree). Playwright's locator model is the modern standard.
+2. **Playwright documentation — playwright.dev.** Source for the semantic locator patterns (`page.locator()`, role-based selectors, accessibility tree). Playwright's locator model is the modern standard.
 
 3. **Selenium documentation + best practices guides.** Source for the historical context: Selenium pioneered semantic finders 15+ years before Playwright; the patterns are well-established.
 

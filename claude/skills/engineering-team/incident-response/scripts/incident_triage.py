@@ -249,7 +249,7 @@ def parse_forensic_fields(fact: dict) -> dict:
                 fmt = "%Y-%m-%dT%H:%M:%SZ"
                 dt_first = datetime.strptime(str(first_seen), fmt)
                 dt_last = datetime.strptime(str(last_seen), fmt)
-                dwell_hours = max(0.0, (dt_last - dt_first).total_seconds / 3600.0)
+                dwell_hours = max(0.0, (dt_last - dt_first).total_seconds() / 3600.0)
             except (ValueError, TypeError):
                 dwell_hours = 0.0
 
@@ -320,13 +320,13 @@ def build_ioc_summary(fields: dict) -> dict:
 def _looks_like_ip(value: str) -> bool:
     """Heuristic: does the string look like an IPv4 address?"""
     import re
-    return bool(re.match(r"^\d{1,3}(\.\d{1,3}){3}$", value.strip))
+    return bool(re.match(r"^\d{1,3}(\.\d{1,3}){3}$", value.strip()))
 
 
 def _looks_like_hash(value: str) -> bool:
     """Heuristic: does the string look like a hex hash (MD5/SHA1/SHA256)?"""
     import re
-    return bool(re.match(r"^[0-9a-fA-F]{32,64}$", value.strip))
+    return bool(re.match(r"^[0-9a-fA-F]{32,64}$", value.strip()))
 
 
 def _source_applicable(source: str, fields: dict) -> bool:
@@ -358,13 +358,13 @@ def classify_incident(fact: dict) -> Tuple[str, float]:
         Returns ("unknown", 0.0) when no match is found.
     """
     # Build a single searchable string from the fact
-    searchable = _flatten_to_string(fact).lower
+    searchable = _flatten_to_string(fact).lower()
 
     scores: Dict[str, int] = {}
 
     for incident_type in INCIDENT_TAXONOMY:
         # The incident type slug itself is a keyword
-        slug_words = incident_type.replace("_", " ").split
+        slug_words = incident_type.replace("_", " ").split()
         score = 0
         for word in slug_words:
             if word in searchable:
@@ -381,7 +381,7 @@ def classify_incident(fact: dict) -> Tuple[str, float]:
 
     if not scores:
         # Last resort: check explicit event_type field
-        event_type = str(fact.get("event_type", "")).lower.replace(" ", "_").replace("-", "_")
+        event_type = str(fact.get("event_type", "")).lower().replace(" ", "_").replace("-", "_")
         if event_type in INCIDENT_TAXONOMY:
             return event_type, 0.6
         return "unknown", 0.0
@@ -391,10 +391,10 @@ def classify_incident(fact: dict) -> Tuple[str, float]:
 
     # Normalise confidence: cap at 1.0, scale by how much the best
     # outscores alternatives
-    total_score = sum(scores.values) or 1
+    total_score = sum(scores.values()) or 1
     raw_confidence = max_score / total_score
     # Boost if event_type field matches
-    event_type = str(fact.get("event_type", "")).lower.replace(" ", "_").replace("-", "_")
+    event_type = str(fact.get("event_type", "")).lower().replace(" ", "_").replace("-", "_")
     if event_type == best_type:
         raw_confidence = min(1.0, raw_confidence + 0.25)
 
@@ -408,7 +408,7 @@ def _flatten_to_string(obj: Any, depth: int = 0) -> str:
         return ""
     if isinstance(obj, dict):
         parts = []
-        for k, v in obj.items:
+        for k, v in obj.items():
             parts.append(str(k))
             parts.append(_flatten_to_string(v, depth + 1))
         return " ".join(parts)
@@ -444,12 +444,12 @@ def check_false_positives(fact: dict) -> List[str]:
 
     Returns a list of triggered false positive indicator names.
     """
-    searchable = _flatten_to_string(fact).lower
+    searchable = _flatten_to_string(fact).lower()
     triggered: List[str] = []
 
     for indicator in FALSE_POSITIVE_INDICATORS:
         for pattern in indicator["patterns"]:
-            if pattern.lower in searchable:
+            if pattern.lower() in searchable:
                 triggered.append(indicator["name"])
                 break  # one match per indicator is enough
 
@@ -462,8 +462,8 @@ def get_escalation_path(incident_type: str, severity: str) -> dict:
 
     Falls back to sev4 routing if severity is not recognised.
     """
-    sev_key = severity.lower
-    routing = ESCALATION_ROUTING.get(sev_key, ESCALATION_ROUTING["sev4"]).copy
+    sev_key = severity.lower()
+    routing = ESCALATION_ROUTING.get(sev_key, ESCALATION_ROUTING["sev4"]).copy()
 
     # Augment with taxonomy SLA if available
     taxonomy = INCIDENT_TAXONOMY.get(incident_type, {})
@@ -482,17 +482,17 @@ def check_sev_escalation_triggers(fact: dict) -> Optional[str]:
     Returns the escalation target (e.g. 'sev1') if a trigger fires,
     or None if no triggers are present.
     """
-    searchable = _flatten_to_string(fact).lower
+    searchable = _flatten_to_string(fact).lower()
     # Also inspect a flat list of explicit indicator flags
     explicit_indicators: List[str] = []
     if isinstance(fact.get("indicators"), list):
-        explicit_indicators = [str(i).lower for i in fact["indicators"]]
+        explicit_indicators = [str(i).lower() for i in fact["indicators"]]
     if isinstance(fact.get("escalation_triggers"), list):
-        explicit_indicators += [str(i).lower for i in fact["escalation_triggers"]]
+        explicit_indicators += [str(i).lower() for i in fact["escalation_triggers"]]
 
     for trigger in SEV_ESCALATION_TRIGGERS:
         indicator_key = trigger["indicator"].replace("_", " ")
-        indicator_raw = trigger["indicator"].lower
+        indicator_raw = trigger["indicator"].lower()
 
         if (
             indicator_key in searchable
@@ -512,7 +512,7 @@ _SEV_ORDER = {"sev1": 1, "sev2": 2, "sev3": 3, "sev4": 4}
 
 
 def _sev_to_int(sev: str) -> int:
-    return _SEV_ORDER.get(sev.lower, 4)
+    return _SEV_ORDER.get(sev.lower(), 4)
 
 
 def _int_to_sev(n: int) -> str:
@@ -535,8 +535,8 @@ def _print_text_report(result: dict) -> None:
     print("  INCIDENT TRIAGE REPORT")
     print(sep)
     print(f"  Timestamp     : {result.get('timestamp_utc', 'N/A')}")
-    print(f"  Incident Type : {result.get('incident_type', 'unknown').upper}")
-    print(f"  Severity      : {result.get('severity', 'N/A').upper}")
+    print(f"  Incident Type : {result.get('incident_type', 'unknown').upper()}")
+    print(f"  Severity      : {result.get('severity', 'N/A').upper()}")
     print(f"  Confidence    : {result.get('classification_confidence', 0.0):.0%}")
     print(sep)
 
@@ -547,7 +547,7 @@ def _print_text_report(result: dict) -> None:
 
     esc_trigger = result.get("escalation_trigger_fired")
     if esc_trigger:
-        print(f"\n  [!] ESCALATION TRIGGER FIRED -> {esc_trigger.upper}")
+        print(f"\n  [!] ESCALATION TRIGGER FIRED -> {esc_trigger.upper()}")
 
     path = result.get("escalation_path", {})
     print(f"\n  Escalate To   : {path.get('escalate_to', 'N/A')}")
@@ -584,7 +584,20 @@ def _print_text_report(result: dict) -> None:
 # Main Entry Point
 # ---------------------------------------------------------------------------
 
-def main -> None:
+# Embedded synthetic security event for --sample (no file/stdin needed).
+SAMPLE_EVENT = {
+    "event_type": "ransomware",
+    "source_ip": "203.0.113.50",
+    "destination_ip": "10.0.4.21",
+    "user_account": "svc-backup",
+    "hostname": "fileserver-02",
+    "process_name": "encryptor.exe",
+    "first_seen": "2026-06-10T01:30:00Z",
+    "detected_at": "2026-06-10T09:30:00Z",
+}
+
+
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Incident Classification, Triage, and Escalation",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -627,12 +640,22 @@ Exit codes:
         choices=["sev1", "sev2", "sev3", "sev4"],
         help="Explicit severity override (skips taxonomy-derived severity)",
     )
+    parser.add_argument(
+        "--sample",
+        action="store_true",
+        help="Triage an embedded synthetic ransomware event (no file/stdin needed; "
+             "note: exits 2 — the SEV1 exit-code signal is intentional)",
+    )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # --- Load input ---
     try:
-        if args.input:
+        if args.sample:
+            if args.input:
+                print("Warning: --sample specified; ignoring --input", file=sys.stderr)
+            raw_event = SAMPLE_EVENT
+        elif args.input:
             with open(args.input, "r", encoding="utf-8") as fh:
                 raw_event = json.load(fh)
         else:
@@ -675,14 +698,14 @@ Exit codes:
 
     # Override with explicit event_type if classify not run
     if not args.classify:
-        et = str(raw_event.get("event_type", "")).lower.replace(" ", "_").replace("-", "_")
+        et = str(raw_event.get("event_type", "")).lower().replace(" ", "_").replace("-", "_")
         if et in INCIDENT_TAXONOMY:
             incident_type = et
             confidence = 0.75
 
     # --- Determine base severity ---
     if args.severity:
-        severity = args.severity.lower
+        severity = args.severity.lower()
     else:
         taxonomy_entry = INCIDENT_TAXONOMY.get(incident_type, {})
         severity = taxonomy_entry.get("default_severity", "sev4")
@@ -765,4 +788,4 @@ Exit codes:
 
 
 if __name__ == "__main__":
-    main
+    main()

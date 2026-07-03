@@ -27,7 +27,7 @@ Comprehensive security standards and secure coding practices for application sec
 # BAD - No authorization check
 @app.route('/admin/users/<user_id>')
 def get_user(user_id):
-    return User.query.get(user_id).to_dict
+    return User.query.get(user_id).to_dict()
 
 # GOOD - Authorization enforced
 @app.route('/admin/users/<user_id>')
@@ -36,7 +36,7 @@ def get_user(user_id):
     user = User.query.get_or_404(user_id)
     if not current_user.can_access(user):
         abort(403)
-    return user.to_dict
+    return user.to_dict()
 ```
 
 **Checklist:**
@@ -55,7 +55,7 @@ def get_user(user_id):
 ```python
 # BAD - Weak hashing
 import hashlib
-password_hash = hashlib.md5(password.encode).hexdigest
+password_hash = hashlib.md5(password.encode()).hexdigest()
 
 # GOOD - Strong password hashing
 from argon2 import PasswordHasher
@@ -70,7 +70,7 @@ password_hash = ph.hash(password)
 try:
     ph.verify(stored_hash, password)
 except argon2.exceptions.VerifyMismatchError:
-    raise InvalidCredentials
+    raise InvalidCredentials()
 ```
 
 **Checklist:**
@@ -95,7 +95,7 @@ cursor.execute(query)
 cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
 
 # GOOD - ORM with parameter binding
-user = User.query.filter_by(id=user_id).first
+user = User.query.filter_by(id=user_id).first()
 ```
 
 **Command Injection Prevention:**
@@ -158,13 +158,13 @@ class SecurePaymentFlow:
         self.validate_input(payment_data)
 
         # Layer 2: Authentication check
-        self.verify_user_authenticated
+        self.verify_user_authenticated()
 
         # Layer 3: Authorization check
         self.verify_user_can_pay(payment_data.amount)
 
         # Layer 4: Rate limiting
-        self.check_rate_limit
+        self.check_rate_limit()
 
         # Layer 5: Fraud detection
         self.check_fraud_signals(payment_data)
@@ -230,7 +230,7 @@ class UserInput(BaseModel):
         pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if not re.match(pattern, v):
             raise ValueError('Invalid email format')
-        return v.lower
+        return v.lower()
 
     @validator('age')
     def validate_age(cls, v):
@@ -261,7 +261,7 @@ def encode_for_url(data: str) -> str:
 def encode_for_css(data: str) -> str:
     """Encode data for safe CSS value."""
     return ''.join(
-        c if c.isalnum else f'\\{ord(c):06x}'
+        c if c.isalnum() else f'\\{ord(c):06x}'
         for c in data
     )
 ```
@@ -282,11 +282,11 @@ class SecurityException(Exception):
         self.message = message
         # Internal details (for logging only)
         self.internal_details = internal_details
-        super.__init__(message)
+        super().__init__(message)
 
-def handle_request:
+def handle_request():
     try:
-        process_sensitive_data
+        process_sensitive_data()
     except DatabaseError as e:
         # Log full details internally
         logger.error(f"Database error: {e}", exc_info=True)
@@ -334,12 +334,12 @@ def validate_password(password: str) -> Tuple[bool, str]:
     if not re.search(r'\d', password):
         return False, "Password must contain a digit"
 
-    if not re.search(r'[!@#$%^&*,.?":{}|<>]', password):
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
         return False, "Password must contain special character"
 
     # Check against common passwords (use haveibeenpwned API in production)
     common_passwords = {'password123', 'qwerty123456', 'admin123456'}
-    if password.lower in common_passwords:
+    if password.lower() in common_passwords:
         return False, "Password is too common"
 
     return True, "Password meets requirements"
@@ -364,9 +364,9 @@ class JWTManager:
             'sub': user_id,
             'roles': roles,
             'type': 'access',
-            'iat': datetime.utcnow,
-            'exp': datetime.utcnow + self.access_token_expiry,
-            'jti': self._generate_jti  # Unique token ID for revocation
+            'iat': datetime.utcnow(),
+            'exp': datetime.utcnow() + self.access_token_expiry,
+            'jti': self._generate_jti()  # Unique token ID for revocation
         }
         return jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
 
@@ -407,7 +407,7 @@ class TOTPManager:
 
     def generate_secret(self) -> str:
         """Generate a new TOTP secret for a user."""
-        return pyotp.random_base32
+        return pyotp.random_base32()
 
     def get_provisioning_uri(self, secret: str, email: str) -> str:
         """Generate URI for QR code."""
@@ -421,9 +421,9 @@ class TOTPManager:
         qr.make(fit=True)
 
         img = qr.make_image(fill_color="black", back_color="white")
-        buffer = BytesIO
+        buffer = BytesIO()
         img.save(buffer, format='PNG')
-        return base64.b64encode(buffer.getvalue).decode
+        return base64.b64encode(buffer.getvalue()).decode()
 
     def verify_totp(self, secret: str, code: str) -> bool:
         """Verify TOTP code with time window tolerance."""
@@ -449,11 +449,11 @@ class RateLimiter:
     def __init__(self, requests_per_minute: int = 60):
         self.requests_per_minute = requests_per_minute
         self.requests = defaultdict(list)
-        self.lock = threading.Lock
+        self.lock = threading.Lock()
 
     def is_rate_limited(self, identifier: str) -> bool:
         with self.lock:
-            now = time.time
+            now = time.time()
             minute_ago = now - 60
 
             # Clean old requests
@@ -503,7 +503,7 @@ class APIKeyManager:
         raw_key = f"sk_live_{secrets.token_urlsafe(32)}"
 
         # Store hash only
-        key_hash = hashlib.sha256(raw_key.encode).hexdigest
+        key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
 
         api_key_record = {
             'id': secrets.token_urlsafe(16),
@@ -512,7 +512,7 @@ class APIKeyManager:
             'key_hash': key_hash,
             'key_prefix': raw_key[:12],  # Store prefix for identification
             'scopes': scopes,
-            'created_at': datetime.utcnow,
+            'created_at': datetime.utcnow(),
             'last_used_at': None
         }
 
@@ -527,7 +527,7 @@ class APIKeyManager:
 
     def validate_api_key(self, raw_key: str) -> Optional[Dict]:
         """Validate an API key and return associated data."""
-        key_hash = hashlib.sha256(raw_key.encode).hexdigest
+        key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
 
         api_key = self.db.api_keys.find_one({'key_hash': key_hash})
 
@@ -537,7 +537,7 @@ class APIKeyManager:
         # Update last used timestamp
         self.db.api_keys.update(
             {'id': api_key['id']},
-            {'last_used_at': datetime.utcnow}
+            {'last_used_at': datetime.utcnow()}
         )
 
         return {
@@ -564,7 +564,7 @@ class AppSecrets:
     api_key: str
     encryption_key: str
 
-def load_secrets -> AppSecrets:
+def load_secrets() -> AppSecrets:
     """Load secrets from environment with validation."""
 
     def get_required(name: str) -> str:
@@ -587,11 +587,11 @@ class SecretFilter(logging.Filter):
     """Filter to redact secrets from logs."""
 
     def __init__(self, secrets: list):
-        super.__init__
+        super().__init__()
         self.secrets = secrets
 
     def filter(self, record):
-        message = record.getMessage
+        message = record.getMessage()
         for secret in self.secrets:
             if secret in message:
                 record.msg = record.msg.replace(secret, '[REDACTED]')
@@ -678,7 +678,7 @@ def add_security_headers(response: Response) -> Response:
 
     # Permissions Policy
     response.headers['Permissions-Policy'] = (
-        'geolocation=, microphone=, camera='
+        'geolocation=(), microphone=(), camera=()'
     )
 
     return response

@@ -60,7 +60,7 @@ def load_matrix(filepath: str) -> List[Dict[str, Any]]:
 
 def classify_evidence_status(control: Dict[str, Any]) -> str:
     """Classify the evidence collection status for a control."""
-    status = control.get("status", "Not Started").lower.strip
+    status = control.get("status", "Not Started").lower().strip()
     evidence_date = control.get("evidence_date", "")
 
     if status in ("not_applicable", "n/a", "not applicable"):
@@ -72,7 +72,7 @@ def classify_evidence_status(control: Dict[str, Any]) -> str:
         if evidence_date:
             try:
                 due = datetime.strptime(evidence_date, "%Y-%m-%d")
-                if due < datetime.now:
+                if due < datetime.now():
                     return "overdue"
             except ValueError:
                 pass
@@ -150,7 +150,7 @@ def generate_status_report(controls: List[Dict[str, Any]]) -> Dict[str, Any]:
             "status_breakdown": status_counts,
             "readiness_score": readiness_pct,
             "readiness_rating": readiness_rating,
-            "report_date": datetime.now.strftime("%Y-%m-%d"),
+            "report_date": datetime.now().strftime("%Y-%m-%d"),
         },
         "by_category": by_category,
         "issues": issues,
@@ -171,15 +171,15 @@ def format_status_text(report: Dict[str, Any]) -> str:
 
     # Status breakdown
     lines.append("--- Status Breakdown ---")
-    for status, count in summary["status_breakdown"].items:
+    for status, count in summary["status_breakdown"].items():
         label = EVIDENCE_STATUSES.get(status, status)
         lines.append(f"  {status:15s}: {count:3d}  ({label})")
     lines.append("")
 
     # By category
     lines.append("--- By Category ---")
-    for cat, statuses in report["by_category"].items:
-        cat_total = sum(statuses.values)
+    for cat, statuses in report["by_category"].items():
+        cat_total = sum(statuses.values())
         cat_collected = statuses.get("collected", 0)
         cat_pct = round(cat_collected / cat_total * 100, 1) if cat_total > 0 else 0
         lines.append(f"  {cat}: {cat_collected}/{cat_total} collected ({cat_pct}%)")
@@ -199,7 +199,7 @@ def format_status_text(report: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="SOC 2 Evidence Tracker — tracks evidence collection status per control."
     )
@@ -220,10 +220,10 @@ def main:
         help="Output in JSON format",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if not args.status:
-        parser.print_help
+        parser.print_help()
         print("\nError: --status flag is required.", file=sys.stderr)
         sys.exit(1)
 
@@ -237,4 +237,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

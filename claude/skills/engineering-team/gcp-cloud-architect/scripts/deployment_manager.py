@@ -20,7 +20,7 @@ class DeploymentManager:
             app_name: Application name (used for resource naming)
             requirements: Dictionary with pattern, region, project requirements
         """
-        self.app_name = app_name.lower.replace(' ', '-')
+        self.app_name = app_name.lower().replace(' ', '-')
         self.requirements = requirements
         self.region = requirements.get('region', 'us-central1')
         self.project_id = requirements.get('project_id', 'my-project')
@@ -34,13 +34,13 @@ class DeploymentManager:
             Shell script as string
         """
         if self.pattern == 'serverless_web':
-            return self._gcloud_serverless_web
+            return self._gcloud_serverless_web()
         elif self.pattern == 'gke_microservices':
-            return self._gcloud_gke_microservices
+            return self._gcloud_gke_microservices()
         elif self.pattern == 'data_pipeline':
-            return self._gcloud_data_pipeline
+            return self._gcloud_data_pipeline()
         else:
-            return self._gcloud_serverless_web
+            return self._gcloud_serverless_web()
 
     def _gcloud_serverless_web(self) -> str:
         """Generate gcloud script for serverless web pattern."""
@@ -376,11 +376,11 @@ echo "    --temp_location gs://$STAGING_BUCKET/temp"
             Terraform HCL configuration as string
         """
         if self.pattern == 'serverless_web':
-            return self._terraform_serverless_web
+            return self._terraform_serverless_web()
         elif self.pattern == 'gke_microservices':
-            return self._terraform_gke_microservices
+            return self._terraform_gke_microservices()
         else:
-            return self._terraform_serverless_web
+            return self._terraform_serverless_web()
 
     def _terraform_serverless_web(self) -> str:
         """Generate Terraform for serverless web pattern."""
@@ -741,7 +741,7 @@ output "redis_host" {{
 """
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description='GCP Deployment Manager - Generates gcloud CLI scripts and Terraform configurations'
     )
@@ -788,7 +788,7 @@ def main:
         help='Output as JSON format'
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     requirements = {
         'pattern': args.pattern,
@@ -801,9 +801,9 @@ def main:
     if args.json:
         output = {}
         if args.format in ('gcloud', 'both'):
-            output['gcloud_script'] = manager.generate_gcloud_script
+            output['gcloud_script'] = manager.generate_gcloud_script()
         if args.format in ('terraform', 'both'):
-            output['terraform_config'] = manager.generate_terraform_configuration
+            output['terraform_config'] = manager.generate_terraform_configuration()
         print(json.dumps(output, indent=2))
     elif args.output:
         import os
@@ -812,24 +812,24 @@ def main:
         if args.format in ('gcloud', 'both'):
             gcloud_path = os.path.join(args.output, 'deploy.sh')
             with open(gcloud_path, 'w') as f:
-                f.write(manager.generate_gcloud_script)
+                f.write(manager.generate_gcloud_script())
             os.chmod(gcloud_path, 0o755)
             print(f"gcloud script written to {gcloud_path}")
 
         if args.format in ('terraform', 'both'):
             tf_path = os.path.join(args.output, 'main.tf')
             with open(tf_path, 'w') as f:
-                f.write(manager.generate_terraform_configuration)
+                f.write(manager.generate_terraform_configuration())
             print(f"Terraform config written to {tf_path}")
     else:
         if args.format in ('gcloud', 'both'):
             print("# ===== gcloud CLI Script =====")
-            print(manager.generate_gcloud_script)
+            print(manager.generate_gcloud_script())
 
         if args.format in ('terraform', 'both'):
             print("# ===== Terraform Configuration =====")
-            print(manager.generate_terraform_configuration)
+            print(manager.generate_terraform_configuration())
 
 
 if __name__ == '__main__':
-    main
+    main()

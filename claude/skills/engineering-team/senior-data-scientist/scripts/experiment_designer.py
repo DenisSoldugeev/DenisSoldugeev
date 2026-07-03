@@ -26,7 +26,7 @@ class ExperimentDesigner:
         self.config = config
         self.results = {
             'status': 'initialized',
-            'start_time': datetime.now.isoformat,
+            'start_time': datetime.now().isoformat(),
             'processed_items': 0
         }
         logger.info(f"Initialized {self.__class__.__name__}")
@@ -43,13 +43,13 @@ class ExperimentDesigner:
         logger.info("Starting processing...")
         
         try:
-            self.validate_config
+            self.validate_config()
             
             # Main processing
-            result = self._execute
+            result = self._execute()
             
             self.results['status'] = 'completed'
-            self.results['end_time'] = datetime.now.isoformat
+            self.results['end_time'] = datetime.now().isoformat()
             
             logger.info("Processing completed successfully")
             return self.results
@@ -65,7 +65,7 @@ class ExperimentDesigner:
         # Implementation here
         return {'success': True}
 
-def main:
+def main():
     """Main entry point"""
     parser = argparse.ArgumentParser(
         description="Experiment Designer"
@@ -75,10 +75,10 @@ def main:
     parser.add_argument('--config', '-c', help='Configuration file')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     if args.verbose:
-        logging.getLogger.setLevel(logging.DEBUG)
+        logging.getLogger().setLevel(logging.DEBUG)
     
     try:
         config = {
@@ -87,7 +87,7 @@ def main:
         }
         
         processor = ExperimentDesigner(config)
-        results = processor.process
+        results = processor.process()
         
         print(json.dumps(results, indent=2))
         sys.exit(0)
@@ -97,4 +97,4 @@ def main:
         sys.exit(1)
 
 if __name__ == '__main__':
-    main
+    main()

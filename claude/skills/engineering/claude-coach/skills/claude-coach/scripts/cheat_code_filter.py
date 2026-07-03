@@ -29,7 +29,7 @@ USE_CASE_KEYWORDS: dict[str, tuple[str, ...]] = {
     "data": ("json", "table", "structured", "parse", "format", "schema", "extract"),
 }
 
-DEFAULT_GLOSSARY = Path(__file__).resolve.parent.parent / "references" / "cheat-codes.md"
+DEFAULT_GLOSSARY = Path(__file__).resolve().parent.parent / "references" / "cheat-codes.md"
 
 TIER_HEADING = re.compile(r"^##\s+Tier\s+(\d+)", re.IGNORECASE)
 TECHNIQUE_HEADING = re.compile(r"^###\s+(?P<title>.+?)\s*\((?P<level>Beginner|Intermediate|Advanced)\)\s*$", re.IGNORECASE)
@@ -47,12 +47,12 @@ class Technique:
 
 
 def parse_glossary(path: Path) -> list[Technique]:
-    if not path.exists:
+    if not path.exists():
         raise FileNotFoundError(f"Glossary not found at {path}")
     techniques: list[Technique] = []
     current_tier = 99
     current: Technique | None = None
-    lines = path.read_text(encoding="utf-8").splitlines
+    lines = path.read_text(encoding="utf-8").splitlines()
     for line in lines:
         tier_match = TIER_HEADING.match(line)
         if tier_match:
@@ -63,8 +63,8 @@ def parse_glossary(path: Path) -> list[Technique]:
             if current is not None:
                 techniques.append(current)
             current = Technique(
-                title=tech_match.group("title").strip,
-                level=tech_match.group("level").capitalize,
+                title=tech_match.group("title").strip(),
+                level=tech_match.group("level").capitalize(),
                 tier=current_tier,
                 explanation="",
                 example="",
@@ -74,22 +74,22 @@ def parse_glossary(path: Path) -> list[Technique]:
             continue
         ex_match = EXAMPLE_LINE.match(line)
         if ex_match:
-            current.example = ex_match.group("text").strip
+            current.example = ex_match.group("text").strip()
             continue
-        if line.strip and not line.startswith("---") and not line.startswith("##"):
+        if line.strip() and not line.startswith("---") and not line.startswith("##"):
             if not current.explanation:
-                current.explanation = line.strip
+                current.explanation = line.strip()
     if current is not None:
         techniques.append(current)
     return techniques
 
 
 def score_technique(tech: Technique, use_cases: Iterable[str]) -> float:
-    text = f"{tech.title} {tech.explanation} {tech.example}".lower
+    text = f"{tech.title} {tech.explanation} {tech.example}".lower()
     score = 0.0
     matched_use_cases = 0
     for uc in use_cases:
-        uc = uc.strip.lower
+        uc = uc.strip().lower()
         keywords = USE_CASE_KEYWORDS.get(uc, (uc,))
         hits = sum(1 for kw in keywords if kw in text)
         if hits:
@@ -118,12 +118,16 @@ def render_human(picks: list[Technique]) -> str:
     return "\n".join(out)
 
 
-def sample_run -> int:
+def sample_run(as_json: bool = False) -> int:
     sample_path = DEFAULT_GLOSSARY
-    if not sample_path.exists:
+    if not sample_path.exists():
         print("Sample glossary not found; place references/cheat-codes.md alongside this script.", file=sys.stderr)
         return 1
-    picks = rank(parse_glossary(sample_path), ["writing", "coding"], 5)
+    use_cases = ["writing", "coding"]
+    picks = rank(parse_glossary(sample_path), use_cases, 5)
+    if as_json:
+        print(json.dumps({"use_cases": use_cases, "picks": [asdict(t) for t in picks]}, indent=2))
+        return 0
     print(render_human(picks))
     return 0
 
@@ -138,12 +142,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.sample:
-        return sample_run
+        return sample_run(args.json)
 
     if not args.use_cases:
         parser.error("--use-cases is required unless --sample is passed")
 
-    use_cases = [u.strip for u in args.use_cases.split(",") if u.strip]
+    use_cases = [u.strip() for u in args.use_cases.split(",") if u.strip()]
     try:
         techniques = parse_glossary(args.glossary)
     except FileNotFoundError as exc:
@@ -160,4 +164,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

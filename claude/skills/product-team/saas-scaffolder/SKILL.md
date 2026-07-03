@@ -126,23 +126,23 @@ export const authOptions: NextAuthOptions = {
 import { pgTable, text, timestamp, integer } from "drizzle-orm/pg-core"
 
 export const users = pgTable("users", {
-  id: text("id").primaryKey.$defaultFn( => crypto.randomUUID),
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text("name"),
-  email: text("email").notNull.unique,
+  email: text("email").notNull().unique(),
   emailVerified: timestamp("emailVerified"),
   image: text("image"),
-  stripeCustomerId: text("stripe_customer_id").unique,
+  stripeCustomerId: text("stripe_customer_id").unique(),
   stripeSubscriptionId: text("stripe_subscription_id"),
   stripePriceId: text("stripe_price_id"),
   stripeCurrentPeriodEnd: timestamp("stripe_current_period_end"),
-  createdAt: timestamp("created_at").defaultNow.notNull,
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
 export const accounts = pgTable("accounts", {
-  userId: text("user_id").notNull.references( => users.id, { onDelete: "cascade" }),
-  type: text("type").notNull,
-  provider: text("provider").notNull,
-  providerAccountId: text("provider_account_id").notNull,
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: text("type").notNull(),
+  provider: text("provider").notNull(),
+  providerAccountId: text("provider_account_id").notNull(),
   refresh_token: text("refresh_token"),
   access_token: text("access_token"),
   expires_at: integer("expires_at"),
@@ -165,8 +165,8 @@ export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const { priceId } = await req.json
-  const [user] = await db.select.from(users).where(eq(users.id, session.user.id))
+  const { priceId } = await req.json()
+  const [user] = await db.select().from(users).where(eq(users.id, session.user.id))
 
   let customerId = user.stripeCustomerId
   if (!customerId) {
@@ -250,7 +250,7 @@ The following phases must be completed in order. **Validate at the end of each p
 - [ ] 9. DB client singleton exported from `lib/db.ts`
 - [ ] 10. DB connection tested in local environment
 
-✅ **Validate:** Run a simple `db.select.from(users)` in a test script — it should return an empty array without throwing.  
+✅ **Validate:** Run a simple `db.select().from(users)` in a test script — it should return an empty array without throwing.  
 🔧 **If DB connection fails:** Verify `DATABASE_URL` format includes `?sslmode=require` for NeonDB/Supabase. Check that the migration has been applied with `drizzle-kit push` (dev) or `drizzle-kit migrate` (prod).
 
 ### Phase 3 — Authentication

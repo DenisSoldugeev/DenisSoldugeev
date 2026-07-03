@@ -13,7 +13,7 @@ Tests simple form submission with success and validation scenarios.
 ```typescript
 import { test, expect } from '@playwright/test';
 
-test.describe('Single-Step Form — {{formName}}',  => {
+test.describe('Single-Step Form — {{formName}}', () => {
   test.use({ storageState: '{{authStorageStatePath}}' });
 
   test.beforeEach(async ({ page }) => {
@@ -25,36 +25,36 @@ test.describe('Single-Step Form — {{formName}}',  => {
     await page.getByRole('textbox', { name: /{{field1Label}}/i }).fill('{{field1Value}}');
     await page.getByRole('textbox', { name: /{{field2Label}}/i }).fill('{{field2Value}}');
     await page.getByRole('combobox', { name: /{{field3Label}}/i }).selectOption('{{field3Value}}');
-    await page.getByRole('button', { name: /submit|save/i }).click;
+    await page.getByRole('button', { name: /submit|save/i }).click();
     await expect(page.getByRole('alert')).toContainText(/submitted|saved successfully/i);
   });
 
   // Happy path: success redirect
   test('redirects to success page after submission', async ({ page }) => {
     await page.getByRole('textbox', { name: /{{field1Label}}/i }).fill('{{field1Value}}');
-    await page.getByRole('button', { name: /submit|save/i }).click;
+    await page.getByRole('button', { name: /submit|save/i }).click();
     await expect(page).toHaveURL('{{baseUrl}}/{{successPath}}');
   });
 
   // Happy path: reset clears form
   test('reset button clears all fields', async ({ page }) => {
     await page.getByRole('textbox', { name: /{{field1Label}}/i }).fill('some value');
-    await page.getByRole('button', { name: /reset|clear/i }).click;
+    await page.getByRole('button', { name: /reset|clear/i }).click();
     await expect(page.getByRole('textbox', { name: /{{field1Label}}/i })).toHaveValue('');
   });
 
   // Error case: required field missing
   test('shows required field error', async ({ page }) => {
-    await page.getByRole('button', { name: /submit|save/i }).click;
-    await expect(page.getByText(/{{field1Label}}.*required|required/i)).toBeVisible;
-    await expect(page.getByRole('textbox', { name: /{{field1Label}}/i })).toBeFocused;
+    await page.getByRole('button', { name: /submit|save/i }).click();
+    await expect(page.getByText(/{{field1Label}}.*required|required/i)).toBeVisible();
+    await expect(page.getByRole('textbox', { name: /{{field1Label}}/i })).toBeFocused();
   });
 
   // Error case: invalid email format
   test('shows format error for invalid email', async ({ page }) => {
     await page.getByRole('textbox', { name: /email/i }).fill('not-an-email');
-    await page.getByRole('button', { name: /submit|save/i }).click;
-    await expect(page.getByText(/valid.*email|invalid.*email/i)).toBeVisible;
+    await page.getByRole('button', { name: /submit|save/i }).click();
+    await expect(page.getByText(/valid.*email|invalid.*email/i)).toBeVisible();
   });
 
   // Error case: server error on submit
@@ -63,7 +63,7 @@ test.describe('Single-Step Form — {{formName}}',  => {
       route.fulfill({ status: 500, body: JSON.stringify({ error: 'Server Error' }) })
     );
     await page.getByRole('textbox', { name: /{{field1Label}}/i }).fill('{{field1Value}}');
-    await page.getByRole('button', { name: /submit|save/i }).click;
+    await page.getByRole('button', { name: /submit|save/i }).click();
     await expect(page.getByRole('alert')).toContainText(/error|something went wrong/i);
   });
 
@@ -71,8 +71,8 @@ test.describe('Single-Step Form — {{formName}}',  => {
   test('disables submit button after first click', async ({ page }) => {
     await page.getByRole('textbox', { name: /{{field1Label}}/i }).fill('{{field1Value}}');
     const btn = page.getByRole('button', { name: /submit|save/i });
-    await btn.click;
-    await expect(btn).toBeDisabled;
+    await btn.click();
+    await expect(btn).toBeDisabled();
   });
 });
 ```
@@ -84,7 +84,7 @@ test.describe('Single-Step Form — {{formName}}',  => {
 ```javascript
 const { test, expect } = require('@playwright/test');
 
-test.describe('Single-Step Form — {{formName}}',  => {
+test.describe('Single-Step Form — {{formName}}', () => {
   test.use({ storageState: '{{authStorageStatePath}}' });
 
   test.beforeEach(async ({ page }) => {
@@ -94,20 +94,20 @@ test.describe('Single-Step Form — {{formName}}',  => {
   test('submits form with valid data', async ({ page }) => {
     await page.getByRole('textbox', { name: /{{field1Label}}/i }).fill('{{field1Value}}');
     await page.getByRole('textbox', { name: /{{field2Label}}/i }).fill('{{field2Value}}');
-    await page.getByRole('button', { name: /submit|save/i }).click;
+    await page.getByRole('button', { name: /submit|save/i }).click();
     await expect(page.getByRole('alert')).toContainText(/submitted|saved/i);
   });
 
   test('shows required error for empty submission', async ({ page }) => {
-    await page.getByRole('button', { name: /submit|save/i }).click;
-    await expect(page.getByText(/required/i)).toBeVisible;
+    await page.getByRole('button', { name: /submit|save/i }).click();
+    await expect(page.getByText(/required/i)).toBeVisible();
   });
 
   test('disables submit after click (prevents double submit)', async ({ page }) => {
     await page.getByRole('textbox', { name: /{{field1Label}}/i }).fill('{{field1Value}}');
     const btn = page.getByRole('button', { name: /submit|save/i });
-    await btn.click;
-    await expect(btn).toBeDisabled;
+    await btn.click();
+    await expect(btn).toBeDisabled();
   });
 });
 ```

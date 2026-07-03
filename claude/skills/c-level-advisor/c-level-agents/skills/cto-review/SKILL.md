@@ -1,6 +1,6 @@
 ---
 name: "cto-review"
-description: "/ds:cto-review <plan> — Architecture and scaling interrogation. Tech debt, scaling cliffs, team scaling, build-vs-buy."
+description: "/ds:cto-review <plan> — Architecture and scaling interrogation. Tech debt, scaling cliffs, team scaling, build-vs-buy. Use when committing to an architecture, planning for 10x load, or weighing a rebuild against a vendor."
 ---
 
 # /ds:cto-review — CTO Forcing Questions
@@ -27,13 +27,13 @@ Pressure-tests architecture and engineering scaling decisions. Six questions to 
 ### 2. Tech Debt Inventory
 **What's the top tech debt item, what's it costing per week, and when does it become blocking?**
 ```bash
-python ../../../skills/cto-advisor/scripts/tech_debt_analyzer.py
+python ../../../cto-advisor/scripts/tech_debt_analyzer.py
 ```
 
 ### 3. Team Scaling
 **For each open req, what's the ramp time and contribution model?**
 ```bash
-python ../../../skills/cto-advisor/scripts/team_scaling_calculator.py
+python ../../../cto-advisor/scripts/team_scaling_calculator.py
 ```
 
 ### 4. Build vs Buy
@@ -108,7 +108,7 @@ python ../../../skills/cto-advisor/scripts/team_scaling_calculator.py
 
 ## Related
 
-- Agent: [`ds-cto-advisor`](../../../../../agents/c-level/ds-cto-advisor.md)
+- Agent: [`ds-cto-advisor`](../../../../agents/c-level/ds-cto-advisor.md)
 - Skill: [`cto-advisor`](../../../cto-advisor/SKILL.md)
 - SLO: `../../../../engineering/slo-architect/`
 

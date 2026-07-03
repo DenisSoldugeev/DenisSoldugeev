@@ -74,7 +74,7 @@ class RAGEvaluationReport:
 def tokenize(text: str) -> List[str]:
     """Simple tokenization for text comparison"""
     # Lowercase and split on non-alphanumeric
-    text = text.lower
+    text = text.lower()
     tokens = re.findall(r'\b\w+\b', text)
     # Remove common stopwords
     stopwords = {'the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been',
@@ -175,7 +175,7 @@ def extract_claims(answer: str) -> List[str]:
     claims = []
 
     for sentence in sentences:
-        sentence = sentence.strip
+        sentence = sentence.strip()
         if len(sentence) > 10:  # Filter out very short fragments
             claims.append(sentence)
 
@@ -489,7 +489,7 @@ def format_report(report: RAGEvaluationReport) -> str:
     return '\n'.join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="RAG Evaluator - Evaluate Retrieval-Augmented Generation systems",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -523,17 +523,17 @@ contexts.json:
     parser.add_argument('--verbose', '-v', action='store_true', help='Include per-question details')
     parser.add_argument('--compare', help='Compare with baseline report JSON')
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Load input files
     contexts_path = Path(args.contexts)
     questions_path = Path(args.questions)
 
-    if not contexts_path.exists:
+    if not contexts_path.exists():
         print(f"Error: Contexts file not found: {args.contexts}", file=sys.stderr)
         sys.exit(1)
 
-    if not questions_path.exists:
+    if not questions_path.exists():
         print(f"Error: Questions file not found: {args.questions}", file=sys.stderr)
         sys.exit(1)
 
@@ -550,13 +550,13 @@ contexts.json:
     # Compare with baseline
     if args.compare:
         baseline_path = Path(args.compare)
-        if baseline_path.exists:
-            baseline = json.loads(baseline_path.read_text)
+        if baseline_path.exists():
+            baseline = json.loads(baseline_path.read_text())
             print("\n📊 COMPARISON WITH BASELINE")
             print(f"  Relevance:    {baseline.get('avg_context_relevance', 0):.2f} -> {report.avg_context_relevance:.2f}")
             print(f"  Faithfulness: {baseline.get('avg_faithfulness', 0):.2f} -> {report.avg_faithfulness:.2f}")
             print(f"  Groundedness: {baseline.get('avg_groundedness', 0):.2f} -> {report.avg_groundedness:.2f}")
-            print
+            print()
 
     # Output
     if args.json:
@@ -571,4 +571,4 @@ contexts.json:
 
 
 if __name__ == '__main__':
-    main
+    main()

@@ -130,13 +130,13 @@ def score(ellis_pct: float, retention: float, organic: float,
 
 
 def _wrap(text: str, width: int) -> List[str]:
-    words, lines, cur = text.split, [], ""
+    words, lines, cur = text.split(), [], ""
     for w in words:
         if len(cur) + len(w) + 1 > width:
             lines.append(cur)
             cur = w
         else:
-            cur = f"{cur} {w}".strip
+            cur = f"{cur} {w}".strip()
     if cur:
         lines.append(cur)
     return lines
@@ -189,7 +189,7 @@ def main(argv: List[str]) -> int:
         vals = dict(ellis_pct=args.ellis_pct, retention=args.retention,
                     organic=args.organic, demand=args.demand, frequency=args.frequency)
     else:
-        p.print_help
+        p.print_help()
         print("\nerror: provide all signals (--ellis-pct --retention --organic --demand --frequency) or --sample",
               file=sys.stderr)
         return 2

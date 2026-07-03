@@ -150,7 +150,7 @@
 **Trigger:** Scheduled - Every hour
 **Conditions:**
 - Priority IN (Highest, High)
-- Due date < now
+- Due date < now()
 - Status != Done
 **Actions:**
 - Transition to "Escalated"
@@ -183,7 +183,7 @@
 **Trigger:** Issue transitioned
 **Conditions:**
 - Transition is to "Done"
-- Sprint IN openSprints
+- Sprint IN openSprints()
 **Actions:**
 - Remove issue from sprint
 - Add comment: "Removed from active sprint (completed)"
@@ -404,7 +404,7 @@
 
 ### Calculate completion percentage
 ```
-{{issue.subtasks.filter(item => item.status.statusCategory.key == "done").size.divide(issue.subtasks.size).multiply(100).round}}%
+{{issue.subtasks.filter(item => item.status.statusCategory.key == "done").size.divide(issue.subtasks.size).multiply(100).round()}}%
 ```
 
 ---

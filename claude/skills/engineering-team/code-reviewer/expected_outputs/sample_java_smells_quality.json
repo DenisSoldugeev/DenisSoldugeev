@@ -30,13 +30,13 @@
     {
       "type": "java_print_stack_trace",
       "severity": "medium",
-      "message": "'printStackTrace' is not real error handling \u2014 log via a proper logger or rethrow with context",
+      "message": "'printStackTrace()' is not real error handling \u2014 log via a proper logger or rethrow with context",
       "location": "offset 913"
     },
     {
       "type": "java_swallowed_interrupt",
       "severity": "high",
-      "message": "InterruptedException caught without 'Thread.currentThread.interrupt' \u2014 breaks cooperative cancellation",
+      "message": "InterruptedException caught without 'Thread.currentThread().interrupt()' \u2014 breaks cooperative cancellation",
       "location": "offset 841"
     },
     {
@@ -48,7 +48,7 @@
     {
       "type": "java_per_use_heavy_object",
       "severity": "medium",
-      "message": "'new ObjectMapper' is expensive \u2014 share a singleton instance instead of constructing per call",
+      "message": "'new ObjectMapper()' is expensive \u2014 share a singleton instance instead of constructing per call",
       "location": "offset 451"
     }
   ],

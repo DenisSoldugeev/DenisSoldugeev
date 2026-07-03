@@ -1,6 +1,6 @@
 # workflow-builder
 
-Design and write deterministic multi-agent **workflow** scripts for Claude Code's Workflow tool — `.js` files in `.claude/workflows/` that fan work out to fresh-context sub-agents under plain JavaScript control flow. Only leaf `agent` calls spend tokens, so the main session stays clean and the run is resumable.
+Design and write deterministic multi-agent **workflow** scripts for Claude Code's Workflow tool — `.js` files in `.claude/workflows/` that fan work out to fresh-context sub-agents under plain JavaScript control flow. Only leaf `agent()` calls spend tokens, so the main session stays clean and the run is resumable.
 
 Targets the Workflow tool introduced in Claude Code v2.1.147 (gated behind `CLAUDE_CODE_WORKFLOWS=1`, browsable via `/workflows`).
 
@@ -13,7 +13,7 @@ Every workflow-creation session opens with an intake question set (what task, wh
 | Component | Where | What it does |
 |---|---|---|
 | **Intake recommendation engine** | `skills/workflow-builder/scripts/workflow_intake.py` | Classifies a (vague) task → recommended topology + runner-up + per-stage model plan + budget guard + a one-line rationale per choice. |
-| **Workflow validator** | `skills/workflow-builder/scripts/validate_workflow.py` | Stdlib linter for `.js` workflows: pure-literal `meta`, no `Date.now`/`Math.random`/argless `new Date`, no FS/Node APIs in the orchestrator, `parallel` thunks, guarded loops, `filter(Boolean)`, size cap. PASS / WARN / FAIL with line numbers. |
+| **Workflow validator** | `skills/workflow-builder/scripts/validate_workflow.py` | Stdlib linter for `.js` workflows: pure-literal `meta`, no `Date.now()`/`Math.random()`/argless `new Date()`, no FS/Node APIs in the orchestrator, `parallel()` thunks, guarded loops, `filter(Boolean)`, size cap. PASS / WARN / FAIL with line numbers. |
 | **Scaffolder** | `skills/workflow-builder/scripts/scaffold_workflow.py` | Emits a runnable starter for any of 5 topologies (fan-out, pipeline, barrier, loop, judge-panel). |
 | **3 references** | `skills/workflow-builder/references/` | API reference · orchestration patterns · decision + intake guide (7-8 sources each). |
 | **Templates + example** | `skills/workflow-builder/assets/` | Fan-out / pipeline / loop starters + a complete PR-triage workflow. |

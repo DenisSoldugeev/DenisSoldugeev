@@ -149,13 +149,13 @@ class DebtDashboard:
     def load_from_directory(self, directory_path: str, pattern: str = "*.json") -> bool:
         """Load all JSON files from a directory."""
         directory = Path(directory_path)
-        if not directory.exists:
+        if not directory.exists():
             print(f"Directory does not exist: {directory_path}")
             return False
         
         file_paths = []
         for file_path in directory.glob(pattern):
-            if file_path.is_file:
+            if file_path.is_file():
                 file_paths.append(str(file_path))
         
         if not file_paths:
@@ -190,9 +190,9 @@ class DebtDashboard:
         # Fallback to file modification time
         try:
             mtime = os.path.getmtime(file_path)
-            return datetime.fromtimestamp(mtime).isoformat
+            return datetime.fromtimestamp(mtime).isoformat()
         except:
-            return datetime.now.isoformat
+            return datetime.now().isoformat()
     
     def generate_dashboard(self, period: str = "monthly") -> Dict[str, Any]:
         """
@@ -209,10 +209,10 @@ class DebtDashboard:
         print("=" * 50)
         
         # Step 1: Process historical snapshots
-        self._process_snapshots
+        self._process_snapshots()
         
         # Step 2: Calculate health metrics for each snapshot
-        self._calculate_health_metrics
+        self._calculate_health_metrics()
         
         # Step 3: Analyze trends
         self._analyze_trends(period)
@@ -221,20 +221,20 @@ class DebtDashboard:
         self._calculate_debt_velocity(period)
         
         # Step 5: Generate forecasts
-        forecasts = self._generate_forecasts
+        forecasts = self._generate_forecasts()
         
         # Step 6: Create executive summary
-        executive_summary = self._generate_executive_summary
+        executive_summary = self._generate_executive_summary()
         
         # Step 7: Generate recommendations
-        recommendations = self._generate_strategic_recommendations
+        recommendations = self._generate_strategic_recommendations()
         
         # Step 8: Create visualizations data
-        visualizations = self._generate_visualization_data
+        visualizations = self._generate_visualization_data()
         
         dashboard_data = {
             "metadata": {
-                "generated_date": datetime.now.isoformat,
+                "generated_date": datetime.now().isoformat(),
                 "analysis_period": period,
                 "snapshots_analyzed": len(self.historical_data),
                 "date_range": {
@@ -245,12 +245,12 @@ class DebtDashboard:
             },
             "executive_summary": executive_summary,
             "current_health": self.health_history[-1] if self.health_history else None,
-            "trend_analysis": {name: asdict(trend) for name, trend in self.trend_analyses.items},
+            "trend_analysis": {name: asdict(trend) for name, trend in self.trend_analyses.items()},
             "debt_velocity": [asdict(v) for v in self.velocity_history],
             "forecasts": forecasts,
             "recommendations": recommendations,
             "visualizations": visualizations,
-            "detailed_metrics": self._get_detailed_metrics
+            "detailed_metrics": self._get_detailed_metrics()
         }
         
         return dashboard_data
@@ -293,7 +293,7 @@ class DebtDashboard:
             "documentation": ["missing_docstring", "outdated_docs"]
         }
         
-        for category, types in categories.items:
+        for category, types in categories.items():
             if debt_type in types:
                 return category
         
@@ -357,7 +357,7 @@ class DebtDashboard:
     def _is_security_related(self, item: Dict[str, Any]) -> bool:
         """Determine if debt item is security-related."""
         debt_type = item.get("type", "")
-        description = item.get("description", "").lower
+        description = item.get("description", "").lower()
         
         security_types = ["security_risk", "hardcoded_secrets", "sql_injection_risk"]
         security_keywords = ["password", "token", "key", "secret", "auth", "security"]
@@ -533,8 +533,8 @@ class DebtDashboard:
             previous = self.processed_snapshots[i-1]
             
             # Track debt by unique identifiers when possible
-            current_debt_ids = set
-            previous_debt_ids = set
+            current_debt_ids = set()
+            previous_debt_ids = set()
             
             current_effort = current["total_effort_estimate"]
             previous_effort = previous["total_effort_estimate"]
@@ -727,8 +727,8 @@ class DebtDashboard:
                 recommendations.append({
                     "priority": "medium",
                     "category": "focus_area",
-                    "title": f"Focus on {category.replace('_', ' ').title} Debt",
-                    "description": f"{category.replace('_', ' ').title} represents the largest debt category ({count} items). Consider targeted initiatives.",
+                    "title": f"Focus on {category.replace('_', ' ').title()} Debt",
+                    "description": f"{category.replace('_', ' ').title()} represents the largest debt category ({count} items). Consider targeted initiatives.",
                     "impact": "medium",
                     "effort": "medium"
                 })
@@ -781,7 +781,7 @@ class DebtDashboard:
             latest_categories = self.processed_snapshots[-1]["debt_by_category"]
             visualizations["category_distribution"] = [
                 {"category": category, "count": count}
-                for category, count in latest_categories.items
+                for category, count in latest_categories.items()
             ]
         
         # Velocity chart
@@ -844,7 +844,7 @@ def format_dashboard_report(dashboard_data: Dict[str, Any]) -> str:
     exec_summary = dashboard_data["executive_summary"]
     output.append("EXECUTIVE SUMMARY")
     output.append("-" * 30)
-    output.append(f"Overall Status: {exec_summary['overall_status'].upper}")
+    output.append(f"Overall Status: {exec_summary['overall_status'].upper()}")
     output.append(f"Health Score: {exec_summary['health_score']:.1f}/100")
     output.append(f"Status: {exec_summary['status_message']}")
     output.append("")
@@ -878,14 +878,14 @@ def format_dashboard_report(dashboard_data: Dict[str, Any]) -> str:
     if trends:
         output.append("TREND ANALYSIS")
         output.append("-" * 30)
-        for metric, trend in trends.items:
+        for metric, trend in trends.items():
             direction_symbol = {
                 "improving": "↑",
                 "declining": "↓", 
                 "stable": "→"
             }.get(trend["trend_direction"], "→")
             
-            output.append(f"{metric.replace('_', ' ').title}: {direction_symbol} {trend['trend_direction']}")
+            output.append(f"{metric.replace('_', ' ').title()}: {direction_symbol} {trend['trend_direction']}")
             output.append(f"  Change Rate: {trend['change_rate']:.3f} per period")
             output.append(f"  Forecast: {trend['forecast_next_period']:.1f}")
         output.append("")
@@ -896,7 +896,7 @@ def format_dashboard_report(dashboard_data: Dict[str, Any]) -> str:
         output.append("TOP RECOMMENDATIONS")
         output.append("-" * 30)
         for i, rec in enumerate(recommendations[:5], 1):
-            output.append(f"{i}. [{rec['priority'].upper}] {rec['title']}")
+            output.append(f"{i}. [{rec['priority'].upper()}] {rec['title']}")
             output.append(f"   {rec['description']}")
             output.append(f"   Impact: {rec['impact']}, Effort: {rec['effort']}")
             output.append("")
@@ -904,7 +904,7 @@ def format_dashboard_report(dashboard_data: Dict[str, Any]) -> str:
     return "\n".join(output)
 
 
-def main:
+def main():
     """Main entry point for the debt dashboard."""
     parser = argparse.ArgumentParser(description="Generate technical debt dashboard")
     parser.add_argument("files", nargs="*", help="Debt inventory files")
@@ -916,7 +916,7 @@ def main:
                        default="monthly", help="Analysis period")
     parser.add_argument("--team-size", type=int, default=5, help="Team size")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     # Initialize dashboard
     dashboard = DebtDashboard(args.team_size)
@@ -967,4 +967,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

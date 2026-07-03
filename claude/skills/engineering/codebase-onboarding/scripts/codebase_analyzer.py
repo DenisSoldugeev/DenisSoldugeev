@@ -67,23 +67,23 @@ def iter_files(root: Path) -> Iterable[Path]:
         dirnames[:] = [d for d in dirnames if d not in IGNORED_DIRS]
         for name in filenames:
             path = Path(dirpath) / name
-            if path.is_file:
+            if path.is_file():
                 yield path
 
 
 def detect_languages(paths: Iterable[Path]) -> Dict[str, int]:
-    counts: Counter[str] = Counter
+    counts: Counter[str] = Counter()
     for path in paths:
-        lang = EXT_TO_LANG.get(path.suffix.lower)
+        lang = EXT_TO_LANG.get(path.suffix.lower())
         if lang:
             counts[lang] += 1
-    return dict(sorted(counts.items, key=lambda item: (-item[1], item[0])))
+    return dict(sorted(counts.items(), key=lambda item: (-item[1], item[0])))
 
 
 def find_key_configs(root: Path) -> List[str]:
     found: List[str] = []
     for rel in KEY_CONFIG_FILES:
-        if (root / rel).exists:
+        if (root / rel).exists():
             found.append(rel)
     return found
 
@@ -117,10 +117,10 @@ def build_report(root: Path, max_depth: int) -> Dict[str, object]:
     files = list(iter_files(root))
     languages = detect_languages(files)
     total_files = len(files)
-    file_count_by_ext: Counter[str] = Counter(p.suffix.lower or "<no-ext>" for p in files)
+    file_count_by_ext: Counter[str] = Counter(p.suffix.lower() or "<no-ext>" for p in files)
 
     largest = sorted(
-        ((str(p.relative_to(root)), p.stat.st_size) for p in files),
+        ((str(p.relative_to(root)), p.stat().st_size) for p in files),
         key=lambda item: item[1],
         reverse=True,
     )[:20]
@@ -154,7 +154,7 @@ def print_text(report: Dict[str, object]) -> None:
 
     print("Languages detected")
     if report["languages"]:
-        for lang, count in report["languages"].items:
+        for lang, count in report["languages"].items():
             print(f"- {lang}: {count}")
     else:
         print("- No recognized source file extensions")
@@ -179,18 +179,18 @@ def print_text(report: Dict[str, object]) -> None:
         print(line)
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Scan a repository and generate onboarding summary facts.")
     parser.add_argument("path", help="Path to project directory")
     parser.add_argument("--max-depth", type=int, default=2, help="Max depth for structure output (default: 2)")
     parser.add_argument("--json", action="store_true", help="Print JSON output")
-    return parser.parse_args
+    return parser.parse_args()
 
 
-def main -> int:
-    args = parse_args
-    root = Path(args.path).expanduser.resolve
-    if not root.exists or not root.is_dir:
+def main() -> int:
+    args = parse_args()
+    root = Path(args.path).expanduser().resolve()
+    if not root.exists() or not root.is_dir():
         raise SystemExit(f"Path is not a directory: {root}")
 
     report = build_report(root, max_depth=max(1, args.max_depth))
@@ -202,4 +202,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main)
+    raise SystemExit(main())

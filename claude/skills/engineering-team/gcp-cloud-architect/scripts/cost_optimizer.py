@@ -34,19 +34,19 @@ class CostOptimizer:
         self.recommendations = []
         potential_savings = 0.0
 
-        compute_savings = self._analyze_compute
+        compute_savings = self._analyze_compute()
         potential_savings += compute_savings
 
-        storage_savings = self._analyze_storage
+        storage_savings = self._analyze_storage()
         potential_savings += storage_savings
 
-        database_savings = self._analyze_database
+        database_savings = self._analyze_database()
         potential_savings += database_savings
 
-        network_savings = self._analyze_networking
+        network_savings = self._analyze_networking()
         potential_savings += network_savings
 
-        general_savings = self._analyze_general_optimizations
+        general_savings = self._analyze_general_optimizations()
         potential_savings += general_savings
 
         return {
@@ -55,7 +55,7 @@ class CostOptimizer:
             'optimized_monthly_spend': round(self.monthly_spend - potential_savings, 2),
             'savings_percentage': round((potential_savings / self.monthly_spend) * 100, 2) if self.monthly_spend > 0 else 0,
             'recommendations': self.recommendations,
-            'priority_actions': self._prioritize_recommendations
+            'priority_actions': self._prioritize_recommendations()
         }
 
     def _analyze_compute(self) -> float:
@@ -389,7 +389,7 @@ class CostOptimizer:
         ]
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description='GCP Cost Optimizer - Analyzes GCP resources and recommends cost savings'
     )
@@ -420,7 +420,7 @@ def main:
         help='Generate optimization checklist'
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.resources:
         try:
@@ -436,10 +436,10 @@ def main:
         resources = {}
 
     optimizer = CostOptimizer(resources, args.monthly_spend)
-    result = optimizer.analyze_and_optimize
+    result = optimizer.analyze_and_optimize()
 
     if args.checklist:
-        result['checklist'] = optimizer.generate_optimization_checklist
+        result['checklist'] = optimizer.generate_optimization_checklist()
 
     if args.output:
         with open(args.output, 'w') as f:
@@ -462,4 +462,4 @@ def main:
 
 
 if __name__ == '__main__':
-    main
+    main()

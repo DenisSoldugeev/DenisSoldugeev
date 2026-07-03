@@ -38,7 +38,7 @@ class CaseScore:
     output_length: int
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="A/B test prompts against test cases.")
     parser.add_argument("--input", help="JSON input file for full payload.")
     parser.add_argument("--prompt-a", help="Prompt A text.")
@@ -51,7 +51,7 @@ def parse_args -> argparse.Namespace:
         help="External command template, e.g. 'llm --prompt {prompt} --input {input}'.",
     )
     parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
-    return parser.parse_args
+    return parser.parse_args()
 
 
 def read_text_file(path: Optional[str]) -> Optional[str]:
@@ -70,8 +70,8 @@ def load_payload(args: argparse.Namespace) -> Dict[str, Any]:
         except Exception as exc:
             raise CLIError(f"Failed reading --input payload: {exc}") from exc
 
-    if not sys.stdin.isatty:
-        raw = sys.stdin.read.strip
+    if not sys.stdin.isatty():
+        raw = sys.stdin.read().strip()
         if raw:
             try:
                 return json.loads(raw)
@@ -105,8 +105,8 @@ def run_runner(runner_cmd: str, prompt: str, case_input: str) -> str:
     try:
         proc = subprocess.run(parts, text=True, capture_output=True, check=True)
     except subprocess.CalledProcessError as exc:
-        raise CLIError(f"Runner command failed: {exc.stderr.strip}") from exc
-    return proc.stdout.strip
+        raise CLIError(f"Runner command failed: {exc.stderr.strip()}") from exc
+    return proc.stdout.strip()
 
 
 def static_output(prompt: str, case_input: str) -> str:
@@ -120,9 +120,9 @@ def score_output(case: Dict[str, Any], output: str, prompt_variant: str) -> Case
     forbidden = [str(x) for x in case.get("forbidden_contains", []) if str(x)]
     regexes = [str(x) for x in case.get("expected_regex", []) if str(x)]
 
-    matched_expected = sum(1 for item in expected if item.lower in output.lower)
+    matched_expected = sum(1 for item in expected if item.lower() in output.lower())
     missed_expected = len(expected) - matched_expected
-    forbidden_hits = sum(1 for item in forbidden if item.lower in output.lower)
+    forbidden_hits = sum(1 for item in forbidden if item.lower() in output.lower())
     regex_matches = 0
     for pattern in regexes:
         try:
@@ -139,7 +139,7 @@ def score_output(case: Dict[str, Any], output: str, prompt_variant: str) -> Case
     # Heuristic penalty for unbounded verbosity
     if len(output) > 4000:
         score -= 10
-    if len(output.strip) < 10:
+    if len(output.strip()) < 10:
         score -= 10
 
     score = max(0.0, min(100.0, score))
@@ -168,12 +168,12 @@ def aggregate(scores: List[CaseScore]) -> Dict[str, Any]:
     }
 
 
-def main -> int:
-    args = parse_args
+def main() -> int:
+    args = parse_args()
     payload = load_payload(args)
 
-    prompt_a = str(payload.get("prompt_a", "")).strip
-    prompt_b = str(payload.get("prompt_b", "")).strip
+    prompt_a = str(payload.get("prompt_a", "")).strip()
+    prompt_b = str(payload.get("prompt_b", "")).strip()
     cases = payload.get("cases", [])
     runner_cmd = payload.get("runner_cmd")
 
@@ -188,7 +188,7 @@ def main -> int:
     for case in cases:
         if not isinstance(case, dict):
             continue
-        case_input = str(case.get("input", "")).strip
+        case_input = str(case.get("input", "")).strip()
 
         output_a = run_runner(runner_cmd, prompt_a, case_input) if runner_cmd else static_output(prompt_a, case_input)
         output_b = run_runner(runner_cmd, prompt_b, case_input) if runner_cmd else static_output(prompt_b, case_input)
@@ -233,7 +233,7 @@ def main -> int:
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(main)
+        raise SystemExit(main())
     except CLIError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         raise SystemExit(2)

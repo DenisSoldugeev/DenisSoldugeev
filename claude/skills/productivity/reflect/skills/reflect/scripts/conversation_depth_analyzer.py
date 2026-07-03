@@ -82,7 +82,7 @@ def detect_detail_mode_run(text: str) -> int:
     consecutive_detail = 0
     max_consecutive = 0
     for block in blocks:
-        if not block.strip:
+        if not block.strip():
             continue
         if any(re.search(p, block, re.IGNORECASE) for p in DETAIL_MARKERS):
             consecutive_detail += 1
@@ -179,12 +179,12 @@ def main(argv: List[str]) -> int:
         text = SAMPLE_CONVERSATION
     elif args.conversation:
         p = Path(args.conversation)
-        if not p.exists:
+        if not p.exists():
             print(f"error: {args.conversation} not found", file=sys.stderr)
             return 2
         text = p.read_text(encoding="utf-8")
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     result = analyze(text)

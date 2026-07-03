@@ -46,22 +46,22 @@ def parse_frontmatter(text: str) -> dict[str, str]:
         return {}
     raw = m.group(1)
     fm: dict[str, str] = {}
-    for line in raw.splitlines:
-        if ":" in line and not line.lstrip.startswith("#"):
+    for line in raw.splitlines():
+        if ":" in line and not line.lstrip().startswith("#"):
             key, _, value = line.partition(":")
-            fm[key.strip] = value.strip.strip("'\"")
+            fm[key.strip()] = value.strip().strip("'\"")
     return fm
 
 
 def infer_title(path: Path, fm: dict[str, str]) -> str:
     if "title" in fm:
         return fm["title"]
-    return path.stem.replace("-", " ").replace("_", " ").title
+    return path.stem.replace("-", " ").replace("_", " ").title()
 
 
 def scan_wiki(vault: Path) -> dict[str, list[dict]]:
     wiki = vault / "wiki"
-    if not wiki.exists:
+    if not wiki.exists():
         print(f"[error] {wiki} not found", file=sys.stderr)
         sys.exit(1)
 
@@ -97,13 +97,13 @@ def scan_wiki(vault: Path) -> dict[str, list[dict]]:
 
     # Sort each category by title
     for cat in pages:
-        pages[cat].sort(key=lambda p: p["title"].lower)
+        pages[cat].sort(key=lambda p: p["title"].lower())
     return pages
 
 
 def render_index(pages: dict[str, list[dict]], vault_name: str) -> str:
-    today = dt.date.today.isoformat
-    total = sum(len(v) for v in pages.values)
+    today = dt.date.today().isoformat()
+    total = sum(len(v) for v in pages.values())
 
     lines = [
         f"# Index — {vault_name}",
@@ -120,7 +120,7 @@ def render_index(pages: dict[str, list[dict]], vault_name: str) -> str:
         entries = pages.get(cat, [])
         if not entries:
             continue
-        lines.append(f"## {cat.capitalize} ({len(entries)})")
+        lines.append(f"## {cat.capitalize()} ({len(entries)})")
         lines.append("")
         for e in entries:
             summary = f" — {e['summary']}" if e["summary"] else ""
@@ -137,7 +137,7 @@ def render_index(pages: dict[str, list[dict]], vault_name: str) -> str:
     return "\n".join(lines)
 
 
-def main:
+def main():
     p = argparse.ArgumentParser(
         description="Regenerate wiki/index.md from every wiki page's YAML frontmatter.",
         epilog="The index is organized by category (synthesis, concept, entity, source, comparison).",
@@ -151,10 +151,10 @@ def main:
         action="store_true",
         help="Emit a JSON summary of the regeneration result",
     )
-    args = p.parse_args
+    args = p.parse_args()
 
     try:
-        vault = Path(args.vault).expanduser.resolve
+        vault = Path(args.vault).expanduser().resolve()
         pages = scan_wiki(vault)
         content = render_index(pages, vault.name)
     except SystemExit:
@@ -166,12 +166,12 @@ def main:
             print(f"[error] {e}", file=sys.stderr)
         sys.exit(1)
 
-    total = sum(len(v) for v in pages.values)
+    total = sum(len(v) for v in pages.values())
     summary = {
         "status": "ok",
         "vault": str(vault),
         "total_pages": total,
-        "by_category": {k: len(v) for k, v in pages.items},
+        "by_category": {k: len(v) for k, v in pages.items()},
         "dry_run": args.dry_run,
     }
 
@@ -201,4 +201,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -44,7 +44,7 @@ import fs from 'fs'
 
 // Endpoint: POST /debug/heap-snapshot (protect with auth!)
 app.post('/debug/heap-snapshot', (req, res) => {
-  const filename = `heap-${Date.now}.heapsnapshot`
+  const filename = `heap-${Date.now()}.heapsnapshot`
   const snapshot = v8.writeHeapSnapshot(filename)
   res.json({ snapshot })
 })
@@ -84,7 +84,7 @@ function formatBytes(bytes) {
 }
 
 function measureMemory(label) {
-  const mem = process.memoryUsage
+  const mem = process.memoryUsage()
   console.log(`\n[${label}]`)
   console.log(`  RSS:       ${formatBytes(mem.rss)}`)
   console.log(`  Heap Used: ${formatBytes(mem.heapUsed)}`)
@@ -98,7 +98,7 @@ const baseline = measureMemory('Baseline')
 // Simulate your operation
 for (let i = 0; i < 1000; i++) {
   // Replace with your actual operation
-  const result = await someOperation
+  const result = await someOperation()
 }
 
 const after = measureMemory('After 1000 operations')
@@ -107,7 +107,7 @@ console.log(`\n[Delta]`)
 console.log(`  Heap Used: +${formatBytes(after.heapUsed - baseline.heapUsed)}`)
 
 // If heap keeps growing across GC cycles, you have a leak
-global.gc?. // Run with --expose-gc flag
+global.gc?.() // Run with --expose-gc flag
 const afterGC = measureMemory('After GC')
 if (afterGC.heapUsed > baseline.heapUsed * 1.1) {
   console.warn('⚠️  Possible memory leak detected (>10% growth after GC)')
@@ -145,22 +145,22 @@ import pstats
 import io
 from app.services.task_service import TaskService
 
-def run:
-    service = TaskService
+def run():
+    service = TaskService()
     for _ in range(100):
         service.list_tasks(user_id="user_1", page=1, limit=20)
 
-profiler = cProfile.Profile
-profiler.enable
-run
-profiler.disable
+profiler = cProfile.Profile()
+profiler.enable()
+run()
+profiler.disable()
 
 # Print top 20 functions by cumulative time
-stream = io.StringIO
+stream = io.StringIO()
 stats = pstats.Stats(profiler, stream=stream)
 stats.sort_stats('cumulative')
 stats.print_stats(20)
-print(stream.getvalue)
+print(stream.getvalue())
 ```
 
 ### Memory profiling with memory_profiler
@@ -170,9 +170,9 @@ print(stream.getvalue)
 from memory_profiler import profile
 
 @profile
-def my_function:
+def my_function():
     # Function to profile
-    data = load_large_dataset
+    data = load_large_dataset()
     result = process(data)
     return result
 ```
@@ -184,8 +184,8 @@ python -m memory_profiler scripts/profile_function.py
 # Output:
 # Line #    Mem usage    Increment   Line Contents
 # ================================================
-#     10   45.3 MiB   45.3 MiB   def my_function:
-#     11   78.1 MiB   32.8 MiB       data = load_large_dataset
+#     10   45.3 MiB   45.3 MiB   def my_function():
+#     11   78.1 MiB   32.8 MiB       data = load_large_dataset()
 #     12  156.2 MiB   78.1 MiB       result = process(data)
 ```
 
@@ -198,11 +198,11 @@ python -m memory_profiler scripts/profile_function.py
 import _ "net/http/pprof"
 import "net/http"
 
-func main {
+func main() {
     // pprof endpoints at /debug/pprof/
-    go func {
+    go func() {
         log.Println(http.ListenAndServe(":6060", nil))
-    }
+    }()
     // ... rest of your app
 }
 ```
@@ -277,8 +277,8 @@ import dayjs from 'dayjs'  // 7kB
 import HeavyChart from '@/components/HeavyChart'
 
 // After: dynamic import (loaded on demand)
-const HeavyChart = dynamic( => import('@/components/HeavyChart'), {
-  loading:  => <Skeleton />,
+const HeavyChart = dynamic(() => import('@/components/HeavyChart'), {
+  loading: () => <Skeleton />,
 })
 ```
 
@@ -305,7 +305,7 @@ ORDER BY mean_exec_time DESC
 LIMIT 20;
 
 -- Reset stats
-SELECT pg_stat_statements_reset;
+SELECT pg_stat_statements_reset();
 ```
 
 ```bash
@@ -345,7 +345,7 @@ const db = drizzle(pool, { logger: true })
 
 // Or use a query counter middleware
 let queryCount = 0
-db.$on('query',  => queryCount++)
+db.$on('query', () => queryCount++)
 
 // In tests:
 queryCount = 0
@@ -364,9 +364,9 @@ NPLUSONE_RAISE = True  # Raise exception on N+1 in tests
 
 ```typescript
 // Before: N+1 (1 query for tasks + N queries for assignees)
-const tasks = await db.select.from(tasksTable)
+const tasks = await db.select().from(tasksTable)
 for (const task of tasks) {
-  task.assignee = await db.select.from(usersTable)
+  task.assignee = await db.select().from(usersTable)
     .where(eq(usersTable.id, task.assigneeId))
     .then(r => r[0])
 }
@@ -416,7 +416,7 @@ export const options = {
 
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000'
 
-export function setup {
+export function setup() {
   // Get auth token once
   const loginRes = http.post(`${BASE_URL}/api/auth/login`, JSON.stringify({
     email: 'loadtest@example.com',
@@ -433,9 +433,9 @@ export default function(data) {
   }
   
   // Scenario 1: List tasks
-  const start = Date.now
+  const start = Date.now()
   const listRes = http.get(`${BASE_URL}/api/tasks?limit=20`, { headers })
-  taskListDuration.add(Date.now - start)
+  taskListDuration.add(Date.now() - start)
   
   check(listRes, {
     'list tasks: status 200': (r) => r.status === 200,
@@ -447,7 +447,7 @@ export default function(data) {
   // Scenario 2: Create task
   const createRes = http.post(
     `${BASE_URL}/api/tasks`,
-    JSON.stringify({ title: `Load test task ${Date.now}`, priority: 'medium' }),
+    JSON.stringify({ title: `Load test task ${Date.now()}`, priority: 'medium' }),
     { headers }
   )
   

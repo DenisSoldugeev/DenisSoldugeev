@@ -39,7 +39,7 @@ class ConventionalCommit:
         self.is_breaking = False
         self.breaking_change_description = ""
         
-        self._parse_commit_message
+        self._parse_commit_message()
     
     def _parse_commit_message(self):
         """Parse conventional commit format."""
@@ -51,11 +51,11 @@ class ConventionalCommit:
         match = re.match(header_pattern, header)
         
         if match:
-            self.type = match.group(1).lower
+            self.type = match.group(1).lower()
             scope_match = match.group(2)
             self.scope = scope_match[1:-1] if scope_match else ""  # Remove parentheses
             self.is_breaking = bool(match.group(3))  # ! indicates breaking change
-            self.description = match.group(4).strip
+            self.description = match.group(4).strip()
         else:
             # Fallback for non-conventional commits
             self.type = "chore"
@@ -68,7 +68,7 @@ class ConventionalCommit:
             in_footer = False
             
             for line in lines[1:]:
-                if not line.strip:
+                if not line.strip():
                     continue
                     
                 # Check if this is a footer (KEY: value or KEY #value format)
@@ -80,7 +80,7 @@ class ConventionalCommit:
                     # Check for breaking change
                     if line.startswith('BREAKING CHANGE:'):
                         self.is_breaking = True
-                        self.breaking_change_description = line[16:].strip
+                        self.breaking_change_description = line[16:].strip()
                 else:
                     if in_footer:
                         # Continuation of footer
@@ -88,7 +88,7 @@ class ConventionalCommit:
                     else:
                         body_lines.append(line)
             
-            self.body = '\n'.join(body_lines).strip
+            self.body = '\n'.join(body_lines).strip()
             self.footers = footer_lines
     
     def extract_issue_references(self) -> List[str]:
@@ -146,13 +146,13 @@ class ChangelogGenerator:
     def __init__(self):
         self.commits: List[ConventionalCommit] = []
         self.version = "Unreleased"
-        self.date = datetime.now.strftime("%Y-%m-%d")
+        self.date = datetime.now().strftime("%Y-%m-%d")
         self.base_url = ""
         
     def parse_git_log_output(self, git_log_text: str):
         """Parse git log output into ConventionalCommit objects."""
         # Try to detect format based on patterns in the text
-        lines = git_log_text.strip.split('\n')
+        lines = git_log_text.strip().split('\n')
         
         if not lines or not lines[0]:
             return
@@ -167,7 +167,7 @@ class ChangelogGenerator:
         commit_buffer = []
         
         for line in lines:
-            line = line.strip
+            line = line.strip()
             if not line:
                 continue
                 
@@ -189,7 +189,7 @@ class ChangelogGenerator:
             if full_match:
                 # Process previous commit
                 if current_commit:
-                    commit_message = '\n'.join(commit_buffer).strip
+                    commit_message = '\n'.join(commit_buffer).strip()
                     if commit_message:
                         current_commit = ConventionalCommit(commit_message, current_commit.commit_hash, 
                                                           current_commit.author, current_commit.date)
@@ -204,11 +204,11 @@ class ChangelogGenerator:
             # Parse metadata lines in full format
             if current_commit and not current_commit.raw_message:
                 if line.startswith('Author:'):
-                    current_commit.author = line[7:].strip
+                    current_commit.author = line[7:].strip()
                 elif line.startswith('Date:'):
-                    current_commit.date = line[5:].strip
+                    current_commit.date = line[5:].strip()
                 elif line.startswith('Merge:'):
-                    current_commit.merge_info = line[6:].strip
+                    current_commit.merge_info = line[6:].strip()
                 elif line.startswith('    '):
                     # Commit message line (indented)
                     commit_buffer.append(line[4:])  # Remove 4-space indent
@@ -216,7 +216,7 @@ class ChangelogGenerator:
         # Process final commit
         if current_commit:
             if commit_buffer:
-                commit_message = '\n'.join(commit_buffer).strip
+                commit_message = '\n'.join(commit_buffer).strip()
                 current_commit = ConventionalCommit(commit_message, current_commit.commit_hash,
                                                   current_commit.author, current_commit.date)
             self.commits.append(current_commit)
@@ -242,7 +242,7 @@ class ChangelogGenerator:
         categories = defaultdict(list)
         
         for commit in self.commits:
-            category = commit.get_changelog_category
+            category = commit.get_changelog_category()
             if category:  # Skip None categories (internal changes)
                 categories[category].append(commit)
         
@@ -250,7 +250,7 @@ class ChangelogGenerator:
     
     def generate_markdown_changelog(self, include_unreleased: bool = True) -> str:
         """Generate Keep a Changelog format markdown."""
-        grouped_commits = self.group_commits_by_category
+        grouped_commits = self.group_commits_by_category()
         
         if not grouped_commits:
             return "No notable changes.\n"
@@ -292,14 +292,14 @@ class ChangelogGenerator:
                 scoped_commits[scope].append(commit)
             
             # Sort scopes, with 'general' last
-            scopes = sorted(scoped_commits.keys)
+            scopes = sorted(scoped_commits.keys())
             if "general" in scopes:
                 scopes.remove("general")
                 scopes.append("general")
             
             for scope in scopes:
                 if len(scoped_commits) > 1 and scope != "general":
-                    changelog.append(f"#### {scope.title}")
+                    changelog.append(f"#### {scope.title()}")
                 
                 for commit in scoped_commits[scope]:
                     line = self._format_commit_line(commit)
@@ -312,14 +312,14 @@ class ChangelogGenerator:
     def _format_commit_line(self, commit: ConventionalCommit, show_breaking: bool = False) -> str:
         """Format a single commit line for the changelog."""
         # Start with description
-        line = commit.description.capitalize
+        line = commit.description.capitalize()
         
         # Add scope if present and not already in description
-        if commit.scope and commit.scope.lower not in line.lower:
+        if commit.scope and commit.scope.lower() not in line.lower():
             line = f"{commit.scope}: {line}"
         
         # Add issue references
-        issue_refs = commit.extract_issue_references
+        issue_refs = commit.extract_issue_references()
         if issue_refs:
             refs_str = ', '.join(f"#{ref}" for ref in issue_refs)
             line += f" ({refs_str})"
@@ -370,27 +370,27 @@ class ChangelogGenerator:
             'version': self.version,
             'date': self.date,
             'total_commits': len(self.commits),
-            'by_type': dict(type_counts.most_common),
+            'by_type': dict(type_counts.most_common()),
             'by_author': dict(author_counts.most_common(10)),  # Top 10 contributors
             'breaking_changes': breaking_count,
             'notable_changes': notable_count,
             'scopes': list(set(commit.scope for commit in self.commits if commit.scope)),
-            'issue_references': len(set.union(*(commit.extract_issue_references for commit in self.commits)))
+            'issue_references': len(set().union(*(commit.extract_issue_references() for commit in self.commits)))
         }
     
     def generate_json_output(self) -> str:
         """Generate JSON representation of the changelog data."""
-        grouped_commits = self.group_commits_by_category
+        grouped_commits = self.group_commits_by_category()
         
         # Convert commits to serializable format
         json_data = {
             'version': self.version,
             'date': self.date,
-            'summary': self.generate_release_summary,
+            'summary': self.generate_release_summary(),
             'categories': {}
         }
         
-        for category, commits in grouped_commits.items:
+        for category, commits in grouped_commits.items():
             json_data['categories'][category] = []
             for commit in commits:
                 commit_data = {
@@ -402,14 +402,14 @@ class ChangelogGenerator:
                     'date': commit.date,
                     'breaking': commit.is_breaking,
                     'breaking_description': commit.breaking_change_description,
-                    'issue_references': commit.extract_issue_references
+                    'issue_references': commit.extract_issue_references()
                 }
                 json_data['categories'][category].append(commit_data)
         
         return json.dumps(json_data, indent=2)
 
 
-def main:
+def main():
     """Main entry point with CLI argument parsing."""
     parser = argparse.ArgumentParser(description="Generate changelog from conventional commits")
     parser.add_argument('--input', '-i', type=str, help='Input file (default: stdin)')
@@ -418,7 +418,7 @@ def main:
     parser.add_argument('--version', '-v', type=str, default='Unreleased',
                        help='Version for this release')
     parser.add_argument('--date', '-d', type=str, 
-                       default=datetime.now.strftime("%Y-%m-%d"),
+                       default=datetime.now().strftime("%Y-%m-%d"),
                        help='Release date (YYYY-MM-DD format)')
     parser.add_argument('--base-url', '-u', type=str, default='',
                        help='Base URL for commit links')
@@ -428,21 +428,21 @@ def main:
     parser.add_argument('--summary', '-s', action='store_true',
                        help='Include release summary statistics')
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     # Read input
     if args.input:
         with open(args.input, 'r', encoding='utf-8') as f:
-            input_data = f.read
+            input_data = f.read()
     else:
-        input_data = sys.stdin.read
+        input_data = sys.stdin.read()
     
-    if not input_data.strip:
+    if not input_data.strip():
         print("No input data provided", file=sys.stderr)
         sys.exit(1)
     
     # Initialize generator
-    generator = ChangelogGenerator
+    generator = ChangelogGenerator()
     generator.version = args.version
     generator.date = args.date
     generator.base_url = args.base_url
@@ -465,19 +465,19 @@ def main:
     output_lines = []
     
     if args.format in ['markdown', 'both']:
-        changelog_md = generator.generate_markdown_changelog
+        changelog_md = generator.generate_markdown_changelog()
         if args.format == 'both':
             output_lines.append("# Markdown Changelog\n")
         output_lines.append(changelog_md)
     
     if args.format in ['json', 'both']:
-        changelog_json = generator.generate_json_output
+        changelog_json = generator.generate_json_output()
         if args.format == 'both':
             output_lines.append("\n# JSON Output\n")
         output_lines.append(changelog_json)
     
     if args.summary:
-        summary = generator.generate_release_summary
+        summary = generator.generate_release_summary()
         output_lines.append(f"\n# Release Summary")
         output_lines.append(f"- **Version:** {summary['version']}")
         output_lines.append(f"- **Total Commits:** {summary['total_commits']}")
@@ -487,7 +487,7 @@ def main:
         
         if summary['by_type']:
             output_lines.append("- **By Type:**")
-            for commit_type, count in summary['by_type'].items:
+            for commit_type, count in summary['by_type'].items():
                 output_lines.append(f"  - {commit_type}: {count}")
     
     # Write output
@@ -501,4 +501,4 @@ def main:
 
 
 if __name__ == '__main__':
-    main
+    main()

@@ -32,11 +32,11 @@ def _walk_code_files(repo):
 
 
 def discover_code_flags(repo):
-    found = set
+    found = set()
     for path in _walk_code_files(repo):
         try:
             with open(path, "r", encoding="utf-8", errors="replace") as f:
-                text = f.read
+                text = f.read()
         except OSError:
             continue
         for pat in FLAG_PATTERNS:
@@ -50,7 +50,7 @@ def _split_sections(text):
     sections = {}
     current = None
     buf = []
-    for line in text.splitlines:
+    for line in text.splitlines():
         m = re.match(r"^#{2,3}\s+([\w.\-:]+)\s*$", line)
         if m:
             if current is not None:
@@ -65,7 +65,7 @@ def _split_sections(text):
 
 
 def _missing_fields(section_text):
-    lower = section_text.lower
+    lower = section_text.lower()
     return [f for f in REQUIRED_FIELDS if f not in lower]
 
 
@@ -74,9 +74,9 @@ def audit(repo, flag_doc_path):
         return {"error": f"flag-doc not found: {flag_doc_path}"}
 
     with open(flag_doc_path, "r", encoding="utf-8") as f:
-        doc_text = f.read
+        doc_text = f.read()
     sections = _split_sections(doc_text)
-    documented = set(sections.keys)
+    documented = set(sections.keys())
 
     code_flags = discover_code_flags(repo)
     undocumented = sorted(code_flags - documented)
@@ -123,12 +123,12 @@ def render_text(result):
         print("PASS: every code flag is fully documented.")
 
 
-def main:
+def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--repo", default=".", help="Path to repo root (default: .)")
     ap.add_argument("--flag-doc", required=True, help="Path to markdown flag registry (e.g., docs/feature-flags.md)")
     ap.add_argument("--format", choices=["text", "json"], default="text")
-    args = ap.parse_args
+    args = ap.parse_args()
 
     result = audit(os.path.abspath(args.repo), args.flag_doc)
     if args.format == "json":
@@ -143,4 +143,4 @@ def main:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -20,7 +20,7 @@ from typing import Dict
 # Bicep templates
 # ---------------------------------------------------------------------------
 
-def _web_app_template -> str:
+def _web_app_template() -> str:
     return r"""// =============================================================================
 // Azure Web App Architecture — Bicep Template
 // App Service + Azure SQL + Front Door + Key Vault + Application Insights
@@ -31,7 +31,7 @@ def _web_app_template -> str:
 param environment string = 'dev'
 
 @description('Azure region')
-param location string = resourceGroup.location
+param location string = resourceGroup().location
 
 @description('Application name (lowercase, no spaces)')
 @minLength(3)
@@ -50,7 +50,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   location: location
   properties: {
     sku: { family: 'A', name: 'standard' }
-    tenantId: subscription.tenantId
+    tenantId: subscription().tenantId
     enableRbacAuthorization: true
     enableSoftDelete: true
     softDeleteRetentionInDays: 30
@@ -122,7 +122,7 @@ resource sqlServer 'Microsoft.Sql/servers@2023-05-01-preview' = {
       azureADOnlyAuthentication: true
       principalType: 'Group'
       sid: sqlAdminObjectId
-      tenantId: subscription.tenantId
+      tenantId: subscription().tenantId
     }
     minimalTlsVersion: '1.2'
     publicNetworkAccess: environment == 'production' ? 'Disabled' : 'Enabled'
@@ -194,7 +194,7 @@ output sqlServerFqdn string = sqlServer.properties.fullyQualifiedDomainName
 """
 
 
-def _microservices_template -> str:
+def _microservices_template() -> str:
     return r"""// =============================================================================
 // Azure Microservices Architecture — Bicep Template
 // AKS + API Management + Cosmos DB + Service Bus + Key Vault
@@ -205,7 +205,7 @@ def _microservices_template -> str:
 param environment string = 'dev'
 
 @description('Azure region')
-param location string = resourceGroup.location
+param location string = resourceGroup().location
 
 @description('Application name')
 @minLength(3)
@@ -224,7 +224,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   location: location
   properties: {
     sku: { family: 'A', name: 'standard' }
-    tenantId: subscription.tenantId
+    tenantId: subscription().tenantId
     enableRbacAuthorization: true
     enableSoftDelete: true
   }
@@ -390,7 +390,7 @@ output keyVaultUri string = keyVault.properties.vaultUri
 """
 
 
-def _serverless_template -> str:
+def _serverless_template() -> str:
     return r"""// =============================================================================
 // Azure Serverless Architecture — Bicep Template
 // Azure Functions + Event Grid + Service Bus + Cosmos DB
@@ -401,7 +401,7 @@ def _serverless_template -> str:
 param environment string = 'dev'
 
 @description('Azure region')
-param location string = resourceGroup.location
+param location string = resourceGroup().location
 
 @description('Application name')
 @minLength(3)
@@ -461,7 +461,7 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
       minTlsVersion: '1.2'
       ftpsState: 'Disabled'
       appSettings: [
-        { name: 'AzureWebJobsStorage', value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=core.windows.net;AccountKey=${storageAccount.listKeys.keys[0].value}' }
+        { name: 'AzureWebJobsStorage', value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=core.windows.net;AccountKey=${storageAccount.listKeys().keys[0].value}' }
         { name: 'FUNCTIONS_EXTENSION_VERSION', value: '~4' }
         { name: 'FUNCTIONS_WORKER_RUNTIME', value: 'node' }
         { name: 'APPINSIGHTS_INSTRUMENTATIONKEY', value: appInsights.properties.InstrumentationKey }
@@ -565,7 +565,7 @@ output appInsightsKey string = appInsights.properties.InstrumentationKey
 """
 
 
-def _data_pipeline_template -> str:
+def _data_pipeline_template() -> str:
     return r"""// =============================================================================
 // Azure Data Pipeline Architecture — Bicep Template
 // Event Hubs + Data Lake Gen2 + Synapse Analytics + Azure Functions
@@ -576,7 +576,7 @@ def _data_pipeline_template -> str:
 param environment string = 'dev'
 
 @description('Azure region')
-param location string = resourceGroup.location
+param location string = resourceGroup().location
 
 @description('Application name')
 @minLength(3)
@@ -717,7 +717,7 @@ TEMPLATE_DESCRIPTIONS = {
 # CLI
 # ---------------------------------------------------------------------------
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Azure Bicep Generator — generate Bicep IaC templates for common Azure architecture patterns.",
         epilog="Examples:\n"
@@ -729,7 +729,7 @@ def main:
     parser.add_argument(
         "--arch-type",
         required=True,
-        choices=list(TEMPLATES.keys),
+        choices=list(TEMPLATES.keys()),
         help="Architecture pattern type",
     )
     parser.add_argument(
@@ -745,23 +745,23 @@ def main:
         help="Output metadata as JSON (template content + description)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     template_fn = TEMPLATES[args.arch_type]
-    bicep_content = template_fn
+    bicep_content = template_fn()
 
     if args.json_output:
         result = {
             "arch_type": args.arch_type,
             "description": TEMPLATE_DESCRIPTIONS[args.arch_type],
             "bicep_template": bicep_content,
-            "lines": len(bicep_content.strip.split("\n")),
+            "lines": len(bicep_content.strip().split("\n")),
         }
         print(json.dumps(result, indent=2))
     elif args.output:
         with open(args.output, "w") as f:
             f.write(bicep_content)
-        print(f"Bicep template written to {args.output} ({len(bicep_content.strip.split(chr(10)))} lines)")
+        print(f"Bicep template written to {args.output} ({len(bicep_content.strip().split(chr(10)))} lines)")
         print(f"Pattern: {TEMPLATE_DESCRIPTIONS[args.arch_type]}")
         print(f"\nNext steps:")
         print(f"  1. az bicep build --file {args.output}")
@@ -772,4 +772,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

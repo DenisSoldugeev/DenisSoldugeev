@@ -59,31 +59,31 @@ npx playwright test tests/auth/login.spec.ts --headed
 
 # 4. If a test is flaky in CI, diagnose it
 /pw:fix tests/auth/login.spec.ts
-# → Identifies missing web-first assertion; replaces waitForTimeout(2000) with expect(locator).toBeVisible
+# → Identifies missing web-first assertion; replaces waitForTimeout(2000) with expect(locator).toBeVisible()
 ```
 
 ## Golden Rules
 
-1. `getByRole` over CSS/XPath — resilient to markup changes
-2. Never `page.waitForTimeout` — use web-first assertions
-3. `expect(locator)` auto-retries; `expect(await locator.textContent)` does not
+1. `getByRole()` over CSS/XPath — resilient to markup changes
+2. Never `page.waitForTimeout()` — use web-first assertions
+3. `expect(locator)` auto-retries; `expect(await locator.textContent())` does not
 4. Isolate every test — no shared state between tests
 5. `baseURL` in config — zero hardcoded URLs
 6. Retries: `2` in CI, `0` locally
 7. Traces: `'on-first-retry'` — rich debugging without slowdown
-8. Fixtures over globals — `test.extend` for shared state
+8. Fixtures over globals — `test.extend()` for shared state
 9. One behavior per test — multiple related assertions are fine
 10. Mock external services only — never mock your own app
 
 ## Locator Priority
 
 ```
-1. getByRole        — buttons, links, headings, form elements
-2. getByLabel       — form fields with labels
-3. getByText        — non-interactive text
-4. getByPlaceholder — inputs with placeholder
-5. getByTestId      — when no semantic option exists
-6. page.locator     — CSS/XPath as last resort
+1. getByRole()        — buttons, links, headings, form elements
+2. getByLabel()       — form fields with labels
+3. getByText()        — non-interactive text
+4. getByPlaceholder() — inputs with placeholder
+5. getByTestId()      — when no semantic option exists
+6. page.locator()     — CSS/XPath as last resort
 ```
 
 ## What's Included

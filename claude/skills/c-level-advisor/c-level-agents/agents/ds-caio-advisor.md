@@ -32,32 +32,32 @@ Differentiates from `ds-cdo-advisor` (data strategy, training rights), `ds-cto-a
 
 ## Skill Integration
 
-**Skill Location:** `../../skills/chief-ai-officer-advisor/`
+**Skill Location:** `../../chief-ai-officer-advisor/`
 
 ### Python Tools
 
 1. **Model Build-vs-Buy Calculator**
-   - Path: `../../skills/chief-ai-officer-advisor/scripts/model_buildvsbuy_calculator.py`
-   - Usage: `python ../../skills/chief-ai-officer-advisor/scripts/model_buildvsbuy_calculator.py use_case.json`
+   - Path: `../../chief-ai-officer-advisor/scripts/model_buildvsbuy_calculator.py`
+   - Usage: `python ../../chief-ai-officer-advisor/scripts/model_buildvsbuy_calculator.py use_case.json`
    - Returns: API / FINE_TUNE / BUILD recommendation, 3-year TCO across all 3 paths + open-hosted variant, breakeven analysis, failure modes per chosen path
    - Deterministic: balances economic breakeven with practical feasibility (data availability, ML team capacity, compliance constraints)
 
 2. **AI Risk Classifier**
-   - Path: `../../skills/chief-ai-officer-advisor/scripts/ai_risk_classifier.py`
-   - Usage: `python ../../skills/chief-ai-officer-advisor/scripts/ai_risk_classifier.py use_case.json`
+   - Path: `../../chief-ai-officer-advisor/scripts/ai_risk_classifier.py`
+   - Usage: `python ../../chief-ai-officer-advisor/scripts/ai_risk_classifier.py use_case.json`
    - Returns: EU AI Act tier (PROHIBITED/HIGH/LIMITED/MINIMAL) with citations, US state triggers (NYC LL 144, CO AI Act, IL HB 53, CA SB 1001, IL BIPA), industry overlays (FDA, NYDFS, NAIC, ECOA), required controls list, conformity assessment flag
 
 3. **AI Cost Economics**
-   - Path: `../../skills/chief-ai-officer-advisor/scripts/ai_cost_economics.py`
-   - Usage: `python ../../skills/chief-ai-officer-advisor/scripts/ai_cost_economics.py workload.json`
+   - Path: `../../chief-ai-officer-advisor/scripts/ai_cost_economics.py`
+   - Usage: `python ../../chief-ai-officer-advisor/scripts/ai_cost_economics.py workload.json`
    - Returns: API costs at 3 tiers, self-hosted costs at low/mid/high GPU rates with 24/7 warm + ops attribution, breakeven monthly tokens, API/SELF_HOSTED/HYBRID recommendation with caveats
 
 ### Knowledge Bases
 
-- `../../skills/chief-ai-officer-advisor/references/model_buildvsbuy_strategy.md` — Full decision tree + 3 paths with failure modes + fine-tuning approaches table (RAG / LoRA / full FT / RLHF / DPO / continued pre-training) + when each fails
-- `../../skills/chief-ai-officer-advisor/references/ai_risk_governance.md` — EU AI Act full risk-tier map + NIST AI RMF + US state patchwork + industry overlays (FDA, financial, insurance) + governance program checklist
-- `../../skills/chief-ai-officer-advisor/references/ai_cost_economics.md` — 2026 API pricing + GPU rental economics + utilization reality + hidden costs (ops, monitoring, model updates, capacity, failover, security) + migration cost + prompt caching as economics lever
-- `../../skills/chief-ai-officer-advisor/references/ai_team_org_evolution.md` — 5-stage role map + 9-role definition table + AI team vs data team contrast + 7 anti-patterns
+- `../../chief-ai-officer-advisor/references/model_buildvsbuy_strategy.md` — Full decision tree + 3 paths with failure modes + fine-tuning approaches table (RAG / LoRA / full FT / RLHF / DPO / continued pre-training) + when each fails
+- `../../chief-ai-officer-advisor/references/ai_risk_governance.md` — EU AI Act full risk-tier map + NIST AI RMF + US state patchwork + industry overlays (FDA, financial, insurance) + governance program checklist
+- `../../chief-ai-officer-advisor/references/ai_cost_economics.md` — 2026 API pricing + GPU rental economics + utilization reality + hidden costs (ops, monitoring, model updates, capacity, failover, security) + migration cost + prompt caching as economics lever
+- `../../chief-ai-officer-advisor/references/ai_team_org_evolution.md` — 5-stage role map + 9-role definition table + AI team vs data team contrast + 7 anti-patterns
 
 ## Workflows
 
@@ -67,7 +67,7 @@ Differentiates from `ds-cdo-advisor` (data strategy, training rights), `ds-cto-a
 ```bash
 # 1. Define use_case.json with: volume, latency budget, accuracy required, domain-specific?,
 #    data for fine-tune available?, ML team capacity, compliance constraints
-python ../../skills/chief-ai-officer-advisor/scripts/model_buildvsbuy_calculator.py use_case.json
+python ../../chief-ai-officer-advisor/scripts/model_buildvsbuy_calculator.py use_case.json
 # 2. Review 3-year TCO + breakeven analysis
 # 3. Cross-check with ds-cfo-advisor on budget commitment (multi-year vendor / GPU)
 # 4. Cross-check with ds-cto-advisor on engineering capacity (esp. for fine-tune)
@@ -81,7 +81,7 @@ python ../../skills/chief-ai-officer-advisor/scripts/model_buildvsbuy_calculator
 ```bash
 # 1. Define use_case.json with: domain, geography (EU? states?), automation level, biometric?,
 #    consequential decisions?, user-facing?
-python ../../skills/chief-ai-officer-advisor/scripts/ai_risk_classifier.py use_case.json
+python ../../chief-ai-officer-advisor/scripts/ai_risk_classifier.py use_case.json
 # 2. For PROHIBITED: scope out EU OR redesign
 # 3. For HIGH: budget conformity assessment ($50-200K + 3-12 months) + register in EU DB
 # 4. For LIMITED: implement transparency requirements before launch
@@ -95,7 +95,7 @@ python ../../skills/chief-ai-officer-advisor/scripts/ai_risk_classifier.py use_c
 
 ```bash
 # 1. Build workload.json: monthly tokens, quality tier, model size, latency target, utilization
-python ../../skills/chief-ai-officer-advisor/scripts/ai_cost_economics.py workload.json
+python ../../chief-ai-officer-advisor/scripts/ai_cost_economics.py workload.json
 # 2. Review monthly cost comparison + breakeven analysis + sensitivity to GPU rates
 # 3. Estimate migration cost (3-6 months, 2-3 engineers = $150-300K)
 # 4. Cross-check with ds-cfo-advisor on capex commitment + reserved GPU pricing
@@ -130,13 +130,13 @@ python ../../skills/chief-ai-officer-advisor/scripts/ai_cost_economics.py worklo
 # AI feature pre-launch gate — must pass all three before deployment
 
 # 1. Model selection sanity check
-python ../../skills/chief-ai-officer-advisor/scripts/model_buildvsbuy_calculator.py use_case.json
+python ../../chief-ai-officer-advisor/scripts/model_buildvsbuy_calculator.py use_case.json
 
 # 2. Regulatory classification + controls
-python ../../skills/chief-ai-officer-advisor/scripts/ai_risk_classifier.py use_case.json
+python ../../chief-ai-officer-advisor/scripts/ai_risk_classifier.py use_case.json
 
 # 3. Cost projection at expected scale
-python ../../skills/chief-ai-officer-advisor/scripts/ai_cost_economics.py workload.json
+python ../../chief-ai-officer-advisor/scripts/ai_cost_economics.py workload.json
 
 # Required before ship:
 #   ☐ Recommendation logged via /ds:decide
@@ -158,7 +158,7 @@ python ../../skills/chief-ai-officer-advisor/scripts/ai_cost_economics.py worklo
 ## Related Agents
 
 - [ds-cdo-advisor](ds-cdo-advisor.md) — Training data rights, data strategy (chains directly to model decisions)
-- [ds-cto-advisor](../../../../agents/c-level/ds-cto-advisor.md) — Architecture capacity, scaling cliffs
+- [ds-cto-advisor](../../../agents/c-level/ds-cto-advisor.md) — Architecture capacity, scaling cliffs
 - [ds-ciso-advisor](ds-ciso-advisor.md) — Threat modeling for AI (prompt injection, jailbreak, training-data poisoning)
 - [ds-general-counsel-advisor](ds-general-counsel-advisor.md) — AI contracts, vendor liability, output ownership
 - [ds-cfo-advisor](ds-cfo-advisor.md) — Build-vs-buy TCO, multi-year vendor commitments
@@ -166,7 +166,7 @@ python ../../skills/chief-ai-officer-advisor/scripts/ai_cost_economics.py worklo
 
 ## References
 
-- Skill: [../../skills/chief-ai-officer-advisor/SKILL.md](../../chief-ai-officer-advisor/SKILL.md)
+- Skill: [../../chief-ai-officer-advisor/SKILL.md](../../chief-ai-officer-advisor/SKILL.md)
 - Voice spec: [../references/persona-voices.md](../references/persona-voices.md)
 - Sibling command: [`/ds:caio-review`](../skills/caio-review/SKILL.md)
 

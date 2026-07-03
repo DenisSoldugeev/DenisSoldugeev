@@ -28,7 +28,7 @@ const FINDINGS_SCHEMA = {
 
 // Loop: discover an unknown number of items. GUARDED against the agent cap.
 const found = []
-const seen = new Set
+const seen = new Set()
 let dryRounds = 0
 const HARD_CAP = 100
 
@@ -36,7 +36,7 @@ phase('Discover')
 while (
   dryRounds < 2 &&
   found.length < HARD_CAP &&
-  (!budget.total || budget.remaining > 50_000)
+  (!budget.total || budget.remaining() > 50_000)
 ) {
   const r = await agent(
     `Find items NOT already found:\n${JSON.stringify([...seen])}`,

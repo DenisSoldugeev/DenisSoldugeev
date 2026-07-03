@@ -158,7 +158,7 @@ class LaunchChecklistGenerator:
             Launch timing recommendations
         """
         if not current_date:
-            current_date = datetime.now.strftime('%Y-%m-%d')
+            current_date = datetime.now().strftime('%Y-%m-%d')
 
         # Analyze launch timing factors
         day_of_week_rec = self._recommend_day_of_week(app_category)
@@ -200,7 +200,7 @@ class LaunchChecklistGenerator:
             Seasonal campaign opportunities
         """
         if not current_month:
-            current_month = datetime.now.month
+            current_month = datetime.now().month
 
         # Identify relevant seasonal events
         seasonal_opportunities = self._identify_seasonal_opportunities(
@@ -422,7 +422,7 @@ class LaunchChecklistGenerator:
         total_items = 0
         completed_items = 0
 
-        for platform, categories in checklists.items:
+        for platform, categories in checklists.items():
             for category in categories:
                 for item in category['items']:
                     total_items += 1
@@ -580,12 +580,12 @@ Have feedback? Contact us at support@[company].com"""
     def _recommend_day_of_week(self, app_category: str) -> Dict[str, Any]:
         """Recommend best day of week to launch."""
         # General recommendations based on category
-        if app_category.lower in ['games', 'entertainment']:
+        if app_category.lower() in ['games', 'entertainment']:
             return {
                 'recommended_day': 'Thursday',
                 'rationale': 'People download entertainment apps before weekend'
             }
-        elif app_category.lower in ['productivity', 'business']:
+        elif app_category.lower() in ['productivity', 'business']:
             return {
                 'recommended_day': 'Tuesday',
                 'rationale': 'Business users most active mid-week'
@@ -642,7 +642,7 @@ Have feedback? Contact us at support@[company].com"""
         days_map = {'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3, 'Friday': 4}
         target_day_num = days_map.get(target_day, 2)
 
-        days_ahead = (target_day_num - current_dt.weekday) % 7
+        days_ahead = (target_day_num - current_dt.weekday()) % 7
         if days_ahead == 0:
             days_ahead = 7
 
@@ -682,18 +682,18 @@ Have feedback? Contact us at support@[company].com"""
             opportunities.append({
                 'event': 'New Year Resolutions',
                 'dates': 'January 1-31',
-                'relevance': 'high' if app_category.lower in ['health', 'fitness', 'productivity'] else 'medium'
+                'relevance': 'high' if app_category.lower() in ['health', 'fitness', 'productivity'] else 'medium'
             })
 
         if current_month in [11, 12]:
             opportunities.append({
                 'event': 'Holiday Shopping Season',
                 'dates': 'November-December',
-                'relevance': 'high' if app_category.lower in ['shopping', 'gifts'] else 'low'
+                'relevance': 'high' if app_category.lower() in ['shopping', 'gifts'] else 'low'
             })
 
         # Category-specific
-        if app_category.lower == 'education' and current_month in [8, 9]:
+        if app_category.lower() == 'education' and current_month in [8, 9]:
             opportunities.append({
                 'event': 'Back to School',
                 'dates': 'August-September',

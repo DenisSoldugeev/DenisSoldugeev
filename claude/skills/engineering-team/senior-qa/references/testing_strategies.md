@@ -93,20 +93,20 @@ export function formatPrice(cents: number, currency = 'USD'): string {
 }
 
 // utils/formatPrice.test.ts
-describe('formatPrice',  => {
-  it('formats cents to USD by default',  => {
+describe('formatPrice', () => {
+  it('formats cents to USD by default', () => {
     expect(formatPrice(1999)).toBe('$19.99');
   });
 
-  it('handles zero',  => {
+  it('handles zero', () => {
     expect(formatPrice(0)).toBe('$0.00');
   });
 
-  it('supports different currencies',  => {
+  it('supports different currencies', () => {
     expect(formatPrice(1999, 'EUR')).toContain('€');
   });
 
-  it('handles large numbers',  => {
+  it('handles large numbers', () => {
     expect(formatPrice(100000000)).toBe('$1,000,000.00');
   });
 });
@@ -118,9 +118,9 @@ describe('formatPrice',  => {
 // hooks/useCounter.ts
 export function useCounter(initial = 0) {
   const [count, setCount] = useState(initial);
-  const increment =  => setCount(c => c + 1);
-  const decrement =  => setCount(c => c - 1);
-  const reset =  => setCount(initial);
+  const increment = () => setCount(c => c + 1);
+  const decrement = () => setCount(c => c - 1);
+  const reset = () => setCount(initial);
   return { count, increment, decrement, reset };
 }
 
@@ -128,28 +128,28 @@ export function useCounter(initial = 0) {
 import { renderHook, act } from '@testing-library/react';
 import { useCounter } from './useCounter';
 
-describe('useCounter',  => {
-  it('starts with initial value',  => {
-    const { result } = renderHook( => useCounter(5));
+describe('useCounter', () => {
+  it('starts with initial value', () => {
+    const { result } = renderHook(() => useCounter(5));
     expect(result.current.count).toBe(5);
   });
 
-  it('increments count',  => {
-    const { result } = renderHook( => useCounter(0));
-    act( => result.current.increment);
+  it('increments count', () => {
+    const { result } = renderHook(() => useCounter(0));
+    act(() => result.current.increment());
     expect(result.current.count).toBe(1);
   });
 
-  it('decrements count',  => {
-    const { result } = renderHook( => useCounter(5));
-    act( => result.current.decrement);
+  it('decrements count', () => {
+    const { result } = renderHook(() => useCounter(5));
+    act(() => result.current.decrement());
     expect(result.current.count).toBe(4);
   });
 
-  it('resets to initial value',  => {
-    const { result } = renderHook( => useCounter(10));
-    act( => result.current.increment);
-    act( => result.current.reset);
+  it('resets to initial value', () => {
+    const { result } = renderHook(() => useCounter(10));
+    act(() => result.current.increment());
+    act(() => result.current.reset());
     expect(result.current.count).toBe(10);
   });
 });
@@ -176,12 +176,12 @@ export function UserProfile({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect( => {
+  useEffect(() => {
     fetch(`/api/users/${userId}`)
-      .then(res => res.json)
+      .then(res => res.json())
       .then(data => setUser(data))
       .catch(err => setError(err.message))
-      .finally( => setLoading(false));
+      .finally(() => setLoading(false));
   }, [userId]);
 
   if (loading) return <div>Loading...</div>;
@@ -201,32 +201,32 @@ const server = setupServer(
   })
 );
 
-beforeAll( => server.listen);
-afterEach( => server.resetHandlers);
-afterAll( => server.close);
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
-describe('UserProfile',  => {
-  it('shows loading state initially',  => {
+describe('UserProfile', () => {
+  it('shows loading state initially', () => {
     render(<UserProfile userId="123" />);
-    expect(screen.getByText('Loading...')).toBeInTheDocument;
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
-  it('displays user name after loading', async  => {
+  it('displays user name after loading', async () => {
     render(<UserProfile userId="123" />);
-    await waitFor( => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument;
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
   });
 
-  it('displays error on API failure', async  => {
+  it('displays error on API failure', async () => {
     server.use(
       rest.get('/api/users/:id', (req, res, ctx) => {
         return res(ctx.status(500));
       })
     );
     render(<UserProfile userId="123" />);
-    await waitFor( => {
-      expect(screen.getByText(/Error/)).toBeInTheDocument;
+    await waitFor(() => {
+      expect(screen.getByText(/Error/)).toBeInTheDocument();
     });
   });
 });
@@ -250,7 +250,7 @@ describe('UserProfile',  => {
 // e2e/checkout.spec.ts
 import { test, expect } from '@playwright/test';
 
-test.describe('Checkout Flow',  => {
+test.describe('Checkout Flow', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
   });
@@ -258,13 +258,13 @@ test.describe('Checkout Flow',  => {
   test('completes purchase successfully', async ({ page }) => {
     // Add product to cart
     await page.goto('/products/widget-pro');
-    await page.getByRole('button', { name: 'Add to Cart' }).click;
+    await page.getByRole('button', { name: 'Add to Cart' }).click();
 
     // Verify cart updated
     await expect(page.getByTestId('cart-count')).toHaveText('1');
 
     // Go to checkout
-    await page.getByRole('link', { name: 'Checkout' }).click;
+    await page.getByRole('link', { name: 'Checkout' }).click();
 
     // Fill shipping info
     await page.getByLabel('Email').fill('test@example.com');
@@ -278,19 +278,19 @@ test.describe('Checkout Flow',  => {
     await page.getByLabel('CVC').fill('123');
 
     // Submit order
-    await page.getByRole('button', { name: 'Place Order' }).click;
+    await page.getByRole('button', { name: 'Place Order' }).click();
 
     // Verify confirmation
     await expect(page).toHaveURL(/\/orders\/\w+/);
-    await expect(page.getByText('Order Confirmed')).toBeVisible;
+    await expect(page.getByText('Order Confirmed')).toBeVisible();
   });
 
   test('shows validation errors for invalid input', async ({ page }) => {
     await page.goto('/checkout');
-    await page.getByRole('button', { name: 'Place Order' }).click;
+    await page.getByRole('button', { name: 'Place Order' }).click();
 
-    await expect(page.getByText('Email is required')).toBeVisible;
-    await expect(page.getByText('Address is required')).toBeVisible;
+    await expect(page.getByText('Email is required')).toBeVisible();
+    await expect(page.getByText('Address is required')).toBeVisible();
   });
 });
 ```
@@ -307,7 +307,7 @@ test.describe('Checkout Flow',  => {
 // e2e/visual/components.spec.ts
 import { test, expect } from '@playwright/test';
 
-test.describe('Visual Regression',  => {
+test.describe('Visual Regression', () => {
   test('button variants render correctly', async ({ page }) => {
     await page.goto('/storybook/button');
     await expect(page).toHaveScreenshot('button-variants.png');
@@ -342,11 +342,11 @@ import { Button } from './Button';
 
 expect.extend(toHaveNoViolations);
 
-describe('Button accessibility',  => {
-  it('has no accessibility violations', async  => {
+describe('Button accessibility', () => {
+  it('has no accessibility violations', async () => {
     const { container } = render(<Button>Click me</Button>);
     const results = await axe(container);
-    expect(results).toHaveNoViolations;
+    expect(results).toHaveNoViolations();
   });
 });
 
@@ -356,7 +356,7 @@ import AxeBuilder from '@axe-core/playwright';
 
 test('homepage has no a11y violations', async ({ page }) => {
   await page.goto('/');
-  const results = await new AxeBuilder({ page }).analyze;
+  const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
 });
 ```
@@ -561,7 +561,7 @@ jobs:
       - run: npm run build
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
-        if: failure
+        if: failure()
         with:
           name: playwright-report
           path: playwright-report/

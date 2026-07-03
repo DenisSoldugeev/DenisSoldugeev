@@ -329,7 +329,7 @@ class ABTestPlanner:
     def _generate_test_id(self, test_type: str) -> str:
         """Generate unique test ID."""
         import time
-        timestamp = int(time.time)
+        timestamp = int(time.time())
         return f"{test_type}_{timestamp}"
 
     def _get_secondary_metrics(self, test_type: str) -> List[str]:
@@ -386,7 +386,7 @@ class ABTestPlanner:
         }
 
         estimates = {}
-        for scenario, daily_views in traffic_scenarios.items:
+        for scenario, daily_views in traffic_scenarios.items():
             days = math.ceil(required_sample_size / daily_views)
             estimates[scenario] = {
                 'daily_page_views': daily_views,
@@ -642,7 +642,7 @@ def plan_ab_test(
     Returns:
         Complete test plan
     """
-    planner = ABTestPlanner
+    planner = ABTestPlanner()
 
     test_design = planner.design_test(
         test_type,

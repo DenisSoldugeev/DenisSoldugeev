@@ -22,13 +22,13 @@ import time
 from pathlib import Path
 
 
-def find_autoresearch_root:
+def find_autoresearch_root():
     """Find .autoresearch/ in project or user home."""
-    project_root = Path(".").resolve / ".autoresearch"
-    if project_root.exists:
+    project_root = Path(".").resolve() / ".autoresearch"
+    if project_root.exists():
         return project_root
-    user_root = Path.home / ".autoresearch"
-    if user_root.exists:
+    user_root = Path.home() / ".autoresearch"
+    if user_root.exists():
         return user_root
     return None
 
@@ -37,21 +37,21 @@ def load_config(experiment_dir):
     """Load config.cfg."""
     cfg_file = experiment_dir / "config.cfg"
     config = {}
-    if cfg_file.exists:
-        for line in cfg_file.read_text.splitlines:
+    if cfg_file.exists():
+        for line in cfg_file.read_text().splitlines():
             if ":" in line:
                 k, v = line.split(":", 1)
-                config[k.strip] = v.strip
+                config[k.strip()] = v.strip()
     return config
 
 
 def load_results(experiment_dir):
     """Load results.tsv into list of dicts."""
     tsv = experiment_dir / "results.tsv"
-    if not tsv.exists:
+    if not tsv.exists():
         return []
     results = []
-    for line in tsv.read_text.splitlines[1:]:
+    for line in tsv.read_text().splitlines()[1:]:
         parts = line.split("\t")
         if len(parts) >= 4:
             try:
@@ -129,17 +129,17 @@ def print_experiment(experiment_dir, experiment_path):
         m = f"{r['metric']:.6f}" if r["metric"] is not None else "N/A     "
         icon = {"keep": "+", "discard": "-", "crash": "!"}.get(r["status"], "?")
         print(f"  {r['commit']:<10} {m:>12} {icon} {r['status']:<7} {r['description'][:35]}")
-    print
+    print()
 
 
 def print_dashboard(root):
     """Print cross-experiment dashboard."""
     experiments = []
-    for domain_dir in sorted(root.iterdir):
-        if not domain_dir.is_dir or domain_dir.name.startswith("."):
+    for domain_dir in sorted(root.iterdir()):
+        if not domain_dir.is_dir() or domain_dir.name.startswith("."):
             continue
-        for exp_dir in sorted(domain_dir.iterdir):
-            if not exp_dir.is_dir or not (exp_dir / "config.cfg").exists:
+        for exp_dir in sorted(domain_dir.iterdir()):
+            if not exp_dir.is_dir() or not (exp_dir / "config.cfg").exists():
                 continue
             config = load_config(exp_dir)
             results = load_results(exp_dir)
@@ -153,8 +153,8 @@ def print_dashboard(root):
             status = "idle"
             if stats["total"] > 0:
                 tsv = exp_dir / "results.tsv"
-                if tsv.exists:
-                    age_hours = (time.time - tsv.stat.st_mtime) / 3600
+                if tsv.exists():
+                    age_hours = (time.time() - tsv.stat().st_mtime) / 3600
                     status = "active" if age_hours < 1 else "paused" if age_hours < 24 else "done"
 
             experiments.append({
@@ -179,7 +179,7 @@ def print_dashboard(root):
     print(f"  {'─' * 85}")
     for e in experiments:
         print(f"  {e['domain']:<15} {e['name']:<20} {e['runs']:>5} {e['kept']:>5} {e['best']:>12} {e['change']:>10} {e['status']:<8}")
-    print
+    print()
     return experiments
 
 
@@ -192,7 +192,7 @@ def export_experiment_csv(experiment_dir, experiment_path):
     direction = config.get("metric_direction", "lower")
     stats = compute_stats(results, direction)
 
-    buf = io.StringIO
+    buf = io.StringIO()
     writer = csv.writer(buf)
 
     # Header with metadata
@@ -213,19 +213,19 @@ def export_experiment_csv(experiment_dir, experiment_path):
         m = f"{r['metric']:.6f}" if r["metric"] is not None else "N/A"
         writer.writerow([r["commit"], m, r["status"], r["description"]])
 
-    return buf.getvalue
+    return buf.getvalue()
 
 
 def export_dashboard_csv(root, domain_filter=None):
     """Export dashboard as CSV string."""
     experiments = []
-    for domain_dir in sorted(root.iterdir):
-        if not domain_dir.is_dir or domain_dir.name.startswith("."):
+    for domain_dir in sorted(root.iterdir()):
+        if not domain_dir.is_dir() or domain_dir.name.startswith("."):
             continue
         if domain_filter and domain_dir.name != domain_filter:
             continue
-        for exp_dir in sorted(domain_dir.iterdir):
-            if not exp_dir.is_dir or not (exp_dir / "config.cfg").exists:
+        for exp_dir in sorted(domain_dir.iterdir()):
+            if not exp_dir.is_dir() or not (exp_dir / "config.cfg").exists():
                 continue
             config = load_config(exp_dir)
             results = load_results(exp_dir)
@@ -239,12 +239,12 @@ def export_dashboard_csv(root, domain_filter=None):
                 best_str, pct_str
             ])
 
-    buf = io.StringIO
+    buf = io.StringIO()
     writer = csv.writer(buf)
     writer.writerow(["Domain", "Experiment", "Metric", "Runs", "Kept", "Discarded", "Crashed", "Best", "Change"])
     for e in experiments:
         writer.writerow(e)
-    return buf.getvalue
+    return buf.getvalue()
 
 
 # --- Markdown Export ---
@@ -284,13 +284,13 @@ def export_dashboard_markdown(root, domain_filter=None):
     lines.append("| Domain | Experiment | Metric | Runs | Kept | Best | Change | Status |")
     lines.append("|--------|-----------|--------|------|------|------|--------|--------|")
 
-    for domain_dir in sorted(root.iterdir):
-        if not domain_dir.is_dir or domain_dir.name.startswith("."):
+    for domain_dir in sorted(root.iterdir()):
+        if not domain_dir.is_dir() or domain_dir.name.startswith("."):
             continue
         if domain_filter and domain_dir.name != domain_filter:
             continue
-        for exp_dir in sorted(domain_dir.iterdir):
-            if not exp_dir.is_dir or not (exp_dir / "config.cfg").exists:
+        for exp_dir in sorted(domain_dir.iterdir()):
+            if not exp_dir.is_dir() or not (exp_dir / "config.cfg").exists():
                 continue
             config = load_config(exp_dir)
             results = load_results(exp_dir)
@@ -301,8 +301,8 @@ def export_dashboard_markdown(root, domain_filter=None):
 
             tsv = exp_dir / "results.tsv"
             status = "idle"
-            if tsv.exists and stats["total"] > 0:
-                age_h = (time.time - tsv.stat.st_mtime) / 3600
+            if tsv.exists() and stats["total"] > 0:
+                age_h = (time.time() - tsv.stat().st_mtime) / 3600
                 status = "active" if age_h < 1 else "paused" if age_h < 24 else "done"
 
             lines.append(f"| {domain_dir.name} | {exp_dir.name} | {config.get('metric', '?')} | {stats['total']} | {stats['keeps']} | {best} | {pct} | {status} |")
@@ -313,7 +313,7 @@ def export_dashboard_markdown(root, domain_filter=None):
 
 # --- Main ---
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="autoresearch-agent results viewer")
     parser.add_argument("--experiment", help="Show one experiment: domain/name")
     parser.add_argument("--domain", help="Show all experiments in a domain")
@@ -322,9 +322,9 @@ def main:
                         help="Output format (default: terminal)")
     parser.add_argument("--output", "-o", help="Write to file instead of stdout")
     parser.add_argument("--all", action="store_true", help="Show all experiments (alias for --dashboard)")
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    root = find_autoresearch_root
+    root = find_autoresearch_root()
     if root is None:
         print("No .autoresearch/ found. Run setup_experiment.py first.")
         sys.exit(1)
@@ -334,7 +334,7 @@ def main:
     # Single experiment
     if args.experiment:
         experiment_dir = root / args.experiment
-        if not experiment_dir.exists:
+        if not experiment_dir.exists():
             print(f"Experiment not found: {args.experiment}")
             sys.exit(1)
 
@@ -349,11 +349,11 @@ def main:
     # Domain
     elif args.domain:
         domain_dir = root / args.domain
-        if not domain_dir.exists:
+        if not domain_dir.exists():
             print(f"Domain not found: {args.domain}")
             sys.exit(1)
-        for exp_dir in sorted(domain_dir.iterdir):
-            if exp_dir.is_dir and (exp_dir / "config.cfg").exists:
+        for exp_dir in sorted(domain_dir.iterdir()):
+            if exp_dir.is_dir() and (exp_dir / "config.cfg").exists():
                 if args.format == "terminal":
                     print_experiment(exp_dir, f"{args.domain}/{exp_dir.name}")
                 # For CSV/MD, fall through to dashboard with domain filter
@@ -390,4 +390,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

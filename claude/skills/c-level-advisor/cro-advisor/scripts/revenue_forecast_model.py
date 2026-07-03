@@ -62,7 +62,7 @@ class Deal:
     def __init__(self, deal_id, name, stage, arr_value, close_date, rep="", segment=""):
         self.deal_id = deal_id
         self.name = name
-        self.stage = stage.lower.replace(" ", "_").replace("/", "_")
+        self.stage = stage.lower().replace(" ", "_").replace("/", "_")
         self.arr_value = float(arr_value)
         self.close_date = self._parse_date(close_date)
         self.rep = rep
@@ -72,7 +72,7 @@ class Deal:
     def _parse_date(value):
         for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%d/%m/%Y", "%Y/%m/%d"):
             try:
-                return datetime.strptime(str(value), fmt).date
+                return datetime.strptime(str(value), fmt).date()
             except ValueError:
                 continue
         raise ValueError(f"Cannot parse date: {value!r}")
@@ -112,17 +112,17 @@ def calculate_historical_win_rates(deals):
     """
     # In a real implementation, you'd have historical stage-at-point-in-time data.
     # Here we approximate: among closed deals, what fraction were won?
-    closed = [d for d in deals if not d.is_open]
+    closed = [d for d in deals if not d.is_open()]
     if not closed:
         return {}
 
-    won = [d for d in closed if d.is_closed_won]
+    won = [d for d in closed if d.is_closed_won()]
     overall_rate = len(won) / len(closed) if closed else 0.0
 
     # Stage-level calibration: adjust default probs by actual overall rate
     # (In production: use CRM historical stage-level conversion data)
     calibrated = {}
-    for stage, default_prob in DEFAULT_STAGE_PROBABILITIES.items:
+    for stage, default_prob in DEFAULT_STAGE_PROBABILITIES.items():
         if overall_rate > 0:
             calibrated[stage] = min(1.0, default_prob * (overall_rate / 0.25))
         else:
@@ -141,24 +141,24 @@ class ForecastEngine:
         self.stage_probs = stage_probs or DEFAULT_STAGE_PROBABILITIES
 
     def open_deals(self):
-        return [d for d in self.deals if d.is_open]
+        return [d for d in self.deals if d.is_open()]
 
     def closed_won_deals(self):
-        return [d for d in self.deals if d.is_closed_won]
+        return [d for d in self.deals if d.is_closed_won()]
 
     def pipeline_by_month(self, scenario="base"):
         """Returns dict: month_key → weighted ARR."""
         result = defaultdict(float)
-        for deal in self.open_deals:
+        for deal in self.open_deals():
             result[deal.month_key] += deal.weighted_value(self.stage_probs, scenario)
-        return dict(sorted(result.items))
+        return dict(sorted(result.items()))
 
     def pipeline_by_quarter(self, scenario="base"):
         """Returns dict: quarter → weighted ARR."""
         result = defaultdict(float)
-        for deal in self.open_deals:
+        for deal in self.open_deals():
             result[deal.quarter] += deal.weighted_value(self.stage_probs, scenario)
-        return dict(sorted(result.items))
+        return dict(sorted(result.items()))
 
     def coverage_ratio(self, quota, period_filter=None):
         """
@@ -166,7 +166,7 @@ class ForecastEngine:
         period_filter: if set, only include deals with close_date in that period.
         """
         pipeline = sum(
-            d.arr_value for d in self.open_deals
+            d.arr_value for d in self.open_deals()
             if period_filter is None or d.quarter == period_filter
         )
         return pipeline / quota if quota else 0.0
@@ -177,11 +177,11 @@ class ForecastEngine:
         periods: list of month_keys to include; if None, all months.
         """
         summaries = {}
-        all_months = sorted(set(d.month_key for d in self.open_deals))
+        all_months = sorted(set(d.month_key for d in self.open_deals()))
         target_months = periods or all_months
 
         for month in target_months:
-            deals_in_month = [d for d in self.open_deals if d.month_key == month]
+            deals_in_month = [d for d in self.open_deals() if d.month_key == month]
             if not deals_in_month:
                 continue
             summaries[month] = {
@@ -197,14 +197,14 @@ class ForecastEngine:
         """Returns dict: rep → {pipeline, weighted_base, deal_count, avg_deal_size}."""
         rep_data = defaultdict(lambda: {"pipeline": 0.0, "weighted_base": 0.0,
                                         "deal_count": 0, "deals": []})
-        for deal in self.open_deals:
+        for deal in self.open_deals():
             rep_data[deal.rep]["pipeline"] += deal.arr_value
             rep_data[deal.rep]["weighted_base"] += deal.weighted_value(self.stage_probs, "base")
             rep_data[deal.rep]["deal_count"] += 1
             rep_data[deal.rep]["deals"].append(deal.arr_value)
 
         result = {}
-        for rep, data in rep_data.items:
+        for rep, data in rep_data.items():
             deals = data["deals"]
             result[rep] = {
                 "pipeline":      data["pipeline"],
@@ -217,18 +217,18 @@ class ForecastEngine:
     def segment_breakdown(self, scenario="base"):
         """Returns dict: segment → weighted ARR."""
         result = defaultdict(float)
-        for deal in self.open_deals:
+        for deal in self.open_deals():
             result[deal.segment or "unspecified"] += deal.weighted_value(self.stage_probs, scenario)
         return dict(result)
 
     def stage_distribution(self):
         """Returns dict: stage → {count, total_arr, avg_arr}."""
         result = defaultdict(lambda: {"count": 0, "total_arr": 0.0})
-        for deal in self.open_deals:
+        for deal in self.open_deals():
             result[deal.stage]["count"] += 1
             result[deal.stage]["total_arr"] += deal.arr_value
         out = {}
-        for stage, data in result.items:
+        for stage, data in result.items():
             out[stage] = {
                 "count":     data["count"],
                 "total_arr": data["total_arr"],
@@ -249,13 +249,13 @@ class ForecastEngine:
         totals = []
         for _ in range(iterations):
             total = 0.0
-            for deal in self.open_deals:
+            for deal in self.open_deals():
                 prob = min(1.0, self.stage_probs.get(deal.stage, 0.0) * SCENARIO_MULTIPLIERS[scenario])
-                if random.random < prob:
+                if random.random() < prob:
                     total += deal.arr_value
             totals.append(total)
 
-        totals.sort
+        totals.sort()
         n = len(totals)
         return (
             totals[int(n * 0.10)],  # P10 (conservative)
@@ -282,7 +282,7 @@ def fmt_pct(value):
 
 def print_header(title):
     width = 70
-    print
+    print()
     print("=" * width)
     print(f"  {title}")
     print("=" * width)
@@ -293,11 +293,11 @@ def print_section(title):
 
 
 def print_report(engine, quota=None, current_quarter=None):
-    open_deals = engine.open_deals
-    won_deals = engine.closed_won_deals
+    open_deals = engine.open_deals()
+    won_deals = engine.closed_won_deals()
 
     print_header("REVENUE FORECAST MODEL")
-    print(f"  Generated: {date.today.isoformat}")
+    print(f"  Generated: {date.today().isoformat()}")
     print(f"  Open deals: {len(open_deals)}")
     print(f"  Closed Won (in dataset): {len(won_deals)}")
     total_pipeline = sum(d.arr_value for d in open_deals)
@@ -317,12 +317,12 @@ def print_report(engine, quota=None, current_quarter=None):
 
     # ── Stage distribution
     print_section("STAGE DISTRIBUTION")
-    stage_dist = engine.stage_distribution
+    stage_dist = engine.stage_distribution()
     col_w = [28, 8, 14, 12, 10]
     header = f"  {'Stage':<{col_w[0]}} {'Deals':>{col_w[1]}} {'Pipeline':>{col_w[2]}} {'Avg Size':>{col_w[3]}} {'Win Prob':>{col_w[4]}}"
     print(header)
     print("  " + "-" * (sum(col_w) + 4))
-    for stage, data in sorted(stage_dist.items, key=lambda x: -x[1]["total_arr"]):
+    for stage, data in sorted(stage_dist.items(), key=lambda x: -x[1]["total_arr"]):
         print(f"  {stage:<{col_w[0]}} {data['count']:>{col_w[1]}} "
               f"{fmt_currency(data['total_arr']):>{col_w[2]}} "
               f"{fmt_currency(data['avg_arr']):>{col_w[3]}} "
@@ -330,14 +330,14 @@ def print_report(engine, quota=None, current_quarter=None):
 
     # ── Scenario forecast by month
     print_section("MONTHLY FORECAST — ALL SCENARIOS")
-    summaries = engine.scenario_summary
+    summaries = engine.scenario_summary()
     col_w2 = [10, 8, 14, 14, 14, 14]
     h2 = (f"  {'Month':<{col_w2[0]}} {'Deals':>{col_w2[1]}} "
           f"{'Pipeline':>{col_w2[2]}} {'Conservative':>{col_w2[3]}} "
           f"{'Base':>{col_w2[4]}} {'Upside':>{col_w2[5]}}")
     print(h2)
     print("  " + "-" * (sum(col_w2) + 5))
-    for month, data in summaries.items:
+    for month, data in summaries.items():
         print(f"  {month:<{col_w2[0]}} {data['deal_count']:>{col_w2[1]}} "
               f"{fmt_currency(data['open_pipeline']):>{col_w2[2]}} "
               f"{fmt_currency(data['conservative']):>{col_w2[3]}} "
@@ -358,7 +358,7 @@ def print_report(engine, quota=None, current_quarter=None):
         q_pipeline[deal.quarter] += deal.arr_value
         q_count[deal.quarter] += 1
 
-    quarters = sorted(q_base.keys)
+    quarters = sorted(q_base.keys())
     col_w3 = [10, 8, 14, 14, 14, 14]
     h3 = (f"  {'Quarter':<{col_w3[0]}} {'Deals':>{col_w3[1]}} "
           f"{'Pipeline':>{col_w3[2]}} {'Conservative':>{col_w3[3]}} "
@@ -382,14 +382,14 @@ def print_report(engine, quota=None, current_quarter=None):
 
     # ── Rep performance
     print_section("REP PIPELINE PERFORMANCE")
-    rep_perf = engine.rep_performance
+    rep_perf = engine.rep_performance()
     if rep_perf:
         col_w4 = [20, 8, 14, 14, 12]
         h4 = (f"  {'Rep':<{col_w4[0]}} {'Deals':>{col_w4[1]}} "
               f"{'Pipeline':>{col_w4[2]}} {'Weighted':>{col_w4[3]}} {'Avg Size':>{col_w4[4]}}")
         print(h4)
         print("  " + "-" * (sum(col_w4) + 4))
-        for rep, data in sorted(rep_perf.items, key=lambda x: -x[1]["pipeline"]):
+        for rep, data in sorted(rep_perf.items(), key=lambda x: -x[1]["pipeline"]):
             print(f"  {rep:<{col_w4[0]}} {data['deal_count']:>{col_w4[1]}} "
                   f"{fmt_currency(data['pipeline']):>{col_w4[2]}} "
                   f"{fmt_currency(data['weighted_base']):>{col_w4[3]}} "
@@ -398,7 +398,7 @@ def print_report(engine, quota=None, current_quarter=None):
     # ── Segment breakdown
     print_section("SEGMENT BREAKDOWN (Base Forecast)")
     seg = engine.segment_breakdown("base")
-    for segment, value in sorted(seg.items, key=lambda x: -x[1]):
+    for segment, value in sorted(seg.items(), key=lambda x: -x[1]):
         bar_len = int((value / total_pipeline) * 30) if total_pipeline else 0
         bar = "█" * bar_len
         print(f"  {segment:<20} {fmt_currency(value):>12}  {bar}")
@@ -439,7 +439,7 @@ def print_report(engine, quota=None, current_quarter=None):
     else:
         print("  ✅ No critical flags detected")
 
-    print
+    print()
 
 
 # ---------------------------------------------------------------------------
@@ -497,7 +497,7 @@ def load_deals_from_csv(csv_text):
     return deals
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Revenue Forecast Model — pipeline-based ARR forecasting"
     )
@@ -522,13 +522,13 @@ def main:
         "--json", action="store_true",
         help="Output forecast as JSON instead of formatted report"
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Load data
     if args.csv:
         try:
             with open(args.csv, "r", encoding="utf-8") as f:
-                csv_text = f.read
+                csv_text = f.read()
         except FileNotFoundError:
             print(f"Error: File not found: {args.csv}", file=sys.stderr)
             sys.exit(1)
@@ -549,17 +549,17 @@ def main:
 
     if args.json:
         output = {
-            "generated": date.today.isoformat,
+            "generated": date.today().isoformat(),
             "quota": args.quota,
-            "open_pipeline": sum(d.arr_value for d in engine.open_deals),
+            "open_pipeline": sum(d.arr_value for d in engine.open_deals()),
             "coverage_ratio": engine.coverage_ratio(args.quota, args.quarter),
-            "monthly_forecast": engine.scenario_summary,
+            "monthly_forecast": engine.scenario_summary(),
             "quarterly_base": engine.pipeline_by_quarter("base"),
             "confidence_interval": dict(zip(
                 ["p10", "p50", "p90"],
                 engine.confidence_interval("base")
             )),
-            "rep_performance": engine.rep_performance,
+            "rep_performance": engine.rep_performance(),
             "segment_breakdown": engine.segment_breakdown("base"),
         }
         print(json.dumps(output, indent=2))
@@ -568,4 +568,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

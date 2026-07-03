@@ -11,7 +11,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 
 ## PR Analyzer — Dart / Flutter Risk Signals
 
-- `print` statements left in production code — use a logging package
+- `print()` statements left in production code — use a logging package
 - `// ignore:` lint suppression comments — verify they are justified
 - `!` null assertion operator used broadly without justification
 - Hardcoded API keys, tokens, or URLs in Dart source — use environment variables or a secrets package
@@ -44,9 +44,9 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 ## Async / Concurrency
 
 - Flag `BuildContext` used after an `await` without checking `if (!mounted) return` — context may be invalid
-- Flag `Future` returned but not `await`-ed and without `.catchError` or `unawaited` — floating future
+- Flag `Future` returned but not `await`-ed and without `.catchError()` or `unawaited()` — floating future
 - Flag `Isolate.spawn` without a clear message-passing protocol
-- Flag heavy computation on the main isolate — offload with `compute` or `Isolate.run`
+- Flag heavy computation on the main isolate — offload with `compute()` or `Isolate.run()`
 - Flag `StreamController` not closed when the owning widget is disposed — memory leak
 - Flag `async*` / `yield*` generators with no error handling on the stream consumer side
 
@@ -54,10 +54,10 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 
 ## Resource Management
 
-- Flag `StreamController` not closed in `dispose`
-- Flag `AnimationController` not disposed in `dispose`
-- Flag `TextEditingController` / `FocusNode` / `ScrollController` not disposed in `dispose`
-- Flag `Timer` not cancelled in `dispose`
+- Flag `StreamController` not closed in `dispose()`
+- Flag `AnimationController` not disposed in `dispose()`
+- Flag `TextEditingController` / `FocusNode` / `ScrollController` not disposed in `dispose()`
+- Flag `Timer` not cancelled in `dispose()`
 - Flag listeners added to `ChangeNotifier` / `ValueNotifier` without a corresponding `removeListener`
 
 ---
@@ -75,7 +75,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 ## Performance
 
 - Flag `setState` called for changes that only affect a small subtree — use `ValueNotifier` / `provider` / `Riverpod` to scope rebuilds
-- Flag expensive computation inside `build` — move to `initState`, a controller, or a `FutureBuilder`
+- Flag expensive computation inside `build()` — move to `initState`, a controller, or a `FutureBuilder`
 - Flag `ListView` without `ListView.builder` for long or infinite lists — builds all children at once
 - Flag missing `const` on widgets that never change — prevents unnecessary rebuilds
 - Flag `Image.network` without a caching package in a list — re-downloads on every scroll
@@ -92,13 +92,13 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 
 ### Flutter Widget Patterns
 - Prefer `StatelessWidget` + external state management over `StatefulWidget` for business logic
-- Keep `build` methods pure — no side effects, no heavy computation
+- Keep `build()` methods pure — no side effects, no heavy computation
 - Extract repeated widget subtrees into named widget classes, not just methods, for better rebuild granularity
 - Use `const` constructors wherever possible — compile-time constant widgets skip rebuilds entirely
 
 ### State Management
 - Do not mix multiple state management approaches in the same feature
-- Flag business logic inside `build` — it belongs in a ViewModel, Notifier, or BLoC
+- Flag business logic inside `build()` — it belongs in a ViewModel, Notifier, or BLoC
 - Prefer `Riverpod` / `provider` / `BLoC` over raw `setState` for anything beyond local UI state
 
 ### Modern Dart (3.x)

@@ -222,7 +222,7 @@ The section's edge is not a hard straight line — it morphs between shapes (rec
 ```
 
 ```javascript
-function initSVGMorphBorder {
+function initSVGMorphBorder() {
   const morphPath = document.getElementById('morphPath');
 
   const paths = {
@@ -317,7 +317,7 @@ function initCircleIris(el, originX = '50%', originY = '50%') {
 // Variant: iris opens from cursor position on hover
 function initHoverIris(el) {
   el.addEventListener('mouseenter', (e) => {
-    const rect = el.getBoundingClientRect;
+    const rect = el.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1) + '%';
     const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1) + '%';
 
@@ -405,7 +405,7 @@ A full-viewport branded intro screen that physically lifts off the page on load,
 ```
 
 ```javascript
-function initLoadingCurtain {
+function initLoadingCurtain() {
   const curtainTop = document.querySelector('.curtain-top');
   const curtainBottom = document.querySelector('.curtain-bottom');
   const curtainLogo = document.querySelector('.curtain-logo');
@@ -416,11 +416,11 @@ function initLoadingCurtain {
 
   const tl = gsap.timeline({
     delay: 0.5,
-    onComplete:  => {
+    onComplete: () => {
       document.body.style.overflow = '';
       loadingScreen.style.display = 'none';
       // Init all scroll animations AFTER curtain lifts
-      initAllAnimations;
+      initAllAnimations();
     }
   });
 

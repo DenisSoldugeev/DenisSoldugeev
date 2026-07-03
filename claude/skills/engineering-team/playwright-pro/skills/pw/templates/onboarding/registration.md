@@ -13,9 +13,9 @@ Tests signup form submission, validation, and post-registration flow.
 ```typescript
 import { test, expect } from '@playwright/test';
 
-const uniqueEmail = `test+${Date.now}@example.com`;
+const uniqueEmail = `test+${Date.now()}@example.com`;
 
-test.describe('Registration',  => {
+test.describe('Registration', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('{{baseUrl}}/register');
   });
@@ -27,8 +27,8 @@ test.describe('Registration',  => {
     await page.getByRole('textbox', { name: /email/i }).fill(uniqueEmail);
     await page.getByRole('textbox', { name: /^password$/i }).fill('{{newPassword}}');
     await page.getByRole('textbox', { name: /confirm.*password/i }).fill('{{newPassword}}');
-    await page.getByRole('checkbox', { name: /terms/i }).check;
-    await page.getByRole('button', { name: /sign up|register|create account/i }).click;
+    await page.getByRole('checkbox', { name: /terms/i }).check();
+    await page.getByRole('button', { name: /sign up|register|create account/i }).click();
     await expect(page).toHaveURL(/\/verify-email|\/dashboard|\/onboarding/);
   });
 
@@ -36,17 +36,17 @@ test.describe('Registration',  => {
   test('shows confirmation after registration', async ({ page }) => {
     await page.getByRole('textbox', { name: /email/i }).fill(uniqueEmail);
     await page.getByRole('textbox', { name: /^password$/i }).fill('{{newPassword}}');
-    await page.getByRole('checkbox', { name: /terms/i }).check;
-    await page.getByRole('button', { name: /sign up|register/i }).click;
-    await expect(page.getByText(/check your email|account created|welcome/i)).toBeVisible;
+    await page.getByRole('checkbox', { name: /terms/i }).check();
+    await page.getByRole('button', { name: /sign up|register/i }).click();
+    await expect(page.getByText(/check your email|account created|welcome/i)).toBeVisible();
   });
 
   // Error case: email already registered
   test('shows error for already registered email', async ({ page }) => {
     await page.getByRole('textbox', { name: /email/i }).fill('{{existingUserEmail}}');
     await page.getByRole('textbox', { name: /^password$/i }).fill('{{newPassword}}');
-    await page.getByRole('checkbox', { name: /terms/i }).check;
-    await page.getByRole('button', { name: /sign up|register/i }).click;
+    await page.getByRole('checkbox', { name: /terms/i }).check();
+    await page.getByRole('button', { name: /sign up|register/i }).click();
     await expect(page.getByRole('alert')).toContainText(/already.*registered|email.*taken/i);
   });
 
@@ -54,23 +54,23 @@ test.describe('Registration',  => {
   test('blocks registration if terms not accepted', async ({ page }) => {
     await page.getByRole('textbox', { name: /email/i }).fill(uniqueEmail);
     await page.getByRole('textbox', { name: /^password$/i }).fill('{{newPassword}}');
-    await page.getByRole('button', { name: /sign up|register/i }).click;
-    await expect(page.getByText(/accept.*terms|terms.*required/i)).toBeVisible;
+    await page.getByRole('button', { name: /sign up|register/i }).click();
+    await expect(page.getByText(/accept.*terms|terms.*required/i)).toBeVisible();
   });
 
   // Error case: weak password
   test('shows error for weak password', async ({ page }) => {
     await page.getByRole('textbox', { name: /^password$/i }).fill('123');
-    await page.getByRole('textbox', { name: /^password$/i }).blur;
-    await expect(page.getByText(/at least \d+ characters|too weak/i)).toBeVisible;
+    await page.getByRole('textbox', { name: /^password$/i }).blur();
+    await expect(page.getByText(/at least \d+ characters|too weak/i)).toBeVisible();
   });
 
   // Error case: passwords mismatch
   test('shows error when passwords do not match', async ({ page }) => {
     await page.getByRole('textbox', { name: /^password$/i }).fill('{{newPassword}}');
     await page.getByRole('textbox', { name: /confirm.*password/i }).fill('different');
-    await page.getByRole('textbox', { name: /confirm.*password/i }).blur;
-    await expect(page.getByText(/do not match/i)).toBeVisible;
+    await page.getByRole('textbox', { name: /confirm.*password/i }).blur();
+    await expect(page.getByText(/do not match/i)).toBeVisible();
   });
 
   // Edge case: already logged-in user redirected
@@ -89,14 +89,14 @@ test.describe('Registration',  => {
 ```javascript
 const { test, expect } = require('@playwright/test');
 
-test.describe('Registration',  => {
+test.describe('Registration', () => {
   test('registers with valid data', async ({ page }) => {
-    const email = `test+${Date.now}@example.com`;
+    const email = `test+${Date.now()}@example.com`;
     await page.goto('{{baseUrl}}/register');
     await page.getByRole('textbox', { name: /email/i }).fill(email);
     await page.getByRole('textbox', { name: /^password$/i }).fill('{{newPassword}}');
-    await page.getByRole('checkbox', { name: /terms/i }).check;
-    await page.getByRole('button', { name: /sign up|register/i }).click;
+    await page.getByRole('checkbox', { name: /terms/i }).check();
+    await page.getByRole('button', { name: /sign up|register/i }).click();
     await expect(page).toHaveURL(/\/verify-email|\/dashboard|\/onboarding/);
   });
 
@@ -104,17 +104,17 @@ test.describe('Registration',  => {
     await page.goto('{{baseUrl}}/register');
     await page.getByRole('textbox', { name: /email/i }).fill('{{existingUserEmail}}');
     await page.getByRole('textbox', { name: /^password$/i }).fill('{{newPassword}}');
-    await page.getByRole('checkbox', { name: /terms/i }).check;
-    await page.getByRole('button', { name: /sign up|register/i }).click;
+    await page.getByRole('checkbox', { name: /terms/i }).check();
+    await page.getByRole('button', { name: /sign up|register/i }).click();
     await expect(page.getByRole('alert')).toContainText(/already.*registered/i);
   });
 
   test('requires terms acceptance', async ({ page }) => {
     await page.goto('{{baseUrl}}/register');
-    await page.getByRole('textbox', { name: /email/i }).fill(`t${Date.now}@example.com`);
+    await page.getByRole('textbox', { name: /email/i }).fill(`t${Date.now()}@example.com`);
     await page.getByRole('textbox', { name: /^password$/i }).fill('{{newPassword}}');
-    await page.getByRole('button', { name: /sign up|register/i }).click;
-    await expect(page.getByText(/accept.*terms/i)).toBeVisible;
+    await page.getByRole('button', { name: /sign up|register/i }).click();
+    await expect(page.getByText(/accept.*terms/i)).toBeVisible();
   });
 });
 ```

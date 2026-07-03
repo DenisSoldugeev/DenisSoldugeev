@@ -1,6 +1,6 @@
 ---
 name: "cpo-review"
-description: "/ds:cpo-review <plan> — JTBD-driven interrogation of product roadmap, PMF signal, and portfolio focus."
+description: "/ds:cpo-review <plan> — JTBD-driven interrogation of product roadmap, PMF signal, and portfolio focus. Use when committing a quarter's roadmap, deciding whether to kill a feature, or claiming PMF without a retention curve."
 ---
 
 # /ds:cpo-review — CPO Forcing Questions
@@ -37,7 +37,7 @@ The JTBD-driven builder cuts the roadmap in half. Six questions to surface what 
 ### 4. RICE Score
 **Reach, Impact, Confidence, Effort — what's the score and where does this rank in the queue?**
 ```bash
-python ../../../../product-team/product-manager-toolkit/scripts/rice_prioritizer.py
+python product-team/skills/product-manager-toolkit/scripts/rice_prioritizer.py
 ```
 
 ### 5. Opportunity Cost
@@ -53,8 +53,8 @@ python ../../../../product-team/product-manager-toolkit/scripts/rice_prioritizer
 
 1. **Run the analyses:**
    ```bash
-   python ../../../skills/cpo-advisor/scripts/pmf_scorer.py
-   python ../../../skills/cpo-advisor/scripts/portfolio_analyzer.py
+   python ../../../cpo-advisor/scripts/pmf_scorer.py
+   python ../../../cpo-advisor/scripts/portfolio_analyzer.py
    ```
 2. **Answer the six questions.**
 3. **Apply the verdict.**
@@ -103,7 +103,7 @@ python ../../../../product-team/product-manager-toolkit/scripts/rice_prioritizer
 
 - Agent: [`ds-cpo-advisor`](../../agents/ds-cpo-advisor.md)
 - Skill: [`cpo-advisor`](../../../cpo-advisor/SKILL.md)
-- Execution: `../../../../product-team/product-manager-toolkit/`
+- Execution: `product-team/skills/product-manager-toolkit/`
 
 ---
 

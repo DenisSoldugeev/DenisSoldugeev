@@ -160,7 +160,7 @@ class TestSecurityScorerInit(unittest.TestCase):
         
     def test_init_with_scripts(self):
         """Test initialization with script list."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "test.py"
             script_path.write_text("# test")
             
@@ -179,166 +179,166 @@ class TestSensitiveDataExposure(unittest.TestCase):
     def test_no_scripts_returns_max_score(self):
         """Test that empty script list returns max score."""
         scorer = SecurityScorer([])
-        score, findings = scorer.score_sensitive_data_exposure
+        score, findings = scorer.score_sensitive_data_exposure()
         self.assertEqual(score, float(MAX_COMPONENT_SCORE))
         self.assertEqual(findings, [])
         
     def test_clean_script_scores_high(self):
         """Test that clean script without sensitive data scores high."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "clean.py"
             script_path.write_text("""
 import os
 
-def get_password:
+def get_password():
     return os.getenv("DB_PASSWORD")
     
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_sensitive_data_exposure
+            score, findings = scorer.score_sensitive_data_exposure()
             
             self.assertGreaterEqual(score, 20)
             self.assertEqual(len(findings), 0)
             
     def test_hardcoded_password_detected(self):
         """Test that hardcoded password is detected and penalized."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "insecure.py"
             script_path.write_text("""
 password = "super_secret_password_123"
 
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_sensitive_data_exposure
+            score, findings = scorer.score_sensitive_data_exposure()
             
             self.assertLess(score, MAX_COMPONENT_SCORE)
-            self.assertTrue(any('password' in f.lower for f in findings))
+            self.assertTrue(any('password' in f.lower() for f in findings))
             
     def test_hardcoded_api_key_detected(self):
         """Test that hardcoded API key is detected and penalized."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "insecure.py"
             script_path.write_text("""
 api_key = "sk-1234567890abcdef123456"
 
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_sensitive_data_exposure
+            score, findings = scorer.score_sensitive_data_exposure()
             
             self.assertLess(score, MAX_COMPONENT_SCORE)
             # Check for 'api' or 'hardcoded' in findings (description is 'hardcoded API key')
-            self.assertTrue(any('api' in f.lower or 'hardcoded' in f.lower for f in findings))
+            self.assertTrue(any('api' in f.lower() or 'hardcoded' in f.lower() for f in findings))
             
     def test_hardcoded_token_detected(self):
         """Test that hardcoded token is detected and penalized."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "insecure.py"
             script_path.write_text("""
 token = "ghp_1234567890abcdef"
 
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_sensitive_data_exposure
+            score, findings = scorer.score_sensitive_data_exposure()
             
             self.assertLess(score, MAX_COMPONENT_SCORE)
             
     def test_hardcoded_private_key_detected(self):
         """Test that hardcoded private key is detected and penalized."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "insecure.py"
             script_path.write_text("""
 private_key = "-----BEGIN RSA PRIVATE KEY-----MIIEowIBAAJCA..."
 
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_sensitive_data_exposure
+            score, findings = scorer.score_sensitive_data_exposure()
             
             self.assertLess(score, MAX_COMPONENT_SCORE)
             
     def test_environment_variable_not_flagged(self):
         """Test that environment variable usage is not flagged as sensitive."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "secure.py"
             script_path.write_text("""
 import os
 
-def get_credentials:
+def get_credentials():
     password = os.getenv("DB_PASSWORD")
     api_key = os.environ.get("API_KEY")
     return password, api_key
     
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_sensitive_data_exposure
+            score, findings = scorer.score_sensitive_data_exposure()
             
             # Should score well because using environment variables
             self.assertGreaterEqual(score, 20)
             
     def test_empty_file_handled(self):
         """Test that empty file is handled gracefully."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "empty.py"
             script_path.write_text("")
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_sensitive_data_exposure
+            score, findings = scorer.score_sensitive_data_exposure()
             
             # Should return max score for empty file (no sensitive data)
             self.assertGreaterEqual(score, 20)
             
     def test_jwt_token_detected(self):
         """Test that JWT token in code is detected."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "jwt.py"
             script_path.write_text("""
 # JWT token for testing
 token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
 
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_sensitive_data_exposure
+            score, findings = scorer.score_sensitive_data_exposure()
             
             # Should be penalized for JWT token
             self.assertLess(score, MAX_COMPONENT_SCORE)
@@ -350,57 +350,57 @@ class TestSafeFileOperations(unittest.TestCase):
     def test_no_scripts_returns_max_score(self):
         """Test that empty script list returns max score."""
         scorer = SecurityScorer([])
-        score, findings = scorer.score_safe_file_operations
+        score, findings = scorer.score_safe_file_operations()
         self.assertEqual(score, float(MAX_COMPONENT_SCORE))
         
     def test_safe_pathlib_usage_scores_high(self):
         """Test that safe pathlib usage scores high."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "safe.py"
             script_path.write_text("""
 from pathlib import Path
 
 def read_file(filename):
-    path = Path(filename).resolve
-    return path.read_text
+    path = Path(filename).resolve()
+    return path.read_text()
     
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_safe_file_operations
+            score, findings = scorer.score_safe_file_operations()
             
             self.assertGreaterEqual(score, 15)
             
     def test_path_traversal_detected(self):
         """Test that path traversal pattern is detected."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "risky.py"
             script_path.write_text("""
 def read_file(base_path, filename):
     # Potential path traversal vulnerability
     path = base_path + "/../../../etc/passwd"
-    return open(path).read
+    return open(path).read()
     
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_safe_file_operations
+            score, findings = scorer.score_safe_file_operations()
             
             self.assertLess(score, MAX_COMPONENT_SCORE)
             
     def test_basename_usage_scores_bonus(self):
         """Test that basename usage gets bonus points."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "safe.py"
             script_path.write_text("""
 import os
@@ -408,15 +408,15 @@ import os
 def safe_filename(user_input):
     return os.path.basename(user_input)
     
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_safe_file_operations
+            score, findings = scorer.score_safe_file_operations()
             
             self.assertGreaterEqual(score, 15)
 
@@ -427,12 +427,12 @@ class TestCommandInjectionPrevention(unittest.TestCase):
     def test_no_scripts_returns_max_score(self):
         """Test that empty script list returns max score."""
         scorer = SecurityScorer([])
-        score, findings = scorer.score_command_injection_prevention
+        score, findings = scorer.score_command_injection_prevention()
         self.assertEqual(score, float(MAX_COMPONENT_SCORE))
         
     def test_os_system_detected(self):
         """Test that os.system usage is detected."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "risky.py"
             script_path.write_text("""
 import os
@@ -440,22 +440,22 @@ import os
 def run_command(user_input):
     os.system("echo " + user_input)
     
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_command_injection_prevention
+            score, findings = scorer.score_command_injection_prevention()
             
             self.assertLess(score, MAX_COMPONENT_SCORE)
-            self.assertTrue(any('os.system' in f.lower for f in findings))
+            self.assertTrue(any('os.system' in f.lower() for f in findings))
             
     def test_subprocess_shell_true_detected(self):
         """Test that subprocess with shell=True is detected."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "risky.py"
             script_path.write_text("""
 import subprocess
@@ -463,65 +463,65 @@ import subprocess
 def run_command(cmd):
     subprocess.run(cmd, shell=True)
     
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_command_injection_prevention
+            score, findings = scorer.score_command_injection_prevention()
             
             self.assertLess(score, MAX_COMPONENT_SCORE)
             # Check for 'shell' or 'subprocess' in findings
-            self.assertTrue(any('shell' in f.lower or 'subprocess' in f.lower for f in findings))
+            self.assertTrue(any('shell' in f.lower() or 'subprocess' in f.lower() for f in findings))
             
     def test_eval_detected(self):
         """Test that eval usage is detected."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "risky.py"
             script_path.write_text("""
 def evaluate(user_input):
     return eval(user_input)
     
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_command_injection_prevention
+            score, findings = scorer.score_command_injection_prevention()
             
             self.assertLess(score, MAX_COMPONENT_SCORE)
-            self.assertTrue(any('eval' in f.lower for f in findings))
+            self.assertTrue(any('eval' in f.lower() for f in findings))
             
     def test_exec_detected(self):
         """Test that exec usage is detected."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "risky.py"
             script_path.write_text("""
 def execute(user_code):
     exec(user_code)
     
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_command_injection_prevention
+            score, findings = scorer.score_command_injection_prevention()
             
             self.assertLess(score, MAX_COMPONENT_SCORE)
-            self.assertTrue(any('exec' in f.lower for f in findings))
+            self.assertTrue(any('exec' in f.lower() for f in findings))
             
     def test_shlex_quote_gets_bonus(self):
         """Test that shlex.quote usage gets bonus points."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "safe.py"
             script_path.write_text("""
 import shlex
@@ -531,21 +531,21 @@ def run_command(user_input):
     safe_cmd = shlex.quote(user_input)
     subprocess.run(["echo", safe_cmd], shell=False)
     
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_command_injection_prevention
+            score, findings = scorer.score_command_injection_prevention()
             
             self.assertGreaterEqual(score, 20)
             
     def test_safe_subprocess_scores_high(self):
         """Test that safe subprocess usage (shell=False) scores high."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "safe.py"
             script_path.write_text("""
 import subprocess
@@ -553,15 +553,15 @@ import subprocess
 def run_command(cmd_parts):
     subprocess.run(cmd_parts, shell=False)
     
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, findings = scorer.score_command_injection_prevention
+            score, findings = scorer.score_command_injection_prevention()
             
             self.assertGreaterEqual(score, 20)
 
@@ -572,27 +572,27 @@ class TestInputValidation(unittest.TestCase):
     def test_no_scripts_returns_max_score(self):
         """Test that empty script list returns max score."""
         scorer = SecurityScorer([])
-        score, suggestions = scorer.score_input_validation
+        score, suggestions = scorer.score_input_validation()
         self.assertEqual(score, float(MAX_COMPONENT_SCORE))
         
     def test_argparse_usage_scores_bonus(self):
         """Test that argparse usage gets bonus points."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "good.py"
             script_path.write_text("""
 import argparse
 
-def main:
-    parser = argparse.ArgumentParser
+def main():
+    parser = argparse.ArgumentParser()
     parser.add_argument("input")
-    args = parser.parse_args
+    args = parser.parse_args()
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, suggestions = scorer.score_input_validation
+            score, suggestions = scorer.score_input_validation()
             
             # Base score is 10, argparse gives +3 bonus, so score should be 13
             self.assertGreaterEqual(score, 10)
@@ -600,29 +600,29 @@ if __name__ == "__main__":
             
     def test_isinstance_usage_scores_bonus(self):
         """Test that isinstance usage gets bonus points."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "good.py"
             script_path.write_text("""
 def process(value):
     if isinstance(value, str):
-        return value.upper
+        return value.upper()
     return value
     
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, suggestions = scorer.score_input_validation
+            score, suggestions = scorer.score_input_validation()
             
             self.assertGreater(score, BASE_SCORE_INPUT_VALIDATION)
             
     def test_try_except_scores_bonus(self):
         """Test that try/except usage gets bonus points."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "good.py"
             script_path.write_text("""
 def process(value):
@@ -631,32 +631,32 @@ def process(value):
     except ValueError:
         return 0
     
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, suggestions = scorer.score_input_validation
+            score, suggestions = scorer.score_input_validation()
             
             self.assertGreater(score, BASE_SCORE_INPUT_VALIDATION)
             
     def test_minimal_validation_gets_suggestion(self):
         """Test that minimal validation triggers suggestion."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "minimal.py"
             script_path.write_text("""
-def main:
+def main():
     print("Hello")
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            score, suggestions = scorer.score_input_validation
+            score, suggestions = scorer.score_input_validation()
             
             self.assertLess(score, 15)
             self.assertTrue(len(suggestions) > 0)
@@ -667,22 +667,22 @@ class TestOverallScore(unittest.TestCase):
     
     def test_overall_score_components_present(self):
         """Test that overall score includes all components."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "test.py"
             script_path.write_text("""
 import os
 import argparse
 
-def main:
-    parser = argparse.ArgumentParser
-    parser.parse_args
+def main():
+    parser = argparse.ArgumentParser()
+    parser.parse_args()
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            results = scorer.get_overall_score
+            results = scorer.get_overall_score()
             
             self.assertIn('overall_score', results)
             self.assertIn('components', results)
@@ -697,21 +697,21 @@ if __name__ == "__main__":
             
     def test_overall_score_is_weighted_average(self):
         """Test that overall score is calculated as weighted average."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "test.py"
             script_path.write_text("""
 import argparse
 
-def main:
-    parser = argparse.ArgumentParser
-    parser.parse_args
+def main():
+    parser = argparse.ArgumentParser()
+    parser.parse_args()
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            results = scorer.get_overall_score
+            results = scorer.get_overall_score()
             
             # Calculate expected weighted average
             expected = (
@@ -725,21 +725,21 @@ if __name__ == "__main__":
             
     def test_critical_vulnerability_caps_score(self):
         """Test that critical vulnerabilities cap the overall score."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "critical.py"
             script_path.write_text("""
 password = "hardcoded_password_123"
 api_key = "sk-1234567890abcdef"
 
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            results = scorer.get_overall_score
+            results = scorer.get_overall_score()
             
             # Score should be capped at 30 for critical vulnerabilities
             self.assertLessEqual(results['overall_score'], 30)
@@ -747,7 +747,7 @@ if __name__ == "__main__":
             
     def test_secure_script_scores_high(self):
         """Test that secure script scores high overall."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             script_path = Path(tmpdir) / "secure.py"
             script_path.write_text("""
 #!/usr/bin/env python3
@@ -758,28 +758,28 @@ import subprocess
 from pathlib import Path
 
 def validate_path(path_str):
-    path = Path(path_str).resolve
-    if not path.exists:
+    path = Path(path_str).resolve()
+    if not path.exists():
         raise FileNotFoundError("Path not found")
     return path
 
 def safe_command(args):
     return subprocess.run(args, shell=False, capture_output=True)
 
-def main:
-    parser = argparse.ArgumentParser
+def main():
+    parser = argparse.ArgumentParser()
     parser.add_argument("input")
-    args = parser.parse_args
+    args = parser.parse_args()
     
     db_password = os.getenv("DB_PASSWORD")
     path = validate_path(args.input)
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([script_path])
-            results = scorer.get_overall_score
+            results = scorer.get_overall_score()
             
             # Secure script should score reasonably well
             # Note: Score may vary based on pattern detection
@@ -816,31 +816,31 @@ class TestMultipleScripts(unittest.TestCase):
     
     def test_multiple_scripts_averaged(self):
         """Test that scores are averaged across multiple scripts."""
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             secure_script = Path(tmpdir) / "secure.py"
             secure_script.write_text("""
 import os
 
-def main:
+def main():
     password = os.getenv("PASSWORD")
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             insecure_script = Path(tmpdir) / "insecure.py"
             insecure_script.write_text("""
 password = "hardcoded_secret_password"
 
-def main:
+def main():
     pass
     
 if __name__ == "__main__":
-    main
+    main()
 """)
             
             scorer = SecurityScorer([secure_script, insecure_script])
-            score, findings = scorer.score_sensitive_data_exposure
+            score, findings = scorer.score_sensitive_data_exposure()
             
             # Score should be between secure and insecure
             self.assertGreater(score, 0)

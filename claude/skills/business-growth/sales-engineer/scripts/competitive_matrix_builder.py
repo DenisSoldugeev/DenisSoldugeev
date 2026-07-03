@@ -86,7 +86,7 @@ def normalize_score(score_value: Any) -> int:
         Normalized integer score (0-3).
     """
     if isinstance(score_value, str):
-        return FEATURE_SCORES.get(score_value.lower, 0)
+        return FEATURE_SCORES.get(score_value.lower(), 0)
     if isinstance(score_value, (int, float)):
         return max(0, min(3, int(score_value)))
     return 0
@@ -125,8 +125,8 @@ def build_comparison_matrix(data: dict[str, Any]) -> dict[str, Any]:
                 cat_scores[product].append(scores[product])
 
             # Determine leader for this feature
-            max_score = max(scores.values)
-            leaders = [p for p, s in scores.items if s == max_score]
+            max_score = max(scores.values())
+            leaders = [p for p, s in scores.items() if s == max_score]
 
             matrix.append({
                 "category": cat_name,
@@ -186,7 +186,7 @@ def compute_competitive_scores(
         for p in all_products
     }
 
-    for cat_name, cat_data in category_summaries.items:
+    for cat_name, cat_data in category_summaries.items():
         weight = cat_data["weight"]
         for product in all_products:
             p_data = cat_data["product_scores"][product]
@@ -308,7 +308,7 @@ def generate_win_themes(
     our_score = competitive_scores.get(our_product, {}).get("weighted_score", 0)
     competitor_scores = [
         (p, s["weighted_score"])
-        for p, s in competitive_scores.items
+        for p, s in competitive_scores.items()
         if p != our_product
     ]
     if competitor_scores:
@@ -397,7 +397,7 @@ def format_text(result: dict[str, Any]) -> str:
 
     # Sort by weighted score descending
     sorted_scores = sorted(
-        result["competitive_scores"].items,
+        result["competitive_scores"].items(),
         key=lambda x: x[1]["weighted_score"],
         reverse=True,
     )
@@ -460,7 +460,7 @@ def format_text(result: dict[str, Any]) -> str:
         for v in vulns:
             leaders = ", ".join(
                 f"{p}: {FEATURE_LABELS.get(s, 'N/A')}"
-                for p, s in v["leading_competitors"].items
+                for p, s in v["leading_competitors"].items()
             )
             lines.append(
                 f"  - {v['feature']} [{v['category']}] "
@@ -482,7 +482,7 @@ def format_text(result: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def main -> None:
+def main() -> None:
     """Main entry point for the Competitive Matrix Builder."""
     parser = argparse.ArgumentParser(
         description="Build competitive feature comparison matrices and positioning analysis.",
@@ -510,7 +510,7 @@ def main -> None:
         help="Output format: json or text (default: text)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     data = load_competitive_data(args.input_file)
     result = analyze_competitive(data)
@@ -522,4 +522,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

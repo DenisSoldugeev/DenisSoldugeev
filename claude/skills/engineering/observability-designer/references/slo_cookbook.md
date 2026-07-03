@@ -244,7 +244,7 @@ Special considerations for non-request/response systems:
 #### Freshness SLO
 ```prometheus
 # Data should be no more than 4 hours old
-(time - last_successful_update_timestamp) < (4 * 3600)
+(time() - last_successful_update_timestamp) < (4 * 3600)
 ```
 
 #### Throughput SLO

@@ -137,7 +137,7 @@ SECRET_PATTERNS = [
         "severity": "critical",
         "pattern": r'-----BEGIN (?:RSA |EC |DSA )?PRIVATE KEY-----',
         "message": "Private key embedded in Terraform configuration",
-        "fix": "Reference key file with file function or use secrets manager",
+        "fix": "Reference key file with file() function or use secrets manager",
     },
 ]
 
@@ -249,7 +249,7 @@ def find_tf_files(directory):
         if entry.endswith(".tf"):
             filepath = os.path.join(directory, entry)
             with open(filepath, encoding="utf-8") as f:
-                tf_files[entry] = f.read
+                tf_files[entry] = f.read()
     return tf_files
 
 
@@ -265,7 +265,7 @@ def check_regex_rules(content, rules):
                 "severity": rule["severity"],
                 "message": rule["message"],
                 "fix": rule["fix"],
-                "line": match.group(0).strip[:80],
+                "line": match.group(0).strip()[:80],
             })
     return findings
 
@@ -421,7 +421,7 @@ def check_sensitive_variables(content):
     for var_match in var_blocks:
         name = var_match.group(1)
         body = var_match.group(2)
-        name_lower = name.lower
+        name_lower = name.lower()
 
         if any(s in name_lower for s in secret_names):
             if not re.search(r'sensitive\s*=\s*true', body):
@@ -466,7 +466,7 @@ def scan_content(content, strict=False):
                 f["severity"] = "medium"
 
     # Deduplicate by (id, line)
-    seen = set
+    seen = set()
     unique = []
     for f in findings:
         key = (f["id"], f.get("line", ""))
@@ -513,13 +513,13 @@ def generate_report(content, output_format="text", strict=False):
     print(f"  Terraform Security Scan Report")
     print(f"{'=' * 60}")
     print(f"  Score: {score}/100")
-    print
+    print()
     print(f"  Findings: {counts['critical']} critical | {counts['high']} high | {counts['medium']} medium | {counts['low']} low")
     print(f"{'─' * 60}")
 
     for f in findings:
         icon = {"critical": "!!!", "high": "!!", "medium": "!", "low": "~"}.get(f["severity"], "?")
-        print(f"\n  [{f['id']}] {icon} {f['severity'].upper}")
+        print(f"\n  [{f['id']}] {icon} {f['severity'].upper()}")
         print(f"  {f['message']}")
         if f.get("line"):
             print(f"  Match: {f['line']}")
@@ -532,7 +532,7 @@ def generate_report(content, output_format="text", strict=False):
     return result
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="terraform-patterns: Terraform security scanner"
     )
@@ -551,17 +551,17 @@ def main:
         action="store_true",
         help="Strict mode — elevate warnings to higher severity",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.target:
         target = Path(args.target)
-        if target.is_dir:
+        if target.is_dir():
             tf_files = find_tf_files(str(target))
             if not tf_files:
                 print(f"Error: No .tf files found in {args.target}", file=sys.stderr)
                 sys.exit(1)
-            content = "\n".join(tf_files.values)
-        elif target.is_file and target.suffix == ".tf":
+            content = "\n".join(tf_files.values())
+        elif target.is_file() and target.suffix == ".tf":
             content = target.read_text(encoding="utf-8")
         else:
             print(f"Error: {args.target} is not a directory or .tf file", file=sys.stderr)
@@ -574,4 +574,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

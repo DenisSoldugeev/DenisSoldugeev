@@ -46,9 +46,9 @@ class RICECalculator:
             confidence: high/medium/low (percentage)
             effort: xl/l/m/s/xs (person-months)
         """
-        impact_score = self.impact_map.get(impact.lower, 1.0)
-        confidence_score = self.confidence_map.get(confidence.lower, 50) / 100
-        effort_score = self.effort_map.get(effort.lower, 5)
+        impact_score = self.impact_map.get(impact.lower(), 1.0)
+        confidence_score = self.confidence_map.get(confidence.lower(), 50) / 100
+        effort_score = self.effort_map.get(effort.lower(), 5)
         
         if effort_score == 0:
             return 0
@@ -82,7 +82,7 @@ class RICECalculator:
             return {}
         
         total_effort = sum(
-            self.effort_map.get(f.get('effort', 'm').lower, 5) 
+            self.effort_map.get(f.get('effort', 'm').lower(), 5) 
             for f in features
         )
         
@@ -92,8 +92,8 @@ class RICECalculator:
         impact_distribution = {}
         
         for feature in features:
-            effort = feature.get('effort', 'm').lower
-            impact = feature.get('impact', 'medium').lower
+            effort = feature.get('effort', 'm').lower()
+            impact = feature.get('impact', 'medium').lower()
             
             effort_distribution[effort] = effort_distribution.get(effort, 0) + 1
             impact_distribution[impact] = impact_distribution.get(impact, 0) + 1
@@ -101,15 +101,15 @@ class RICECalculator:
         # Calculate quick wins (high impact, low effort)
         quick_wins = [
             f for f in features 
-            if f.get('impact', '').lower in ['massive', 'high'] 
-            and f.get('effort', '').lower in ['xs', 's']
+            if f.get('impact', '').lower() in ['massive', 'high'] 
+            and f.get('effort', '').lower() in ['xs', 's']
         ]
         
         # Calculate big bets (high impact, high effort)
         big_bets = [
             f for f in features 
-            if f.get('impact', '').lower in ['massive', 'high'] 
-            and f.get('effort', '').lower in ['l', 'xl']
+            if f.get('impact', '').lower() in ['massive', 'high'] 
+            and f.get('effort', '').lower() in ['l', 'xl']
         ]
         
         return {
@@ -142,7 +142,7 @@ class RICECalculator:
         }
         
         for feature in features:
-            effort = self.effort_map.get(feature.get('effort', 'm').lower, 5)
+            effort = self.effort_map.get(feature.get('effort', 'm').lower(), 5)
             
             if current_quarter['capacity_used'] + effort <= team_capacity:
                 current_quarter['features'].append(feature)
@@ -243,13 +243,13 @@ def create_sample_csv(filepath: str):
     
     print(f"Sample CSV created at: {filepath}")
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description='RICE Framework for Feature Prioritization')
     parser.add_argument('input', nargs='?', help='CSV file with features or "sample" to create sample')
     parser.add_argument('--capacity', type=int, default=10, help='Team capacity per quarter (person-months)')
     parser.add_argument('--output', choices=['text', 'json', 'csv'], default='text', help='Output format')
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     # Create sample if requested
     if args.input == 'sample':
@@ -269,7 +269,7 @@ def main:
         features = load_features_from_csv(args.input)
     
     # Calculate RICE scores
-    calculator = RICECalculator
+    calculator = RICECalculator()
     prioritized = calculator.prioritize_features(features)
     analysis = calculator.analyze_portfolio(prioritized)
     roadmap = calculator.generate_roadmap(prioritized, args.capacity)
@@ -285,7 +285,7 @@ def main:
     elif args.output == 'csv':
         # Output prioritized features as CSV
         if prioritized:
-            keys = prioritized[0].keys
+            keys = prioritized[0].keys()
             print(','.join(keys))
             for feature in prioritized:
                 print(','.join(str(feature.get(k, '')) for k in keys))
@@ -293,4 +293,4 @@ def main:
         print(format_output(prioritized, analysis, roadmap))
 
 if __name__ == "__main__":
-    main
+    main()

@@ -26,12 +26,12 @@ from pathlib import Path
 
 def find_record_path(tc_dir: Path, tc_id: str) -> Path | None:
     direct = tc_dir / "records" / tc_id / "tc_record.json"
-    if direct.exists:
+    if direct.exists():
         return direct
     for entry in (tc_dir / "records").glob("*"):
-        if entry.is_dir and entry.name.startswith(tc_id):
+        if entry.is_dir() and entry.name.startswith(tc_id):
             candidate = entry / "tc_record.json"
-            if candidate.exists:
+            if candidate.exists():
                 return candidate
     return None
 
@@ -114,7 +114,7 @@ def render_registry(registry: dict) -> str:
     lines.append(f"Total TCs: {stats.get('total', 0)}")
     by_status = stats.get("by_status", {}) or {}
     lines.append("By status:")
-    for status, count in by_status.items:
+    for status, count in by_status.items():
         if count:
             lines.append(f"  {status:12} {count}")
     lines.append("")
@@ -137,20 +137,20 @@ def render_registry(registry: dict) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(description="Show TC status.")
     parser.add_argument("--root", default=".", help="Project root (default: current directory)")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--tc-id", help="Show this single TC")
     group.add_argument("--all", action="store_true", help="Show registry summary for all TCs")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    root = Path(args.root).resolve
+    root = Path(args.root).resolve()
     tc_dir = root / "docs" / "TC"
     registry_path = tc_dir / "tc_registry.json"
 
-    if not registry_path.exists:
+    if not registry_path.exists():
         msg = f"TC tracking not initialized at {tc_dir}. Run tc_init.py first."
         print(json.dumps({"status": "error", "error": msg}) if args.json else f"ERROR: {msg}")
         return 2
@@ -197,4 +197,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

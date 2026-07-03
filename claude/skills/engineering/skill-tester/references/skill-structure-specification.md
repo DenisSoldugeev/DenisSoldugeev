@@ -67,6 +67,7 @@ Name: skill-name
 Tier: [BASIC|STANDARD|POWERFUL]
 Category: [Category Name]
 Dependencies: [None|List of dependencies]
+Author: [Author Name]
 Version: [Semantic Version]
 Last Updated: [YYYY-MM-DD]
 ---

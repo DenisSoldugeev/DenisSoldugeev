@@ -26,8 +26,8 @@ class BrandVoiceAnalyzer:
     
     def analyze_text(self, text: str) -> Dict:
         """Analyze text for brand voice characteristics"""
-        text_lower = text.lower
-        word_count = len(text.split)
+        text_lower = text.lower()
+        word_count = len(text.split())
         
         results = {
             'word_count': word_count,
@@ -38,14 +38,14 @@ class BrandVoiceAnalyzer:
         }
         
         # Analyze voice dimensions
-        for dimension, categories in self.voice_dimensions.items:
+        for dimension, categories in self.voice_dimensions.items():
             dim_scores = {}
-            for category, keywords in categories.items:
+            for category, keywords in categories.items():
                 score = sum(1 for keyword in keywords if keyword in text_lower)
                 dim_scores[category] = score
             
             # Determine dominant voice
-            if sum(dim_scores.values) > 0:
+            if sum(dim_scores.values()) > 0:
                 dominant = max(dim_scores, key=dim_scores.get)
                 results['voice_profile'][dimension] = {
                     'dominant': dominant,
@@ -60,7 +60,7 @@ class BrandVoiceAnalyzer:
     def _calculate_readability(self, text: str) -> float:
         """Calculate Flesch Reading Ease score"""
         sentences = re.split(r'[.!?]+', text)
-        words = text.split
+        words = text.split()
         syllables = sum(self._count_syllables(word) for word in words)
         
         if len(sentences) == 0 or len(words) == 0:
@@ -75,7 +75,7 @@ class BrandVoiceAnalyzer:
     
     def _count_syllables(self, word: str) -> int:
         """Count syllables in a word (simplified)"""
-        word = word.lower
+        word = word.lower()
         vowels = 'aeiou'
         syllable_count = 0
         previous_was_vowel = False
@@ -95,12 +95,12 @@ class BrandVoiceAnalyzer:
     def _analyze_sentences(self, text: str) -> Dict:
         """Analyze sentence structure"""
         sentences = re.split(r'[.!?]+', text)
-        sentences = [s.strip for s in sentences if s.strip]
+        sentences = [s.strip() for s in sentences if s.strip()]
         
         if not sentences:
             return {'average_length': 0, 'variety': 'low'}
         
-        lengths = [len(s.split) for s in sentences]
+        lengths = [len(s.split()) for s in sentences]
         avg_length = sum(lengths) / len(lengths) if lengths else 0
         
         # Calculate variety
@@ -139,7 +139,7 @@ class BrandVoiceAnalyzer:
 
 def analyze_content(content: str, output_format: str = 'json') -> str:
     """Main function to analyze content"""
-    analyzer = BrandVoiceAnalyzer
+    analyzer = BrandVoiceAnalyzer()
     results = analyzer.analyze_text(content)
     
     if output_format == 'json':
@@ -154,8 +154,8 @@ def analyze_content(content: str, output_format: str = 'json') -> str:
             f"Voice Profile:"
         ]
         
-        for dimension, profile in results['voice_profile'].items:
-            output.append(f"  {dimension.title}: {profile['dominant']}")
+        for dimension, profile in results['voice_profile'].items():
+            output.append(f"  {dimension.title()}: {profile['dominant']}")
         
         output.extend([
             f"",
@@ -187,11 +187,11 @@ if __name__ == "__main__":
         "--format", choices=["json", "text"], default="text",
         help="Output format (default: text)"
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.file:
         with open(args.file, 'r') as f:
-            content = f.read
+            content = f.read()
         print(analyze_content(content, args.format))
     else:
         print("Usage: python brand_voice_analyzer.py <file> [--format json|text]")

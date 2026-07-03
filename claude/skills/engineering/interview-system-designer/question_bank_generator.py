@@ -26,11 +26,11 @@ class QuestionBankGenerator:
     """Generates comprehensive interview question banks with scoring criteria."""
     
     def __init__(self):
-        self.technical_questions = self._init_technical_questions
-        self.behavioral_questions = self._init_behavioral_questions
-        self.competency_mapping = self._init_competency_mapping
-        self.scoring_rubrics = self._init_scoring_rubrics
-        self.follow_up_strategies = self._init_follow_up_strategies
+        self.technical_questions = self._init_technical_questions()
+        self.behavioral_questions = self._init_behavioral_questions()
+        self.competency_mapping = self._init_competency_mapping()
+        self.scoring_rubrics = self._init_scoring_rubrics()
+        self.follow_up_strategies = self._init_follow_up_strategies()
         
     def _init_technical_questions(self) -> Dict[str, Dict]:
         """Initialize technical questions by competency area and level."""
@@ -536,7 +536,7 @@ class QuestionBankGenerator:
         
         # Normalize inputs
         role_key = self._normalize_role(role)
-        level_key = level.lower
+        level_key = level.lower()
         
         # Get competency requirements
         role_competencies = self._get_role_competencies(role_key, level_key, competencies)
@@ -562,7 +562,7 @@ class QuestionBankGenerator:
             "level": level,
             "competencies": role_competencies,
             "question_types": question_types,
-            "generated_at": datetime.now.isoformat,
+            "generated_at": datetime.now().isoformat(),
             "total_questions": len(questions),
             "questions": questions,
             "scoring_rubrics": scoring_rubrics,
@@ -573,7 +573,7 @@ class QuestionBankGenerator:
     
     def _normalize_role(self, role: str) -> str:
         """Normalize role name to match competency mapping keys."""
-        role_lower = role.lower.replace(" ", "_").replace("-", "_")
+        role_lower = role.lower().replace(" ", "_").replace("-", "_")
         
         # Map variations to standard roles
         role_mappings = {
@@ -586,7 +586,7 @@ class QuestionBankGenerator:
             "devops_engineer": ["devops", "sre", "platform_engineer", "infrastructure"]
         }
         
-        for standard_role, variations in role_mappings.items:
+        for standard_role, variations in role_mappings.items():
             if any(var in role_lower for var in variations):
                 return standard_role
         
@@ -600,7 +600,7 @@ class QuestionBankGenerator:
             role_key = "software_engineer"
         
         role_mapping = self.competency_mapping[role_key]
-        competencies = role_mapping["core_competencies"].copy
+        competencies = role_mapping["core_competencies"].copy()
         
         # Add level-specific competencies
         if level_key in role_mapping["level_specific"]:
@@ -610,7 +610,7 @@ class QuestionBankGenerator:
         
         # Add custom competencies if specified
         if custom_competencies:
-            competencies.extend([comp.strip for comp in custom_competencies if comp.strip not in competencies])
+            competencies.extend([comp.strip() for comp in custom_competencies if comp.strip() not in competencies])
         
         return list(set(competencies))  # Remove duplicates
     
@@ -759,7 +759,7 @@ class QuestionBankGenerator:
             
             # Get competency-specific follow-ups
             if competency in self.follow_up_strategies:
-                competency_probes = self.follow_up_strategies[competency].copy
+                competency_probes = self.follow_up_strategies[competency].copy()
             else:
                 competency_probes = [
                     "Can you provide more specific details about your approach?",
@@ -882,7 +882,7 @@ def format_human_readable(question_bank: Dict[str, Any]) -> str:
     output = []
     
     # Header
-    output.append(f"Interview Question Bank: {question_bank['role']} ({question_bank['level'].title} Level)")
+    output.append(f"Interview Question Bank: {question_bank['role']} ({question_bank['level'].title()} Level)")
     output.append("=" * 70)
     output.append(f"Generated: {question_bank['generated_at']}")
     output.append(f"Total Questions: {question_bank['total_questions']}")
@@ -896,8 +896,8 @@ def format_human_readable(question_bank: Dict[str, Any]) -> str:
     
     for i, question in enumerate(question_bank['questions'], 1):
         output.append(f"\n{i}. {question['question']}")
-        output.append(f"   Competency: {question['competency'].replace('_', ' ').title}")
-        output.append(f"   Type: {question.get('type', 'N/A').title}")
+        output.append(f"   Competency: {question['competency'].replace('_', ' ').title()}")
+        output.append(f"   Type: {question.get('type', 'N/A').title()}")
         if 'time_limit' in question:
             output.append(f"   Time Limit: {question['time_limit']} minutes")
         if 'focus_areas' in question:
@@ -909,13 +909,13 @@ def format_human_readable(question_bank: Dict[str, Any]) -> str:
     
     # Show sample scoring criteria
     if question_bank['scoring_rubrics']:
-        first_question = list(question_bank['scoring_rubrics'].keys)[0]
+        first_question = list(question_bank['scoring_rubrics'].keys())[0]
         sample_rubric = question_bank['scoring_rubrics'][first_question]
         
         output.append(f"Sample Scoring Criteria ({sample_rubric['type']} questions):")
-        for criterion, scores in sample_rubric['scoring_criteria'].items:
-            output.append(f"\n{criterion.replace('_', ' ').title}:")
-            for score, description in scores.items:
+        for criterion, scores in sample_rubric['scoring_criteria'].items():
+            output.append(f"\n{criterion.replace('_', ' ').title()}:")
+            for score, description in scores.items():
                 output.append(f"  {score}: {description}")
     
     # Follow-up Probes
@@ -923,7 +923,7 @@ def format_human_readable(question_bank: Dict[str, Any]) -> str:
     output.append("-" * 50)
     
     if question_bank['follow_up_probes']:
-        first_question = list(question_bank['follow_up_probes'].keys)[0]
+        first_question = list(question_bank['follow_up_probes'].keys())[0]
         sample_probes = question_bank['follow_up_probes'][first_question]
         
         output.append("Sample follow-up questions:")
@@ -937,12 +937,12 @@ def format_human_readable(question_bank: Dict[str, Any]) -> str:
     guidelines = question_bank['usage_guidelines']
     
     output.append("Interview Flow:")
-    for phase, description in guidelines['interview_flow'].items:
-        output.append(f"  • {phase.replace('_', ' ').title}: {description}")
+    for phase, description in guidelines['interview_flow'].items():
+        output.append(f"  • {phase.replace('_', ' ').title()}: {description}")
     
     output.append("\nTime Management:")
-    for aspect, recommendation in guidelines['time_management'].items:
-        output.append(f"  • {aspect.replace('_', ' ').title}: {recommendation}")
+    for aspect, recommendation in guidelines['time_management'].items():
+        output.append(f"  • {aspect.replace('_', ' ').title()}: {recommendation}")
     
     output.append("\nCommon Mistakes to Avoid:")
     for mistake in guidelines['common_mistakes'][:3]:  # Show first 3
@@ -953,12 +953,12 @@ def format_human_readable(question_bank: Dict[str, Any]) -> str:
         output.append("\n\nCALIBRATION EXAMPLES")
         output.append("-" * 50)
         
-        first_example = list(question_bank['calibration_examples'].values)[0]
+        first_example = list(question_bank['calibration_examples'].values())[0]
         output.append(f"Question: {first_example['question']}")
         
         output.append("\nSample Answer Quality Levels:")
-        for quality, details in first_example['sample_answers'].items:
-            output.append(f"  {quality.replace('_', ' ').title} (Score {details['score']}):")
+        for quality, details in first_example['sample_answers'].items():
+            output.append(f"  {quality.replace('_', ' ').title()} (Score {details['score']}):")
             if 'issues' in details:
                 output.append(f"    Issues: {', '.join(details['issues'])}")
             if 'strengths' in details:
@@ -967,7 +967,7 @@ def format_human_readable(question_bank: Dict[str, Any]) -> str:
     return "\n".join(output)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Generate comprehensive interview question banks with scoring criteria")
     parser.add_argument("--role", type=str, help="Job role title (e.g., 'Frontend Engineer')")
     parser.add_argument("--level", type=str, default="senior", help="Experience level (junior, mid, senior, staff, principal)")
@@ -978,9 +978,9 @@ def main:
     parser.add_argument("--output", type=str, help="Output directory or file path")
     parser.add_argument("--format", choices=["json", "text", "both"], default="both", help="Output format")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
-    generator = QuestionBankGenerator
+    generator = QuestionBankGenerator()
     
     # Handle input
     if args.input:
@@ -1020,7 +1020,7 @@ def main:
         if args.output:
             output_path = args.output
             if os.path.isdir(output_path):
-                safe_role = "".join(c for c in role.lower if c.isalnum or c in (' ', '-', '_')).replace(' ', '_')
+                safe_role = "".join(c for c in role.lower() if c.isalnum() or c in (' ', '-', '_')).replace(' ', '_')
                 base_filename = f"{safe_role}_{level}_questions"
                 json_path = os.path.join(output_path, f"{base_filename}.json")
                 text_path = os.path.join(output_path, f"{base_filename}.txt")
@@ -1028,7 +1028,7 @@ def main:
                 json_path = output_path if output_path.endswith('.json') else f"{output_path}.json"
                 text_path = output_path.replace('.json', '.txt') if output_path.endswith('.json') else f"{output_path}.txt"
         else:
-            safe_role = "".join(c for c in role.lower if c.isalnum or c in (' ', '-', '_')).replace(' ', '_')
+            safe_role = "".join(c for c in role.lower() if c.isalnum() or c in (' ', '-', '_')).replace(' ', '_')
             base_filename = f"{safe_role}_{level}_questions"
             json_path = f"{base_filename}.json"
             text_path = f"{base_filename}.txt"
@@ -1046,7 +1046,7 @@ def main:
         
         # Print summary
         print(f"\nQuestion Bank Summary:")
-        print(f"Role: {question_bank['role']} ({question_bank['level'].title})")
+        print(f"Role: {question_bank['role']} ({question_bank['level'].title()})")
         print(f"Total Questions: {question_bank['total_questions']}")
         print(f"Competencies Covered: {len(question_bank['competencies'])}")
         print(f"Question Types: {', '.join(question_bank['question_types'])}")
@@ -1057,4 +1057,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

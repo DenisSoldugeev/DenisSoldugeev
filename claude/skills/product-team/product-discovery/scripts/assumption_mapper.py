@@ -27,7 +27,7 @@ def parse_float(value: str, field: str) -> float:
 
 
 def suggest_test(category: str) -> str:
-    category = category.lower.strip
+    category = category.lower().strip()
     if category == "desirability":
         return "problem interviews or fake-door test"
     if category == "viability":
@@ -52,8 +52,8 @@ def load_from_csv(path: str) -> list[Assumption]:
         for row in reader:
             assumptions.append(
                 Assumption(
-                    statement=(row.get("assumption") or "").strip,
-                    category=(row.get("category") or "").strip,
+                    statement=(row.get("assumption") or "").strip(),
+                    category=(row.get("category") or "").strip(),
                     risk=parse_float(row.get("risk") or "0", "risk"),
                     certainty=parse_float(row.get("certainty") or "0", "certainty"),
                 )
@@ -65,7 +65,7 @@ def parse_inline(items: list[str]) -> list[Assumption]:
     assumptions: list[Assumption] = []
     for item in items:
         # format: statement|category|risk|certainty
-        parts = [part.strip for part in item.split("|")]
+        parts = [part.strip() for part in item.split("|")]
         if len(parts) != 4:
             raise ValueError("Inline assumption must be: statement|category|risk|certainty")
         assumptions.append(
@@ -79,7 +79,7 @@ def parse_inline(items: list[str]) -> list[Assumption]:
     return assumptions
 
 
-def build_parser -> argparse.ArgumentParser:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Prioritize assumptions and generate test plan.")
     parser.add_argument("input", nargs="?", help="CSV file path")
     parser.add_argument(
@@ -92,9 +92,9 @@ def build_parser -> argparse.ArgumentParser:
     return parser
 
 
-def main -> int:
-    parser = build_parser
-    args = parser.parse_args
+def main() -> int:
+    parser = build_parser()
+    args = parser.parse_args()
 
     assumptions: list[Assumption] = []
     if args.input:
@@ -120,4 +120,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main)
+    raise SystemExit(main())

@@ -40,7 +40,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 
-SESSIONS_DIR = Path.home / ".pulse_sessions"
+SESSIONS_DIR = Path.home() / ".pulse_sessions"
 
 
 def session_path(name: str) -> Path:
@@ -49,7 +49,7 @@ def session_path(name: str) -> Path:
 
 def load_session(name: str) -> Dict[str, Any]:
     p = session_path(name)
-    if not p.exists:
+    if not p.exists():
         raise FileNotFoundError(f"Session not found: {name} (looked at {p})")
     return json.loads(p.read_text(encoding="utf-8"))
 
@@ -59,17 +59,17 @@ def save_session(name: str, data: Dict[str, Any]) -> None:
     session_path(name).write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
-def now_iso -> str:
-    return datetime.now(timezone.utc).isoformat
+def now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 def action_start(name: str, topic: Optional[str]) -> Dict[str, Any]:
-    if session_path(name).exists:
+    if session_path(name).exists():
         raise FileExistsError(f"Session already exists: {name}")
     data: Dict[str, Any] = {
         "session": name,
         "topic": topic or "",
-        "started_at": now_iso,
+        "started_at": now_iso(),
         "ended_at": None,
         "queries_sent": [],
         "sources_received": [],
@@ -82,7 +82,7 @@ def action_start(name: str, topic: Optional[str]) -> Dict[str, Any]:
 
 def action_record_sent(name: str, query: str, platform: str) -> Dict[str, Any]:
     data = load_session(name)
-    data["queries_sent"].append({"query": query, "platform": platform, "at": now_iso})
+    data["queries_sent"].append({"query": query, "platform": platform, "at": now_iso()})
     data["counts"]["sent"] += 1
     save_session(name, data)
     return data
@@ -90,7 +90,7 @@ def action_record_sent(name: str, query: str, platform: str) -> Dict[str, Any]:
 
 def action_record_received(name: str, count: int, platform: str) -> Dict[str, Any]:
     data = load_session(name)
-    data["sources_received"].append({"count": count, "platform": platform, "at": now_iso})
+    data["sources_received"].append({"count": count, "platform": platform, "at": now_iso()})
     data["counts"]["received"] += count
     save_session(name, data)
     return data
@@ -98,7 +98,7 @@ def action_record_received(name: str, count: int, platform: str) -> Dict[str, An
 
 def action_record_cited(name: str, url: str, platform: str) -> Dict[str, Any]:
     data = load_session(name)
-    data["sources_cited"].append({"url": url, "platform": platform, "at": now_iso})
+    data["sources_cited"].append({"url": url, "platform": platform, "at": now_iso()})
     data["counts"]["cited"] += 1
     save_session(name, data)
     return data
@@ -111,12 +111,12 @@ def action_status(name: str) -> Dict[str, Any]:
 def action_close(name: str) -> Dict[str, Any]:
     data = load_session(name)
     if data.get("ended_at") is None:
-        data["ended_at"] = now_iso
+        data["ended_at"] = now_iso()
         save_session(name, data)
     return data
 
 
-def action_list -> List[Dict[str, Any]]:
+def action_list() -> List[Dict[str, Any]]:
     SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
     out: List[Dict[str, Any]] = []
     for p in sorted(SESSIONS_DIR.glob("*.json")):
@@ -153,12 +153,12 @@ def render_status_human(data: Dict[str, Any]) -> str:
         by_platform_sent[q["platform"]] = by_platform_sent.get(q["platform"], 0) + 1
     if by_platform_sent:
         out.append("Sent by platform:")
-        for plat, n in sorted(by_platform_sent.items, key=lambda kv: -kv[1]):
+        for plat, n in sorted(by_platform_sent.items(), key=lambda kv: -kv[1]):
             out.append(f"  {plat:<10s} {n}")
     out.append("")
     out.append("Audit block (paste in synthesis):")
     parts: List[str] = []
-    for plat, n in sorted(by_platform_sent.items, key=lambda kv: -kv[1]):
+    for plat, n in sorted(by_platform_sent.items(), key=lambda kv: -kv[1]):
         parts.append(f"{plat}: {n}")
     breakdown = " (" + ", ".join(parts) + ")" if parts else ""
     out.append(
@@ -232,7 +232,7 @@ def main(argv: List[str]) -> int:
                 return 2
             result = action_close(args.session)
         else:  # list
-            result = action_list
+            result = action_list()
     except (FileNotFoundError, FileExistsError) as e:
         print(f"error: {e}", file=sys.stderr)
         return 2

@@ -71,7 +71,7 @@ export function use{name}(options: Use{name}Options = {{}}): Use{name}Return {{
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect( => {{
+  useEffect(() => {{
     // Effect logic here
   }}, []);
 
@@ -86,13 +86,13 @@ export function use{name}(options: Use{name}Options = {{}}): Use{name}Return {{
 import userEvent from '@testing-library/user-event';
 import {{ {name} }} from './{name}';
 
-describe('{name}',  => {{
-  it('renders correctly',  => {{
+describe('{name}', () => {{
+  it('renders correctly', () => {{
     render(<{name}>Test content</{name}>);
-    expect(screen.getByText('Test content')).toBeInTheDocument;
+    expect(screen.getByText('Test content')).toBeInTheDocument();
   }});
 
-  it('applies custom className',  => {{
+  it('applies custom className', () => {{
     render(<{name} className="custom-class">Content</{name}>);
     expect(screen.getByText('Content').parentElement).toHaveClass('custom-class');
   }});
@@ -143,16 +143,16 @@ def to_pascal_case(name: str) -> str:
     """Convert string to PascalCase."""
     # Handle kebab-case and snake_case
     words = name.replace('-', '_').split('_')
-    return ''.join(word.capitalize for word in words)
+    return ''.join(word.capitalize() for word in words)
 
 
 def to_kebab_case(name: str) -> str:
     """Convert PascalCase to kebab-case."""
     result = []
     for i, char in enumerate(name):
-        if char.isupper and i > 0:
+        if char.isupper() and i > 0:
             result.append('-')
-        result.append(char.lower)
+        result.append(char.lower())
     return ''.join(result)
 
 
@@ -241,10 +241,10 @@ def print_result(result: dict, verbose: bool = False) -> None:
     else:
         print("Usage:")
         print(f"  import {{ use{result['name']} }} from '@/hooks/use{result['name']}';")
-        print(f"\n  const {{ isLoading, error }} = use{result['name']};")
+        print(f"\n  const {{ isLoading, error }} = use{result['name']}();")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Generate React/Next.js components with TypeScript and Tailwind CSS"
     )
@@ -294,7 +294,7 @@ def main:
         help="Enable verbose output"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     output_dir = Path(args.dir)
     pascal_name = to_pascal_case(args.name)
@@ -326,4 +326,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

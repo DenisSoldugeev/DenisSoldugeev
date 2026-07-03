@@ -78,7 +78,7 @@ Auditor questions follow the **walk-through pattern**:
 3. **Drill** — "What happens if [edge case]?"
 4. **Verify** — "Where is this documented?"
 
-Each control gets 3–5 questions following this pattern. The simulator's `interview_questions` function provides theme-specific questions per the IIA performance standards.
+Each control gets 3–5 questions following this pattern. The simulator's `interview_questions()` function provides theme-specific questions per the IIA performance standards.
 
 ## Document-Review Requests
 
@@ -88,7 +88,7 @@ Per ISO 19011, the auditor reviews:
 - The records (the "what actually happened")
 - The evidence of management oversight (the "did anyone check?")
 
-A document-review request typically asks for all three. The simulator's `document_requests` function generates the request list per theme.
+A document-review request typically asks for all three. The simulator's `document_requests()` function generates the request list per theme.
 
 ## Auditor Independence Test
 

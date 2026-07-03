@@ -95,7 +95,7 @@ python scripts/reconcile_lint.py --controller controllers/myapp_controller.go
 **Checks (regex-based heuristics):**
 - Returns are `(ctrl.Result, error)` shape
 - Errors trigger a non-zero requeue (`return ctrl.Result{Requeue: true}, err`)
-- `client.Update` on the spec object is flagged (controllers should update only status)
+- `client.Update()` on the spec object is flagged (controllers should update only status)
 - `time.Sleep` inside reconcile is flagged (use `RequeueAfter`)
 - HTTP calls without context cancellation are flagged
 - Missing `defer` after a finalizer add
@@ -223,7 +223,7 @@ See `references/reconcile_loop.md` for full detail. Quick rules:
 ## Anti-patterns
 
 - **`time.Sleep(30 * time.Second)` inside reconcile** — block other reconciles. Use `RequeueAfter`.
-- **`r.Client.Update(ctx, obj)` to set status** — use `r.Status.Update(ctx, obj)` instead.
+- **`r.Client.Update(ctx, obj)` to set status** — use `r.Status().Update(ctx, obj)` instead.
 - **No leader election + 2+ replicas** — split-brain.
 - **No finalizer** — external resources orphan on deletion.
 - **CRD without status subresource** — status updates trigger spec reconciles (infinite loop).

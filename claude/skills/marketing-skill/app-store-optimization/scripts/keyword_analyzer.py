@@ -78,8 +78,8 @@ class KeywordAnalyzer:
                 difficulty_score,
                 relevance_score
             ),
-            'keyword_length': len(keyword.split),
-            'is_long_tail': len(keyword.split) >= 3
+            'keyword_length': len(keyword.split()),
+            'is_long_tail': len(keyword.split()) >= 3
         }
 
         self.analyzed_keywords[keyword] = analysis
@@ -207,11 +207,11 @@ class KeywordAnalyzer:
             List of (keyword, frequency) tuples
         """
         # Clean and normalize text
-        text = text.lower
+        text = text.lower()
         text = re.sub(r'[^\w\s]', ' ', text)
 
         # Extract words
-        words = text.split
+        words = text.split()
 
         # Filter by length
         words = [w for w in words if len(w) >= min_word_length]
@@ -235,7 +235,7 @@ class KeywordAnalyzer:
         phrase_counts = Counter(phrases)
 
         # Combine and sort
-        all_keywords = list(word_counts.items) + list(phrase_counts.items)
+        all_keywords = list(word_counts.items()) + list(phrase_counts.items())
         all_keywords.sort(key=lambda x: x[1], reverse=True)
 
         return all_keywords[:50]  # Top 50
@@ -255,12 +255,12 @@ class KeywordAnalyzer:
         Returns:
             Dictionary of keyword: density (percentage)
         """
-        text_lower = text.lower
-        total_words = len(text_lower.split)
+        text_lower = text.lower()
+        total_words = len(text_lower.split())
 
         densities = {}
         for keyword in target_keywords:
-            keyword_lower = keyword.lower
+            keyword_lower = keyword.lower()
             occurrences = text_lower.count(keyword_lower)
             density = (occurrences / total_words) * 100 if total_words > 0 else 0
             densities[keyword] = round(density, 2)
@@ -402,5 +402,5 @@ def analyze_keyword_set(keywords_data: List[Dict[str, Any]]) -> Dict[str, Any]:
     Returns:
         Complete analysis report
     """
-    analyzer = KeywordAnalyzer
+    analyzer = KeywordAnalyzer()
     return analyzer.compare_keywords(keywords_data)

@@ -25,23 +25,23 @@ Pairs with `ds-cfo-advisor` (revenue → cash conversion), `ds-cmo-advisor` (pip
 
 ## Skill Integration
 
-**Skill Location:** `../../skills/cro-advisor/`
+**Skill Location:** `../../cro-advisor/`
 
 ### Python Tools
 
 1. **Revenue Forecast Model**
-   - Path: `../../skills/cro-advisor/scripts/revenue_forecast_model.py`
+   - Path: `../../cro-advisor/scripts/revenue_forecast_model.py`
    - Bottom-up + top-down forecast, pipeline coverage by stage, ramp-adjusted
 
 2. **Churn Analyzer**
-   - Path: `../../skills/cro-advisor/scripts/churn_analyzer.py`
+   - Path: `../../cro-advisor/scripts/churn_analyzer.py`
    - Logo churn, gross retention, NRR, cohort decay, expansion vs contraction
 
 ### Knowledge Bases
 
-- `../../skills/cro-advisor/references/revenue_operations.md` — pipeline cadence, win/loss process, forecasting hygiene
-- `../../skills/cro-advisor/references/sales_motion.md` — PLG vs sales-led, hiring profiles, ramp curves
-- `../../skills/cro-advisor/references/retention_expansion.md` — NRR levers, customer success cadence, expansion plays
+- `../../cro-advisor/references/sales_playbook.md` — pipeline cadence, win/loss process, forecasting hygiene
+- `../../cro-advisor/references/pricing_strategy.md` — PLG vs sales-led, hiring profiles, ramp curves
+- `../../cro-advisor/references/nrr_playbook.md` — NRR levers, customer success cadence, expansion plays
 
 ## Workflows
 
@@ -55,7 +55,7 @@ Pairs with `ds-cfo-advisor` (revenue → cash conversion), `ds-cmo-advisor` (pip
 4. Output: gap-to-plan, top-3 stage fixes, weekly check-in template
 
 ```bash
-python ../../skills/cro-advisor/scripts/revenue_forecast_model.py
+python ../../cro-advisor/scripts/revenue_forecast_model.py
 ```
 
 ### Workflow 2: NRR Decomposition
@@ -91,8 +91,8 @@ python ../../skills/cro-advisor/scripts/revenue_forecast_model.py
 ```bash
 #!/bin/bash
 echo "📈 CRO Weekly Review"
-python ../../skills/cro-advisor/scripts/revenue_forecast_model.py
-python ../../skills/cro-advisor/scripts/churn_analyzer.py
+python ../../cro-advisor/scripts/revenue_forecast_model.py
+python ../../cro-advisor/scripts/churn_analyzer.py
 echo "Pipeline coverage and retention dashboard ready."
 ```
 
@@ -109,11 +109,11 @@ echo "Pipeline coverage and retention dashboard ready."
 - [ds-cfo-advisor](ds-cfo-advisor.md) — revenue → cash conversion
 - [ds-cmo-advisor](ds-cmo-advisor.md) — pipeline contribution
 - [ds-cpo-advisor](ds-cpo-advisor.md) — product gaps in win/loss
-- [ds-growth-strategist](../../../../agents/business-growth/ds-growth-strategist.md) — execution
+- [ds-growth-strategist](../../../agents/business-growth/ds-growth-strategist.md) — execution
 
 ## References
 
-- Skill: [../../skills/cro-advisor/SKILL.md](../../cro-advisor/SKILL.md)
+- Skill: [../../cro-advisor/SKILL.md](../../cro-advisor/SKILL.md)
 - Voice spec: [../references/persona-voices.md](../references/persona-voices.md)
 
 ---

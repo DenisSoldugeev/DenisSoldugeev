@@ -36,20 +36,20 @@ export class BrowserStackClient {
     const response = await fetch(url, options);
 
     if (!response.ok) {
-      const errorText = await response.text;
+      const errorText = await response.text();
       throw new Error(
         `BrowserStack API error ${response.status}: ${errorText}`,
       );
     }
 
-    return response.json as Promise<T>;
+    return response.json() as Promise<T>;
   }
 
-  async getPlan: Promise<BrowserStackPlan> {
+  async getPlan(): Promise<BrowserStackPlan> {
     return this.request<BrowserStackPlan>('GET', '/automate/plan.json');
   }
 
-  async getBrowsers: Promise<BrowserStackBrowser[]> {
+  async getBrowsers(): Promise<BrowserStackBrowser[]> {
     return this.request<BrowserStackBrowser[]>('GET', '/automate/browsers.json');
   }
 
@@ -92,6 +92,6 @@ export class BrowserStackClient {
     if (!response.ok) {
       throw new Error(`BrowserStack logs error ${response.status}`);
     }
-    return response.text;
+    return response.text();
   }
 }

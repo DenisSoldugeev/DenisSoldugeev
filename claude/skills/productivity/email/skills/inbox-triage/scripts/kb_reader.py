@@ -75,13 +75,13 @@ SAMPLE_KB: Dict[str, str] = {
 
 def load_file(workspace: Path, filename: str) -> Optional[Dict[str, Any]]:
     p = workspace / "Email" / filename
-    if not p.exists or not p.is_file:
+    if not p.exists() or not p.is_file():
         return None
     try:
         text = p.read_text(encoding="utf-8")
         return {
             "path": str(p),
-            "size": p.stat.st_size,
+            "size": p.stat().st_size,
             "text": text,
         }
     except OSError:
@@ -90,14 +90,14 @@ def load_file(workspace: Path, filename: str) -> Optional[Dict[str, Any]]:
 
 def extract_h1(text: str) -> Optional[str]:
     m = re.search(r"^#\s+(.+?)\s*$", text, re.MULTILINE)
-    return m.group(1).strip if m else None
+    return m.group(1).strip() if m else None
 
 
 def extract_section(text: str, header: str) -> Optional[str]:
     """Extract content between '## {header}' and the next '## ' (or EOF)."""
     pattern = rf"^##\s+{re.escape(header)}\s*\n(.*?)(?=^##\s|\Z)"
     m = re.search(pattern, text, re.MULTILINE | re.DOTALL)
-    return m.group(1).strip if m else None
+    return m.group(1).strip() if m else None
 
 
 def extract_h3_blocks(text: str, parent_section: str) -> List[Dict[str, str]]:
@@ -109,8 +109,8 @@ def extract_h3_blocks(text: str, parent_section: str) -> List[Dict[str, str]]:
     pattern = re.compile(r"^###\s+(.+?)\s*\n(.*?)(?=^###\s|\Z)", re.MULTILINE | re.DOTALL)
     for m in pattern.finditer(section_text):
         blocks.append({
-            "name": m.group(1).strip,
-            "body": m.group(2).strip,
+            "name": m.group(1).strip(),
+            "body": m.group(2).strip(),
         })
     return blocks
 
@@ -183,7 +183,7 @@ def read_kb(workspace: Path) -> Dict[str, Any]:
         issues.append({"level": level, "message": message})
 
     email_dir = workspace / "Email"
-    if not email_dir.exists:
+    if not email_dir.exists():
         add_issue("FAIL", f"{email_dir} does not exist. Run /ds:inbox-setup first.")
         return {"verdict": "FAIL", "issues": issues, "files": {}}
 
@@ -226,10 +226,10 @@ def read_kb(workspace: Path) -> Dict[str, Any]:
 
     # triage-log/ directory
     triage_log = email_dir / LOG_DIR
-    if not triage_log.exists:
+    if not triage_log.exists():
         add_issue("FAIL", f"Email/{LOG_DIR}/ missing. Run /ds:inbox-setup first.")
         files[LOG_DIR] = {"present": False}
-    elif not triage_log.is_dir:
+    elif not triage_log.is_dir():
         add_issue("FAIL", f"Email/{LOG_DIR} exists but is not a directory.")
         files[LOG_DIR] = {"present": False, "error": "not a directory"}
     else:
@@ -246,7 +246,7 @@ def render_human(result: Dict[str, Any]) -> str:
     out.append(f"KB read verdict: {result['verdict']}")
     out.append("")
     out.append("Files:")
-    for fn, info in result["files"].items:
+    for fn, info in result["files"].items():
         if not info.get("present"):
             out.append(f"  [missing] {fn}")
         elif fn == LOG_DIR:
@@ -264,15 +264,15 @@ def render_human(result: Dict[str, Any]) -> str:
     return "\n".join(out)
 
 
-def run_sample -> Dict[str, Any]:
+def run_sample() -> Dict[str, Any]:
     import tempfile
-    with tempfile.TemporaryDirectory as td:
+    with tempfile.TemporaryDirectory() as td:
         ws = Path(td)
         email_dir = ws / "Email"
         email_dir.mkdir(parents=True)
-        for name, content in SAMPLE_KB.items:
+        for name, content in SAMPLE_KB.items():
             (email_dir / name).write_text(content, encoding="utf-8")
-        (email_dir / LOG_DIR).mkdir
+        (email_dir / LOG_DIR).mkdir()
         return read_kb(ws)
 
 
@@ -284,14 +284,14 @@ def main(argv: List[str]) -> int:
     args = parser.parse_args(argv)
 
     if args.sample:
-        result = run_sample
+        result = run_sample()
     elif args.workspace:
         ws = Path(args.workspace)
-        if not ws.exists:
+        if not ws.exists():
             print(f"error: {args.workspace} not found", file=sys.stderr); return 2
         result = read_kb(ws)
     else:
-        parser.print_help; return 0
+        parser.print_help(); return 0
 
     if args.output == "json":
         print(json.dumps(result, indent=2))

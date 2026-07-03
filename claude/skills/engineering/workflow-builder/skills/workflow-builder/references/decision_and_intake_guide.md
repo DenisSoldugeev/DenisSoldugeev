@@ -53,7 +53,7 @@ Then say, in your own words: *"You were light on detail, so here's the approach 
 | stages | single stage unless the task names a verb chain | most fuzzy asks are one-pass fan-outs, not pipelines |
 | needs-all-results | no (prefer pipeline) | pipeline is strictly faster and the default per the API; only add a barrier on evidence |
 | structured output | yes, lightweight schema | a small schema makes downstream stages reliable at near-zero cost |
-| budget | guard at `remaining > 50k` | keeps runaway loops from draining the turn |
+| budget | guard at `remaining() > 50k` | keeps runaway loops from draining the turn |
 
 ## Worked examples
 
@@ -64,7 +64,7 @@ Unit = one PR (a known list, gathered inside the first agent). Each PR is review
 Unit = one document. Count = known list (the folder contents, gathered inside the first agent). Combine at end = yes. → **fan-out** (Haiku per doc, structured summary) → **synthesize** (Opus, one report). No loop, no barrier mid-stream. Rationale: documents are independent, so parallel; one final synthesis because the user wants a single summary.
 
 **"Find security issues until you run out of budget."**
-Unit = one issue. Count = unknown, budget-bounded. → **loop-until-budget** guarded by `budget.remaining > 50_000`, structured issue schema, dedup by id. Rationale: depth scales to the token target; the guard is mandatory or it hits the agent cap.
+Unit = one issue. Count = unknown, budget-bounded. → **loop-until-budget** guarded by `budget.remaining() > 50_000`, structured issue schema, dedup by id. Rationale: depth scales to the token target; the guard is mandatory or it hits the agent cap.
 
 ## When to walk away from a workflow
 

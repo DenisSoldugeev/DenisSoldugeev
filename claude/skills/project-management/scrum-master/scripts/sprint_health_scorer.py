@@ -88,7 +88,7 @@ class Story:
         self.id: str = data.get("id", "")
         self.title: str = data.get("title", "")
         self.points: int = data.get("points", 0)
-        self.status: str = data.get("status", "").lower
+        self.status: str = data.get("status", "").lower()
         self.assigned_to: str = data.get("assigned_to", "")
         self.created_date: str = data.get("created_date", "")
         self.completed_date: Optional[str] = data.get("completed_date")
@@ -100,9 +100,9 @@ class Story:
     
     def _normalize_status(self, status: str) -> str:
         """Normalize status to standard categories."""
-        status_lower = status.lower.strip
+        status_lower = status.lower().strip()
         
-        for category, statuses in STORY_STATUS_MAPPING.items:
+        for category, statuses in STORY_STATUS_MAPPING.items():
             if status_lower in statuses:
                 return category
         
@@ -145,7 +145,7 @@ class SprintHealthData:
         self.ceremonies: Dict[str, Any] = data.get("ceremonies", {})
         
         # Calculate derived metrics
-        self._calculate_derived_metrics
+        self._calculate_derived_metrics()
     
     def _calculate_derived_metrics(self):
         """Calculate derived health metrics."""
@@ -309,7 +309,7 @@ def score_ceremony_engagement(sprints: List[SprintHealthData]) -> Dict[str, Any]
         ceremonies = sprint.ceremonies
         sprint_ceremony_scores = []
         
-        for ceremony_name, ceremony_data in ceremonies.items:
+        for ceremony_name, ceremony_data in ceremonies.items():
             if isinstance(ceremony_data, dict):
                 attendance_rate = ceremony_data.get("attendance_rate", 0)
                 engagement_score = ceremony_data.get("engagement_score", 0)
@@ -464,7 +464,7 @@ def _score_to_grade(score: float) -> str:
 
 def analyze_sprint_health(data: Dict[str, Any]) -> HealthScoreResult:
     """Perform comprehensive sprint health analysis."""
-    result = HealthScoreResult
+    result = HealthScoreResult()
     
     try:
         # Parse sprint data
@@ -489,7 +489,7 @@ def analyze_sprint_health(data: Dict[str, Any]) -> HealthScoreResult:
         
         weighted_scores = []
         
-        for dimension_name, scoring_func in dimensions.items:
+        for dimension_name, scoring_func in dimensions.items():
             dimension_result = scoring_func(sprints)
             result.dimension_scores[dimension_name] = dimension_result
             
@@ -582,7 +582,7 @@ def _generate_health_recommendations(result: HealthScoreResult) -> List[str]:
         recommendations.append("Excellent sprint health! Maintain current practices and share learnings with other teams.")
     
     # Dimension-specific recommendations
-    for dimension, scores in result.dimension_scores.items:
+    for dimension, scores in result.dimension_scores.items():
         if isinstance(scores, dict) and "score" in scores:
             score = scores["score"]
             grade = scores["grade"]
@@ -602,7 +602,7 @@ def _generate_health_recommendations(result: HealthScoreResult) -> List[str]:
                     recommendations.append("Work on consistent estimation and delivery patterns.")
             
             elif score >= 85:  # Excellent performance
-                dimension_name = dimension.replace("_", " ").title
+                dimension_name = dimension.replace("_", " ").title()
                 recommendations.append(f"Excellent {dimension_name}! Document and share best practices.")
     
     return recommendations
@@ -628,19 +628,19 @@ def format_text_output(result: HealthScoreResult) -> str:
     lines.append("OVERALL HEALTH SUMMARY")
     lines.append("-"*30)
     lines.append(f"Health Score: {result.overall_score:.1f}/100")
-    lines.append(f"Health Grade: {result.health_grade.title}")
+    lines.append(f"Health Grade: {result.health_grade.title()}")
     lines.append("")
     
     # Dimension scores
     lines.append("DIMENSION SCORES")
     lines.append("-"*30)
     
-    for dimension, scores in result.dimension_scores.items:
+    for dimension, scores in result.dimension_scores.items():
         if isinstance(scores, dict) and "score" in scores:
-            dimension_name = dimension.replace("_", " ").title
+            dimension_name = dimension.replace("_", " ").title()
             weight = HEALTH_DIMENSIONS[dimension]["weight"]
             lines.append(f"{dimension_name} (Weight: {weight:.0%})")
-            lines.append(f"  Score: {scores['score']:.1f}/100 ({scores['grade'].title})")
+            lines.append(f"  Score: {scores['score']:.1f}/100 ({scores['grade'].title()})")
             lines.append(f"  Details: {scores['details']}")
             lines.append("")
     
@@ -693,7 +693,7 @@ def format_json_output(result: HealthScoreResult) -> Dict[str, Any]:
 # CLI Interface
 # ---------------------------------------------------------------------------
 
-def main -> int:
+def main() -> int:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Analyze sprint health across multiple dimensions"
@@ -709,7 +709,7 @@ def main -> int:
         help="Output format (default: text)"
     )
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Load and validate data
@@ -741,4 +741,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

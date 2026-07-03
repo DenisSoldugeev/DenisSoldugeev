@@ -78,7 +78,7 @@ spec:
 ### 1. Status subresource — `subresources.status: {}`
 
 Without it:
-- `r.Status.Update(ctx, obj)` doesn't work — falls back to `r.Update`
+- `r.Status().Update(ctx, obj)` doesn't work — falls back to `r.Update`
 - Status updates re-trigger spec reconcile → loop
 - RBAC can't be split between spec writers and status writers
 
@@ -94,7 +94,7 @@ Conventional condition types:
 - `Degraded` — operating but with reduced capability
 - `Progressing` — change in progress (mostly for Deployments-style flows)
 
-Use `meta.SetStatusCondition` from `k8s.io/apimachinery/pkg/api/meta` — don't write to the slice directly.
+Use `meta.SetStatusCondition()` from `k8s.io/apimachinery/pkg/api/meta` — don't write to the slice directly.
 
 ### 3. observedGeneration
 

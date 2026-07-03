@@ -40,7 +40,7 @@ Quick reference for identifying routes, components, state, and APIs across front
 | Components | `.vue` SFCs (`<template>`, `<script setup>`, `<style>`) |
 | State | Pinia (`stores/`), Vuex (`store/`) |
 | API | `axios`, `fetch`, VueQuery |
-| Forms | VeeValidate, FormKit, custom `ref` / `reactive` |
+| Forms | VeeValidate, FormKit, custom `ref()` / `reactive()` |
 | i18n | `vue-i18n` |
 
 ## Nuxt 3
@@ -80,13 +80,13 @@ Quick reference for identifying routes, components, state, and APIs across front
 
 | Aspect | Where to Look |
 |--------|--------------|
-| Routes | `@Controller('prefix')` + `@Get/@Post/@Put/@Delete` decorators |
+| Routes | `@Controller('prefix')` + `@Get()/@Post()/@Put()/@Delete()` decorators |
 | Modules | `*.module.ts` — `@Module({ controllers, providers, imports })` |
 | Services | `*.service.ts` — injected via constructor, contains business logic |
 | DTOs | `*.dto.ts` — `class-validator` decorators define validation rules |
-| Entities | `*.entity.ts` — TypeORM `@Entity` / Prisma schemas |
+| Entities | `*.entity.ts` — TypeORM `@Entity()` / Prisma schemas |
 | Auth | `@UseGuards(AuthGuard)`, `@Roles('admin')`, Passport strategies |
-| Middleware | `*.middleware.ts`, registered in module `configure` |
+| Middleware | `*.middleware.ts`, registered in module `configure()` |
 | Pipes | `ValidationPipe`, `ParseIntPipe` — input transformation |
 | Config | `ConfigModule`, `.env` files, `config/` directory |
 
@@ -146,10 +146,10 @@ Quick reference for identifying routes, components, state, and APIs across front
 ### Mock Detection
 ```
 # Likely mock
-setTimeout( => resolve(data), 500)
+setTimeout(() => resolve(data), 500)
 Promise.resolve(mockData)
 import { data } from './fixtures'
-faker.name.firstName
+faker.name.firstName()
 
 # Likely real
 axios.get('/api/users')
@@ -185,13 +185,13 @@ rules="required|email|max:100"
 Validators.required, Validators.minLength(3), Validators.pattern(...)
 
 # NestJS (class-validator)
-@IsString @IsNotEmpty @MaxLength(50) name: string;
-@IsEmail email: string;
+@IsString() @IsNotEmpty() @MaxLength(50) name: string;
+@IsEmail() email: string;
 @IsEnum(UserRole) role: UserRole;
 
 # Django Forms
 name = forms.CharField(max_length=50, required=True)
-email = forms.EmailField
+email = forms.EmailField()
 
 # DRF Serializers
 name = serializers.CharField(max_length=50)
@@ -211,11 +211,11 @@ class Order(models.Model):
     total = models.DecimalField(max_digits=10, decimal_places=2)
 
 # TypeORM (NestJS)
-@Entity
+@Entity()
 export class Order {
     @Column({ type: 'enum', enum: OrderStatus })
     status: OrderStatus;
-    @ManyToOne( => User)
+    @ManyToOne(() => User)
     user: User;
 }
 

@@ -144,7 +144,7 @@ def render_template(template_key, length="standard", output_format="text"):
             "name": template["name"],
             "description": template["description"],
             "length": length,
-            "generated": datetime.now.strftime("%Y-%m-%d"),
+            "generated": datetime.now().strftime("%Y-%m-%d"),
             "sections": [],
         }
         for title, content in sections:
@@ -159,7 +159,7 @@ def render_template(template_key, length="standard", output_format="text"):
     lines.append(f"# {template['name']}")
     lines.append(f"_{template['description']}_\n")
     lines.append(f"Length: {LENGTH_CONFIGS[length]['label']}")
-    lines.append(f"Generated: {datetime.now.strftime('%Y-%m-%d')}\n")
+    lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d')}\n")
     lines.append("---\n")
 
     for title, content in sections:
@@ -179,7 +179,7 @@ def list_templates(output_format="text"):
     """List all available templates."""
     if output_format == "json":
         result = []
-        for key, tmpl in TEMPLATES.items:
+        for key, tmpl in TEMPLATES.items():
             result.append({
                 "key": key,
                 "name": tmpl["name"],
@@ -192,20 +192,20 @@ def list_templates(output_format="text"):
     lines.append("Available Summary Templates\n")
     lines.append(f"{'KEY':<15} {'NAME':<30} {'SECTIONS':>8}  DESCRIPTION")
     lines.append(f"{'─' * 90}")
-    for key, tmpl in TEMPLATES.items:
+    for key, tmpl in TEMPLATES.items():
         lines.append(
             f"{key:<15} {tmpl['name']:<30} {len(tmpl['sections']):>8}  {tmpl['description'][:40]}"
         )
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="research-summarizer: Generate structured summary templates"
     )
     parser.add_argument(
         "--template", "-t",
-        choices=list(TEMPLATES.keys),
+        choices=list(TEMPLATES.keys()),
         help="Template type to generate",
     )
     parser.add_argument(
@@ -225,7 +225,7 @@ def main:
         action="store_true",
         help="List all available templates",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.list_templates:
         print(list_templates(args.output))
@@ -241,4 +241,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

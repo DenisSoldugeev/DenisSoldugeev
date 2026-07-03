@@ -11,7 +11,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 
 ## PR Analyzer — Kotlin Risk Signals
 
-- `println` statements left in production code
+- `println()` statements left in production code
 - `@Suppress` annotations — verify they are justified
 - `!!` (not-null assertion) used broadly without justification
 - Hardcoded credentials or API keys in source
@@ -20,7 +20,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 
 ## Code Quality — Kotlin Checks
 
-- `!!` used broadly — prefer `?.let`, `?:`, or `requireNotNull`
+- `!!` used broadly — prefer `?.let`, `?:`, or `requireNotNull()`
 - `lateinit var` accessed before initialization
 - Coroutines launched with `GlobalScope` — prefer scoped coroutines
 - `runBlocking` used outside of tests or top-level entry points
@@ -30,7 +30,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 ## Security
 
 - Flag Room / SQLite queries built with string concatenation — require parameterized queries
-- Flag `WebView.loadUrl` with user-controlled input without validation
+- Flag `WebView.loadUrl()` with user-controlled input without validation
 - Flag credentials stored in `SharedPreferences` — require `EncryptedSharedPreferences` or Keychain
 
 ---
@@ -41,7 +41,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 - Flag `runBlocking` outside of tests or top-level main functions
 - Flag `launch` / `async` without a `CoroutineExceptionHandler` or `supervisorScope` where individual failures should not cancel siblings
 - Flag `Dispatchers.Main` used for CPU-bound work — use `Dispatchers.Default`
-- Flag coroutine cancellation not respected — long loops should check `isActive` or call `yield`
+- Flag coroutine cancellation not respected — long loops should check `isActive` or call `yield()`
 
 ---
 
@@ -56,7 +56,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 
 ## Exception Handling
 
-- Flag `runCatching { }.getOrNull` used broadly — silently swallows all exceptions
+- Flag `runCatching { }.getOrNull()` used broadly — silently swallows all exceptions
 - Flag `catch (e: Exception)` in coroutines without re-throwing `CancellationException` — breaks structured concurrency
 - Flag empty `catch` blocks
 - Flag `throw RuntimeException(e)` without a descriptive message
@@ -78,7 +78,7 @@ Load this file alongside `rules/universal.md`. Universal rules are not repeated 
 
 ### Null Safety
 - Prefer safe call (`?.`) and Elvis operator (`?:`) over `!!`
-- Use `requireNotNull` / `checkNotNull` with a descriptive message when null means a programming error
+- Use `requireNotNull()` / `checkNotNull()` with a descriptive message when null means a programming error
 - Prefer `val` over `var` — immutability by default
 
 ### Modern Kotlin

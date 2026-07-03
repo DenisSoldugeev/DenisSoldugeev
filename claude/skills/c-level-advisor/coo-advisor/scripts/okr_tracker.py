@@ -412,7 +412,7 @@ def format_report(
 ) -> str:
     """Format full OKR tracking report as plain text."""
     lines = []
-    now = datetime.now.strftime("%Y-%m-%d %H:%M")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
     company_name = okr_tree["company"].get("name", "Company")
 
     lines.append("=" * 70)
@@ -684,7 +684,7 @@ def format_json_output(okr_tree: dict, alignment: dict, at_risk_krs: list[dict])
     """Format analysis as machine-readable JSON."""
     return json.dumps(
         {
-            "generated_at": datetime.now.isoformat,
+            "generated_at": datetime.now().isoformat(),
             "company_score": (
                 sum(o["score"] for o in okr_tree["company"].get("objectives", []))
                 / max(1, len(okr_tree["company"].get("objectives", [])))
@@ -705,7 +705,7 @@ def format_json_output(okr_tree: dict, alignment: dict, at_risk_krs: list[dict])
 # Main Entrypoint
 # ---------------------------------------------------------------------------
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="OKR Cascade and Alignment Tracker — COO Advisor Tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -725,7 +725,7 @@ def main:
         default=None,
         help="Override quarter progress (0.0–1.0). Default: auto-calculated from quarter dates.",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.input:
         try:
@@ -780,7 +780,7 @@ def _calculate_quarter_progress(data: dict) -> float:
     try:
         start = date.fromisoformat(start_str)
         end = date.fromisoformat(end_str)
-        today = date.today
+        today = date.today()
         total_days = (end - start).days
         elapsed_days = (today - start).days
         progress = elapsed_days / total_days if total_days > 0 else 0.5
@@ -1097,4 +1097,4 @@ SAMPLE_DATA = {
 
 
 if __name__ == "__main__":
-    main
+    main()

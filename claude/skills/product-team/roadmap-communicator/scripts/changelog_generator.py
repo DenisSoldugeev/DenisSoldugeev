@@ -34,7 +34,7 @@ DEMO_COMMITS = [
 ]
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate changelog from git commits or piped input.",
         epilog="Examples:\n"
@@ -53,7 +53,7 @@ def parse_args -> argparse.Namespace:
                         help="Read commit subjects from stdin instead of git log")
     parser.add_argument("--demo", action="store_true",
                         help="Run with sample data (no git required)")
-    return parser.parse_args
+    return parser.parse_args()
 
 
 def get_git_log(from_ref: str, to_ref: str) -> list[str]:
@@ -69,15 +69,15 @@ def get_git_log(from_ref: str, to_ref: str) -> list[str]:
         print("Error: git log timed out.", file=sys.stderr)
         sys.exit(1)
     if result.returncode != 0:
-        print(f"Error: git log failed: {result.stderr.strip}", file=sys.stderr)
+        print(f"Error: git log failed: {result.stderr.strip()}", file=sys.stderr)
         sys.exit(1)
-    lines = [line.strip for line in result.stdout.splitlines if line.strip]
+    lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
     return lines
 
 
-def read_stdin -> list[str]:
+def read_stdin() -> list[str]:
     """Read commit subjects from stdin, one per line."""
-    return [line.strip for line in sys.stdin if line.strip]
+    return [line.strip() for line in sys.stdin if line.strip()]
 
 
 def group_commits(subjects: list[str]) -> dict[str, list[str]]:
@@ -96,7 +96,7 @@ def group_commits(subjects: list[str]) -> dict[str, list[str]]:
 
 def render_markdown(grouped: dict[str, list[str]]) -> str:
     out = ["# Changelog", ""]
-    ordered_types = list(SECTIONS.keys) + ["other"]
+    ordered_types = list(SECTIONS.keys()) + ["other"]
     for commit_type in ordered_types:
         commits = grouped.get(commit_type, [])
         if not commits:
@@ -106,31 +106,31 @@ def render_markdown(grouped: dict[str, list[str]]) -> str:
         for item in commits:
             out.append(f"- {item}")
         out.append("")
-    return "\n".join(out).rstrip + "\n"
+    return "\n".join(out).rstrip() + "\n"
 
 
 def render_text(grouped: dict[str, list[str]]) -> str:
     out: list[str] = []
-    ordered_types = list(SECTIONS.keys) + ["other"]
+    ordered_types = list(SECTIONS.keys()) + ["other"]
     for commit_type in ordered_types:
         commits = grouped.get(commit_type, [])
         if not commits:
             continue
         header = SECTIONS.get(commit_type, "Other")
-        out.append(header.upper)
+        out.append(header.upper())
         for item in commits:
             out.append(f"* {item}")
         out.append("")
-    return "\n".join(out).rstrip + "\n"
+    return "\n".join(out).rstrip() + "\n"
 
 
-def main -> int:
-    args = parse_args
+def main() -> int:
+    args = parse_args()
 
     if args.demo:
         subjects = DEMO_COMMITS
     elif args.stdin:
-        subjects = read_stdin
+        subjects = read_stdin()
     else:
         subjects = get_git_log(args.from_ref, args.to_ref)
 
@@ -148,4 +148,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main)
+    raise SystemExit(main())

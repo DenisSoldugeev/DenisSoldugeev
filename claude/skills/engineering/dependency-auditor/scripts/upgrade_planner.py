@@ -5,6 +5,8 @@ Upgrade Planner - Dependency upgrade path planning and risk analysis tool.
 This script analyzes dependency inventories, evaluates semantic versioning patterns,
 estimates breaking change risks, and generates prioritized upgrade plans with
 migration checklists and rollback procedures.
+
+Author: Claude Skills Engineering Team
 License: MIT
 """
 
@@ -88,9 +90,9 @@ class UpgradePlanner:
     """Main upgrade planning and risk analysis class."""
     
     def __init__(self):
-        self.breaking_change_patterns = self._build_breaking_change_patterns
-        self.ecosystem_knowledge = self._build_ecosystem_knowledge
-        self.security_advisories = self._build_security_advisories
+        self.breaking_change_patterns = self._build_breaking_change_patterns()
+        self.ecosystem_knowledge = self._build_ecosystem_knowledge()
+        self.security_advisories = self._build_security_advisories()
     
     def _build_breaking_change_patterns(self) -> Dict[str, List[str]]:
         """Build patterns for detecting breaking changes."""
@@ -219,7 +221,7 @@ class UpgradePlanner:
         dependencies = self._load_dependency_inventory(dependency_inventory)
         
         analysis_results = {
-            'timestamp': datetime.now.isoformat,
+            'timestamp': datetime.now().isoformat(),
             'timeline_days': timeline_days,
             'dependencies_analyzed': len(dependencies),
             'available_upgrades': [],
@@ -347,7 +349,7 @@ class UpgradePlanner:
         match = re.match(pattern, version)
         
         if match:
-            major, minor, patch, prerelease, build = match.groups
+            major, minor, patch, prerelease, build = match.groups()
             return VersionInfo(
                 major=int(major),
                 minor=int(minor),
@@ -360,7 +362,7 @@ class UpgradePlanner:
         simple_pattern = r'^(\d+)\.(\d+)(?:\.(\d+))?'
         match = re.match(simple_pattern, version)
         if match:
-            major, minor, patch = match.groups
+            major, minor, patch = match.groups()
             return VersionInfo(
                 major=int(major),
                 minor=int(minor),
@@ -410,7 +412,7 @@ class UpgradePlanner:
         # pypi: pip index versions <package>
         # maven: maven metadata API
         
-        return mock_versions.get(package_name.lower)
+        return mock_versions.get(package_name.lower())
     
     def _determine_update_type(self, current: VersionInfo, latest: VersionInfo) -> UpdateType:
         """Determine the type of update based on semantic versioning."""
@@ -444,7 +446,7 @@ class UpgradePlanner:
             'spring-boot', 'hibernate'  # Java frameworks
         ]
         
-        if package_name.lower in high_risk_packages and update_type == UpdateType.MAJOR:
+        if package_name.lower() in high_risk_packages and update_type == UpdateType.MAJOR:
             base_risk = UpgradeRisk.CRITICAL
         
         # Check for known breaking changes
@@ -467,7 +469,7 @@ class UpgradePlanner:
             'typescript': ['4.0.0', '5.0.0']
         }
         
-        package_versions = breaking_change_versions.get(package_name.lower, [])
+        package_versions = breaking_change_versions.get(package_name.lower(), [])
         latest_str = str(latest)
         
         return any(latest_str.startswith(v.split('.')[0]) for v in package_versions)
@@ -514,16 +516,16 @@ class UpgradePlanner:
             breaking_changes.extend(common_changes[:2])  # Add top 2
         
         # Check for specific package patterns
-        if package_name.lower == 'react' and latest.major >= 17:
+        if package_name.lower() == 'react' and latest.major >= 17:
             breaking_changes.append("New JSX Transform")
             if latest.major >= 18:
                 breaking_changes.append("Concurrent Rendering changes")
         
-        elif package_name.lower == 'django' and latest.major >= 4:
+        elif package_name.lower() == 'django' and latest.major >= 4:
             breaking_changes.append("CSRF token changes")
             breaking_changes.append("Default AUTO_INCREMENT field changes")
         
-        elif package_name.lower == 'webpack' and latest.major >= 5:
+        elif package_name.lower() == 'webpack' and latest.major >= 5:
             breaking_changes.append("Module Federation support")
             breaking_changes.append("Asset modules replace file-loader")
         
@@ -585,7 +587,7 @@ class UpgradePlanner:
             'babel': ['@babel/core', '@babel/preset-env', '@babel/preset-react']
         }
         
-        return common_dependencies.get(package_name.lower, [])
+        return common_dependencies.get(package_name.lower(), [])
     
     def _assess_rollback_complexity(self, update_type: UpdateType, risk_level: UpgradeRisk) -> str:
         """Assess complexity of rolling back the upgrade."""
@@ -696,7 +698,7 @@ class UpgradePlanner:
         if critical_count > 0:
             factors.append(f"{critical_count} critical risk upgrades requiring careful planning")
         
-        framework_upgrades = [u for u in upgrades if any(fw in u.name.lower 
+        framework_upgrades = [u for u in upgrades if any(fw in u.name.lower() 
                              for fw in ['react', 'django', 'spring', 'webpack', 'babel'])]
         if framework_upgrades:
             factors.append(f"Core framework upgrades: {[u.name for u in framework_upgrades[:3]]}")
@@ -883,7 +885,7 @@ class UpgradePlanner:
         """Generate upgrade plan report in specified format."""
         if format == 'json':
             # Convert dataclass objects for JSON serialization
-            serializable_results = analysis_results.copy
+            serializable_results = analysis_results.copy()
             serializable_results['available_upgrades'] = [asdict(upgrade) for upgrade in analysis_results['available_upgrades']]
             serializable_results['upgrade_plans'] = [asdict(plan) for plan in analysis_results['upgrade_plans']]
             return json.dumps(serializable_results, indent=2, default=str)
@@ -929,7 +931,7 @@ class UpgradePlanner:
                 security_indicator = " 🔒" if upgrade.security_updates else ""
                 
                 report.append(f"{risk_indicator} {upgrade.name}: {upgrade.current_version} → {upgrade.latest_version}{security_indicator}")
-                report.append(f"   Type: {upgrade.update_type.value.title} | Risk: {upgrade.risk_level.value.title} | Priority: {upgrade.priority_score:.1f}")
+                report.append(f"   Type: {upgrade.update_type.value.title()} | Risk: {upgrade.risk_level.value.title()} | Priority: {upgrade.priority_score:.1f}")
                 if upgrade.security_updates:
                     report.append(f"   Security: {upgrade.security_updates[0]}")
                 report.append("")
@@ -958,7 +960,7 @@ class UpgradePlanner:
         report.append("=" * 60)
         return '\n'.join(report)
 
-def main:
+def main():
     """Main entry point for the upgrade planner."""
     parser = argparse.ArgumentParser(
         description='Analyze dependency upgrades and create migration plans',
@@ -986,10 +988,10 @@ Examples:
     parser.add_argument('--security-only', action='store_true',
                        help='Only plan upgrades with security fixes')
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
-        planner = UpgradePlanner
+        planner = UpgradePlanner()
         results = planner.analyze_upgrades(args.inventory_file, args.timeline)
         
         # Filter by risk threshold if specified
@@ -1024,4 +1026,4 @@ Examples:
         sys.exit(1)
 
 if __name__ == '__main__':
-    main
+    main()

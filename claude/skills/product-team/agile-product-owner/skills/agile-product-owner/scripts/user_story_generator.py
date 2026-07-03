@@ -84,7 +84,7 @@ class UserStoryGenerator:
         
         # Create story
         story = {
-            'id': f"{epic[:3].upper}-{index:03d}",
+            'id': f"{epic[:3].upper()}-{index:03d}",
             'type': 'story',
             'title': self._generate_title(feature),
             'narrative': self._generate_narrative(persona_data, feature),
@@ -101,7 +101,7 @@ class UserStoryGenerator:
         """Generate technical enabler story"""
         
         return {
-            'id': f"{epic[:3].upper}-E{len(requirement):02d}",
+            'id': f"{epic[:3].upper()}-E{len(requirement):02d}",
             'type': 'enabler',
             'title': f"Technical: {requirement}",
             'narrative': f"As a developer, I need to {requirement} to enable user features",
@@ -127,8 +127,8 @@ class UserStoryGenerator:
     def _generate_title(self, feature: str) -> str:
         """Generate concise story title"""
         # Simplify feature description to title
-        words = feature.split[:5]
-        return ' '.join(words).title
+        words = feature.split()[:5]
+        return ' '.join(words).title()
     
     def _generate_narrative(self, persona: Dict, feature: str) -> str:
         """Generate story narrative in standard format"""
@@ -170,17 +170,17 @@ class UserStoryGenerator:
         """Extract action from feature description"""
         action_verbs = ['create', 'view', 'edit', 'delete', 'share', 'export', 'import', 'configure', 'search', 'filter']
         
-        feature_lower = feature.lower
+        feature_lower = feature.lower()
         for verb in action_verbs:
             if verb in feature_lower:
                 return feature_lower
         
-        return f"use {feature.lower}"
+        return f"use {feature.lower()}"
     
     def _extract_benefit(self, feature: str, needs: List[str]) -> str:
         """Extract benefit based on feature and persona needs"""
         
-        feature_lower = feature.lower
+        feature_lower = feature.lower()
         
         if 'save' in feature_lower or 'quick' in feature_lower:
             return "I can save time and work more efficiently"
@@ -195,12 +195,12 @@ class UserStoryGenerator:
     
     def _extract_outcome(self, feature: str) -> str:
         """Extract expected outcome"""
-        return f"the {feature.lower} is successfully completed"
+        return f"the {feature.lower()} is successfully completed"
     
     def _estimate_complexity(self, feature: str) -> int:
         """Estimate story points based on complexity indicators"""
         
-        feature_lower = feature.lower
+        feature_lower = feature.lower()
         
         # Complexity indicators
         complexity = 3  # Base complexity
@@ -219,7 +219,7 @@ class UserStoryGenerator:
     def _determine_priority(self, persona: str, feature: str) -> str:
         """Determine story priority"""
         
-        feature_lower = feature.lower
+        feature_lower = feature.lower()
         
         # Critical features
         if any(word in feature_lower for word in ['security', 'fix', 'critical', 'broken']):
@@ -241,12 +241,12 @@ class UserStoryGenerator:
         """Check INVEST criteria compliance"""
         
         return {
-            'independent': not any(word in feature.lower for word in ['after', 'depends', 'requires']),
+            'independent': not any(word in feature.lower() for word in ['after', 'depends', 'requires']),
             'negotiable': True,  # Most features can be negotiated
             'valuable': True,  # Assume value if it made it to backlog
-            'estimable': len(feature.split) < 20,  # Can estimate if not too vague
+            'estimable': len(feature.split()) < 20,  # Can estimate if not too vague
             'small': self._estimate_complexity(feature) <= 8,  # 8 points or less
-            'testable': not any(word in feature.lower for word in ['maybe', 'possibly', 'somehow'])
+            'testable': not any(word in feature.lower() for word in ['maybe', 'possibly', 'somehow'])
         }
     
     def generate_sprint_stories(self, capacity: int, backlog: List[Dict]) -> Dict:
@@ -289,7 +289,7 @@ class UserStoryGenerator:
         output.append("=" * 40)
         output.append(f"Title: {story['title']}")
         output.append(f"Type: {story['type']}")
-        output.append(f"Priority: {story['priority'].upper}")
+        output.append(f"Priority: {story['priority'].upper()}")
         output.append(f"Points: {story['estimation']}")
         output.append("")
         output.append("Story:")
@@ -300,13 +300,13 @@ class UserStoryGenerator:
             output.append(f"  {i}. {criterion}")
         output.append("")
         output.append("INVEST Checklist:")
-        for criterion, passed in story['invest_check'].items:
+        for criterion, passed in story['invest_check'].items():
             status = "✓" if passed else "✗"
-            output.append(f"  {status} {criterion.capitalize}")
+            output.append(f"  {status} {criterion.capitalize()}")
         
         return "\n".join(output)
 
-def create_sample_epic:
+def create_sample_epic():
     """Create a sample epic for testing"""
     return {
         'name': 'User Dashboard',
@@ -325,17 +325,17 @@ def create_sample_epic:
         ]
     }
 
-def main:
+def main():
     import sys
     
-    generator = UserStoryGenerator
+    generator = UserStoryGenerator()
     
     if len(sys.argv) > 1 and sys.argv[1] == 'sprint':
         # Generate sprint planning
         capacity = int(sys.argv[2]) if len(sys.argv) > 2 else 30
         
         # Create sample backlog
-        epic = create_sample_epic
+        epic = create_sample_epic()
         backlog = generator.generate_epic_stories(epic)
         
         # Plan sprint
@@ -350,16 +350,16 @@ def main:
         print("\n📋 COMMITTED STORIES:\n")
         
         for story in sprint['committed']:
-            print(f"  [{story['priority'][:1].upper}] {story['id']}: {story['title']} ({story['estimation']}pts)")
+            print(f"  [{story['priority'][:1].upper()}] {story['id']}: {story['title']} ({story['estimation']}pts)")
         
         if sprint['stretch']:
             print("\n🎯 STRETCH GOALS:\n")
             for story in sprint['stretch']:
-                print(f"  [{story['priority'][:1].upper}] {story['id']}: {story['title']} ({story['estimation']}pts)")
+                print(f"  [{story['priority'][:1].upper()}] {story['id']}: {story['title']} ({story['estimation']}pts)")
     
     else:
         # Generate stories for epic
-        epic = create_sample_epic
+        epic = create_sample_epic()
         stories = generator.generate_epic_stories(epic)
         
         print(f"Generated {len(stories)} stories from epic: {epic['name']}\n")
@@ -381,7 +381,7 @@ def main:
         for priority in ['critical', 'high', 'medium', 'low']:
             count = len([s for s in stories if s['priority'] == priority])
             if count > 0:
-                print(f"  {priority.capitalize}: {count} stories")
+                print(f"  {priority.capitalize()}: {count} stories")
 
 if __name__ == "__main__":
-    main
+    main()

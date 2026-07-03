@@ -50,7 +50,7 @@ const PRS = args?.prs ?? ['#101', '#102', '#103']
 // Phase 1 — fan out one reviewer per PR. Cheap model, structured output.
 phase('Review')
 const reviews = await parallel(
-  PRS.map((pr, i) =>  =>
+  PRS.map((pr, i) => () =>
     agent(
       `Review PR ${pr} for likely bugs. Inspect the diff and report concrete findings.`,
       { label: `review:${pr}`, phase: 'Review', model: 'haiku', schema: FINDINGS_SCHEMA }
@@ -73,7 +73,7 @@ const confirmed = []
 for (let i = 0; i < highSeverity.length; i++) {
   const f = highSeverity[i]
   const votes = await parallel(
-    Array.from({ length: 3 }, (_, k) =>  =>
+    Array.from({ length: 3 }, (_, k) => () =>
       agent(
         `Try hard to REFUTE this bug claim about PR ${f.pr}: "${f.title}" in ${f.file ?? 'unknown file'}. ` +
         `Return { refuted: boolean, reason }.`,

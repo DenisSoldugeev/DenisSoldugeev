@@ -92,7 +92,7 @@ For each project: extract `agency_ic_admin` (the institute code like NCI, NHLBI,
 
 ```python
 from collections import Counter
-institute_counts = Counter
+institute_counts = Counter()
 for project in projects:
     institute_counts[project['agency_ic_admin']] += 1
 top_institutes = institute_counts.most_common(3)
@@ -105,7 +105,7 @@ Surface in DOCX Section 3 as ranked table with project counts + brief institute 
 For each project: extract `study_section`.
 
 ```python
-study_section_counts = Counter
+study_section_counts = Counter()
 for project in projects:
     section = project.get('study_section', '')
     if section:  # Some projects unassigned
@@ -122,7 +122,7 @@ NOSI (Notice of Special Interest) numbers appear as `NOT-*` in project abstracts
 ```python
 import re
 NOSI_RE = re.compile(r'NOT-[A-Z]{2,3}-\d{2}-\d{3}')
-nosi_numbers = set
+nosi_numbers = set()
 for project in projects:
     abstract = project.get('abstract_text', '')
     nosi_numbers.update(NOSI_RE.findall(abstract))

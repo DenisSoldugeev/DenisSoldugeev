@@ -133,7 +133,7 @@ def load_controls_from_csv(filepath: str) -> Dict[str, str]:
             reader = csv.DictReader(f)
             for row in reader:
                 control_id = row.get("control_id", row.get("id", ""))
-                status = row.get("status", "not_implemented").lower
+                status = row.get("status", "not_implemented").lower()
                 if control_id:
                     controls[control_id] = status
     except FileNotFoundError:
@@ -154,7 +154,7 @@ def check_compliance(
 
     results = {
         "standard": standard,
-        "timestamp": datetime.now.isoformat,
+        "timestamp": datetime.now().isoformat(),
         "domains": {},
         "summary": {
             "total_controls": 0,
@@ -165,7 +165,7 @@ def check_compliance(
         "findings": [],
     }
 
-    for domain_key, domain_data in ISO27001_CONTROLS.items:
+    for domain_key, domain_data in ISO27001_CONTROLS.items():
         if domains and domain_key not in domains:
             continue
 
@@ -262,7 +262,7 @@ def format_output(
 
     # Markdown format
     lines = [
-        f"# {results['standard'].upper} Compliance Report",
+        f"# {results['standard'].upper()} Compliance Report",
         f"",
         f"**Generated:** {results['timestamp']}",
         f"",
@@ -286,7 +286,7 @@ def format_output(
         f"|--------|-------------|---------|----------|-------|",
     ])
 
-    for domain_key, domain_data in results["domains"].items:
+    for domain_key, domain_data in results["domains"].items():
         total = len(domain_data["controls"])
         score = round(
             ((domain_data["implemented"] + domain_data["partial"] * 0.5) / total) * 100
@@ -308,7 +308,7 @@ def format_output(
         for finding in results["findings"][:15]:  # Top 15
             lines.append(
                 f"| {finding['control_id']} | {finding['control_name']} | "
-                f"{finding['priority'].capitalize} | {finding['status'].replace('_', ' ').capitalize} |"
+                f"{finding['priority'].capitalize()} | {finding['status'].replace('_', ' ').capitalize()} |"
             )
 
     # Gap analysis
@@ -323,8 +323,8 @@ def format_output(
             lines.extend([
                 f"### {gap['control_id']}: {gap['control_name']}",
                 f"",
-                f"- **Priority:** {gap['priority'].capitalize}",
-                f"- **Current Status:** {gap['current_status'].replace('_', ' ').capitalize}",
+                f"- **Priority:** {gap['priority'].capitalize()}",
+                f"- **Current Status:** {gap['current_status'].replace('_', ' ').capitalize()}",
                 f"- **Remediation:** {gap['remediation']}",
                 f"- **Timeline:** {gap['timeline']}",
                 f"",
@@ -333,7 +333,7 @@ def format_output(
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="ISO 27001/27002 Compliance Checker"
     )
@@ -367,7 +367,7 @@ def main:
         help="Output format (default: markdown)"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Load control status if provided
     controls_data = None
@@ -377,7 +377,7 @@ def main:
     # Parse domains
     domains = None
     if args.domains:
-        domains = [d.strip.lower.replace("-", "_") for d in args.domains.split(",")]
+        domains = [d.strip().lower().replace("-", "_") for d in args.domains.split(",")]
 
     # Check compliance
     results = check_compliance(args.standard, controls_data, domains)
@@ -395,4 +395,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

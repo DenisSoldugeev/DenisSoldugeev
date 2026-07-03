@@ -22,7 +22,7 @@ class ReportGenerator:
             output_context: 'desktop', 'cli', or None for auto-detect
         """
         self.report_data = report_data
-        self.output_context = output_context or self._detect_context
+        self.output_context = output_context or self._detect_context()
 
     def _detect_context(self) -> str:
         """
@@ -92,7 +92,7 @@ class ReportGenerator:
             for factor in decision_factors:
                 category = factor.get('category', 'Unknown')
                 best = factor.get('best_performer', 'Unknown')
-                summary_parts.append(f"- **{category.replace('_', ' ').title}**: {best}\n")
+                summary_parts.append(f"- **{category.replace('_', ' ').title()}**: {best}\n")
 
         summary_parts.append(f"\n---\n")
         summary_parts.append(f"*For detailed analysis, request full report sections*\n")
@@ -110,12 +110,12 @@ class ReportGenerator:
             Complete report markdown
         """
         if sections is None:
-            sections = self._get_available_sections
+            sections = self._get_available_sections()
 
         report_parts = []
 
         # Title and metadata
-        report_parts.append(self._generate_title)
+        report_parts.append(self._generate_title())
 
         # Generate each requested section
         for section in sections:
@@ -165,7 +165,7 @@ class ReportGenerator:
 
 **Technologies**: {tech_names}
 **Use Case**: {use_case}
-**Generated**: {self._get_timestamp}
+**Generated**: {self._get_timestamp()}
 
 ---
 """
@@ -176,7 +176,7 @@ TECHNOLOGY STACK EVALUATION REPORT
 
 Technologies: {tech_names}
 Use Case: {use_case}
-Generated: {self._get_timestamp}
+Generated: {self._get_timestamp()}
 
 ================================================================================
 """
@@ -203,13 +203,13 @@ Generated: {self._get_timestamp}
 
         generator = generators.get(section_name)
         if generator:
-            return generator
+            return generator()
 
         return None
 
     def _section_executive_summary(self) -> str:
         """Generate executive summary section."""
-        return self.generate_executive_summary
+        return self.generate_executive_summary()
 
     def _section_comparison_matrix(self) -> str:
         """Generate comparison matrix section."""
@@ -230,7 +230,7 @@ Generated: {self._get_timestamp}
             return ""
 
         # Get technology names from first row
-        tech_names = list(matrix_data[0].get('scores', {}).keys)
+        tech_names = list(matrix_data[0].get('scores', {}).keys())
 
         # Build table header
         header = "| Category | Weight |"
@@ -245,7 +245,7 @@ Generated: {self._get_timestamp}
 
         # Rows
         for row in matrix_data:
-            category = row.get('category', '').replace('_', ' ').title
+            category = row.get('category', '').replace('_', ' ').title()
             weight = row.get('weight', '')
             scores = row.get('scores', {})
 
@@ -266,7 +266,7 @@ Generated: {self._get_timestamp}
             return ""
 
         # Get technology names
-        tech_names = list(matrix_data[0].get('scores', {}).keys)
+        tech_names = list(matrix_data[0].get('scores', {}).keys())
 
         # Calculate column widths
         category_width = 25
@@ -282,7 +282,7 @@ Generated: {self._get_timestamp}
 
         # Rows
         for row in matrix_data:
-            category = row.get('category', '').replace('_', ' ').title[:category_width-1]
+            category = row.get('category', '').replace('_', ' ').title()[:category_width-1]
             weight = row.get('weight', '')
             scores = row.get('scores', {})
 
@@ -340,9 +340,9 @@ Generated: {self._get_timestamp}
         # Component scores
         scores = ecosystem_data.get('health_scores', {})
         parts.append("### Health Metrics")
-        for metric, score in scores.items:
+        for metric, score in scores.items():
             if metric != 'overall_health':
-                metric_name = metric.replace('_', ' ').title
+                metric_name = metric.replace('_', ' ').title()
                 parts.append(f"- {metric_name}: {score:.1f}/100")
 
         # Viability assessment
@@ -372,7 +372,7 @@ Generated: {self._get_timestamp}
         compliance = security_data.get('compliance_assessment', {})
         if compliance:
             parts.append("### Compliance Readiness")
-            for standard, assessment in compliance.items:
+            for standard, assessment in compliance.items():
                 level = assessment.get('readiness_level', 'Unknown')
                 pct = assessment.get('readiness_percentage', 0)
                 parts.append(f"- **{standard}**: {level} ({pct:.0f}%)")
@@ -407,7 +407,7 @@ Generated: {self._get_timestamp}
         # Recommended approach
         approach = migration_data.get('recommended_approach', {})
         if approach:
-            parts.append(f"\n### Recommended Approach: {approach.get('approach', 'Unknown').replace('_', ' ').title}")
+            parts.append(f"\n### Recommended Approach: {approach.get('approach', 'Unknown').replace('_', ' ').title()}")
             parts.append(f"{approach.get('description', '')}")
 
         return '\n'.join(parts)
@@ -424,14 +424,14 @@ Generated: {self._get_timestamp}
         throughput = benchmark_data.get('throughput', {})
         if throughput:
             parts.append("### Throughput")
-            for tech, rps in throughput.items:
+            for tech, rps in throughput.items():
                 parts.append(f"- {tech}: {rps:,} requests/sec")
 
         # Latency
         latency = benchmark_data.get('latency', {})
         if latency:
             parts.append("\n### Latency (P95)")
-            for tech, ms in latency.items:
+            for tech, ms in latency.items():
                 parts.append(f"- {tech}: {ms}ms")
 
         return '\n'.join(parts)
@@ -439,7 +439,7 @@ Generated: {self._get_timestamp}
     def _get_timestamp(self) -> str:
         """Get current timestamp."""
         from datetime import datetime
-        return datetime.now.strftime("%Y-%m-%d %H:%M")
+        return datetime.now().strftime("%Y-%m-%d %H:%M")
 
     def export_to_file(self, filename: str, sections: Optional[List[str]] = None) -> str:
         """

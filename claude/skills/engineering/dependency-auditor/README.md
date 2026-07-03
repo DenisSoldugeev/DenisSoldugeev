@@ -407,12 +407,12 @@ The `expected_outputs/` directory contains example reports showing the expected 
 
 ### Custom Vulnerability Database
 
-You can extend the built-in vulnerability database by modifying the `_load_vulnerability_database` method in `dep_scanner.py`:
+You can extend the built-in vulnerability database by modifying the `_load_vulnerability_database()` method in `dep_scanner.py`:
 
 ```python
 def _load_vulnerability_database(self):
     """Load vulnerability database from multiple sources."""
-    db = self._load_builtin_database
+    db = self._load_builtin_database()
     
     # Load custom vulnerabilities
     custom_db_path = os.environ.get('CUSTOM_VULN_DB')

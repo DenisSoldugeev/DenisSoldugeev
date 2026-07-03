@@ -81,21 +81,21 @@ class CoverageParser:
 
     def parse(self, path: Path) -> Tuple[Dict[str, FileCoverage], CoverageSummary]:
         """Parse coverage data from file or directory"""
-        if path.is_file:
+        if path.is_file():
             if path.suffix == '.json':
                 return self._parse_istanbul_json(path)
             elif path.suffix == '.info' or 'lcov' in path.name:
                 return self._parse_lcov(path)
-        elif path.is_dir:
+        elif path.is_dir():
             # Look for common coverage files
             for filename in ['coverage-final.json', 'coverage-summary.json', 'lcov.info']:
                 candidate = path / filename
-                if candidate.exists:
+                if candidate.exists():
                     return self.parse(candidate)
 
             # Check for coverage-final.json in coverage directory
             coverage_json = path / 'coverage-final.json'
-            if coverage_json.exists:
+            if coverage_json.exists():
                 return self._parse_istanbul_json(coverage_json)
 
         raise ValueError(f"Could not find or parse coverage data at: {path}")
@@ -111,7 +111,7 @@ class CoverageParser:
         total_functions = [0, 0]
         total_lines = [0, 0]
 
-        for file_path, file_data in data.items:
+        for file_path, file_data in data.items():
             # Skip node_modules
             if 'node_modules' in file_path:
                 continue
@@ -119,7 +119,7 @@ class CoverageParser:
             # Parse statement coverage
             s_map = file_data.get('statementMap', {})
             s_hits = file_data.get('s', {})
-            covered_statements = sum(1 for h in s_hits.values if h > 0)
+            covered_statements = sum(1 for h in s_hits.values() if h > 0)
             total_statements[0] += covered_statements
             total_statements[1] += len(s_map)
 
@@ -128,22 +128,22 @@ class CoverageParser:
             b_hits = file_data.get('b', {})
             covered_branches = sum(
                 sum(1 for h in hits if h > 0)
-                for hits in b_hits.values
+                for hits in b_hits.values()
             )
-            total_branch_count = sum(len(b['locations']) for b in b_map.values)
+            total_branch_count = sum(len(b['locations']) for b in b_map.values())
             total_branches[0] += covered_branches
             total_branches[1] += total_branch_count
 
             # Parse function coverage
             fn_map = file_data.get('fnMap', {})
             fn_hits = file_data.get('f', {})
-            covered_functions = sum(1 for h in fn_hits.values if h > 0)
+            covered_functions = sum(1 for h in fn_hits.values() if h > 0)
             total_functions[0] += covered_functions
             total_functions[1] += len(fn_map)
 
             # Determine uncovered lines
             uncovered_lines = []
-            for stmt_id, hits in s_hits.items:
+            for stmt_id, hits in s_hits.items():
                 if hits == 0 and stmt_id in s_map:
                     stmt = s_map[stmt_id]
                     start_line = stmt.get('start', {}).get('line', 0)
@@ -157,7 +157,7 @@ class CoverageParser:
 
             # Identify uncovered branches
             uncovered_branches = []
-            for branch_id, hits in b_hits.items:
+            for branch_id, hits in b_hits.items():
                 for idx, hit in enumerate(hits):
                     if hit == 0:
                         uncovered_branches.append(f"{branch_id}:{idx}")
@@ -184,10 +184,10 @@ class CoverageParser:
 
     def _calculate_line_coverage(self, s_map: Dict, s_hits: Dict) -> Tuple[int, int]:
         """Calculate line coverage from statement data"""
-        lines = set
-        covered_lines = set
+        lines = set()
+        covered_lines = set()
 
-        for stmt_id, stmt in s_map.items:
+        for stmt_id, stmt in s_map.items():
             start_line = stmt.get('start', {}).get('line', 0)
             end_line = stmt.get('end', {}).get('line', start_line)
             for line in range(start_line, end_line + 1):
@@ -200,7 +200,7 @@ class CoverageParser:
     def _parse_lcov(self, path: Path) -> Tuple[Dict[str, FileCoverage], CoverageSummary]:
         """Parse LCOV format coverage data"""
         with open(path, 'r') as f:
-            content = f.read
+            content = f.read()
 
         files = {}
         current_file = None
@@ -214,7 +214,7 @@ class CoverageParser:
         }
 
         for line in content.split('\n'):
-            line = line.strip
+            line = line.strip()
 
             if line.startswith('SF:'):
                 current_file = line[3:]
@@ -318,7 +318,7 @@ class CoverageAnalyzer:
         }
 
         # Analyze each file
-        for file_path, coverage in files.items:
+        for file_path, coverage in files.items():
             file_gaps = self._analyze_file(file_path, coverage)
             gaps.extend(file_gaps)
 
@@ -344,7 +344,7 @@ class CoverageAnalyzer:
             'overall_line_pct': (summary.lines[0] / summary.lines[1] * 100) if summary.lines[1] > 0 else 100,
             'files_analyzed': summary.files_analyzed,
             'files_below_threshold': sum(
-                1 for f in files.values
+                1 for f in files.values()
                 if f.line_pct < self.threshold
             ),
             'total_gaps': len(gaps),
@@ -364,12 +364,12 @@ class CoverageAnalyzer:
 
         # Determine if file is critical
         is_critical = any(
-            re.search(pattern, file_path.lower)
+            re.search(pattern, file_path.lower())
             for pattern in self.CRITICAL_PATTERNS
         )
 
         is_service = any(
-            re.search(pattern, file_path.lower)
+            re.search(pattern, file_path.lower())
             for pattern in self.SERVICE_PATTERNS
         )
 
@@ -464,7 +464,7 @@ class ReportGenerator:
         # Header
         lines.append("=" * 60)
         lines.append("COVERAGE ANALYSIS REPORT")
-        lines.append(f"Generated: {datetime.now.strftime('%Y-%m-%d %H:%M:%S')}")
+        lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         lines.append("=" * 60)
         lines.append("")
 
@@ -507,7 +507,7 @@ class ReportGenerator:
 
         # Files below threshold
         below_threshold = [
-            (path, cov) for path, cov in files.items
+            (path, cov) for path, cov in files.items()
             if cov.line_pct < threshold
         ]
         below_threshold.sort(key=lambda x: x[1].line_pct)
@@ -573,7 +573,7 @@ class ReportGenerator:
 </head>
 <body>
     <h1>Coverage Analysis Report</h1>
-    <p>Generated: {datetime.now.strftime('%Y-%m-%d %H:%M:%S')}</p>
+    <p>Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
 
     <div class="summary">
         <div class="stat">
@@ -620,7 +620,7 @@ class ReportGenerator:
         for gap, severity in all_gaps[:15]:
             row_class = f"gap-{severity}" if severity in ['critical', 'high'] else ""
             html += f"""            <tr class="{row_class}">
-                <td>{severity.upper}</td>
+                <td>{severity.upper()}</td>
                 <td>{gap['file'].split('/')[-1]}</td>
                 <td>{gap['description']}</td>
                 <td>{gap['recommendation']}</td>
@@ -645,7 +645,7 @@ class ReportGenerator:
 """
 
         # Sort files by line coverage
-        sorted_files = sorted(files.items, key=lambda x: x[1].line_pct)
+        sorted_files = sorted(files.items(), key=lambda x: x[1].line_pct)
 
         for path, cov in sorted_files[:20]:
             short_path = path.split('/')[-1] if '/' in path else path
@@ -745,7 +745,7 @@ class CoverageAnalyzerTool:
         return results
 
 
-def main:
+def main():
     """Main entry point"""
     parser = argparse.ArgumentParser(
         description="Analyze Jest/Istanbul coverage reports and identify gaps",
@@ -806,7 +806,7 @@ Examples:
         help='Output results as JSON (summary only)'
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     try:
         tool = CoverageAnalyzerTool(
@@ -819,7 +819,7 @@ Examples:
             verbose=args.verbose
         )
 
-        results = tool.run
+        results = tool.run()
 
         if args.json:
             print(json.dumps(results, indent=2))
@@ -828,9 +828,9 @@ Examples:
         print(f"Error: {e}")
         if args.verbose:
             import traceback
-            traceback.print_exc
+            traceback.print_exc()
         sys.exit(1)
 
 
 if __name__ == '__main__':
-    main
+    main()

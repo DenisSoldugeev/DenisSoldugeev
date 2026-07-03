@@ -28,8 +28,8 @@ def build_plan(args):
     magnitude = args.magnitude or attack_meta.get("magnitude_hint", "<set magnitude>")
     tooling = args.tooling or attack_meta.get("tooling_hint", "<set tooling>")
     plan = {
-        "experiment_id": f"chaos-{args.target}-{args.attack}-{int(datetime.now(timezone.utc).timestamp)}",
-        "created": datetime.now(timezone.utc).isoformat,
+        "experiment_id": f"chaos-{args.target}-{args.attack}-{int(datetime.now(timezone.utc).timestamp())}",
+        "created": datetime.now(timezone.utc).isoformat(),
         "target": args.target,
         "hypothesis": args.hypothesis,
         "steady_state": {
@@ -60,7 +60,7 @@ def build_plan(args):
 def _parse_abort_criteria(raw):
     if not raw:
         return []
-    parts = [p.strip for p in raw.split(" OR ")]
+    parts = [p.strip() for p in raw.split(" OR ")]
     return [{"signal": p, "action": "abort"} for p in parts if p]
 
 
@@ -108,11 +108,11 @@ def render_markdown(plan):
     return "\n".join(lines)
 
 
-def main:
+def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--target", required=True, help="Target system or service")
     ap.add_argument("--hypothesis", required=True, help='Hypothesis: "When X, metric Y stays Z"')
-    ap.add_argument("--attack", required=True, choices=list(ATTACK_DEFAULTS.keys))
+    ap.add_argument("--attack", required=True, choices=list(ATTACK_DEFAULTS.keys()))
     ap.add_argument("--magnitude", help="Attack magnitude (default: per-attack hint)")
     ap.add_argument("--duration-min", type=int, default=15)
     ap.add_argument("--steady-metric", help="Steady-state metric name (e.g., 'p99 latency')")
@@ -125,7 +125,7 @@ def main:
     ap.add_argument("--owner", help="Experiment owner")
     ap.add_argument("--learning", help="Learning question")
     ap.add_argument("--format", choices=["markdown", "json"], default="markdown")
-    args = ap.parse_args
+    args = ap.parse_args()
 
     plan = build_plan(args)
     if args.format == "json":
@@ -136,4 +136,4 @@ def main:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

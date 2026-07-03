@@ -60,17 +60,17 @@ class StackComparator:
             Normalized weights dictionary
         """
         # Start with defaults
-        weights = self.DEFAULT_WEIGHTS.copy
+        weights = self.DEFAULT_WEIGHTS.copy()
 
         # Override with custom weights
         weights.update(custom_weights)
 
         # Normalize to 100
-        total = sum(weights.values)
+        total = sum(weights.values())
         if total == 0:
             return self.DEFAULT_WEIGHTS
 
-        return {k: (v / total) * 100 for k, v in weights.items}
+        return {k: (v / total) * 100 for k, v in weights.items()}
 
     def score_technology(self, tech_name: str, tech_data: Dict[str, Any]) -> Dict[str, float]:
         """
@@ -125,10 +125,10 @@ class StackComparator:
         }
 
         # Determine use case type
-        use_case_lower = self.use_case.lower
+        use_case_lower = self.use_case.lower()
         use_case_type = None
 
-        for uc_key in adjustments.keys:
+        for uc_key in adjustments.keys():
             if uc_key in use_case_lower:
                 use_case_type = uc_key
                 break
@@ -152,7 +152,7 @@ class StackComparator:
         """
         total = 0.0
 
-        for category, score in category_scores.items:
+        for category, score in category_scores.items():
             weight = self.weights.get(category, 0.0) / 100.0  # Convert to decimal
             total += score * weight
 
@@ -211,7 +211,7 @@ class StackComparator:
             List of strength categories
         """
         return [
-            category for category, score in category_scores.items
+            category for category, score in category_scores.items()
             if score >= threshold
         ]
 
@@ -227,7 +227,7 @@ class StackComparator:
             List of weakness categories
         """
         return [
-            category for category, score in category_scores.items
+            category for category, score in category_scores.items()
             if score < threshold
         ]
 
@@ -246,7 +246,7 @@ class StackComparator:
 
         # Sort by weighted total score
         sorted_techs = sorted(
-            tech_scores.items,
+            tech_scores.items(),
             key=lambda x: x[1]['weighted_total'],
             reverse=True
         )
@@ -288,7 +288,7 @@ class StackComparator:
 
         # Get top weighted categories
         sorted_weights = sorted(
-            self.weights.items,
+            self.weights.items(),
             key=lambda x: x[1],
             reverse=True
         )[:3]  # Top 3 factors
@@ -297,11 +297,11 @@ class StackComparator:
             # Get scores for this category across all techs
             category_scores = {
                 tech: scores['category_scores'].get(category, 0.0)
-                for tech, scores in tech_scores.items
+                for tech, scores in tech_scores.items()
             }
 
             # Find best performer
-            best_tech = max(category_scores.items, key=lambda x: x[1])
+            best_tech = max(category_scores.items(), key=lambda x: x[1])
 
             factors.append({
                 'category': category,
@@ -331,7 +331,7 @@ class StackComparator:
                 'scores': {}
             }
 
-            for tech_name, scores in tech_scores.items:
+            for tech_name, scores in tech_scores.items():
                 category_score = scores['category_scores'].get(category, 0.0)
                 row['scores'][tech_name] = f"{category_score:.1f}"
 
@@ -344,7 +344,7 @@ class StackComparator:
             'scores': {}
         }
 
-        for tech_name, scores in tech_scores.items:
+        for tech_name, scores in tech_scores.items():
             totals_row['scores'][tech_name] = f"{scores['weighted_total']:.1f}"
 
         matrix.append(totals_row)

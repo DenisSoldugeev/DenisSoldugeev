@@ -33,13 +33,13 @@ LIST_WORDS = ("each", "list of", "set of", "batch", "files", "documents",
 
 
 def _has(task, words):
-    t = task.lower
+    t = task.lower()
     return any(w in t for w in words)
 
 
 def classify(task, units, stages, needs_all, structured):
     """Return (topology, runner_up_or_None, signals_dict)."""
-    t = task.lower
+    t = task.lower()
     signals = {
         "verb_chain": bool(re.search(r"\b(then|after)\b", t)) or _has(task, VERB_CHAIN),
         "panel": _has(task, PANEL_WORDS),
@@ -120,7 +120,7 @@ def model_plan(topology, signals):
 
 def budget_guard(signals):
     if signals["units_effective"] == "loop":
-        return ("budget.remaining > 50_000 (plus a hard count cap)",
+        return ("budget.remaining() > 50_000 (plus a hard count cap)",
                 "open-ended loop — guard is mandatory or it hits the 1000-agent cap")
     return ("optional; set budget.total if the user gave a token target",
             "fixed topology with a known/bounded item count — no runaway risk")
@@ -149,7 +149,7 @@ def recommend(task, units, stages, needs_all, structured):
         "task": task,
         "recommended_topology": topology,
         "runner_up_topology": runner_up,
-        "resolved_signals": {k: v for k, v in signals.items if k.endswith("effective") or k in
+        "resolved_signals": {k: v for k, v in signals.items() if k.endswith("effective") or k in
                              ("panel", "costly", "loop_like", "merge_like", "verb_chain", "list_like")},
         "model_plan": [{"stage": s, "model": m, "why": w} for s, m, w in models],
         "structured_output": structured_eff,
@@ -230,4 +230,4 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

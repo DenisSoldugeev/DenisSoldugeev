@@ -294,7 +294,7 @@ def monte_carlo_forecast(sprints: List[SprintData], sprints_ahead: int = 6) -> D
         simulated_totals.append(total_points)
     
     # Calculate percentiles for confidence intervals
-    simulated_totals.sort
+    simulated_totals.sort()
     forecasts = {}
     
     for confidence in confidence_levels:
@@ -319,8 +319,8 @@ def random_normal(mean: float, std_dev: float) -> float:
     import math
     
     # Box-Muller transformation
-    u1 = random.random
-    u2 = random.random
+    u1 = random.random()
+    u2 = random.random()
     
     z0 = math.sqrt(-2 * math.log(u1)) * math.cos(2 * math.pi * u2)
     return mean + z0 * std_dev
@@ -371,7 +371,7 @@ def generate_recommendations(analysis: VelocityAnalysis) -> List[str]:
 
 def analyze_velocity(data: Dict[str, Any]) -> VelocityAnalysis:
     """Perform comprehensive velocity analysis."""
-    analysis = VelocityAnalysis
+    analysis = VelocityAnalysis()
     
     try:
         # Parse sprint data
@@ -463,7 +463,7 @@ def format_text_output(analysis: VelocityAnalysis) -> str:
     volatility = summary.get("volatility", {})
     lines.append("VELOCITY STABILITY")
     lines.append("-"*30)
-    lines.append(f"Volatility Level: {volatility.get('volatility', 'Unknown').replace('_', ' ').title}")
+    lines.append(f"Volatility Level: {volatility.get('volatility', 'Unknown').replace('_', ' ').title()}")
     lines.append(f"Coefficient of Variation: {volatility.get('coefficient_of_variation', 0):.2%}")
     lines.append(f"Standard Deviation: {volatility.get('standard_deviation', 0):.1f} points")
     lines.append("")
@@ -472,7 +472,7 @@ def format_text_output(analysis: VelocityAnalysis) -> str:
     trend_analysis = analysis.trend_analysis
     lines.append("TREND ANALYSIS")
     lines.append("-"*30)
-    lines.append(f"Trend Direction: {trend_analysis.get('trend', 'Unknown').replace('_', ' ').title}")
+    lines.append(f"Trend Direction: {trend_analysis.get('trend', 'Unknown').replace('_', ' ').title()}")
     lines.append(f"Trend Confidence: {trend_analysis.get('confidence', 0):.1%}")
     lines.append(f"Velocity Change Rate: {trend_analysis.get('relative_slope', 0):.1%} per sprint")
     lines.append("")
@@ -487,7 +487,7 @@ def format_text_output(analysis: VelocityAnalysis) -> str:
         
         forecasted_totals = forecasting.get("forecasted_totals", {})
         lines.append("Confidence Intervals:")
-        for confidence, total in forecasted_totals.items:
+        for confidence, total in forecasted_totals.items():
             lines.append(f"  {confidence}: {total:.0f} points")
     else:
         lines.append(f"Forecast unavailable: {forecasting.get('error', 'Unknown error')}")
@@ -501,7 +501,7 @@ def format_text_output(analysis: VelocityAnalysis) -> str:
             lines.append(f"Sprint {anomaly['sprint_number']} ({anomaly['sprint_name']})")
             lines.append(f"  Velocity: {anomaly['velocity']} points")
             lines.append(f"  Deviation: {anomaly['deviation_percentage']:.1f}%")
-            lines.append(f"  Type: {anomaly['anomaly_type'].replace('_', ' ').title}")
+            lines.append(f"  Type: {anomaly['anomaly_type'].replace('_', ' ').title()}")
         lines.append("")
     
     # Recommendations
@@ -529,7 +529,7 @@ def format_json_output(analysis: VelocityAnalysis) -> Dict[str, Any]:
 # CLI Interface
 # ---------------------------------------------------------------------------
 
-def main -> int:
+def main() -> int:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Analyze sprint velocity data with trend detection and forecasting"
@@ -545,7 +545,7 @@ def main -> int:
         help="Output format (default: text)"
     )
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Load and validate data
@@ -577,4 +577,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

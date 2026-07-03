@@ -192,7 +192,7 @@ class ReleasePlanner:
         
         # Load or generate default quality gates if none provided
         if not self.quality_gates:
-            self._generate_default_quality_gates
+            self._generate_default_quality_gates()
         
         # Load or generate default rollback steps
         if 'rollback_steps' in data:
@@ -209,7 +209,7 @@ class ReleasePlanner:
                 )
                 self.rollback_steps.append(step)
         else:
-            self._generate_default_rollback_steps
+            self._generate_default_rollback_steps()
     
     def _generate_default_quality_gates(self):
         """Generate default quality gates."""
@@ -428,10 +428,10 @@ class ReleasePlanner:
         # Timeline assessment
         if self.target_date:
             # Handle timezone-aware datetime comparison
-            now = datetime.now(self.target_date.tzinfo) if self.target_date.tzinfo else datetime.now
+            now = datetime.now(self.target_date.tzinfo) if self.target_date.tzinfo else datetime.now()
             days_until_release = (self.target_date - now).days
             assessment['timeline_assessment'] = {
-                'target_date': self.target_date.isoformat,
+                'target_date': self.target_date.isoformat(),
                 'days_remaining': days_until_release,
                 'timeline_status': 'on_track' if days_until_release > 0 else 'overdue'
             }
@@ -473,9 +473,9 @@ class ReleasePlanner:
         missing = []
         
         # Determine required approvals based on risk level
-        required = self.required_approvals.copy
+        required = self.required_approvals.copy()
         if feature.risk_level in [RiskLevel.HIGH, RiskLevel.CRITICAL]:
-            required = self.high_risk_approval_requirements.copy
+            required = self.high_risk_approval_requirements.copy()
         
         if 'pm_approved' in required and not feature.pm_approved:
             missing.append('PM approval')
@@ -503,13 +503,13 @@ class ReleasePlanner:
             {
                 'category': 'Pre-Release Validation', 
                 'item': 'Breaking changes documented',
-                'status': 'ready' if self._check_breaking_change_docs else 'pending',
+                'status': 'ready' if self._check_breaking_change_docs() else 'pending',
                 'details': f"{len([f for f in self.features if f.breaking_changes])} features have breaking changes"
             },
             {
                 'category': 'Pre-Release Validation',
                 'item': 'Migration scripts tested',
-                'status': 'ready' if self._check_migrations else 'pending',
+                'status': 'ready' if self._check_migrations() else 'pending',
                 'details': f"{len([f for f in self.features if f.requires_migration])} features require migrations"
             }
         ])
@@ -526,9 +526,9 @@ class ReleasePlanner:
         
         # Approvals
         approval_items = [
-            ('Product Manager sign-off', self._check_pm_approvals),
-            ('QA validation complete', self._check_qa_approvals), 
-            ('Security team clearance', self._check_security_approvals)
+            ('Product Manager sign-off', self._check_pm_approvals()),
+            ('QA validation complete', self._check_qa_approvals()), 
+            ('Security team clearance', self._check_security_approvals())
         ]
         
         for item, status in approval_items:
@@ -645,9 +645,9 @@ class ReleasePlanner:
             for delta, description in timeline_items:
                 notification_time = self.target_date + delta
                 plan['timeline'].append({
-                    'time': notification_time.isoformat,
+                    'time': notification_time.isoformat(),
                     'description': description,
-                    'recipients': 'all' if 'all' in description.lower else 'internal'
+                    'recipients': 'all' if 'all' in description.lower() else 'internal'
                 })
         
         # Communication channels
@@ -659,7 +659,7 @@ class ReleasePlanner:
         plan['channels'] = channels
         
         # Message templates
-        plan['templates'] = self._generate_message_templates
+        plan['templates'] = self._generate_message_templates()
         
         return plan
     
@@ -715,7 +715,7 @@ The Development Team"""
 
 Release: {self.version}
 Reason: [TO BE FILLED]
-Rollback initiated: {datetime.now.strftime('%Y-%m-%d %H:%M UTC')}
+Rollback initiated: {datetime.now().strftime('%Y-%m-%d %H:%M UTC')}
 Estimated completion: [TO BE FILLED]
 
 Current status: Rolling back to previous stable version
@@ -744,7 +744,7 @@ Status page: [TO BE FILLED]"""
                     'Manual decision by incident commander'
                 ],
                 'decision_makers': ['On-call Engineer', 'Engineering Lead', 'Incident Commander'],
-                'estimated_total_time': self._calculate_rollback_time
+                'estimated_total_time': self._calculate_rollback_time()
             },
             'prerequisites': [
                 'Confirm rollback is necessary (check with incident commander)',
@@ -813,7 +813,7 @@ Status page: [TO BE FILLED]"""
         total_minutes = 0
         for step in self.rollback_steps:
             # Parse time estimates like "5 minutes", "30 seconds", "1 hour"
-            time_str = step.estimated_time.lower
+            time_str = step.estimated_time.lower()
             if 'minute' in time_str:
                 minutes = int(re.search(r'(\d+)', time_str).group(1))
                 total_minutes += minutes
@@ -832,7 +832,7 @@ Status page: [TO BE FILLED]"""
             return f"{hours}h {minutes}m"
 
 
-def main:
+def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(description="Assess release readiness and generate release plans")
     parser.add_argument('--input', '-i', required=True,
@@ -851,18 +851,18 @@ def main:
     parser.add_argument('--min-coverage', type=float, default=80.0,
                        help='Minimum test coverage threshold')
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     # Load release plan
     try:
         with open(args.input, 'r', encoding='utf-8') as f:
-            plan_data = f.read
+            plan_data = f.read()
     except Exception as e:
         print(f"Error reading input file: {e}", file=sys.stderr)
         sys.exit(1)
     
     # Initialize planner
-    planner = ReleasePlanner
+    planner = ReleasePlanner()
     planner.min_test_coverage = args.min_coverage
     
     try:
@@ -872,12 +872,12 @@ def main:
         sys.exit(1)
     
     # Generate assessment
-    assessment = planner.assess_release_readiness
+    assessment = planner.assess_release_readiness()
     
     # Generate optional components
-    checklist = planner.generate_release_checklist if args.include_checklist else None
-    communication = planner.generate_communication_plan if args.include_communication else None
-    rollback = planner.generate_rollback_runbook if args.include_rollback else None
+    checklist = planner.generate_release_checklist() if args.include_checklist else None
+    communication = planner.generate_communication_plan() if args.include_communication else None
+    rollback = planner.generate_rollback_runbook() if args.include_rollback else None
     
     # Generate output
     if args.output_format == 'json':
@@ -893,7 +893,7 @@ def main:
         output_lines = [
             f"# Release Readiness Report - {planner.release_name} v{planner.version}",
             "",
-            f"**Overall Status:** {assessment['overall_status'].upper}",
+            f"**Overall Status:** {assessment['overall_status'].upper()}",
             f"**Readiness Score:** {assessment['readiness_score']:.1f}%",
             ""
         ]
@@ -952,7 +952,7 @@ def main:
             f"Release Readiness Report",
             f"========================",
             f"Release: {planner.release_name} v{planner.version}",
-            f"Status: {assessment['overall_status'].upper}",
+            f"Status: {assessment['overall_status'].upper()}",
             f"Readiness Score: {assessment['readiness_score']:.1f}%",
             ""
         ]
@@ -1000,4 +1000,4 @@ def main:
 
 
 if __name__ == '__main__':
-    main
+    main()

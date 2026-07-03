@@ -18,7 +18,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import config_loader  # noqa: E402
 
 HANDOFF_FILENAME_PATTERNS = ("handoff-", "handoff_", "handoff.md")
@@ -30,16 +30,16 @@ def _candidate_dirs(config: dict) -> list[Path]:
     raw_path = save.get("path")
     dirs: list[Path] = []
     if mode == "temp":
-        dirs.append(Path(tempfile.gettempdir))
+        dirs.append(Path(tempfile.gettempdir()))
     elif raw_path:
         dirs.append(Path(raw_path))
     else:
-        dirs.append(Path(tempfile.gettempdir))
-    return [d for d in dirs if d.exists]
+        dirs.append(Path(tempfile.gettempdir()))
+    return [d for d in dirs if d.exists()]
 
 
 def _looks_like_handoff(p: Path) -> bool:
-    name = p.name.lower
+    name = p.name.lower()
     if not name.endswith(".md"):
         return False
     return any(token in name for token in HANDOFF_FILENAME_PATTERNS)
@@ -57,8 +57,8 @@ def find_candidates(config: dict) -> list[Path]:
     out: list[Path] = []
     for d in _candidate_dirs(config):
         try:
-            for entry in d.iterdir:
-                if entry.is_file and _looks_like_handoff(entry):
+            for entry in d.iterdir():
+                if entry.is_file() and _looks_like_handoff(entry):
                     out.append(entry)
         except OSError:
             continue
@@ -67,7 +67,7 @@ def find_candidates(config: dict) -> list[Path]:
 
 def plan_cleanup(config: dict, now: dt.datetime | None = None) -> dict:
     retention = int(config.get("retention_days", 7))
-    now = now or dt.datetime.utcnow
+    now = now or dt.datetime.utcnow()
     plan = {
         "retention_days": retention,
         "candidates": [],
@@ -83,15 +83,15 @@ def plan_cleanup(config: dict, now: dt.datetime | None = None) -> dict:
     cutoff = now - dt.timedelta(days=retention)
     for path in find_candidates(config):
         try:
-            stat = path.stat
+            stat = path.stat()
         except OSError as exc:
             plan["errors"].append({"path": str(path), "error": str(exc)})
             continue
         ctime = dt.datetime.utcfromtimestamp(stat.st_ctime)
         entry = {
             "path": str(path),
-            "ctime": ctime.isoformat + "Z",
-            "age_days": round((now - ctime).total_seconds / 86400, 2),
+            "ctime": ctime.isoformat() + "Z",
+            "age_days": round((now - ctime).total_seconds() / 86400, 2),
         }
         plan["candidates"].append(entry)
         if _was_edited(stat):
@@ -114,7 +114,7 @@ def execute(plan: dict, dry_run: bool = False) -> list[str]:
             deleted.append(str(path))
             continue
         try:
-            path.unlink
+            path.unlink()
             deleted.append(str(path))
         except OSError:
             continue
@@ -128,7 +128,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--sample", action="store_true", help="Run the plan without deleting.")
     args = parser.parse_args(argv)
 
-    config = config_loader.load_config
+    config = config_loader.load_config()
     plan = plan_cleanup(config)
 
     if args.sample or args.dry_run:
@@ -162,4 +162,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

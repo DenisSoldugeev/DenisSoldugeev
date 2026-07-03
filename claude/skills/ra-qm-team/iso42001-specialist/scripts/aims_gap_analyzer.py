@@ -139,7 +139,7 @@ def analyze(payload: Dict[str, Any]) -> Dict[str, Any]:
     total_weight = 0.0
     achieved_weight = 0.0
 
-    for req_key, meta in CLAUSE_REQUIREMENTS.items:
+    for req_key, meta in CLAUSE_REQUIREMENTS.items():
         status = evidence.get(req_key, "missing")
         score = STATUS_SCORE.get(status, 0.0)
         # Severity-weighted: critical = 4, major = 2, minor = 1
@@ -203,7 +203,7 @@ def render_text(r: Dict[str, Any], source: str) -> str:
 
     for f in r["findings"]:
         marker = {"missing": "[X] ", "partial": "[~] ", "documented": "[✓] "}[f["status"]]
-        sev = f["severity_if_missing"].upper if f["status"] != "documented" else "OK"
+        sev = f["severity_if_missing"].upper() if f["status"] != "documented" else "OK"
         lines.append(f"  {marker}Clause {f['clause']:6s}  {f['title']:50s}  [{sev}]")
         if f["status"] != "documented":
             lines.append(f"        → {f['remediation']}")
@@ -214,7 +214,7 @@ def render_text(r: Dict[str, Any], source: str) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="ISO/IEC 42001 AIMS gap analysis across Clauses 4-10.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -222,7 +222,7 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to AIMS evidence JSON (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
@@ -248,4 +248,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

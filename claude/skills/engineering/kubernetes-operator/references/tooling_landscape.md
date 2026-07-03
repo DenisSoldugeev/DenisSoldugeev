@@ -44,7 +44,7 @@ Primary language?
 mgr, _ := ctrl.NewManager(cfg, ctrl.Options{Scheme: scheme})
 ctrl.NewControllerManagedBy(mgr).
     For(&apps.MyApp{}).
-    Complete(&MyAppReconciler{Client: mgr.GetClient})
+    Complete(&MyAppReconciler{Client: mgr.GetClient()})
 mgr.Start(ctx)
 ```
 

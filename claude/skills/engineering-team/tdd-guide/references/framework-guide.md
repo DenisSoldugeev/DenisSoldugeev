@@ -45,19 +45,19 @@ module.exports = {
 ### Jest Test Pattern
 
 ```typescript
-describe('Calculator',  => {
+describe('Calculator', () => {
   let calc: Calculator;
 
-  beforeEach( => {
-    calc = new Calculator;
+  beforeEach(() => {
+    calc = new Calculator();
   });
 
-  it('should add two numbers',  => {
+  it('should add two numbers', () => {
     expect(calc.add(2, 3)).toBe(5);
   });
 
-  it('should throw on invalid input',  => {
-    expect( => calc.add(null, 3)).toThrow('Invalid input');
+  it('should throw on invalid input', () => {
+    expect(() => calc.add(null, 3)).toThrow('Invalid input');
   });
 });
 ```
@@ -106,7 +106,7 @@ from calculator import Calculator
 class TestCalculator:
     @pytest.fixture
     def calc(self):
-        return Calculator
+        return Calculator()
 
     def test_add_positive_numbers(self, calc):
         assert calc.add(2, 3) == 5
@@ -160,21 +160,21 @@ class CalculatorTest {
     private Calculator calc;
 
     @BeforeEach
-    void setUp {
-        calc = new Calculator;
+    void setUp() {
+        calc = new Calculator();
     }
 
     @Test
     @DisplayName("should add two positive numbers")
-    void testAddPositive {
+    void testAddPositive() {
         assertEquals(5, calc.add(2, 3));
     }
 
     @Test
     @DisplayName("should throw on null input")
-    void testAddThrowsOnNull {
+    void testAddThrowsOnNull() {
         assertThrows(IllegalArgumentException.class,
-             -> calc.add(null, 3));
+            () -> calc.add(null, 3));
     }
 
     @ParameterizedTest

@@ -91,7 +91,7 @@ def speed_realtime_aggregation(spark):
         .format("kafka") \
         .option("kafka.bootstrap.servers", "kafka:9092") \
         .option("subscribe", "events") \
-        .load
+        .load()
 
     parsed = stream_df.select(
         from_json(col("value").cast("string"), event_schema).alias("data")
@@ -110,7 +110,7 @@ def speed_realtime_aggregation(spark):
         .format("redis") \
         .option("host", "redis") \
         .outputMode("update") \
-        .start
+        .start()
 
     return query
 ```
@@ -161,7 +161,7 @@ class KappaReprocessor:
         """Reprocess all data from a specific timestamp."""
 
         # 1. Start new consumer group reading from timestamp
-        new_consumer_group = f"reprocess-{uuid.uuid4}"
+        new_consumer_group = f"reprocess-{uuid.uuid4()}"
 
         # 2. Configure stream processor with new group
         self.job.set_config({
@@ -174,11 +174,11 @@ class KappaReprocessor:
         self.job.seek_to_offsets(offsets)
 
         # 4. Write to new output table/topic
-        output_table = f"events_reprocessed_{datetime.now.strftime('%Y%m%d')}"
+        output_table = f"events_reprocessed_{datetime.now().strftime('%Y%m%d')}"
         self.job.set_output(output_table)
 
         # 5. Run until caught up
-        self.job.run_until_caught_up
+        self.job.run_until_caught_up()
 
         # 6. Swap output tables atomically
         self._atomic_table_swap("events", output_table)
@@ -222,8 +222,8 @@ def ingest_to_bronze(spark, source_path, bronze_path):
     df = spark.read.format("json").load(source_path)
 
     # Add metadata
-    df = df.withColumn("_ingested_at", current_timestamp) \
-           .withColumn("_source_file", input_file_name)
+    df = df.withColumn("_ingested_at", current_timestamp()) \
+           .withColumn("_source_file", input_file_name())
 
     df.write \
         .format("delta") \
@@ -244,7 +244,7 @@ def bronze_to_silver(spark, bronze_path, silver_path):
 
     # Cleanse and validate
     silver_df = new_records \
-        .filter(col("user_id").isNotNull) \
+        .filter(col("user_id").isNotNull()) \
         .filter(col("event_type").isin(["click", "view", "purchase"])) \
         .withColumn("event_date", to_date("timestamp")) \
         .dropDuplicates(["event_id"])
@@ -257,9 +257,9 @@ def bronze_to_silver(spark, bronze_path, silver_path):
             silver_df.alias("source"),
             "target.event_id = source.event_id"
         ) \
-        .whenMatchedUpdateAll \
-        .whenNotMatchedInsertAll \
-        .execute
+        .whenMatchedUpdateAll() \
+        .whenNotMatchedInsertAll() \
+        .execute()
 
 # Gold: Business aggregations
 def silver_to_gold(spark, silver_path, gold_path):
@@ -303,7 +303,7 @@ spark = SparkSession.builder \
     .config("spark.sql.adaptive.enabled", "true") \
     .config("spark.sql.adaptive.coalescePartitions.enabled", "true") \
     .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer") \
-    .getOrCreate
+    .getOrCreate()
 ```
 
 **Memory Tuning Guidelines:**
@@ -329,7 +329,7 @@ df_coalesced = df.coalesce(10)  # Reduce partitions without shuffle
 # num_partitions = total_data_size_mb / 200
 
 # Check current partitions
-print(f"Current partitions: {df.rdd.getNumPartitions}")
+print(f"Current partitions: {df.rdd.getNumPartitions()}")
 
 # Repartition for optimal join performance
 large_df = large_df.repartition(200, "join_key")
@@ -374,13 +374,13 @@ from pyspark import StorageLevel
 df.persist(StorageLevel.MEMORY_AND_DISK)
 
 # Cache only necessary columns
-df.select("id", "value").cache
+df.select("id", "value").cache()
 
 # Unpersist when done
-df.unpersist
+df.unpersist()
 
 # Check storage
-spark.catalog.clearCache  # Clear all caches
+spark.catalog.clearCache()  # Clear all caches
 ```
 
 ### Airflow DAG Patterns
@@ -402,7 +402,7 @@ from datetime import timedelta
         "retry_delay": timedelta(minutes=5),
     }
 )
-def idempotent_etl:
+def idempotent_etl():
 
     @task
     def extract(execution_date=None):
@@ -435,11 +435,11 @@ def idempotent_etl:
         # WHEN MATCHED THEN UPDATE
         # WHEN NOT MATCHED THEN INSERT
 
-    raw = extract
+    raw = extract()
     transformed = transform(raw)
     load(transformed)
 
-dag = idempotent_etl
+dag = idempotent_etl()
 ```
 
 #### Backfill Pattern
@@ -546,7 +546,7 @@ events = spark.readStream \
     .format("kafka") \
     .option("kafka.bootstrap.servers", "localhost:9092") \
     .option("subscribe", "events") \
-    .load \
+    .load() \
     .select(from_json(col("value").cast("string"), schema).alias("data")) \
     .select("data.*")
 
@@ -558,14 +558,14 @@ windowed_counts = events \
         window("event_time", "5 minutes", "1 minute"),  # 5-min windows, 1-min slide
         "event_type"
     ) \
-    .count
+    .count()
 
 # Write with append mode (only final results for complete windows)
 query = windowed_counts.writeStream \
     .format("delta") \
     .outputMode("append") \
     .option("checkpointLocation", "/checkpoints/windowed_counts") \
-    .start
+    .start()
 ```
 
 **Watermark Behavior:**
@@ -612,7 +612,7 @@ def session_aggregation(key, events, state):
     state.setTimeoutDuration("30 minutes")
 
     # Check if session should close
-    if state.hasTimedOut:
+    if state.hasTimedOut():
         # Emit completed session
         output = {
             "user_id": key,
@@ -620,7 +620,7 @@ def session_aggregation(key, events, state):
             "event_count": len(session["events"]),
             "total_value": session["total"]
         }
-        state.remove
+        state.remove()
         yield output
     else:
         # Update state
@@ -632,7 +632,7 @@ sessions = events \
     .flatMapGroupsWithState(
         session_aggregation,
         outputMode="append",
-        stateTimeout=GroupStateTimeout.ProcessingTimeTimeout
+        stateTimeout=GroupStateTimeout.ProcessingTimeTimeout()
     )
 ```
 
@@ -659,7 +659,7 @@ producer = KafkaProducer(
 for i in range(100):
     producer.send('topic', {'id': i, 'data': 'value'})
 
-producer.flush
+producer.flush()
 ```
 
 ### Transactional Processing
@@ -676,18 +676,18 @@ producer = KafkaProducer(
     acks='all'
 )
 
-producer.init_transactions
+producer.init_transactions()
 
 def process_with_transactions(consumer, producer):
     """Read-process-write with exactly-once semantics."""
 
     try:
-        producer.begin_transaction
+        producer.begin_transaction()
 
         # Read
         records = consumer.poll(timeout_ms=1000)
 
-        for tp, messages in records.items:
+        for tp, messages in records.items():
             for message in messages:
                 # Process
                 result = transform(message.value)
@@ -697,13 +697,13 @@ def process_with_transactions(consumer, producer):
 
         # Commit offsets and transaction atomically
         producer.send_offsets_to_transaction(
-            consumer.position(consumer.assignment),
+            consumer.position(consumer.assignment()),
             consumer.group_id
         )
-        producer.commit_transaction
+        producer.commit_transaction()
 
     except KafkaError as e:
-        producer.abort_transaction
+        producer.abort_transaction()
         raise
 ```
 
@@ -724,7 +724,7 @@ def write_to_database_idempotent(batch_df, batch_id):
         .option("dbtable", "staging_events") \
         .option("driver", "org.postgresql.Driver") \
         .mode("append") \
-        .save
+        .save()
 
     # Merge staging to final (idempotent)
     execute_sql("""
@@ -741,7 +741,7 @@ def write_to_database_idempotent(batch_df, batch_id):
 query = events.writeStream \
     .foreachBatch(write_to_database_idempotent) \
     .option("checkpointLocation", "/checkpoints/to-postgres") \
-    .start
+    .start()
 ```
 
 ---
@@ -765,7 +765,7 @@ class DeadLetterQueue:
             "original_record": record,
             "error_type": type(error).__name__,
             "error_message": str(error),
-            "timestamp": datetime.utcnow.isoformat,
+            "timestamp": datetime.utcnow().isoformat(),
             "context": context,
             "retry_count": context.get("retry_count", 0)
         }
@@ -782,7 +782,7 @@ def process_with_dlq(consumer, processor, dlq):
         try:
             result = processor.process(message.value)
             # Success - commit offset
-            consumer.commit
+            consumer.commit()
 
         except ValidationError as e:
             # Non-retryable - send to DLQ immediately
@@ -791,7 +791,7 @@ def process_with_dlq(consumer, processor, dlq):
                 e,
                 {"topic": message.topic, "partition": message.partition}
             )
-            consumer.commit  # Don't retry
+            consumer.commit()  # Don't retry
 
         except TemporaryError as e:
             # Retryable - don't commit, let consumer retry
@@ -799,7 +799,7 @@ def process_with_dlq(consumer, processor, dlq):
             retry_count = message.headers.get("retry_count", 0)
             if retry_count >= MAX_RETRIES:
                 dlq.send_to_dlq(message.value, e, {"retry_count": retry_count})
-                consumer.commit
+                consumer.commit()
             else:
                 raise  # Will be retried
 ```
@@ -830,25 +830,25 @@ class CircuitBreaker:
         self.failure_count = 0
         self.success_count = 0
         self.last_failure_time = None
-        self.lock = threading.Lock
+        self.lock = threading.Lock()
 
     def call(self, func, *args, **kwargs):
         """Execute function with circuit breaker protection."""
 
         with self.lock:
             if self.state == CircuitState.OPEN:
-                if self._should_attempt_reset:
+                if self._should_attempt_reset():
                     self.state = CircuitState.HALF_OPEN
                 else:
                     raise CircuitOpenError("Circuit is open")
 
         try:
             result = func(*args, **kwargs)
-            self._record_success
+            self._record_success()
             return result
 
         except Exception as e:
-            self._record_failure
+            self._record_failure()
             raise
 
     def _record_success(self):
@@ -865,7 +865,7 @@ class CircuitBreaker:
     def _record_failure(self):
         with self.lock:
             self.failure_count += 1
-            self.last_failure_time = datetime.now
+            self.last_failure_time = datetime.now()
 
             if self.state == CircuitState.HALF_OPEN:
                 self.state = CircuitState.OPEN
@@ -876,7 +876,7 @@ class CircuitBreaker:
     def _should_attempt_reset(self):
         if self.last_failure_time is None:
             return True
-        return datetime.now - self.last_failure_time >= self.recovery_timeout
+        return datetime.now() - self.last_failure_time >= self.recovery_timeout
 
 # Usage
 circuit = CircuitBreaker(failure_threshold=5, recovery_timeout=timedelta(seconds=60))
@@ -960,7 +960,7 @@ class BulkIngester:
         """Bulk ingest DataFrame to Snowflake."""
 
         # 1. Write to S3 as Parquet (compressed, columnar)
-        s3_path = f"s3://{self.bucket}/staging/{table_name}/{uuid.uuid4}"
+        s3_path = f"s3://{self.bucket}/staging/{table_name}/{uuid.uuid4()}"
         df.write.parquet(s3_path)
 
         # 2. Create external stage if not exists
@@ -1096,5 +1096,5 @@ with open('/config/etl_pipelines.yaml') as f:
 # Generate DAGs
 for config in configs['pipelines']:
     dag_id = f"etl_{config['source']}_{config['destination']}"
-    globals[dag_id] = create_etl_dag(config)
+    globals()[dag_id] = create_etl_dag(config)
 ```

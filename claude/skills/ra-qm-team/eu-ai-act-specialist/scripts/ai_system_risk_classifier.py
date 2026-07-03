@@ -30,6 +30,14 @@ Input schema (JSON):
   ]
 }
 
+Note on `article_5_practice`: this flag is the caller's legal pre-determination
+that a listed Article 5 practice applies IN ITS PROHIBITED CONTEXT — the
+classifier trusts it and does not re-derive it from the other fields. Context
+matters: emotion recognition is prohibited under Article 5(1)(f) ONLY in
+workplace and education settings (narrow safety/medical exceptions aside);
+the same system in e.g. a retail setting is NOT prohibited — it is subject to
+Article 50(3) transparency and possibly Annex III §1 (biometrics) high-risk rules.
+
 Usage:
     python ai_system_risk_classifier.py                       # uses embedded 5-system sample
     python ai_system_risk_classifier.py path/to/systems.json
@@ -45,9 +53,15 @@ from typing import Any, Dict, List, Optional
 SAMPLE: Dict[str, Any] = {
     "systems": [
         {
-            "name": "Emotion recognition in retail store CCTV",
-            "intended_purpose": "Detect emotions of shoppers to optimize layout",
-            "users": "store_managers",
+            # Article 5(1)(f) prohibits emotion recognition ONLY in WORKPLACE and
+            # EDUCATION settings (with narrow safety/medical exceptions). The same
+            # system aimed at RETAIL shoppers is NOT prohibited — it falls under
+            # Article 50(3) transparency (limited-risk) and may be high-risk under
+            # Annex III §1 (biometrics). This sample uses a genuine workplace
+            # context so the prohibited tag is correct.
+            "name": "Emotion recognition of employees in workplace CCTV",
+            "intended_purpose": "Monitor employees' emotional state to score engagement",
+            "users": "hr_managers",
             "data_processes_natural_persons": True,
             "annex_iii_category": None,
             "performs_profiling": False,
@@ -272,7 +286,7 @@ def render_text(r: Dict[str, Any], source: str) -> str:
     lines.append("-" * 72)
 
     for s in r["systems"]:
-        tier_label = s["tier"].replace("_", "-").upper
+        tier_label = s["tier"].replace("_", "-").upper()
         gpai_flag = "  [GPAI]" if s["is_gpai"] else ""
         sysrisk_flag = "  [SYSTEMIC RISK]" if s["gpai_systemic_risk"] else ""
         lines.append(f"  {s['name']}{gpai_flag}{sysrisk_flag}")
@@ -287,7 +301,7 @@ def render_text(r: Dict[str, Any], source: str) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="EU AI Act risk tier classifier per Articles 5/6/50 + Annex III.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -295,7 +309,7 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to systems JSON (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
@@ -321,4 +335,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -194,7 +194,7 @@ def generate_spec(name: str, description: str) -> str:
     context_prompt = generate_context_prompt(description)
     return SPEC_TEMPLATE.format(
         name=name,
-        date=date.today.isoformat,
+        date=date.today().isoformat(),
         context_prompt=context_prompt,
     )
 
@@ -205,8 +205,8 @@ def generate_spec_json(name: str, description: str) -> Dict[str, Any]:
         "spec": {
             "title": f"Spec: {name}",
             "metadata": {
-                "author": "[your name]",
-                "date": date.today.isoformat,
+                "author": "the author",
+                "date": date.today().isoformat(),
                 "status": "Draft",
                 "reviewers": [],
                 "related_specs": [],
@@ -279,7 +279,7 @@ def generate_spec_json(name: str, description: str) -> Dict[str, Any]:
     }
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Generate a feature specification template from a name and description.",
         epilog="Example: python spec_generator.py --name 'User Auth' --description 'OAuth 2.0 login flow'",
@@ -313,7 +313,7 @@ def main:
         help="Shorthand for --format json",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     output_format = "json" if args.json_flag else args.format
 
@@ -335,4 +335,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

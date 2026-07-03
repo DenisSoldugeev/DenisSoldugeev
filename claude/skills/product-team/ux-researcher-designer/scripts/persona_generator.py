@@ -17,36 +17,36 @@ Table of Contents:
 ==================
 
 CLASS: PersonaGenerator
-    __init__                      - Initialize archetype templates and persona components
-    generate_persona_from_data    - Main entry: generate persona from user data + interviews
-    format_persona_output         - Format persona dict as human-readable text
+    __init__()                      - Initialize archetype templates and persona components
+    generate_persona_from_data()    - Main entry: generate persona from user data + interviews
+    format_persona_output()         - Format persona dict as human-readable text
 
 PATTERN ANALYSIS:
-    _analyze_user_patterns        - Extract usage, device, context patterns from data
-    _identify_archetype           - Classify user into power/casual/business/mobile archetype
-    _analyze_behaviors            - Analyze usage patterns and feature preferences
+    _analyze_user_patterns()        - Extract usage, device, context patterns from data
+    _identify_archetype()           - Classify user into power/casual/business/mobile archetype
+    _analyze_behaviors()            - Analyze usage patterns and feature preferences
 
 DEMOGRAPHIC EXTRACTION:
-    _aggregate_demographics       - Calculate age range, location, tech proficiency
-    _extract_psychographics       - Extract motivations, values, attitudes, lifestyle
+    _aggregate_demographics()       - Calculate age range, location, tech proficiency
+    _extract_psychographics()       - Extract motivations, values, attitudes, lifestyle
 
 NEEDS & FRUSTRATIONS:
-    _identify_needs               - Identify primary/secondary goals, functional/emotional needs
-    _extract_frustrations         - Extract pain points from patterns and interviews
+    _identify_needs()               - Identify primary/secondary goals, functional/emotional needs
+    _extract_frustrations()         - Extract pain points from patterns and interviews
 
 CONTENT GENERATION:
-    _generate_name                - Generate persona name from archetype
-    _generate_tagline             - Generate one-line persona summary
-    _generate_scenarios           - Create usage scenarios based on archetype
-    _select_quote                 - Select representative quote from interviews
+    _generate_name()                - Generate persona name from archetype
+    _generate_tagline()             - Generate one-line persona summary
+    _generate_scenarios()           - Create usage scenarios based on archetype
+    _select_quote()                 - Select representative quote from interviews
 
 DATA VALIDATION:
-    _calculate_data_points        - Calculate sample size and confidence level
-    _derive_design_implications   - Generate actionable design recommendations
+    _calculate_data_points()        - Calculate sample size and confidence level
+    _derive_design_implications()   - Generate actionable design recommendations
 
 FUNCTIONS:
-    create_sample_user_data       - Generate sample data for testing/demo
-    main                          - CLI entry point
+    create_sample_user_data()       - Generate sample data for testing/demo
+    main()                          - CLI entry point
 
 Archetypes Supported:
     - power_user: Daily users, 10+ features, efficiency-focused
@@ -176,8 +176,8 @@ class PersonaGenerator:
         """Identify persona archetype based on patterns"""
         
         # Simple heuristic-based archetype identification
-        freq_pattern = max(patterns['usage_frequency'].items, key=lambda x: x[1])[0] if patterns['usage_frequency'] else 'medium'
-        device_pattern = max(patterns['devices'].items, key=lambda x: x[1])[0] if patterns['devices'] else 'desktop'
+        freq_pattern = max(patterns['usage_frequency'].items(), key=lambda x: x[1])[0] if patterns['usage_frequency'] else 'medium'
+        device_pattern = max(patterns['devices'].items(), key=lambda x: x[1])[0] if patterns['devices'] else 'desktop'
         
         if freq_pattern == 'daily' and len(patterns['feature_usage']) > 10:
             return 'power_user'
@@ -213,8 +213,8 @@ class PersonaGenerator:
     def _generate_tagline(self, patterns: Dict) -> str:
         """Generate persona tagline"""
         
-        freq = max(patterns['usage_frequency'].items, key=lambda x: x[1])[0] if patterns['usage_frequency'] else 'regular'
-        context = max(patterns['contexts'].items, key=lambda x: x[1])[0] if patterns['contexts'] else 'general'
+        freq = max(patterns['usage_frequency'].items(), key=lambda x: x[1])[0] if patterns['usage_frequency'] else 'regular'
+        context = max(patterns['contexts'].items(), key=lambda x: x[1])[0] if patterns['contexts'] else 'general'
         
         return f"A {freq} user who primarily uses the product for {context} purposes"
     
@@ -489,13 +489,13 @@ class PersonaGenerator:
         output.append("=" * 60)
         output.append(f"\n📝 {persona['tagline']}\n")
         
-        output.append(f"Archetype: {persona['archetype'].replace('_', ' ').title}")
+        output.append(f"Archetype: {persona['archetype'].replace('_', ' ').title()}")
         output.append(f"Quote: \"{persona['quote']}\"\n")
         
         output.append("👤 Demographics:")
-        for key, value in persona['demographics'].items:
+        for key, value in persona['demographics'].items():
             if value:
-                output.append(f"  • {key.replace('_', ' ').title}: {value}")
+                output.append(f"  • {key.replace('_', ' ').title()}: {value}")
         
         output.append("\n🧠 Psychographics:")
         if persona['psychographics']['motivations']:
@@ -524,7 +524,7 @@ class PersonaGenerator:
         
         return "\n".join(output)
 
-def create_sample_user_data:
+def create_sample_user_data():
     """Create sample user data for testing"""
     return [
         {
@@ -540,13 +540,13 @@ def create_sample_user_data:
         for i in range(30)
     ]
 
-def main:
+def main():
     import sys
     
-    generator = PersonaGenerator
+    generator = PersonaGenerator()
     
     # Create sample data
-    user_data = create_sample_user_data
+    user_data = create_sample_user_data()
     
     # Optional interview insights
     interview_insights = [
@@ -567,4 +567,4 @@ def main:
         print(generator.format_persona_output(persona))
 
 if __name__ == "__main__":
-    main
+    main()

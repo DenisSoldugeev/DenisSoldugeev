@@ -42,18 +42,18 @@ class SpecParser:
             if match:
                 # Save previous AC
                 if current_ac is not None:
-                    current_ac["body"] = "\n".join(body_lines).strip
+                    current_ac["body"] = "\n".join(body_lines).strip()
                     self._parse_gwt(current_ac)
                     criteria.append(current_ac)
 
                 ac_id = int(match.group(1))
-                name = match.group(2).strip
-                refs = match.group(3).strip if match.group(3) else ""
+                name = match.group(2).strip()
+                refs = match.group(3).strip() if match.group(3) else ""
 
                 current_ac = {
                     "id": f"AC-{ac_id}",
                     "name": name,
-                    "references": [r.strip for r in refs.split(",") if r.strip] if refs else [],
+                    "references": [r.strip() for r in refs.split(",") if r.strip()] if refs else [],
                     "given": "",
                     "when": "",
                     "then": [],
@@ -66,7 +66,7 @@ class SpecParser:
                 if re.match(r"^##\s+", line) and not re.match(r"^###\s+", line):
                     in_ac = False
                     if current_ac is not None:
-                        current_ac["body"] = "\n".join(body_lines).strip
+                        current_ac["body"] = "\n".join(body_lines).strip()
                         self._parse_gwt(current_ac)
                         criteria.append(current_ac)
                         current_ac = None
@@ -75,7 +75,7 @@ class SpecParser:
 
         # Don't forget the last one
         if current_ac is not None:
-            current_ac["body"] = "\n".join(body_lines).strip
+            current_ac["body"] = "\n".join(body_lines).strip()
             self._parse_gwt(current_ac)
             criteria.append(current_ac)
 
@@ -94,12 +94,12 @@ class SpecParser:
             if in_section and re.match(r"^##\s+", line):
                 break
             if in_section:
-                match = ec_pattern.match(line.strip)
+                match = ec_pattern.match(line.strip())
                 if match:
                     edge_cases.append({
                         "id": f"EC-{match.group(1)}",
-                        "condition": match.group(2).strip.rstrip("."),
-                        "behavior": match.group(3).strip.rstrip("."),
+                        "condition": match.group(2).strip().rstrip("."),
+                        "behavior": match.group(3).strip().rstrip("."),
                     })
 
         return edge_cases
@@ -109,7 +109,7 @@ class SpecParser:
         for line in self.lines:
             match = re.match(r"^#\s+(?:Spec:\s*)?(.+)", line)
             if match:
-                return match.group(1).strip
+                return match.group(1).strip()
         return "UnknownFeature"
 
     @staticmethod
@@ -120,27 +120,27 @@ class SpecParser:
 
         current_section = None
         for line in lines:
-            stripped = line.strip
+            stripped = line.strip()
             if not stripped:
                 continue
 
-            lower = stripped.lower
+            lower = stripped.lower()
             if lower.startswith("given "):
                 current_section = "given"
-                ac["given"] = stripped[6:].strip
+                ac["given"] = stripped[6:].strip()
             elif lower.startswith("when "):
                 current_section = "when"
-                ac["when"] = stripped[5:].strip
+                ac["when"] = stripped[5:].strip()
             elif lower.startswith("then "):
                 current_section = "then"
-                ac["then"].append(stripped[5:].strip)
+                ac["then"].append(stripped[5:].strip())
             elif lower.startswith("and "):
                 if current_section == "then":
-                    ac["then"].append(stripped[4:].strip)
+                    ac["then"].append(stripped[4:].strip())
                 elif current_section == "given":
-                    ac["given"] += " AND " + stripped[4:].strip
+                    ac["given"] += " AND " + stripped[4:].strip()
                 elif current_section == "when":
-                    ac["when"] += " AND " + stripped[4:].strip
+                    ac["when"] += " AND " + stripped[4:].strip()
 
 
 def _sanitize_name(name: str) -> str:
@@ -150,14 +150,14 @@ def _sanitize_name(name: str) -> str:
     # Replace non-alphanumeric with underscore
     name = re.sub(r"[^a-zA-Z0-9]+", "_", name)
     # Remove leading/trailing underscores
-    name = name.strip("_").lower
+    name = name.strip("_").lower()
     return name or "unnamed"
 
 
 def _to_pascal_case(name: str) -> str:
     """Convert to PascalCase for Go test names."""
     parts = _sanitize_name(name).split("_")
-    return "".join(p.capitalize for p in parts if p)
+    return "".join(p.capitalize() for p in parts if p)
 
 
 class PytestGenerator:
@@ -182,7 +182,7 @@ class PytestGenerator:
         ]
 
         for ac in criteria:
-            method_name = f"test_{ac['id'].lower.replace('-', '')}_{_sanitize_name(ac['name'])}"
+            method_name = f"test_{ac['id'].lower().replace('-', '')}_{_sanitize_name(ac['name'])}"
             docstring = f'{ac["id"]}: {ac["name"]}'
             ref_str = f" [{', '.join(ac['references'])}]" if ac["references"] else ""
 
@@ -204,7 +204,7 @@ class PytestGenerator:
             lines.append("")
 
         for ec in edge_cases:
-            method_name = f"test_{ec['id'].lower.replace('-', '')}_{_sanitize_name(ec['condition'])}"
+            method_name = f"test_{ec['id'].lower().replace('-', '')}_{_sanitize_name(ec['condition'])}"
             lines.append(f"    def {method_name}(self):")
             lines.append(f'        """{ec["id"]}: {ec["condition"]} -> {ec["behavior"]}"""')
             lines.append(f"        # Condition: {ec['condition']}")
@@ -227,14 +227,14 @@ class JestGenerator:
             f" * All tests are stubs — implement the test body to make them pass.",
             f" */",
             "",
-            f'describe("{title}",  => {{',
+            f'describe("{title}", () => {{',
         ]
 
         for ac in criteria:
             ref_str = f" [{', '.join(ac['references'])}]" if ac["references"] else ""
             test_name = f"{ac['id']}: {ac['name']}{ref_str}"
 
-            lines.append(f'  it("{test_name}",  => {{')
+            lines.append(f'  it("{test_name}", () => {{')
             if ac["given"]:
                 lines.append(f"    // Given {ac['given']}")
             if ac["when"]:
@@ -252,7 +252,7 @@ class JestGenerator:
 
         for ec in edge_cases:
             test_name = f"{ec['id']}: {ec['condition']}"
-            lines.append(f'  it("{test_name}",  => {{')
+            lines.append(f'  it("{test_name}", () => {{')
             lines.append(f"    // Condition: {ec['condition']}")
             lines.append(f"    // Expected: {ec['behavior']}")
             lines.append("")
@@ -335,7 +335,7 @@ FILE_EXTENSIONS = {
 }
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Extract test case stubs from a feature specification.",
         epilog="Example: python test_extractor.py --file spec.md --framework pytest --output tests/test_feature.py",
@@ -348,7 +348,7 @@ def main:
     )
     parser.add_argument(
         "--framework",
-        choices=list(GENERATORS.keys),
+        choices=list(GENERATORS.keys()),
         default="pytest",
         help="Target test framework (default: pytest)",
     )
@@ -365,22 +365,22 @@ def main:
         help="Output extracted criteria as JSON instead of test code",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     file_path = Path(args.file)
-    if not file_path.exists:
+    if not file_path.exists():
         print(f"Error: File not found: {file_path}", file=sys.stderr)
         sys.exit(2)
 
     content = file_path.read_text(encoding="utf-8")
-    if not content.strip:
+    if not content.strip():
         print(f"Error: File is empty: {file_path}", file=sys.stderr)
         sys.exit(2)
 
     spec_parser = SpecParser(content)
-    title = spec_parser.extract_spec_title
-    criteria = spec_parser.extract_acceptance_criteria
-    edge_cases = spec_parser.extract_edge_cases
+    title = spec_parser.extract_spec_title()
+    criteria = spec_parser.extract_acceptance_criteria()
+    edge_cases = spec_parser.extract_edge_cases()
 
     if not criteria and not edge_cases:
         print("Error: No acceptance criteria or edge cases found in spec.", file=sys.stderr)
@@ -407,7 +407,7 @@ def main:
         output = json.dumps(result, indent=2)
     else:
         generator_class = GENERATORS[args.framework]
-        generator = generator_class
+        generator = generator_class()
         output = generator.generate(title, criteria, edge_cases)
 
     if args.output:
@@ -428,4 +428,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -25,30 +25,30 @@ It pairs with `ds-ceo-advisor` (strategy → capital allocation), `ds-cro-adviso
 
 ## Skill Integration
 
-**Skill Location:** `../../skills/cfo-advisor/`
+**Skill Location:** `../../cfo-advisor/`
 
 ### Python Tools
 
 1. **Burn Rate Calculator**
-   - Path: `../../skills/cfo-advisor/scripts/burn_rate_calculator.py`
-   - Usage: `python ../../skills/cfo-advisor/scripts/burn_rate_calculator.py`
+   - Path: `../../cfo-advisor/scripts/burn_rate_calculator.py`
+   - Usage: `python ../../cfo-advisor/scripts/burn_rate_calculator.py`
    - Outputs base/bull/bear runway scenarios, months-of-cash, default-alive vs default-dead status
 
 2. **Unit Economics Analyzer**
-   - Path: `../../skills/cfo-advisor/scripts/unit_economics_analyzer.py`
-   - Usage: `python ../../skills/cfo-advisor/scripts/unit_economics_analyzer.py`
+   - Path: `../../cfo-advisor/scripts/unit_economics_analyzer.py`
+   - Usage: `python ../../cfo-advisor/scripts/unit_economics_analyzer.py`
    - Per-cohort LTV, per-channel CAC, payback months, gross margin breakdown
 
 3. **Fundraising Model**
-   - Path: `../../skills/cfo-advisor/scripts/fundraising_model.py`
-   - Usage: `python ../../skills/cfo-advisor/scripts/fundraising_model.py`
+   - Path: `../../cfo-advisor/scripts/fundraising_model.py`
+   - Usage: `python ../../cfo-advisor/scripts/fundraising_model.py`
    - Dilution modeling, cap table projections, round sensitivity, valuation negotiation ranges
 
 ### Knowledge Bases
 
-- `../../skills/cfo-advisor/references/financial_planning.md` — modeling, FP&A cadence, scenario design
-- `../../skills/cfo-advisor/references/fundraising_playbook.md` — round preparation, term sheet decoding, investor outreach
-- `../../skills/cfo-advisor/references/cash_management.md` — treasury, working capital, AR/AP discipline
+- `../../cfo-advisor/references/financial_planning.md` — modeling, FP&A cadence, scenario design
+- `../../cfo-advisor/references/fundraising_playbook.md` — round preparation, term sheet decoding, investor outreach
+- `../../cfo-advisor/references/cash_management.md` — treasury, working capital, AR/AP discipline
 
 ## Workflows
 
@@ -62,7 +62,7 @@ It pairs with `ds-ceo-advisor` (strategy → capital allocation), `ds-cro-adviso
 4. Output: revised plan with cut triggers at month -6, -3 from zero
 
 ```bash
-python ../../skills/cfo-advisor/scripts/burn_rate_calculator.py > runway.txt
+python ../../cfo-advisor/scripts/burn_rate_calculator.py > runway.txt
 ```
 
 ### Workflow 2: Unit Economics Decomposition
@@ -98,9 +98,9 @@ python ../../skills/cfo-advisor/scripts/burn_rate_calculator.py > runway.txt
 ```bash
 #!/bin/bash
 echo "📊 CFO Pre-Boardroom Brief"
-python ../../skills/cfo-advisor/scripts/burn_rate_calculator.py > /tmp/burn.txt
-python ../../skills/cfo-advisor/scripts/unit_economics_analyzer.py > /tmp/ue.txt
-python ../../skills/cfo-advisor/scripts/fundraising_model.py > /tmp/fund.txt
+python ../../cfo-advisor/scripts/burn_rate_calculator.py > /tmp/burn.txt
+python ../../cfo-advisor/scripts/unit_economics_analyzer.py > /tmp/ue.txt
+python ../../cfo-advisor/scripts/fundraising_model.py > /tmp/fund.txt
 echo "Artifacts ready in /tmp/. Feed into /ds:boardroom brief."
 ```
 
@@ -114,14 +114,14 @@ echo "Artifacts ready in /tmp/. Feed into /ds:boardroom brief."
 
 ## Related Agents
 
-- [ds-ceo-advisor](../../../../agents/c-level/ds-ceo-advisor.md) — strategy & capital allocation partner
+- [ds-ceo-advisor](../../../agents/c-level/ds-ceo-advisor.md) — strategy & capital allocation partner
 - [ds-cro-advisor](ds-cro-advisor.md) — revenue forecast feed
-- [ds-financial-analyst](../../../../agents/finance/ds-financial-analyst.md) — deep modeling
+- [ds-financial-analyst](../../../agents/finance/ds-financial-analyst.md) — deep modeling
 - [ds-chief-of-staff](ds-chief-of-staff.md) — routes financial questions here
 
 ## References
 
-- Skill: [../../skills/cfo-advisor/SKILL.md](../../cfo-advisor/SKILL.md)
+- Skill: [../../cfo-advisor/SKILL.md](../../cfo-advisor/SKILL.md)
 - Voice spec: [../references/persona-voices.md](../references/persona-voices.md)
 - Domain guide: [../../CLAUDE.md](../../CLAUDE.md)
 

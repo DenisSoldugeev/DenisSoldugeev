@@ -29,7 +29,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 
-SESSIONS_DIR = Path.home / ".syllabus_sessions"
+SESSIONS_DIR = Path.home() / ".syllabus_sessions"
 MIN_GAP_SECONDS = 1.0
 
 
@@ -39,7 +39,7 @@ def session_path(name: str) -> Path:
 
 def load_session(name: str) -> Dict[str, Any]:
     p = session_path(name)
-    if not p.exists:
+    if not p.exists():
         raise FileNotFoundError(f"Session not found: {name}")
     return json.loads(p.read_text(encoding="utf-8"))
 
@@ -49,16 +49,16 @@ def save_session(name: str, data: Dict[str, Any]) -> None:
     session_path(name).write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
-def now_iso -> str:
-    return datetime.now(timezone.utc).isoformat
+def now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
-def now_ts -> float:
-    return datetime.now(timezone.utc).timestamp
+def now_ts() -> float:
+    return datetime.now(timezone.utc).timestamp()
 
 
 def action_start(name: str, course: Optional[str], audience: Optional[str], year_range: Optional[str]) -> Dict[str, Any]:
-    if session_path(name).exists:
+    if session_path(name).exists():
         raise FileExistsError(f"Session already exists: {name}")
     data: Dict[str, Any] = {
         "session": name,
@@ -66,7 +66,7 @@ def action_start(name: str, course: Optional[str], audience: Optional[str], year
         "audience": audience or "",
         "year_range": year_range or "",
         "consensus_tier": None,
-        "started_at": now_iso,
+        "started_at": now_iso(),
         "ended_at": None,
         "searches": [],
         "received_log": [],
@@ -86,7 +86,7 @@ def action_record_search(name: str, section: str, query: str, tier: Optional[str
     data = load_session(name)
     if data["searches"]:
         last_ts = data["searches"][-1].get("ts", 0)
-        gap = now_ts - last_ts
+        gap = now_ts() - last_ts
         if gap < MIN_GAP_SECONDS:
             raise RuntimeError(
                 f"Sequential discipline violated: {gap:.2f}s gap (need >= {MIN_GAP_SECONDS}s). "
@@ -94,7 +94,7 @@ def action_record_search(name: str, section: str, query: str, tier: Optional[str
             )
     if tier and not data["consensus_tier"]:
         data["consensus_tier"] = tier
-    data["searches"].append({"section": section, "query": query, "tier": tier, "at": now_iso, "ts": now_ts})
+    data["searches"].append({"section": section, "query": query, "tier": tier, "at": now_iso(), "ts": now_ts()})
     data["counts"]["searches_total"] += 1
     if section not in data["by_section"]:
         data["by_section"][section] = {"searches": 0, "received": 0, "cited": 0}
@@ -105,7 +105,7 @@ def action_record_search(name: str, section: str, query: str, tier: Optional[str
 
 def action_record_received(name: str, section: str, count: int) -> Dict[str, Any]:
     data = load_session(name)
-    data["received_log"].append({"section": section, "count": count, "at": now_iso})
+    data["received_log"].append({"section": section, "count": count, "at": now_iso()})
     data["counts"]["papers_received_total"] += count
     if section not in data["by_section"]:
         data["by_section"][section] = {"searches": 0, "received": 0, "cited": 0}
@@ -118,7 +118,7 @@ def action_record_cited(name: str, section: str, url: str, title: Optional[str])
     data = load_session(name)
     if any(c["url"] == url for c in data["cited"]):
         return data
-    data["cited"].append({"section": section, "url": url, "title": title, "at": now_iso})
+    data["cited"].append({"section": section, "url": url, "title": title, "at": now_iso()})
     data["counts"]["papers_cited_total"] += 1
     if section not in data["by_section"]:
         data["by_section"][section] = {"searches": 0, "received": 0, "cited": 0}
@@ -134,7 +134,7 @@ def action_status(name: str) -> Dict[str, Any]:
 def action_close(name: str) -> Dict[str, Any]:
     data = load_session(name)
     if data.get("ended_at") is None:
-        data["ended_at"] = now_iso
+        data["ended_at"] = now_iso()
         save_session(name, data)
     return data
 
@@ -156,7 +156,7 @@ def render_status_human(data: Dict[str, Any]) -> str:
     out.append("")
     if data["by_section"]:
         out.append("Per-section breakdown:")
-        for section, stats in data["by_section"].items:
+        for section, stats in data["by_section"].items():
             out.append(f"  {section:<40s} {stats['searches']} searches → {stats['received']} received → {stats['cited']} cited")
     out.append("")
     out.append("Audit block (paste in DOCX audit-log section):")

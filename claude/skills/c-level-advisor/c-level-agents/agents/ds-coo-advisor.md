@@ -25,28 +25,28 @@ Pairs with `ds-cfo-advisor` (finance cadence), `ds-cro-advisor` (revenue cadence
 
 ## Skill Integration
 
-**Skill Location:** `../../skills/coo-advisor/`
+**Skill Location:** `../../coo-advisor/`
 
 ### Python Tools
 
 1. **Ops Efficiency Analyzer**
-   - Path: `../../skills/coo-advisor/scripts/ops_efficiency_analyzer.py`
+   - Path: `../../coo-advisor/scripts/ops_efficiency_analyzer.py`
    - Process throughput, cycle time, error rate, automation candidates
 
 2. **OKR Tracker**
-   - Path: `../../skills/coo-advisor/scripts/okr_tracker.py`
+   - Path: `../../coo-advisor/scripts/okr_tracker.py`
    - Quarter-to-date OKR progress, leading/lagging indicators, on-track / at-risk / off-track
 
 ### Knowledge Bases
 
-- `../../skills/coo-advisor/references/operating_cadence.md` — weekly/monthly/quarterly rhythm, meeting design
-- `../../skills/coo-advisor/references/okr_execution.md` — OKR design, scoring, cascading
-- `../../skills/coo-advisor/references/scaling_playbooks.md` — 1-10, 10-100, 100-1000 transitions
+- `../../coo-advisor/references/ops_cadence.md` — weekly/monthly/quarterly rhythm, meeting design
+- `../../coo-advisor/references/process_frameworks.md` — OKR design, scoring, cascading
+- `../../coo-advisor/references/scaling_playbook.md` — 1-10, 10-100, 100-1000 transitions
 
 ### Adjacent Skills
 
-- `../../skills/company-os/` — EOS / Scaling Up / OKR selection
-- `../../skills/strategic-alignment/` — strategy cascade & silo detection
+- `../../company-os/` — EOS / Scaling Up / OKR selection
+- `../../strategic-alignment/` — strategy cascade & silo detection
 
 ## Workflows
 
@@ -69,14 +69,14 @@ Pairs with `ds-cfo-advisor` (finance cadence), `ds-cro-advisor` (revenue cadence
 4. Output: OKR scorecard, at-risk list, fix actions
 
 ```bash
-python ../../skills/coo-advisor/scripts/okr_tracker.py
+python ../../coo-advisor/scripts/okr_tracker.py
 ```
 
 ### Workflow 3: Operating-System Selection
 **Goal:** Pick EOS, Scaling Up, or OKR for the company.
 
 **Steps:**
-1. Reference `../../skills/company-os/SKILL.md` for selection criteria
+1. Reference `../../company-os/SKILL.md` for selection criteria
 2. Reference `scaling_playbooks.md` for stage fit
 3. Map current pain points to which OS solves them
 4. Output: recommended OS, 90-day rollout, success metrics
@@ -95,9 +95,9 @@ python ../../skills/coo-advisor/scripts/okr_tracker.py
 
 ```bash
 echo "⚙️  COO Quarterly Review"
-python ../../skills/coo-advisor/scripts/okr_tracker.py
-python ../../skills/coo-advisor/scripts/ops_efficiency_analyzer.py
-echo "Reference: ../../skills/coo-advisor/references/operating_cadence.md"
+python ../../coo-advisor/scripts/okr_tracker.py
+python ../../coo-advisor/scripts/ops_efficiency_analyzer.py
+echo "Reference: ../../coo-advisor/references/ops_cadence.md"
 ```
 
 ## Success Metrics
@@ -113,11 +113,11 @@ echo "Reference: ../../skills/coo-advisor/references/operating_cadence.md"
 - [ds-cfo-advisor](ds-cfo-advisor.md) — finance cadence
 - [ds-cro-advisor](ds-cro-advisor.md) — revenue cadence
 - [ds-chief-of-staff](ds-chief-of-staff.md) — decision logging
-- [ds-engineering-lead](../../../../agents/engineering-team/ds-engineering-lead.md) — eng ops
+- [ds-engineering-lead](../../../agents/engineering-team/ds-engineering-lead.md) — eng ops
 
 ## References
 
-- Skill: [../../skills/coo-advisor/SKILL.md](../../coo-advisor/SKILL.md)
+- Skill: [../../coo-advisor/SKILL.md](../../coo-advisor/SKILL.md)
 - Voice spec: [../references/persona-voices.md](../references/persona-voices.md)
 
 ---

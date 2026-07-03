@@ -26,20 +26,20 @@ SECTIONS = {
 
 def validate_context(content: str) -> dict:
     """Validate marketing context file and return score."""
-    content_lower = content.lower
+    content_lower = content.lower()
     results = {"sections": {}, "score": 0, "max_score": 100, "missing_required": [], "missing_optional": [], "warnings": []}
-    total_weight = sum(s["weight"] for s in SECTIONS.values)
+    total_weight = sum(s["weight"] for s in SECTIONS.values())
     earned = 0
 
-    for name, config in SECTIONS.items:
-        section_present = name.lower.replace("& ", "").replace("  ", " ") in content_lower or any(
+    for name, config in SECTIONS.items():
+        section_present = name.lower().replace("& ", "").replace("  ", " ") in content_lower or any(
             m in content_lower for m in config["markers"][:2]
         )
 
         markers_found = sum(1 for m in config["markers"] if m in content_lower)
         markers_total = len(config["markers"])
 
-        has_placeholder = bool(re.search(r'\[.*?\]', content[content_lower.find(name.lower):content_lower.find(name.lower) + 500] if name.lower in content_lower else ""))
+        has_placeholder = bool(re.search(r'\[.*?\]', content[content_lower.find(name.lower()):content_lower.find(name.lower()) + 500] if name.lower() in content_lower else ""))
 
         if section_present and markers_found > 0:
             completeness = markers_found / markers_total
@@ -78,7 +78,7 @@ def validate_context(content: str) -> dict:
             from datetime import datetime
             try:
                 updated = datetime.strptime(date_match.group(1), "%Y-%m-%d")
-                age_days = (datetime.now - updated).days
+                age_days = (datetime.now() - updated).days
                 if age_days > 180:
                     results["warnings"].append(f"Context is {age_days} days old — review recommended (>180 days)")
             except ValueError:
@@ -98,7 +98,7 @@ def print_report(results: dict):
     print(f"\n{'─'*50}")
     print(f"{'Section':<25} {'Status':<10} {'Score':<10}")
     print(f"{'─'*50}")
-    for name, data in results["sections"].items:
+    for name, data in results["sections"].items():
         icon = {"complete": "✅", "partial": "⚠️", "missing": "❌"}[data["status"]]
         req = " *" if data["required"] else ""
         print(f"{icon} {name:<23} {data['status']:<10} {data['score']}/{data['max_score']}{req}")
@@ -122,7 +122,7 @@ def print_report(results: dict):
     print(f"{'='*50}")
 
 
-def main:
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -138,14 +138,14 @@ def main:
         "--json", action="store_true",
         help="Also output results as JSON."
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.file:
         filepath = Path(args.file)
-        if not filepath.exists:
+        if not filepath.exists():
             print(f"Error: File not found: {filepath}", file=sys.stderr)
             sys.exit(1)
-        content = filepath.read_text
+        content = filepath.read_text()
     else:
         # Demo with sample data
         content = """# Marketing Context
@@ -216,4 +216,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

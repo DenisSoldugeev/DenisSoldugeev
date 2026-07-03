@@ -56,8 +56,8 @@ def load_json_input(input_file: Optional[str]) -> Dict[str, Any]:
         except Exception as exc:
             raise CLIError(f"Failed reading --input file: {exc}") from exc
 
-    if not sys.stdin.isatty:
-        data = sys.stdin.read.strip
+    if not sys.stdin.isatty():
+        data = sys.stdin.read().strip()
         if data:
             try:
                 return json.loads(data)
@@ -70,8 +70,8 @@ def parse_worktree_list(repo: Path) -> List[Dict[str, str]]:
     proc = run(["git", "worktree", "list", "--porcelain"], cwd=repo)
     entries: List[Dict[str, str]] = []
     current: Dict[str, str] = {}
-    for line in proc.stdout.splitlines:
-        if not line.strip:
+    for line in proc.stdout.splitlines():
+        if not line.strip():
             if current:
                 entries.append(current)
             current = {}
@@ -84,14 +84,14 @@ def parse_worktree_list(repo: Path) -> List[Dict[str, str]]:
 
 
 def find_next_ports(repo: Path, app_base: int, db_base: int, redis_base: int, stride: int) -> Dict[str, int]:
-    used_ports = set
+    used_ports = set()
     for entry in parse_worktree_list(repo):
         wt_path = Path(entry.get("worktree", ""))
         ports_file = wt_path / ".worktree-ports.json"
-        if ports_file.exists:
+        if ports_file.exists():
             try:
                 payload = json.loads(ports_file.read_text(encoding="utf-8"))
-                used_ports.update(int(v) for v in payload.values if isinstance(v, int))
+                used_ports.update(int(v) for v in payload.values() if isinstance(v, int))
             except Exception:
                 continue
 
@@ -102,7 +102,7 @@ def find_next_ports(repo: Path, app_base: int, db_base: int, redis_base: int, st
             "db": db_base + (index * stride),
             "redis": redis_base + (index * stride),
         }
-        if all(p not in used_ports for p in ports.values):
+        if all(p not in used_ports for p in ports.values()):
             return ports
         index += 1
 
@@ -111,7 +111,7 @@ def sync_env_files(src_repo: Path, dest_repo: Path) -> List[str]:
     copied = []
     for name in ENV_FILES:
         src = src_repo / name
-        if src.exists and src.is_file:
+        if src.exists() and src.is_file():
             dst = dest_repo / name
             shutil.copy2(src, dst)
             copied.append(name)
@@ -123,7 +123,7 @@ def install_dependencies_if_requested(worktree_path: Path, install: bool) -> str
         return "skipped"
 
     for lockfile, command in LOCKFILE_COMMANDS:
-        if (worktree_path / lockfile).exists:
+        if (worktree_path / lockfile).exists():
             try:
                 run(command, cwd=worktree_path, check=True)
                 return f"installed via {' '.join(command)}"
@@ -167,7 +167,7 @@ def format_text(result: WorktreeResult) -> str:
     return "\n".join(lines)
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Create and prepare a git worktree.")
     parser.add_argument("--input", help="Path to JSON input file. If omitted, reads JSON from stdin when piped.")
     parser.add_argument("--repo", default=".", help="Path to repository root (default: current directory).")
@@ -180,14 +180,14 @@ def parse_args -> argparse.Namespace:
     parser.add_argument("--stride", type=int, default=10, help="Port stride between worktrees.")
     parser.add_argument("--install-deps", action="store_true", help="Install dependencies in the new worktree.")
     parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
-    return parser.parse_args
+    return parser.parse_args()
 
 
-def main -> int:
-    args = parse_args
+def main() -> int:
+    args = parse_args()
     payload = load_json_input(args.input)
 
-    repo = Path(str(payload.get("repo", args.repo))).resolve
+    repo = Path(str(payload.get("repo", args.repo))).resolve()
     branch = payload.get("branch", args.branch)
     name = payload.get("name", args.name)
     base_branch = str(payload.get("base_branch", args.base_branch))
@@ -207,7 +207,7 @@ def main -> int:
         raise CLIError(f"Not a git repository: {repo}") from exc
 
     wt_path = ensure_worktree(repo, branch, name, base_branch)
-    created = (wt_path / ".worktree-ports.json").exists is False
+    created = (wt_path / ".worktree-ports.json").exists() is False
 
     ports = find_next_ports(repo, app_base, db_base, redis_base, stride)
     (wt_path / ".worktree-ports.json").write_text(json.dumps(ports, indent=2), encoding="utf-8")
@@ -234,7 +234,7 @@ def main -> int:
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(main)
+        raise SystemExit(main())
     except CLIError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         raise SystemExit(2)

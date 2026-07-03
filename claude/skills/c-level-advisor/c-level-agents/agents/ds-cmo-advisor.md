@@ -25,23 +25,23 @@ Pairs with `ds-cpo-advisor` (positioning ↔ product), `ds-cro-advisor` (positio
 
 ## Skill Integration
 
-**Skill Location:** `../../skills/cmo-advisor/`
+**Skill Location:** `../../cmo-advisor/`
 
 ### Python Tools
 
 1. **Marketing Budget Modeler**
-   - Path: `../../skills/cmo-advisor/scripts/marketing_budget_modeler.py`
+   - Path: `../../cmo-advisor/scripts/marketing_budget_modeler.py`
    - Allocates budget across paid/content/events/partnerships with payback by channel
 
 2. **Growth Model Simulator**
-   - Path: `../../skills/cmo-advisor/scripts/growth_model_simulator.py`
+   - Path: `../../cmo-advisor/scripts/growth_model_simulator.py`
    - Simulates funnel: impressions → leads → opportunities → wins, with assumption sensitivity
 
 ### Knowledge Bases
 
-- `../../skills/cmo-advisor/references/brand_positioning.md` — category design, message house, narrative arcs
-- `../../skills/cmo-advisor/references/growth_playbooks.md` — channel-specific motions, PLG vs sales-led
-- `../../skills/cmo-advisor/references/marketing_operations.md` — attribution, cadence, content ops
+- `../../cmo-advisor/references/brand_positioning.md` — category design, message house, narrative arcs
+- `../../cmo-advisor/references/growth_frameworks.md` — channel-specific motions, PLG vs sales-led
+- `../../cmo-advisor/references/marketing_org.md` — attribution, cadence, content ops
 
 ### Adjacent Execution
 
@@ -68,7 +68,7 @@ Pairs with `ds-cpo-advisor` (positioning ↔ product), `ds-cro-advisor` (positio
 4. Output: new allocation, 90-day test plan, success metrics
 
 ```bash
-python ../../skills/cmo-advisor/scripts/marketing_budget_modeler.py
+python ../../cmo-advisor/scripts/marketing_budget_modeler.py
 ```
 
 ### Workflow 3: Pipeline-Generation Pressure Test
@@ -94,8 +94,8 @@ python ../../skills/cmo-advisor/scripts/marketing_budget_modeler.py
 
 ```bash
 echo "📣 CMO Quarterly Plan"
-python ../../skills/cmo-advisor/scripts/marketing_budget_modeler.py
-python ../../skills/cmo-advisor/scripts/growth_model_simulator.py
+python ../../cmo-advisor/scripts/marketing_budget_modeler.py
+python ../../cmo-advisor/scripts/growth_model_simulator.py
 echo "📚 Reference: positioning + playbooks"
 ```
 
@@ -111,12 +111,12 @@ echo "📚 Reference: positioning + playbooks"
 
 - [ds-cpo-advisor](ds-cpo-advisor.md) — positioning ↔ product alignment
 - [ds-cro-advisor](ds-cro-advisor.md) — pipeline contribution
-- [ds-content-creator](../../../../agents/marketing/ds-content-creator.md) — execution
-- [ds-demand-gen-specialist](../../../../agents/marketing/ds-demand-gen-specialist.md) — execution
+- [ds-content-creator](../../../agents/marketing/ds-content-creator.md) — execution
+- [ds-demand-gen-specialist](../../../agents/marketing/ds-demand-gen-specialist.md) — execution
 
 ## References
 
-- Skill: [../../skills/cmo-advisor/SKILL.md](../../cmo-advisor/SKILL.md)
+- Skill: [../../cmo-advisor/SKILL.md](../../cmo-advisor/SKILL.md)
 - Voice spec: [../references/persona-voices.md](../references/persona-voices.md)
 
 ---

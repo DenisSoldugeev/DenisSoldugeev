@@ -32,7 +32,7 @@ def nms(boxes, scores, iou_threshold=0.5):
     boxes: (N, 4) in format [x1, y1, x2, y2]
     scores: (N,)
     """
-    order = scores.argsort[::-1]
+    order = scores.argsort()[::-1]
     keep = []
 
     while len(order) > 0:
@@ -73,7 +73,7 @@ score = score * exp(-IoU^2 / sigma)
 ```python
 def soft_nms(boxes, scores, sigma=0.5, score_threshold=0.001):
     """Gaussian penalty soft-NMS"""
-    order = scores.argsort[::-1]
+    order = scores.argsort()[::-1]
     keep = []
 
     while len(order) > 0:
@@ -92,7 +92,7 @@ def soft_nms(boxes, scores, sigma=0.5, score_threshold=0.001):
         # Re-sort by updated scores
         mask = scores[order[1:]] > score_threshold
         order = order[1:][mask]
-        order = order[scores[order].argsort[::-1]]
+        order = order[scores[order].argsort()[::-1]]
 
     return keep
 ```
@@ -123,7 +123,7 @@ NMS per class (prevents cross-class suppression).
 def batched_nms(boxes, scores, classes, iou_threshold):
     """Per-class NMS"""
     # Offset boxes by class ID to prevent cross-class suppression
-    max_coordinate = boxes.max
+    max_coordinate = boxes.max()
     offsets = classes * (max_coordinate + 1)
     boxes_for_nms = boxes + offsets[:, None]
 
@@ -178,7 +178,7 @@ def optimize_anchors(annotations, num_anchors=9, image_size=640):
     """
     # Normalize to input size
     boxes = np.array(annotations)
-    boxes = boxes / boxes.max * image_size
+    boxes = boxes / boxes.max() * image_size
 
     # K-means clustering
     kmeans = KMeans(n_clusters=num_anchors, random_state=42)
@@ -207,7 +207,7 @@ def calculate_anchor_fit(boxes, anchors):
         intersections = np.minimum(box[0], anchors[:, 0]) * \
                        np.minimum(box[1], anchors[:, 1])
         unions = box_area + anchor_areas - intersections
-        max_iou = (intersections / unions).max
+        max_iou = (intersections / unions).max()
         ious.append(max_iou)
     return np.mean(ious)
 ```
@@ -279,7 +279,7 @@ def focal_loss(pred, target, gamma=2.0, alpha=0.25):
     alpha_t = alpha * target + (1 - alpha) * (1 - target)
 
     loss = alpha_t * focal_term * ce_loss
-    return loss.mean
+    return loss.mean()
 ```
 
 **Hyperparameters:**
@@ -298,7 +298,7 @@ def quality_focal_loss(pred, target, beta=2.0):
     ce = F.binary_cross_entropy(pred, target, reduction='none')
     focal_weight = torch.abs(pred - target) ** beta
     loss = focal_weight * ce
-    return loss.mean
+    return loss.mean()
 ```
 
 ### Regression Losses
@@ -313,7 +313,7 @@ def smooth_l1_loss(pred, target, beta=1.0):
         0.5 * diff ** 2 / beta,
         diff - 0.5 * beta
     )
-    return loss.mean
+    return loss.mean()
 ```
 
 #### IoU-Based Losses
@@ -412,9 +412,9 @@ def dfl_loss(pred_dist, target, reg_max=16):
     target: (N,) continuous target values (0 to reg_max)
     """
     # Convert continuous target to soft label
-    target_left = target.floor.long
+    target_left = target.floor().long()
     target_right = target_left + 1
-    weight_right = target - target_left.float
+    weight_right = target - target_left.float()
     weight_left = 1 - weight_right
 
     # Cross-entropy with soft targets
@@ -423,7 +423,7 @@ def dfl_loss(pred_dist, target, reg_max=16):
                                   reduction='none')
 
     loss = weight_left * loss_left + weight_right * loss_right
-    return loss.mean
+    return loss.mean()
 ```
 
 ---
@@ -452,7 +452,7 @@ lr = base_lr * (0.1 ** (milestones_passed))
 
 **Recommended schedule for detection:**
 ```python
-optimizer = SGD(model.parameters, lr=0.01, momentum=0.937, weight_decay=0.0005)
+optimizer = SGD(model.parameters(), lr=0.01, momentum=0.937, weight_decay=0.0005)
 
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
     optimizer,
@@ -484,12 +484,12 @@ class EMA:
         self.model = model
         self.decay = decay
         self.shadow = {}
-        for name, param in model.named_parameters:
+        for name, param in model.named_parameters():
             if param.requires_grad:
-                self.shadow[name] = param.data.clone
+                self.shadow[name] = param.data.clone()
 
     def update(self):
-        for name, param in self.model.named_parameters:
+        for name, param in self.model.named_parameters():
             if param.requires_grad:
                 self.shadow[name] = (
                     self.decay * self.shadow[name] +
@@ -497,7 +497,7 @@ class EMA:
                 )
 
     def apply_shadow(self):
-        for name, param in self.model.named_parameters:
+        for name, param in self.model.named_parameters():
             if param.requires_grad:
                 param.data.copy_(self.shadow[name])
 ```
@@ -531,15 +531,15 @@ Simulate larger batch sizes.
 
 ```python
 accumulation_steps = 4
-optimizer.zero_grad
+optimizer.zero_grad()
 
 for i, (images, targets) in enumerate(dataloader):
     loss = model(images, targets) / accumulation_steps
-    loss.backward
+    loss.backward()
 
     if (i + 1) % accumulation_steps == 0:
-        optimizer.step
-        optimizer.zero_grad
+        optimizer.step()
+        optimizer.zero_grad()
 ```
 
 ### Mixed Precision Training
@@ -549,17 +549,17 @@ Use FP16 for speed and memory.
 ```python
 from torch.cuda.amp import autocast, GradScaler
 
-scaler = GradScaler
+scaler = GradScaler()
 
 for images, targets in dataloader:
-    optimizer.zero_grad
+    optimizer.zero_grad()
 
-    with autocast:
+    with autocast():
         loss = model(images, targets)
 
-    scaler.scale(loss).backward
+    scaler.scale(loss).backward()
     scaler.step(optimizer)
-    scaler.update
+    scaler.update()
 ```
 
 **Benefits:**
@@ -666,7 +666,7 @@ def copy_paste(background, bg_labels, source, src_labels, src_masks):
     """
     Paste segmented objects onto background
     """
-    result = background.copy
+    result = background.copy()
 
     for mask, label in zip(src_masks, src_labels):
         # Random position
@@ -692,7 +692,7 @@ Randomly erase patches.
 ```python
 def cutout(image, num_holes=8, max_h_size=32, max_w_size=32):
     h, w = image.shape[:2]
-    result = image.copy
+    result = image.copy()
 
     for _ in range(num_holes):
         y = random.randint(0, h)
@@ -721,7 +721,7 @@ Remove unimportant weights.
 import torch.nn.utils.prune as prune
 
 # Prune 30% of weights with smallest magnitude
-for name, module in model.named_modules:
+for name, module in model.named_modules():
     if isinstance(module, nn.Conv2d):
         prune.l1_unstructured(module, name='weight', amount=0.3)
 ```
@@ -769,7 +769,7 @@ model.qconfig = torch.quantization.get_default_qconfig('fbgemm')
 torch.quantization.prepare(model, inplace=True)
 
 # Calibrate with representative data
-with torch.no_grad:
+with torch.no_grad():
     for images in calibration_loader:
         model(images)
 
@@ -780,7 +780,7 @@ torch.quantization.convert(model, inplace=True)
 **Quantization-Aware Training:**
 ```python
 # Insert fake quantization during training
-model.train
+model.train()
 model.qconfig = torch.quantization.get_default_qat_qconfig('fbgemm')
 model_prepared = torch.quantization.prepare_qat(model)
 
@@ -828,7 +828,7 @@ def objective(trial):
     weight_decay = trial.suggest_loguniform('weight_decay', 1e-5, 1e-3)
     mosaic_prob = trial.suggest_uniform('mosaic_prob', 0.0, 1.0)
 
-    model = create_model
+    model = create_model()
     train_model(model, lr=lr, weight_decay=weight_decay, mosaic_prob=mosaic_prob)
     mAP = test_model(model)
 

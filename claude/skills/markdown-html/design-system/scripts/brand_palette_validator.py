@@ -38,7 +38,7 @@ HEX_RE = re.compile(r"^#?([0-9a-fA-F]{6})$")
 
 
 def parse_hex(hex_str: str) -> tuple[int, int, int]:
-    m = HEX_RE.match(hex_str.strip)
+    m = HEX_RE.match(hex_str.strip())
     if not m:
         raise ValueError(f"Invalid HEX '{hex_str}'. Expected #RRGGBB or RRGGBB (6 hex chars).")
     h = m.group(1)
@@ -294,7 +294,7 @@ def render_human(result: dict[str, Any]) -> str:
     if result["derived_palette"]:
         out.append("")
         out.append("Derived 12-token palette (use in :root CSS):")
-        for k, v in result["derived_palette"].items:
+        for k, v in result["derived_palette"].items():
             out.append(f"  {k:<20s} {v}")
     return "\n".join(out)
 
@@ -314,7 +314,7 @@ def main(argv: list[str]) -> int:
     elif args.primary:
         result = validate(args.primary, args.accent, args.bg, args.text)
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
     if args.output == "json":

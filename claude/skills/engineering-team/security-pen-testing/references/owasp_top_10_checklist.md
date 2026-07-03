@@ -31,7 +31,7 @@ Access control enforces policy so users cannot act outside their intended permis
 # BAD: No authorization check on resource access
 @app.route("/api/documents/<doc_id>")
 def get_document(doc_id):
-    return Document.query.get(doc_id).to_json  # No ownership check!
+    return Document.query.get(doc_id).to_json()  # No ownership check!
 
 # GOOD: Verify ownership
 @app.route("/api/documents/<doc_id>")
@@ -40,7 +40,7 @@ def get_document(doc_id):
     doc = Document.query.get_or_404(doc_id)
     if doc.owner_id != current_user.id:
         abort(403)
-    return doc.to_json
+    return doc.to_json()
 ```
 
 ```javascript
@@ -95,7 +95,7 @@ Failures related to cryptography that often lead to sensitive data exposure. Thi
 
 ```python
 # BAD: MD5 for password hashing
-password_hash = hashlib.md5(password.encode).hexdigest
+password_hash = hashlib.md5(password.encode()).hexdigest()
 
 # BAD: Hardcoded encryption key
 cipher = AES.new(b"mysecretkey12345", AES.MODE_GCM)
@@ -104,7 +104,7 @@ cipher = AES.new(b"mysecretkey12345", AES.MODE_GCM)
 token = str(random.randint(100000, 999999))
 
 # GOOD: bcrypt for passwords
-password_hash = bcrypt.hashpw(password.encode, bcrypt.gensalt(rounds=12))
+password_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12))
 
 # GOOD: Secrets module for tokens
 token = secrets.token_urlsafe(32)
@@ -175,7 +175,7 @@ db.query('SELECT * FROM users WHERE id = $1', [userId]);
 3. Validate and sanitize all input on the server side
 4. Use Content-Security-Policy to mitigate XSS impact
 5. Escape output based on context (HTML, JS, URL, CSS)
-6. Never pass user input to eval, exec, os.system, or child_process
+6. Never pass user input to eval(), exec(), os.system(), or child_process
 7. Use allowlists for expected input formats
 
 ### CVSS Scoring Guidance
@@ -345,8 +345,8 @@ Code and infrastructure that does not protect against integrity violations, incl
 
 ### Remediation
 
-1. Use `yaml.safe_load` instead of `yaml.load`
-2. Avoid `pickle.loads` on untrusted data
+1. Use `yaml.safe_load()` instead of `yaml.load()`
+2. Avoid `pickle.loads()` on untrusted data
 3. Add SRI hashes to all CDN-loaded scripts
 4. Sign all deployment artifacts
 5. Protect CI/CD pipeline with branch protection and signed commits

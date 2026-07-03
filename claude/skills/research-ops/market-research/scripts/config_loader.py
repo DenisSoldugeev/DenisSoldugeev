@@ -22,7 +22,7 @@ from typing import Any
 
 SKILL = "market-research"
 
-GLOBAL_CONFIG_DIR = Path.home / ".config" / "research-ops"
+GLOBAL_CONFIG_DIR = Path.home() / ".config" / "research-ops"
 GLOBAL_CONFIG_PATH = GLOBAL_CONFIG_DIR / f"{SKILL}.json"
 PROJECT_CONFIG_DIRNAME = ".research-ops"
 
@@ -38,7 +38,7 @@ DEFAULTS: dict[str, Any] = {
 
 
 def project_config_path(cwd: Path | None = None) -> Path:
-    cwd = cwd or Path.cwd
+    cwd = cwd or Path.cwd()
     return cwd / PROJECT_CONFIG_DIRNAME / f"{SKILL}.json"
 
 
@@ -53,7 +53,7 @@ def _read_json(path: Path) -> dict[str, Any] | None:
 
 def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
     out = dict(base)
-    for k, v in override.items:
+    for k, v in override.items():
         if isinstance(v, dict) and isinstance(out.get(k), dict):
             out[k] = _deep_merge(out[k], v)
         else:
@@ -74,8 +74,8 @@ def load_config(cwd: Path | None = None) -> dict[str, Any]:
     return config
 
 
-def setup_completed -> bool:
-    cfg = _read_json(GLOBAL_CONFIG_PATH) or _read_json(project_config_path)
+def setup_completed() -> bool:
+    cfg = _read_json(GLOBAL_CONFIG_PATH) or _read_json(project_config_path())
     return bool(cfg and cfg.get("setup_completed_at"))
 
 
@@ -100,15 +100,15 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({
             "skill": SKILL,
             "global_config_path": str(GLOBAL_CONFIG_PATH),
-            "global_config_exists": GLOBAL_CONFIG_PATH.exists,
-            "project_config_path": str(project_config_path),
-            "project_config_exists": project_config_path.exists,
-            "setup_completed": setup_completed,
+            "global_config_exists": GLOBAL_CONFIG_PATH.exists(),
+            "project_config_path": str(project_config_path()),
+            "project_config_exists": project_config_path().exists(),
+            "setup_completed": setup_completed(),
         }, indent=2))
     else:
-        print(json.dumps(load_config, indent=2, sort_keys=True))
+        print(json.dumps(load_config(), indent=2, sort_keys=True))
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

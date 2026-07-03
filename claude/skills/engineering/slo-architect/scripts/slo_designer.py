@@ -44,8 +44,8 @@ SLI_TYPES = {
 def build_slo(args):
     sli_meta = SLI_TYPES.get(args.sli_type, {})
     slo = {
-        "slo_id": f"slo-{args.service}-{args.sli_type}-{int(datetime.now(timezone.utc).timestamp)}",
-        "created": datetime.now(timezone.utc).isoformat,
+        "slo_id": f"slo-{args.service}-{args.sli_type}-{int(datetime.now(timezone.utc).timestamp())}",
+        "created": datetime.now(timezone.utc).isoformat(),
         "service": args.service,
         "owner": args.owner or "<must define before SLO is live>",
         "user_journey": args.user_journey or f"<{sli_meta.get('user_question', 'describe the user journey this SLO protects')}>",
@@ -116,10 +116,10 @@ def render_markdown(slo):
     return "\n".join(lines)
 
 
-def main:
+def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--service", required=True, help="Service name (e.g., checkout-svc)")
-    ap.add_argument("--sli-type", required=True, choices=list(SLI_TYPES.keys))
+    ap.add_argument("--sli-type", required=True, choices=list(SLI_TYPES.keys()))
     ap.add_argument("--target", type=float, required=True, help="Target percent (e.g., 99.9)")
     ap.add_argument("--window-days", type=int, default=28, help="Compliance window in days (default: 28)")
     ap.add_argument("--user-journey", help="The user journey this SLO protects")
@@ -130,7 +130,7 @@ def main:
     ap.add_argument("--policy-doc", help="URL or path to error budget policy")
     ap.add_argument("--review-cadence", default="quarterly", help="How often to review (default: quarterly)")
     ap.add_argument("--format", choices=["markdown", "json"], default="markdown")
-    args = ap.parse_args
+    args = ap.parse_args()
 
     if not 50 <= args.target <= 100:
         print(f"ERROR: --target must be between 50 and 100, got {args.target}", file=sys.stderr)
@@ -155,4 +155,4 @@ def main:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

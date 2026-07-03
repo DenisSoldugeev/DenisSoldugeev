@@ -111,7 +111,7 @@ VAGUE_AUTHORITY = [
 
 def score_ai_vocabulary(text: str) -> dict:
     """Score 0-25: fewer AI words = higher score."""
-    text_lower = text.lower
+    text_lower = text.lower()
     words_total = max(1, len(re.findall(r'\b\w+\b', text)))
 
     hits = []
@@ -149,12 +149,12 @@ def score_ai_vocabulary(text: str) -> dict:
 def score_sentence_variance(text: str) -> dict:
     """Score 0-20: high variance = more human (robots use uniform length)."""
     sentences = re.split(r'[.!?]+', text)
-    sentences = [s.strip for s in sentences if len(s.split) >= 3]
+    sentences = [s.strip() for s in sentences if len(s.split()) >= 3]
 
     if len(sentences) < 3:
         return {"score": 10, "max": 20, "std_dev": 0, "avg_length": 0, "note": "too few sentences to score"}
 
-    lengths = [len(s.split) for s in sentences]
+    lengths = [len(s.split()) for s in sentences]
     avg = sum(lengths) / len(lengths)
     variance = sum((l - avg) ** 2 for l in lengths) / len(lengths)
     std_dev = math.sqrt(variance)
@@ -184,7 +184,7 @@ def score_sentence_variance(text: str) -> dict:
 def score_passive_voice(text: str) -> dict:
     """Score 0-20: less passive = more human."""
     sentences = re.split(r'[.!?]+', text)
-    sentences = [s.strip for s in sentences if s.strip]
+    sentences = [s.strip() for s in sentences if s.strip()]
     n_sentences = max(1, len(sentences))
 
     passive_count = 0
@@ -215,7 +215,7 @@ def score_passive_voice(text: str) -> dict:
 
 def score_hedging(text: str) -> dict:
     """Score 0-15: fewer hedges = more direct = more human."""
-    text_lower = text.lower
+    text_lower = text.lower()
     hits = []
     for phrase in HEDGING_PHRASES:
         count = text_lower.count(phrase)
@@ -274,11 +274,11 @@ def score_em_dashes(text: str) -> dict:
 
 def score_paragraph_variety(text: str) -> dict:
     """Score 0-10: varied paragraph lengths = more human."""
-    paragraphs = [p.strip for p in text.split('\n\n') if p.strip and not p.startswith('#')]
+    paragraphs = [p.strip() for p in text.split('\n\n') if p.strip() and not p.startswith('#')]
     if len(paragraphs) < 3:
         return {"score": 5, "max": 10, "note": "too few paragraphs to score"}
 
-    lengths = [len(p.split) for p in paragraphs]
+    lengths = [len(p.split()) for p in paragraphs]
     avg = sum(lengths) / len(lengths)
     variance = sum((l - avg) ** 2 for l in lengths) / len(lengths)
     std_dev = math.sqrt(variance)
@@ -356,17 +356,17 @@ def print_report(result: dict, label: str = "") -> None:
     bar_filled = int(total / 5)
     bar = "█" * bar_filled + "░" * (20 - bar_filled)
 
-    print
+    print()
     print("╔══════════════════════════════════════════╗")
     print("║       HUMANIZER SCORER — REPORT          ║")
     print("╚══════════════════════════════════════════╝")
     if label:
         print(f"  Input: {label}")
-    print
+    print()
     print(f"  HUMANITY SCORE:  {total}/100")
     print(f"  [{bar}]")
     print(f"  Verdict: {verdict}")
-    print
+    print()
     print("  ── Section Breakdown ──────────────────────")
 
     sections = [
@@ -382,7 +382,7 @@ def print_report(result: dict, label: str = "") -> None:
         bar2 = "█" * int(sc / mx * 10) + "░" * (10 - int(sc / mx * 10))
         print(f"  {name:<20} {sc:>2}/{mx}  [{bar2}]")
 
-    print
+    print()
     print("  ── Detected Issues ────────────────────────")
 
     v = s["ai_vocabulary"]
@@ -428,7 +428,7 @@ def print_report(result: dict, label: str = "") -> None:
     if not pg.get("has_short_paragraphs"):
         print("  🟡 No short paragraphs found — add some 1-2 sentence paragraphs for rhythm")
 
-    print
+    print()
     print("  ── Priority Fixes ─────────────────────────")
 
     if v["ai_word_hits"] > 5:
@@ -444,10 +444,10 @@ def print_report(result: dict, label: str = "") -> None:
 
     if total >= 85:
         print("  ✅ No priority fixes — content reads as human")
-    print
+    print()
 
 
-def main:
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -464,12 +464,12 @@ def main:
         "--json", action="store_true",
         help="Also output results as JSON."
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.file is None:
         # Demo mode: compare human vs AI sample
         print("[Demo mode — comparing human vs AI sample content]")
-        print
+        print()
         print("═" * 50)
         print("SAMPLE 1: Human-written content")
         print("═" * 50)
@@ -484,11 +484,11 @@ def main:
 
         print(f"  Delta: Human scored {r1['humanity_score']}, AI scored {r2['humanity_score']}")
         print(f"  Difference: {r1['humanity_score'] - r2['humanity_score']} points")
-        print
+        print()
     else:
         try:
             with open(args.file, 'r', encoding='utf-8') as f:
-                text = f.read
+                text = f.read()
         except FileNotFoundError:
             print(f"Error: file not found: {args.file}", file=sys.stderr)
             sys.exit(1)
@@ -501,4 +501,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

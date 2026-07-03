@@ -102,7 +102,7 @@ def score_dimension(signals: dict, scale: int = 100) -> int:
 
     Score = scale * (1 - 1/(1 + total_hits * 0.3)). Soft saturation curve.
     """
-    total = sum(signals.values)
+    total = sum(signals.values())
     if total == 0:
         return 0
     score = scale * (1.0 - 1.0 / (1.0 + total * 0.3))
@@ -121,7 +121,7 @@ def fetch_url(url: str, timeout: int = 15) -> str | None:
             headers={"User-Agent": "Mozilla/5.0 (aeo_audit.py; stdlib urllib)"}
         )
         with urllib.request.urlopen(req, timeout=timeout) as resp:
-            return resp.read.decode("utf-8", errors="replace")
+            return resp.read().decode("utf-8", errors="replace")
     except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
         sys.stderr.write(f"[aeo_audit] URL fetch failed: {e}\n")
         return None
@@ -144,7 +144,7 @@ def analyze_structure(text: str) -> dict:
     h3_count = len(re.findall(r"^###\s+|^<h3\b", text, flags=re.MULTILINE | re.IGNORECASE))
     list_items = len(re.findall(r"^\s*[-*+]\s+|<li\b", text, flags=re.MULTILINE | re.IGNORECASE))
     table_count = len(re.findall(r"^\|.*\|\s*$|<table\b", text, flags=re.MULTILINE | re.IGNORECASE))
-    word_count = len(text.split)
+    word_count = len(text.split())
 
     # Structure score: bonus for diverse element types
     structure_score = 0
@@ -189,7 +189,7 @@ def audit(text: str, url: str | None, industry: str) -> dict:
         + structure["structure_score"] * 0.20
     ))
 
-    cfg = INDUSTRIES.get(industry.lower, INDUSTRIES["saas"])
+    cfg = INDUSTRIES.get(industry.lower(), INDUSTRIES["saas"])
     threshold = cfg["min_composite"]
     verdict = "PASS" if composite >= threshold else "BELOW_THRESHOLD"
 
@@ -207,7 +207,7 @@ def audit(text: str, url: str | None, industry: str) -> dict:
     return {
         "url": url,
         "industry": industry,
-        "audited_at": datetime.utcnow.isoformat + "Z",
+        "audited_at": datetime.utcnow().isoformat() + "Z",
         "composite_score": composite,
         "verdict": verdict,
         "threshold": threshold,
@@ -307,7 +307,7 @@ def render_markdown(result: dict) -> str:
     lines.append("|---|---|")
     dims = result["dimensions"]
     for key in ["experience", "expertise", "authoritativeness", "trustworthiness"]:
-        lines.append(f"| {key.title} | {dims[key]['score']}/100 |")
+        lines.append(f"| {key.title()} | {dims[key]['score']}/100 |")
     lines.append(f"| Structure | {dims['structure']['structure_score']}/100 |")
     lines.append("")
     lines.append("## Top Fixes (Priority Order)")
@@ -352,20 +352,20 @@ Contact us at info@acme.com for our corrections policy.
 """
 
 
-def main:
+def main():
     p = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     p.add_argument("--input", help="Path to markdown/HTML file to audit")
     p.add_argument("--url", help="Live URL to fetch + audit")
-    p.add_argument("--industry", default="saas", choices=list(INDUSTRIES.keys),
+    p.add_argument("--industry", default="saas", choices=list(INDUSTRIES.keys()),
                    help="Industry-aware thresholds (default: saas)")
     p.add_argument("--output", choices=["markdown", "json"], default="markdown",
                    help="Output format (default: markdown)")
     p.add_argument("--sample", action="store_true",
                    help="Run with built-in sample content")
-    args = p.parse_args
+    args = p.parse_args()
 
     if args.sample:
         text = SAMPLE_CONTENT
@@ -390,4 +390,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

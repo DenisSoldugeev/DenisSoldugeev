@@ -168,15 +168,15 @@ MODEL_INVERSION_RISK = {
 SEVERITY_ORDER = {"critical": 4, "high": 3, "medium": 2, "low": 1, "informational": 0}
 
 
-def list_patterns:
+def list_patterns():
     """Print all INJECTION_SIGNATURES with severity and ATLAS ID, then exit."""
     print(f"\n{'Signature':<28} {'Severity':<10} {'ATLAS ID':<18} Description")
     print("-" * 95)
-    for sig_name, sig_data in INJECTION_SIGNATURES.items:
+    for sig_name, sig_data in INJECTION_SIGNATURES.items():
         print(
             f"{sig_name:<28} {sig_data['severity']:<10} {sig_data['atlas_id']:<18} {sig_data['description']}"
         )
-    print
+    print()
     sys.exit(0)
 
 
@@ -190,11 +190,11 @@ def scan_prompts(prompts, scope_set):
         1 for sig_name in INJECTION_SIGNATURES
         if _sig_in_scope(sig_name, scope_set)
     )
-    matched_sig_names = set
+    matched_sig_names = set()
 
     for prompt in prompts:
         prompt_excerpt = prompt[:100]
-        for sig_name, sig_data in INJECTION_SIGNATURES.items:
+        for sig_name, sig_data in INJECTION_SIGNATURES.items():
             if not _sig_in_scope(sig_name, scope_set):
                 continue
             for pattern in sig_data["patterns"]:
@@ -235,7 +235,7 @@ def _sig_in_scope(sig_name, scope_set):
 def build_test_coverage(matched_atlas_ids):
     """Return a dict indicating which ATLAS techniques were covered vs not tested."""
     coverage = {}
-    for atlas_id, tech_data in ATLAS_TECHNIQUE_MAP.items:
+    for atlas_id, tech_data in ATLAS_TECHNIQUE_MAP.items():
         if atlas_id in matched_atlas_ids:
             coverage[tech_data["name"]] = "covered"
         else:
@@ -255,7 +255,7 @@ def compute_overall_risk(findings, auth_required, inversion_risk_level):
     if not severity_levels:
         return "low"
     max_level = max(severity_levels)
-    for label, val in SEVERITY_ORDER.items:
+    for label, val in SEVERITY_ORDER.items():
         if val == max_level:
             return label
     return "low"
@@ -264,7 +264,7 @@ def compute_overall_risk(findings, auth_required, inversion_risk_level):
 def build_recommendations(findings, overall_risk, access_level, target_type, auth_required):
     """Build a prioritised recommendations list from findings."""
     recs = []
-    seen = set
+    seen = set()
 
     severity_seen = {f["severity"] for f in findings}
 
@@ -319,7 +319,7 @@ def build_recommendations(findings, overall_risk, access_level, target_type, aut
     return final_recs
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="AI/LLM Security Threat Scanner — Detects prompt injection, jailbreaks, and ATLAS threats.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -379,17 +379,17 @@ def main:
         help="Print all injection signature names with severity and ATLAS IDs, then exit",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.list_patterns:
-        list_patterns  # exits internally
+        list_patterns()  # exits internally
 
     # Parse scope
-    scope_set = set
+    scope_set = set()
     if args.scope:
         valid_scopes = {"prompt-injection", "jailbreak", "model-inversion", "data-poisoning", "tool-abuse"}
         for s in args.scope.split(","):
-            s = s.strip
+            s = s.strip()
             if s:
                 if s not in valid_scopes:
                     print(
@@ -433,7 +433,7 @@ def main:
     # Scan prompts
     # Filter scope: data-poisoning and model-inversion are checked separately,
     # not part of pattern scanning
-    pattern_scope = scope_set - {"model-inversion", "data-poisoning"} if scope_set else set
+    pattern_scope = scope_set - {"model-inversion", "data-poisoning"} if scope_set else set()
     findings, injection_score, matched_atlas_ids = scan_prompts(prompts, pattern_scope if pattern_scope else None)
 
     # Data poisoning check: scan if target-type != llm OR scope includes data-poisoning
@@ -522,21 +522,21 @@ def main:
         print(f"Access Level    : {output['access_level']}")
         print(f"Prompts Tested  : {output['prompts_tested']}")
         print(f"Injection Score : {output['injection_score']:.2%}")
-        print(f"Overall Risk    : {output['overall_risk'].upper}")
+        print(f"Overall Risk    : {output['overall_risk'].upper()}")
         print(f"Auth Required   : {'YES — obtain authorization before proceeding' if auth_required else 'No'}")
 
-        print(f"\nModel Inversion : [{inversion_check['risk'].upper}] {inversion_check['description']}")
+        print(f"\nModel Inversion : [{inversion_check['risk'].upper()}] {inversion_check['description']}")
 
         if findings:
             non_auth_findings = [f for f in findings if f["signature_name"] != "authorization_required"]
             print(f"\nFindings ({len(non_auth_findings)}):")
-            seen_sigs = set
+            seen_sigs = set()
             for f in non_auth_findings:
                 sig = f["signature_name"]
                 if sig not in seen_sigs:
                     seen_sigs.add(sig)
                     print(
-                        f"  [{f['severity'].upper}] {f['signature_name']} "
+                        f"  [{f['severity'].upper()}] {f['signature_name']} "
                         f"({f['atlas_id']}) — {f['description']}"
                     )
                     print(f"    Excerpt: {f['prompt_excerpt'][:80]}...")
@@ -544,13 +544,13 @@ def main:
             print("\nFindings: None detected.")
 
         print("\nTest Coverage:")
-        for tech_name, status in test_coverage.items:
+        for tech_name, status in test_coverage.items():
             print(f"  {tech_name:<45} {status}")
 
         print("\nRecommendations:")
         for rec in recommendations:
             print(f"  - {rec}")
-        print
+        print()
 
     # Exit codes
     if overall_risk == "critical" or auth_required:
@@ -561,4 +561,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

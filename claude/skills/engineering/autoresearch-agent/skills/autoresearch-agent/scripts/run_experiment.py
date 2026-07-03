@@ -20,13 +20,13 @@ from datetime import datetime
 from pathlib import Path
 
 
-def find_autoresearch_root:
+def find_autoresearch_root():
     """Find .autoresearch/ in project or user home."""
-    project_root = Path(".").resolve / ".autoresearch"
-    if project_root.exists:
+    project_root = Path(".").resolve() / ".autoresearch"
+    if project_root.exists():
         return project_root
-    user_root = Path.home / ".autoresearch"
-    if user_root.exists:
+    user_root = Path.home() / ".autoresearch"
+    if user_root.exists():
         return user_root
     return None
 
@@ -34,14 +34,14 @@ def find_autoresearch_root:
 def load_config(experiment_dir):
     """Load config.cfg from experiment directory."""
     cfg_file = experiment_dir / "config.cfg"
-    if not cfg_file.exists:
+    if not cfg_file.exists():
         print(f"  Error: no config.cfg in {experiment_dir}")
         sys.exit(1)
     config = {}
-    for line in cfg_file.read_text.splitlines:
+    for line in cfg_file.read_text().splitlines():
         if ":" in line:
             k, v = line.split(":", 1)
-            config[k.strip] = v.strip
+            config[k.strip()] = v.strip()
     return config
 
 
@@ -52,7 +52,7 @@ def run_git(args, cwd=None, timeout=30):
         capture_output=True, text=True,
         cwd=cwd, timeout=timeout
     )
-    return result.returncode, result.stdout.strip, result.stderr.strip
+    return result.returncode, result.stdout.strip(), result.stderr.strip()
 
 
 def get_current_commit(path):
@@ -64,9 +64,9 @@ def get_current_commit(path):
 def get_best_metric(experiment_dir, direction):
     """Read the best metric from results.tsv."""
     tsv = experiment_dir / "results.tsv"
-    if not tsv.exists:
+    if not tsv.exists():
         return None
-    lines = [l for l in tsv.read_text.splitlines[1:] if "\tkeep\t" in l]
+    lines = [l for l in tsv.read_text().splitlines()[1:] if "\tkeep\t" in l]
     if not lines:
         return None
     metrics = []
@@ -89,7 +89,7 @@ def run_evaluation(project_root, eval_cmd, time_budget_minutes, log_file):
     may contain pipes, redirects, or chained commands.
     """
     hard_limit = time_budget_minutes * 60 * 2.5
-    t0 = time.time
+    t0 = time.time()
     try:
         with open(log_file, "w") as lf:
             result = subprocess.run(
@@ -98,23 +98,23 @@ def run_evaluation(project_root, eval_cmd, time_budget_minutes, log_file):
                 cwd=str(project_root),
                 timeout=hard_limit
             )
-        elapsed = time.time - t0
+        elapsed = time.time() - t0
         return result.returncode, elapsed
     except subprocess.TimeoutExpired:
-        elapsed = time.time - t0
+        elapsed = time.time() - t0
         return -1, elapsed
 
 
 def extract_metric(log_file, metric_grep):
     """Extract metric value from log file."""
     log_path = Path(log_file)
-    if not log_path.exists:
+    if not log_path.exists():
         return None
-    for line in reversed(log_path.read_text.splitlines):
-        stripped = line.strip
+    for line in reversed(log_path.read_text().splitlines()):
+        stripped = line.strip()
         if stripped.startswith(metric_grep.lstrip("^")):
             try:
-                return float(stripped.split(":")[-1].strip)
+                return float(stripped.split(":")[-1].strip())
             except ValueError:
                 continue
     return None
@@ -140,9 +140,9 @@ def log_result(experiment_dir, commit, metric_val, status, description):
 def get_experiment_count(experiment_dir):
     """Count experiments run so far."""
     tsv = experiment_dir / "results.tsv"
-    if not tsv.exists:
+    if not tsv.exists():
         return 0
-    return max(0, len(tsv.read_text.splitlines) - 1)
+    return max(0, len(tsv.read_text().splitlines()) - 1)
 
 
 def get_description_from_diff(project_root):
@@ -156,9 +156,9 @@ def get_description_from_diff(project_root):
 def read_last_lines(filepath, n=5):
     """Read last n lines of a file (replaces tail shell command)."""
     path = Path(filepath)
-    if not path.exists:
+    if not path.exists():
         return ""
-    lines = path.read_text.splitlines
+    lines = path.read_text().splitlines()
     return "\n".join(lines[-n:])
 
 
@@ -172,7 +172,7 @@ def run_single(project_root, experiment_dir, config, exp_num, dry_run=False, des
     log_file = str(experiment_dir / "run.log")
 
     best = get_best_metric(experiment_dir, direction)
-    ts = datetime.now.strftime("%H:%M:%S")
+    ts = datetime.now().strftime("%H:%M:%S")
 
     print(f"\n[{ts}] Experiment #{exp_num}")
     print(f"  Best {metric_name}: {best}")
@@ -237,17 +237,17 @@ def run_single(project_root, experiment_dir, config, exp_num, dry_run=False, des
         return "discard"
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="autoresearch-agent runner")
     parser.add_argument("--experiment", help="Experiment path: domain/name (e.g. engineering/api-speed)")
     parser.add_argument("--single", action="store_true", help="Run one experiment iteration")
     parser.add_argument("--dry-run", action="store_true", help="Show what would happen")
     parser.add_argument("--description", help="Description of the change (auto-generated from git diff if omitted)")
     parser.add_argument("--path", default=".", help="Project root")
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    project_root = Path(args.path).resolve
-    root = find_autoresearch_root
+    project_root = Path(args.path).resolve()
+    root = find_autoresearch_root()
 
     if root is None:
         print("No .autoresearch/ found. Run setup_experiment.py first.")
@@ -258,7 +258,7 @@ def main:
         sys.exit(1)
 
     experiment_dir = root / args.experiment
-    if not experiment_dir.exists:
+    if not experiment_dir.exists():
         print(f"Experiment not found: {experiment_dir}")
         print("Run: python scripts/setup_experiment.py --list")
         sys.exit(1)
@@ -277,4 +277,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

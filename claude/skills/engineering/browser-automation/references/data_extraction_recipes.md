@@ -30,7 +30,7 @@ ARTICLE_SELECTORS = {
     "fields": {
         "headline": "h2 a, h3 a, .article-title",
         "summary": "p.excerpt, .article-summary, .post-excerpt",
-        "author": "span.author, .byline, [rel='author']",
+        "author": "the author",
         "date": "time, span.date, .published-date",
         "category": "span.category, a.tag, .article-category",
         "url": "h2 a::attr(href), .article-title a::attr(href)",
@@ -86,14 +86,14 @@ async def extract_table(page, table_selector="table"):
 
             // Get headers
             const headers = Array.from(table.querySelectorAll('thead th, thead td'))
-                .map(th => th.textContent.trim);
+                .map(th => th.textContent.trim());
 
             // If no thead, use first row as headers
             if (headers.length === 0) {{
                 const firstRow = table.querySelector('tr');
                 if (firstRow) {{
                     headers.push(...Array.from(firstRow.querySelectorAll('th, td'))
-                        .map(cell => cell.textContent.trim));
+                        .map(cell => cell.textContent.trim()));
                 }}
             }}
 
@@ -104,7 +104,7 @@ async def extract_table(page, table_selector="table"):
                 const obj = {{}};
                 cells.forEach((cell, i) => {{
                     if (i < headers.length) {{
-                        obj[headers[i]] = cell.textContent.trim;
+                        obj[headers[i]] = cell.textContent.trim();
                     }}
                 }});
                 return obj;
@@ -127,13 +127,13 @@ async def extract_rich_table(page, table_selector="table"):
             if (!table) return [];
 
             const headers = Array.from(table.querySelectorAll('thead th'))
-                .map(th => th.textContent.trim);
+                .map(th => th.textContent.trim());
 
             return Array.from(table.querySelectorAll('tbody tr')).map(row => {{
                 const obj = {{}};
                 Array.from(row.querySelectorAll('td')).forEach((cell, i) => {{
                     const key = headers[i] || `col_${{i}}`;
-                    obj[key] = cell.textContent.trim;
+                    obj[key] = cell.textContent.trim();
 
                     // Extract link if present
                     const link = cell.querySelector('a');
@@ -170,10 +170,10 @@ async def extract_paginated_table(page, table_selector, next_selector, max_pages
                 if (!table) return {{ headers: [], rows: [] }};
 
                 const hs = Array.from(table.querySelectorAll('thead th'))
-                    .map(th => th.textContent.trim);
+                    .map(th => th.textContent.trim());
 
                 const rs = Array.from(table.querySelectorAll('tbody tr')).map(row =>
-                    Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim)
+                    Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim())
                 );
 
                 return {{ headers: hs, rows: rs }};
@@ -188,10 +188,10 @@ async def extract_paginated_table(page, table_selector, next_selector, max_pages
 
         # Check for next page
         next_btn = page.locator(next_selector)
-        if await next_btn.count == 0 or await next_btn.is_disabled:
+        if await next_btn.count() == 0 or await next_btn.is_disabled():
             break
 
-        await next_btn.click
+        await next_btn.click()
         await page.wait_for_load_state("networkidle")
         await page.wait_for_timeout(random.randint(800, 2000))
 
@@ -219,7 +219,7 @@ async def extract_listings(page, container_sel, field_map):
 
     for card in cards:
         item = {}
-        for field_name, selector in field_map.items:
+        for field_name, selector in field_map.items():
             try:
                 if "::attr(" in selector:
                     sel, attr = selector.split("::attr(")
@@ -229,10 +229,10 @@ async def extract_listings(page, container_sel, field_map):
                 elif selector.endswith("::html"):
                     sel = selector.replace("::html", "")
                     el = await card.query_selector(sel)
-                    item[field_name] = await el.inner_html if el else None
+                    item[field_name] = await el.inner_html() if el else None
                 else:
                     el = await card.query_selector(selector)
-                    item[field_name] = (await el.text_content).strip if el else None
+                    item[field_name] = (await el.text_content()).strip() if el else None
             except Exception:
                 item[field_name] = None
         items.append(item)
@@ -250,7 +250,7 @@ def parse_price(text):
     if not text:
         return None
     # Remove currency symbols and whitespace
-    cleaned = re.sub(r'[^\d.,]', '', text.strip)
+    cleaned = re.sub(r'[^\d.,]', '', text.strip())
     if not cleaned:
         return None
     # Handle European format (1.234,56)
@@ -302,18 +302,18 @@ async def paginate_via_next_button(page, next_selector, content_selector, max_pa
         pages_scraped += 1
 
         next_btn = page.locator(next_selector)
-        if await next_btn.count == 0:
+        if await next_btn.count() == 0:
             break
 
         try:
-            is_disabled = await next_btn.is_disabled
+            is_disabled = await next_btn.is_disabled()
         except Exception:
             is_disabled = True
 
         if is_disabled:
             break
 
-        await next_btn.click
+        await next_btn.click()
         await page.wait_for_selector(content_selector, state="attached")
         await page.wait_for_timeout(random.randint(500, 1500))
 ```
@@ -357,7 +357,7 @@ async def paginate_via_scroll(page, item_selector, max_scrolls=100, no_change_li
 
     for scroll_num in range(max_scrolls):
         # Count current items
-        current_count = await page.locator(item_selector).count
+        current_count = await page.locator(item_selector).count()
 
         if current_count == previous_count:
             no_change_streak += 1
@@ -374,8 +374,8 @@ async def paginate_via_scroll(page, item_selector, max_scrolls=100, no_change_li
 
         # Check for "Load More" button that might appear
         load_more = page.locator("button:has-text('Load More'), button:has-text('Show More')")
-        if await load_more.count > 0 and await load_more.is_visible:
-            await load_more.click
+        if await load_more.count() > 0 and await load_more.is_visible():
+            await load_more.click()
             await page.wait_for_timeout(random.randint(1000, 2000))
 
     return current_count
@@ -390,11 +390,11 @@ async def paginate_via_load_more(page, button_selector, item_selector, max_click
     """Click a 'Load More' button repeatedly until it disappears."""
     for click_num in range(max_clicks):
         btn = page.locator(button_selector)
-        if await btn.count == 0 or not await btn.is_visible:
+        if await btn.count() == 0 or not await btn.is_visible():
             break
 
-        count_before = await page.locator(item_selector).count
-        await btn.click
+        count_before = await page.locator(item_selector).count()
+        await btn.click()
 
         # Wait for new items to appear
         try:
@@ -407,7 +407,7 @@ async def paginate_via_load_more(page, button_selector, item_selector, max_click
 
         await page.wait_for_timeout(random.randint(500, 1500))
 
-    return await page.locator(item_selector).count
+    return await page.locator(item_selector).count()
 ```
 
 ## Nested Data Extraction
@@ -430,8 +430,8 @@ async def extract_threaded_comments(page, parent_selector=".comments"):
                     const repliesContainer = comment.querySelector('.replies, .children');
 
                     comments.push({{
-                        text: textEl ? textEl.textContent.trim : null,
-                        date: dateEl ? (dateEl.getAttribute('datetime') || dateEl.textContent.trim) : null,
+                        text: textEl ? textEl.textContent.trim() : null,
+                        date: dateEl ? (dateEl.getAttribute('datetime') || dateEl.textContent.trim()) : null,
                         replies: repliesContainer ? extractThread(repliesContainer) : [],
                     }});
                 }}
@@ -461,7 +461,7 @@ async def extract_category_tree(page, root_selector="nav.categories"):
                     const subMenu = item.querySelector(':scope > ul, :scope > div.sub-categories');
 
                     items.push({{
-                        name: link ? link.textContent.trim : item.textContent.trim.split('\\n')[0],
+                        name: link ? link.textContent.trim() : item.textContent.trim().split('\\n')[0],
                         url: link ? link.href : null,
                         children: subMenu ? extractLevel(subMenu) : [],
                     }});
@@ -487,10 +487,10 @@ async def extract_accordion(page, toggle_selector, content_selector):
     toggles = await page.query_selector_all(toggle_selector)
 
     for toggle in toggles:
-        title = (await toggle.text_content).strip
+        title = (await toggle.text_content()).strip()
 
         # Click to expand
-        await toggle.click
+        await toggle.click()
         await page.wait_for_timeout(300)
 
         # Find the associated content panel
@@ -500,9 +500,9 @@ async def extract_accordion(page, toggle_selector, content_selector):
 
         body = None
         if content:
-            body = (await content.text_content)
+            body = (await content.text_content())
             if body:
-                body = body.strip
+                body = body.strip()
 
         items.append({"title": title, "content": body})
 
@@ -523,14 +523,14 @@ def clean_text(text):
     # Remove zero-width characters
     text = re.sub(r'[\u200b\u200c\u200d\ufeff]', '', text)
     # Normalize whitespace
-    text = re.sub(r'\s+', ' ', text).strip
+    text = re.sub(r'\s+', ' ', text).strip()
     return text if text else None
 
 def clean_url(url, base_url=None):
     """Convert relative URLs to absolute."""
     if not url:
         return None
-    url = url.strip
+    url = url.strip()
     if url.startswith("//"):
         return "https:" + url
     if url.startswith("/") and base_url:
@@ -539,7 +539,7 @@ def clean_url(url, base_url=None):
 
 def deduplicate(items, key_field):
     """Remove duplicate items based on a key field."""
-    seen = set
+    seen = set()
     unique = []
     for item in items:
         key = item.get(key_field)
@@ -566,10 +566,10 @@ def to_csv(items, file_path):
     """Write items as CSV."""
     if not items:
         return
-    headers = list(items[0].keys)
+    headers = list(items[0].keys())
     with open(file_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=headers)
-        writer.writeheader
+        writer.writeheader()
         writer.writerows(items)
 
 def to_json(items, file_path, indent=2):

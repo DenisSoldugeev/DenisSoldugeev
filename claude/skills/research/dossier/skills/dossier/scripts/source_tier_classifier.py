@@ -107,15 +107,15 @@ def is_likely_company_official(domain: str, subject_keywords: List[str]) -> bool
     """If the domain contains the subject's name and isn't a known news/blog, it's likely official."""
     if not subject_keywords:
         return False
-    domain_lower = domain.lower
+    domain_lower = domain.lower()
     for kw in subject_keywords:
-        if kw.lower in domain_lower:
+        if kw.lower() in domain_lower:
             return True
     return False
 
 
 def classify(url: str, subject_keywords: Optional[List[str]] = None) -> Dict[str, Any]:
-    if not url or not url.strip:
+    if not url or not url.strip():
         return {"tier": "unknown", "url": url, "rationale": "Empty URL"}
 
     try:
@@ -123,7 +123,7 @@ def classify(url: str, subject_keywords: Optional[List[str]] = None) -> Dict[str
     except Exception as e:
         return {"tier": "unknown", "url": url, "rationale": f"URL parse failed: {e}"}
 
-    domain = parsed.netloc.lower
+    domain = parsed.netloc.lower()
     # Strip 'www.' prefix for matching
     if domain.startswith("www."):
         domain_no_www = domain[4:]
@@ -165,7 +165,7 @@ def classify(url: str, subject_keywords: Optional[List[str]] = None) -> Dict[str
 
     # Contains checks
     for pattern in PRIMARY_DOMAIN_CONTAINS:
-        if pattern in url.lower:
+        if pattern in url.lower():
             return {"tier": "primary", "url": url, "rationale": f"URL contains primary-tier pattern '{pattern}'"}
 
     # Company-official heuristic (if subject keywords provided)
@@ -205,7 +205,7 @@ def main(argv: List[str]) -> int:
     parser.add_argument("--output", choices=["human", "json"], default="human")
     args = parser.parse_args(argv)
 
-    subject_kws = [s.strip for s in args.subject.split(",")] if args.subject else None
+    subject_kws = [s.strip() for s in args.subject.split(",")] if args.subject else None
 
     if args.sample:
         results = [classify(u, ["microsoft"]) for u in SAMPLE_URLS]
@@ -213,7 +213,7 @@ def main(argv: List[str]) -> int:
             print(json.dumps(results, indent=2))
         else:
             for r in results:
-                tier = r["tier"].upper
+                tier = r["tier"].upper()
                 marker = {"PRIMARY": "[1°]", "SECONDARY": "[2°]", "TERTIARY": "[3°]"}.get(tier, "[?]")
                 print(f"{marker} {tier:<10s} {r['url']}")
                 print(f"      {r['rationale']}")
@@ -223,14 +223,14 @@ def main(argv: List[str]) -> int:
         if args.output == "json":
             print(json.dumps(result, indent=2))
         else:
-            print(f"Tier:      {result['tier'].upper}")
+            print(f"Tier:      {result['tier'].upper()}")
             print(f"URL:       {result['url']}")
             print(f"Rationale: {result['rationale']}")
             if result.get("confidence"):
                 print(f"Confidence: {result['confidence']}")
         return 0
     else:
-        parser.print_help
+        parser.print_help()
         return 0
 
 

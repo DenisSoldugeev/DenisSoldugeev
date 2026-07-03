@@ -304,11 +304,11 @@ annotations:
 #### Chaos Engineering Integration
 ```python
 # Test that alerts fire during controlled failures
-def test_alert_during_cpu_spike:
+def test_alert_during_cpu_spike():
     with chaos.cpu_spike(target='payment-api', duration='2m'):
         assert wait_for_alert('HighCPU', timeout=180)
         
-def test_alert_during_network_partition:
+def test_alert_during_network_partition():
     with chaos.network_partition(target='database'):
         assert wait_for_alert('DatabaseUnreachable', timeout=60)
 ```

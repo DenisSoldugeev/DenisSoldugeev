@@ -181,14 +181,14 @@ spec:
 def parse_yaml_simple(content):
     """Simple key-value parser for YAML (stdlib only)."""
     result = {}
-    for line in content.splitlines:
-        stripped = line.strip
+    for line in content.splitlines():
+        stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
         if ":" in stripped and not stripped.startswith("-"):
             key, _, val = stripped.partition(":")
-            key = key.strip
-            val = val.strip.strip("'\"")
+            key = key.strip()
+            val = val.strip().strip("'\"")
             if val:
                 result[key] = val
     return result
@@ -199,7 +199,7 @@ def check_structure(chart_dir):
     findings = []
     for check in REQUIRED_FILES:
         path = chart_dir / check["path"]
-        if not path.exists:
+        if not path.exists():
             findings.append({
                 "id": "ST" + str(REQUIRED_FILES.index(check) + 1).zfill(3),
                 "severity": check["severity"],
@@ -214,7 +214,7 @@ def check_chart_yaml(chart_dir):
     """Validate Chart.yaml metadata."""
     findings = []
     chart_path = chart_dir / "Chart.yaml"
-    if not chart_path.exists:
+    if not chart_path.exists():
         return findings
 
     content = chart_path.read_text(encoding="utf-8")
@@ -258,7 +258,7 @@ def check_templates(chart_dir):
     """Scan templates for anti-patterns."""
     findings = []
     templates_dir = chart_dir / "templates"
-    if not templates_dir.exists:
+    if not templates_dir.exists():
         return findings
 
     template_files = list(templates_dir.glob("*.yaml")) + list(templates_dir.glob("*.yml")) + list(templates_dir.glob("*.tpl"))
@@ -272,7 +272,7 @@ def check_templates(chart_dir):
         for rule in TEMPLATE_ANTI_PATTERNS:
             # Skip patterns that would false-positive on template expressions
             for match in re.finditer(rule["pattern"], content, re.MULTILINE):
-                line = match.group(0).strip
+                line = match.group(0).strip()
                 # Skip if the line contains a template expression
                 if "{{" in line or "}}" in line:
                     continue
@@ -287,7 +287,7 @@ def check_templates(chart_dir):
 
     # Check for standard labels
     helpers_file = templates_dir / "_helpers.tpl"
-    if helpers_file.exists:
+    if helpers_file.exists():
         helpers_content = helpers_file.read_text(encoding="utf-8")
         for label_pattern in LABEL_PATTERNS:
             if not re.search(label_pattern, helpers_content) and not re.search(label_pattern, all_content):
@@ -332,7 +332,7 @@ def check_security(chart_dir):
     """Run security-focused checks."""
     findings = []
     templates_dir = chart_dir / "templates"
-    if not templates_dir.exists:
+    if not templates_dir.exists():
         return findings
 
     template_files = list(templates_dir.glob("*.yaml")) + list(templates_dir.glob("*.yml"))
@@ -357,7 +357,7 @@ def check_security(chart_dir):
                 triggered = True
         elif check["check"] == "no_network_policy":
             np_file = templates_dir / "networkpolicy.yaml"
-            if not np_file.exists and "NetworkPolicy" not in all_content:
+            if not np_file.exists() and "NetworkPolicy" not in all_content:
                 triggered = True
         elif check["check"] == "automount_sa_token":
             if "automountServiceAccountToken" not in all_content and template_files:
@@ -380,7 +380,7 @@ def check_security(chart_dir):
 
     # Check for secrets in values.yaml
     values_path = chart_dir / "values.yaml"
-    if values_path.exists:
+    if values_path.exists():
         values_content = values_path.read_text(encoding="utf-8")
         for match in re.finditer(r"^(\s*\S*(?:password|secret|token|apiKey|api_key)\s*:\s*)(\S+)", values_content, re.MULTILINE | re.IGNORECASE):
             val = match.group(2).strip("'\"")
@@ -388,10 +388,10 @@ def check_security(chart_dir):
                 findings.append({
                     "id": "SC009",
                     "severity": "critical",
-                    "message": f"Potential secret in values.yaml default: {match.group(0).strip[:60]}",
+                    "message": f"Potential secret in values.yaml default: {match.group(0).strip()[:60]}",
                     "fix": "Remove default secret values. Use empty string or null with documentation",
                     "file": "values.yaml",
-                    "line": match.group(0).strip[:80],
+                    "line": match.group(0).strip()[:80],
                 })
 
     return findings
@@ -414,7 +414,7 @@ def analyze_chart(chart_dir, output_format="text", security_focus=False):
         findings.extend(check_security(chart_dir))
 
     # Deduplicate
-    seen = set
+    seen = set()
     unique = []
     for f in findings:
         key = (f["id"], f.get("line", ""), f.get("file", ""))
@@ -440,7 +440,7 @@ def analyze_chart(chart_dir, output_format="text", security_focus=False):
 
     # Chart metadata
     chart_yaml_path = chart_dir / "Chart.yaml"
-    chart_meta = parse_yaml_simple(chart_yaml_path.read_text(encoding="utf-8")) if chart_yaml_path.exists else {}
+    chart_meta = parse_yaml_simple(chart_yaml_path.read_text(encoding="utf-8")) if chart_yaml_path.exists() else {}
 
     result = {
         "score": score,
@@ -462,13 +462,13 @@ def analyze_chart(chart_dir, output_format="text", security_focus=False):
     print(f"  Score: {score}/100")
     print(f"  Chart: {result['chart_name']} v{result['chart_version']}")
     print(f"  App Version: {result['app_version']}")
-    print
+    print()
     print(f"  Findings: {counts['critical']} critical | {counts['high']} high | {counts['medium']} medium | {counts['low']} low")
     print(f"{'─' * 60}")
 
     for f in findings:
         icon = {"critical": "!!!", "high": "!!", "medium": "!", "low": "~"}.get(f["severity"], "?")
-        print(f"\n  [{f['id']}] {icon} {f['severity'].upper}")
+        print(f"\n  [{f['id']}] {icon} {f['severity'].upper()}")
         print(f"  {f['message']}")
         if "file" in f:
             print(f"  File: {f['file']}")
@@ -483,24 +483,24 @@ def analyze_chart(chart_dir, output_format="text", security_focus=False):
     return result
 
 
-def run_demo:
+def run_demo():
     """Run analysis on demo chart data."""
     import tempfile
     import os
 
-    with tempfile.TemporaryDirectory as tmpdir:
+    with tempfile.TemporaryDirectory() as tmpdir:
         chart_dir = Path(tmpdir) / "demo-app"
-        chart_dir.mkdir
+        chart_dir.mkdir()
         (chart_dir / "Chart.yaml").write_text(DEMO_CHART_YAML)
         (chart_dir / "values.yaml").write_text(DEMO_VALUES_YAML)
         templates_dir = chart_dir / "templates"
-        templates_dir.mkdir
+        templates_dir.mkdir()
         (templates_dir / "deployment.yaml").write_text(DEMO_DEPLOYMENT)
 
         return chart_dir, analyze_chart
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="helm-chart-builder: Helm chart static analyzer"
     )
@@ -516,27 +516,27 @@ def main:
         action="store_true",
         help="Security-focused analysis only",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.chartdir:
         chart_dir = Path(args.chartdir)
-        if not chart_dir.is_dir:
+        if not chart_dir.is_dir():
             print(f"Error: Not a directory: {args.chartdir}", file=sys.stderr)
             sys.exit(1)
         analyze_chart(chart_dir, args.output, args.security)
     else:
         print("No chart directory provided. Running demo analysis...\n")
         import tempfile
-        with tempfile.TemporaryDirectory as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             chart_dir = Path(tmpdir) / "demo-app"
-            chart_dir.mkdir
+            chart_dir.mkdir()
             (chart_dir / "Chart.yaml").write_text(DEMO_CHART_YAML)
             (chart_dir / "values.yaml").write_text(DEMO_VALUES_YAML)
             templates_dir = chart_dir / "templates"
-            templates_dir.mkdir
+            templates_dir.mkdir()
             (templates_dir / "deployment.yaml").write_text(DEMO_DEPLOYMENT)
             analyze_chart(chart_dir, args.output, args.security)
 
 
 if __name__ == "__main__":
-    main
+    main()

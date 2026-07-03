@@ -341,7 +341,7 @@ Flag these without being asked:
 
 ### One-liner (any tool)
 ```bash
-git clone 
+git clone /claude-skills.git
 cp -r claude-skills/engineering/docker-development ~/.claude/skills/
 ```
 

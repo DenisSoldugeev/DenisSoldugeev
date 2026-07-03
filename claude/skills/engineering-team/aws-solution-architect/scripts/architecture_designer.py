@@ -46,26 +46,26 @@ class ArchitectureDesigner:
         # Determine pattern based on app type and scale
         if self.app_type in ['web_application', 'saas_platform']:
             if self.expected_users < 10000:
-                return self._serverless_web_architecture
+                return self._serverless_web_architecture()
             elif self.expected_users < 100000:
-                return self._modern_three_tier_architecture
+                return self._modern_three_tier_architecture()
             else:
-                return self._multi_region_architecture
+                return self._multi_region_architecture()
 
         elif self.app_type == 'mobile_backend':
-            return self._serverless_mobile_backend
+            return self._serverless_mobile_backend()
 
         elif self.app_type == 'data_pipeline':
-            return self._event_driven_data_pipeline
+            return self._event_driven_data_pipeline()
 
         elif self.app_type == 'microservices':
-            return self._event_driven_microservices
+            return self._event_driven_microservices()
 
         elif self.app_type == 'iot_platform':
-            return self._iot_architecture
+            return self._iot_architecture()
 
         else:
-            return self._serverless_web_architecture  # Default
+            return self._serverless_web_architecture()  # Default
 
     def _serverless_web_architecture(self) -> Dict[str, Any]:
         """Serverless web application pattern."""
@@ -123,7 +123,7 @@ class ArchitectureDesigner:
                 }
             },
             'estimated_cost': {
-                'monthly_usd': self._calculate_serverless_cost,
+                'monthly_usd': self._calculate_serverless_cost(),
                 'breakdown': {
                     'CloudFront': '10-30 USD',
                     'Lambda': '5-20 USD',
@@ -220,7 +220,7 @@ class ArchitectureDesigner:
                 }
             },
             'estimated_cost': {
-                'monthly_usd': self._calculate_three_tier_cost,
+                'monthly_usd': self._calculate_three_tier_cost(),
                 'breakdown': {
                     'ALB': '20-30 USD',
                     'ECS Fargate': '50-200 USD',
@@ -508,7 +508,7 @@ class ArchitectureDesigner:
                 }
             },
             'estimated_cost': {
-                'monthly_usd': self._calculate_data_pipeline_cost,
+                'monthly_usd': self._calculate_data_pipeline_cost(),
                 'breakdown': {
                     'Kinesis': '15-100 USD (per shard)',
                     'Lambda': '10-50 USD',
@@ -678,7 +678,7 @@ class ArchitectureDesigner:
                 }
             },
             'estimated_cost': {
-                'monthly_usd': self._calculate_three_tier_cost * 1.8,
+                'monthly_usd': self._calculate_three_tier_cost() * 1.8,
                 'breakdown': {
                     'Route 53': '10-30 USD',
                     'CloudFront': '20-100 USD',
@@ -743,7 +743,7 @@ class ArchitectureDesigner:
 
     def generate_service_checklist(self) -> List[Dict[str, Any]]:
         """Generate implementation checklist for recommended architecture."""
-        architecture = self.recommend_architecture_pattern
+        architecture = self.recommend_architecture_pattern()
 
         checklist = [
             {
@@ -770,7 +770,7 @@ class ArchitectureDesigner:
                 'phase': 'Core Services',
                 'tasks': [
                     f"Deploy {service['service']}"
-                    for service in architecture['services'].values
+                    for service in architecture['services'].values()
                 ]
             },
             {

@@ -69,10 +69,10 @@ def _compute_iso(eff: str, offset_days: int) -> str:
     if not eff:
         return ""
     try:
-        d = datetime.fromisoformat(eff).date
+        d = datetime.fromisoformat(eff).date()
     except ValueError:
         return ""
-    return (d + timedelta(days=offset_days)).isoformat
+    return (d + timedelta(days=offset_days)).isoformat()
 
 
 def build_calendar(raw: dict) -> CalendarReport:
@@ -83,7 +83,7 @@ def build_calendar(raw: dict) -> CalendarReport:
         raise SystemExit(
             f"change_event.magnitude must be one of {sorted(MAGNITUDES)}; got '{mag}'"
         )
-    eff = str(event.get("effective_date", "")).strip
+    eff = str(event.get("effective_date", "")).strip()
     audience_size = int(event.get("audience_size", 0) or 0)
     channels = list(raw.get("channels_available") or [])
     if not channels:
@@ -159,7 +159,7 @@ def build_calendar(raw: dict) -> CalendarReport:
             "(town_hall / allhands). Required."
         )
     # Layoff inference: name contains layoff/RIF keyword
-    name_l = name.lower
+    name_l = name.lower()
     layoff_event = any(kw in name_l for kw in ["layoff", "rif", "reduction in force", "redundanc"])
     if layoff_event:
         if all(t.channel == "slack" for t in touchpoints):
@@ -240,7 +240,7 @@ def render_markdown(r: CalendarReport) -> str:
     return "\n".join(lines)
 
 
-def sample_input -> dict:
+def sample_input() -> dict:
     return {
         "change_event": {
             "name": "Reorganization: merging Platform and Infrastructure into one group",
@@ -255,7 +255,7 @@ def sample_input -> dict:
     }
 
 
-def main -> int:
+def main() -> int:
     p = argparse.ArgumentParser(
         description="Build a 7-touchpoint internal-comms sequencing calendar."
     )
@@ -265,14 +265,14 @@ def main -> int:
         help="Output format (default: markdown).",
     )
     p.add_argument("--sample", action="store_true", help="Use built-in sample and exit.")
-    args = p.parse_args
+    args = p.parse_args()
 
     if args.sample:
-        raw = sample_input
+        raw = sample_input()
     else:
         if not args.input:
             p.error("--input is required unless --sample is given")
-        if not args.input.exists:
+        if not args.input.exists():
             p.error(f"input file not found: {args.input}")
         with args.input.open("r", encoding="utf-8") as f:
             raw = json.load(f)
@@ -286,4 +286,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

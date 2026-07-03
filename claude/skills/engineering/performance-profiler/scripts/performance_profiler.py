@@ -24,14 +24,14 @@ def iter_files(root: Path) -> Iterable[Path]:
         dirnames[:] = [d for d in dirnames if d not in {".git", "node_modules", ".next", "dist", "build", "coverage", "__pycache__"}]
         for filename in filenames:
             path = Path(dirpath) / filename
-            if path.is_file:
+            if path.is_file():
                 yield path
 
 
 def get_large_files(root: Path, threshold_bytes: int) -> List[Tuple[str, int]]:
     large: List[Tuple[str, int]] = []
     for file_path in iter_files(root):
-        size = file_path.stat.st_size
+        size = file_path.stat().st_size
         if size >= threshold_bytes:
             large.append((str(file_path.relative_to(root)), size))
     return sorted(large, key=lambda item: item[1], reverse=True)
@@ -41,7 +41,7 @@ def count_dependencies(root: Path) -> Dict[str, int]:
     counts = {"node_dependencies": 0, "python_dependencies": 0, "go_dependencies": 0}
 
     package_json = root / "package.json"
-    if package_json.exists:
+    if package_json.exists():
         try:
             data = json.loads(package_json.read_text(encoding="utf-8"))
             deps = data.get("dependencies", {})
@@ -51,17 +51,17 @@ def count_dependencies(root: Path) -> Dict[str, int]:
             pass
 
     requirements = root / "requirements.txt"
-    if requirements.exists:
-        lines = [ln.strip for ln in requirements.read_text(encoding="utf-8", errors="ignore").splitlines]
+    if requirements.exists():
+        lines = [ln.strip() for ln in requirements.read_text(encoding="utf-8", errors="ignore").splitlines()]
         counts["python_dependencies"] = sum(1 for ln in lines if ln and not ln.startswith("#"))
 
     go_mod = root / "go.mod"
-    if go_mod.exists:
-        lines = go_mod.read_text(encoding="utf-8", errors="ignore").splitlines
+    if go_mod.exists():
+        lines = go_mod.read_text(encoding="utf-8", errors="ignore").splitlines()
         in_require_block = False
         go_count = 0
         for ln in lines:
-            s = ln.strip
+            s = ln.strip()
             if s.startswith("require ("):
                 in_require_block = True
                 continue
@@ -84,16 +84,16 @@ def bundle_indicators(root: Path) -> Dict[str, object]:
         "estimated_bundle_weight": 0.0,
     }
     for d in ["dist", "build", ".next", "out"]:
-        if (root / d).exists:
+        if (root / d).exists():
             indicators["build_dirs_present"].append(d)
 
     bundle_files = 0
     weight = 0.0
     for path in iter_files(root):
-        ext = path.suffix.lower
+        ext = path.suffix.lower()
         if ext in EXT_WEIGHTS:
             bundle_files += 1
-            size_kb = path.stat.st_size / 1024.0
+            size_kb = path.stat().st_size / 1024.0
             weight += size_kb * EXT_WEIGHTS[ext]
 
     indicators["bundle_like_files"] = bundle_files
@@ -153,7 +153,7 @@ def print_text(report: Dict[str, object]) -> None:
             print(f"- {rel_path}: {format_size(size)}")
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Analyze a project directory for common performance risk indicators."
     )
@@ -169,13 +169,13 @@ def parse_args -> argparse.Namespace:
         action="store_true",
         help="Print JSON output instead of text",
     )
-    return parser.parse_args
+    return parser.parse_args()
 
 
-def main -> int:
-    args = parse_args
-    root = Path(args.path).expanduser.resolve
-    if not root.exists or not root.is_dir:
+def main() -> int:
+    args = parse_args()
+    root = Path(args.path).expanduser().resolve()
+    if not root.exists() or not root.is_dir():
         raise SystemExit(f"Path is not a directory: {root}")
 
     threshold = max(1, args.large_file_threshold_kb) * 1024
@@ -189,4 +189,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main)
+    raise SystemExit(main())

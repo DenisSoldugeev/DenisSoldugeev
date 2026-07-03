@@ -375,7 +375,7 @@ with open('my_tools_anthropic.json') as f:
     schemas = json.load(f)
 
 # Use with Anthropic tool use
-client = anthropic.Anthropic
+client = anthropic.Anthropic()
 response = client.messages.create(
     model="claude-3-opus-20240229",
     messages=[{"role": "user", "content": "Search for AI news"}],

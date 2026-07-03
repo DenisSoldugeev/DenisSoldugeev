@@ -27,7 +27,7 @@ const server = new Server(
   { capabilities: { tools: {} } },
 );
 
-server.setRequestHandler(ListToolsRequestSchema, async  => ({
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
     {
       name: 'browserstack_get_plan',
@@ -115,17 +115,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     switch (name) {
       case 'browserstack_get_plan': {
-        const plan = await client.getPlan;
+        const plan = await client.getPlan();
         return { content: [{ type: 'text', text: JSON.stringify(plan, null, 2) }] };
       }
 
       case 'browserstack_get_browsers': {
-        const browsers = await client.getBrowsers;
+        const browsers = await client.getBrowsers();
         const playwrightBrowsers = browsers.filter(
           (b) =>
             ['chrome', 'firefox', 'playwright-chromium', 'playwright-firefox', 'playwright-webkit'].includes(
-              b.browser?.toLowerCase ?? '',
-            ) || b.browser?.toLowerCase.includes('playwright'),
+              b.browser?.toLowerCase() ?? '',
+            ) || b.browser?.toLowerCase().includes('playwright'),
         );
         const summary = playwrightBrowsers.length > 0 ? playwrightBrowsers : browsers.slice(0, 50);
         return { content: [{ type: 'text', text: JSON.stringify(summary, null, 2) }] };
@@ -175,9 +175,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 });
 
-async function main {
-  const transport = new StdioServerTransport;
+async function main() {
+  const transport = new StdioServerTransport();
   await server.connect(transport);
 }
 
-main.catch(console.error);
+main().catch(console.error);

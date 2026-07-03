@@ -66,31 +66,31 @@
     {
       "type": "c_banned_gets",
       "severity": "high",
-      "message": "'gets' is unsafe: no bounds check, removed from C11 (CWE-242)",
+      "message": "'gets()' is unsafe: no bounds check, removed from C11 (CWE-242)",
       "location": "offset 117"
     },
     {
       "type": "c_banned_strcpy",
       "severity": "high",
-      "message": "'strcpy' is unsafe: no bounds check \u2014 prefer strncpy or strlcpy",
+      "message": "'strcpy()' is unsafe: no bounds check \u2014 prefer strncpy or strlcpy",
       "location": "offset 157"
     },
     {
       "type": "c_banned_strcpy",
       "severity": "high",
-      "message": "'strcpy' is unsafe: no bounds check \u2014 prefer strncpy or strlcpy",
+      "message": "'strcpy()' is unsafe: no bounds check \u2014 prefer strncpy or strlcpy",
       "location": "offset 447"
     },
     {
       "type": "c_banned_strcat",
       "severity": "high",
-      "message": "'strcat' is unsafe: no bounds check \u2014 prefer strncat or strlcat",
+      "message": "'strcat()' is unsafe: no bounds check \u2014 prefer strncat or strlcat",
       "location": "offset 186"
     },
     {
       "type": "c_banned_sprintf",
       "severity": "high",
-      "message": "'sprintf' is unsafe: no bounds check \u2014 prefer snprintf",
+      "message": "'sprintf()' is unsafe: no bounds check \u2014 prefer snprintf",
       "location": "offset 238"
     },
     {

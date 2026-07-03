@@ -62,30 +62,30 @@ def _parse_frontmatter(text: str) -> dict:
         return {}
     body = m.group(1)
     fm = {}
-    for line in body.splitlines:
+    for line in body.splitlines():
         if ":" in line:
             k, _, v = line.partition(":")
-            fm[k.strip.lower] = v.strip.strip('"').strip("'")
+            fm[k.strip().lower()] = v.strip().strip('"').strip("'")
     return fm
 
 
 def _extract_title(text: str, path: Path) -> str:
-    for line in text.splitlines:
+    for line in text.splitlines():
         m = re.match(r"^#\s+(.+)$", line)
         if m:
-            return m.group(1).strip
-    return path.stem.replace("-", " ").replace("_", " ").title
+            return m.group(1).strip()
+    return path.stem.replace("-", " ").replace("_", " ").title()
 
 
 def _extract_links(text: str) -> list:
     links = []
     for m in MD_LINK_RE.finditer(text):
-        target = m.group(2).strip
+        target = m.group(2).strip()
         if target.startswith(("http://", "https://", "mailto:")):
             continue
         links.append(target)
     for m in WIKI_LINK_RE.finditer(text):
-        links.append(m.group(1).strip)
+        links.append(m.group(1).strip())
     return links
 
 
@@ -94,28 +94,28 @@ def _extract_acronyms(text: str) -> tuple:
     defs = {}
     for m in ACRONYM_DEF_RE.finditer(text):
         if m.group(1) and m.group(2):
-            defs[m.group(2)] = m.group(1).strip
+            defs[m.group(2)] = m.group(1).strip()
         elif m.group(3) and m.group(4):
-            defs[m.group(3)] = m.group(4).strip
+            defs[m.group(3)] = m.group(4).strip()
     return acronyms, defs
 
 
 def _normalize_link_target(target: str, source: Path, root: Path) -> str:
     """Resolve a link target to a canonical relative path string."""
-    target = target.split("#")[0].split("?")[0].strip
+    target = target.split("#")[0].split("?")[0].strip()
     if not target:
         return ""
     if target.endswith(".md"):
-        candidate = (source.parent / target).resolve
+        candidate = (source.parent / target).resolve()
     elif "/" in target or "\\" in target:
-        candidate_md = (source.parent / (target + ".md")).resolve
-        if candidate_md.exists:
+        candidate_md = (source.parent / (target + ".md")).resolve()
+        if candidate_md.exists():
             candidate = candidate_md
         else:
-            candidate = (source.parent / target).resolve
+            candidate = (source.parent / target).resolve()
     else:
         # bare title — try to match against any .md filename
-        candidate_md = (source.parent / (target + ".md")).resolve
+        candidate_md = (source.parent / (target + ".md")).resolve()
         candidate = candidate_md
     try:
         return str(candidate.relative_to(root))
@@ -126,9 +126,9 @@ def _normalize_link_target(target: str, source: Path, root: Path) -> str:
 def walk_vault(root: Path, stale_days: int = 365) -> list:
     """Walk a directory tree and return a list of PageInfo objects."""
     pages = []
-    now = dt.datetime.now
+    now = dt.datetime.now()
     for path in sorted(root.rglob("*.md")):
-        if not path.is_file:
+        if not path.is_file():
             continue
         try:
             text = path.read_text(encoding="utf-8")
@@ -141,13 +141,13 @@ def walk_vault(root: Path, stale_days: int = 365) -> list:
             "last-reviewed", "")
         # mtime fallback
         try:
-            mtime = dt.datetime.fromtimestamp(path.stat.st_mtime)
+            mtime = dt.datetime.fromtimestamp(path.stat().st_mtime)
             mtime_days_ago = (now - mtime).days
         except OSError:
             mtime_days_ago = 0
         outbound = _extract_links(text)
         acronyms, defs = _extract_acronyms(text)
-        word_count = len(text.split)
+        word_count = len(text.split())
         pages.append(PageInfo(
             path=path,
             title=title,
@@ -161,15 +161,15 @@ def walk_vault(root: Path, stale_days: int = 365) -> list:
         ))
     # Compute inbound links.
     by_relpath = {str(p.path.relative_to(root)): p for p in pages}
-    by_title = {p.title.lower: p for p in pages}
-    by_stem = {p.path.stem.lower: p for p in pages}
+    by_title = {p.title.lower(): p for p in pages}
+    by_stem = {p.path.stem.lower(): p for p in pages}
     for src in pages:
         for raw in src.outbound_links:
             target_rel = _normalize_link_target(raw, src.path, root)
             if target_rel in by_relpath:
                 by_relpath[target_rel].inbound_link_count += 1
                 continue
-            tgt = raw.split("#")[0].split("?")[0].strip.lower
+            tgt = raw.split("#")[0].split("?")[0].strip().lower()
             if tgt.endswith(".md"):
                 tgt = tgt[:-3]
             if tgt in by_title:
@@ -190,7 +190,7 @@ def detect_stale(pages: list, stale_days: int) -> list:
         if p.last_reviewed:
             try:
                 lr = dt.datetime.strptime(p.last_reviewed[:10], "%Y-%m-%d")
-                if (dt.datetime.now - lr).days > stale_days:
+                if (dt.datetime.now() - lr).days > stale_days:
                     is_stale = True
             except ValueError:
                 pass
@@ -210,11 +210,11 @@ def detect_glossary_drift(pages: list) -> dict:
     acronyms that have >= 2 distinct definitions across the vault."""
     by_acronym = defaultdict(list)
     for p in pages:
-        for ac, defin in p.acronym_definitions.items:
+        for ac, defin in p.acronym_definitions.items():
             by_acronym[ac].append((defin, str(p.path)))
     drift = {}
-    for ac, defs in by_acronym.items:
-        distinct = set(d.lower for d, _ in defs)
+    for ac, defs in by_acronym.items():
+        distinct = set(d.lower() for d, _ in defs)
         if len(distinct) >= 2:
             drift[ac] = defs
     return drift
@@ -223,8 +223,8 @@ def detect_glossary_drift(pages: list) -> dict:
 def detect_glossary_candidates(pages: list, min_docs: int = 3) -> list:
     """Acronyms used in >= min_docs pages with no canonical definition
     page (no page where the acronym appears in the title)."""
-    doc_count = Counter
-    titled = set
+    doc_count = Counter()
+    titled = set()
     for p in pages:
         seen = set(p.acronyms_used)
         for ac in seen:
@@ -233,7 +233,7 @@ def detect_glossary_candidates(pages: list, min_docs: int = 3) -> list:
             # If acronym appears in title, treat as canonical-ish.
             if ac in p.title:
                 titled.add(ac)
-    return sorted([(ac, c) for ac, c in doc_count.items
+    return sorted([(ac, c) for ac, c in doc_count.items()
                    if c >= min_docs and ac not in titled],
                   key=lambda x: -x[1])
 
@@ -247,7 +247,7 @@ def cleanup_priority(pages: list, stale_days: int) -> list:
         if p.last_reviewed:
             try:
                 lr = dt.datetime.strptime(p.last_reviewed[:10], "%Y-%m-%d")
-                staleness = max(0, (dt.datetime.now - lr).days
+                staleness = max(0, (dt.datetime.now() - lr).days
                                 - stale_days)
             except ValueError:
                 staleness = max(0, p.mtime_days_ago - stale_days)
@@ -303,7 +303,7 @@ def generate_report(root: Path, pages: list, stale_days: int) -> str:
             rel = p.path.relative_to(root)
             staleness = (p.mtime_days_ago - stale_days
                          if not p.last_reviewed else
-                         (dt.datetime.now - dt.datetime.strptime(
+                         (dt.datetime.now() - dt.datetime.strptime(
                              p.last_reviewed[:10], "%Y-%m-%d")).days
                          - stale_days)
             lines.append(
@@ -330,7 +330,7 @@ def generate_report(root: Path, pages: list, stale_days: int) -> str:
                  "docs)")
     lines.append("")
     if drift:
-        for ac, defs in drift.items:
+        for ac, defs in drift.items():
             lines.append(f"**{ac}:**")
             for defin, src in defs:
                 lines.append(f"  - `{defin}` (in `{src}`)")
@@ -409,7 +409,7 @@ def generate_json_report(root: Path, pages: list, stale_days: int) -> dict:
         "orphans": [str(p.path.relative_to(root)) for p in orphans],
         "glossary_drift": {ac: [{"definition": d, "source": s}
                                 for d, s in defs]
-                           for ac, defs in drift.items},
+                           for ac, defs in drift.items()},
         "glossary_candidates": [{"acronym": ac, "doc_count": c}
                                 for ac, c in candidates],
         "missing_owner": [str(p.path.relative_to(root))
@@ -487,9 +487,9 @@ Link: [Vendor Offboarding](vendor-offboarding.md).
 }
 
 
-def _materialize_sample_vault -> Path:
+def _materialize_sample_vault() -> Path:
     tmp = Path(tempfile.mkdtemp(prefix="kb-sample-"))
-    for relpath, content in SAMPLE_PAGES.items:
+    for relpath, content in SAMPLE_PAGES.items():
         full = tmp / relpath
         full.parent.mkdir(parents=True, exist_ok=True)
         full.write_text(content, encoding="utf-8")
@@ -497,9 +497,9 @@ def _materialize_sample_vault -> Path:
     # has something to find.
     import os
     old = tmp / "old-stale-page.md"
-    if old.exists:
-        old_ts = (dt.datetime.now -
-                  dt.timedelta(days=720)).timestamp
+    if old.exists():
+        old_ts = (dt.datetime.now() -
+                  dt.timedelta(days=720)).timestamp()
         os.utime(old, (old_ts, old_ts))
     return tmp
 
@@ -523,10 +523,10 @@ def main(argv=None) -> int:
     args = p.parse_args(argv)
 
     if args.sample:
-        root = _materialize_sample_vault
+        root = _materialize_sample_vault()
     elif args.input:
-        root = Path(args.input).resolve
-        if not root.exists or not root.is_dir:
+        root = Path(args.input).resolve()
+        if not root.exists() or not root.is_dir():
             print(f"ERROR: input directory not found: {args.input}",
                   file=sys.stderr)
             return 2
@@ -550,4 +550,4 @@ def main(argv=None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

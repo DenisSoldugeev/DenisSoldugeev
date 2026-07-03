@@ -32,7 +32,7 @@ Steps:
 2. For each test case:
    - Read title, preconditions, steps, expected results
    - Map to a Playwright test using appropriate template
-   - Include TestRail case ID as test annotation: `test.info.annotations.push({ type: 'testrail', description: 'C12345' })`
+   - Include TestRail case ID as test annotation: `test.info().annotations.push({ type: 'testrail', description: 'C12345' })`
 3. Generate test files grouped by section
 4. Report: X cases imported, Y tests generated
 
@@ -112,7 +112,7 @@ All Playwright tests linked to TestRail include:
 
 ```typescript
 test('should login successfully', async ({ page }) => {
-  test.info.annotations.push({
+  test.info().annotations.push({
     type: 'testrail',
     description: 'C12345',
   });

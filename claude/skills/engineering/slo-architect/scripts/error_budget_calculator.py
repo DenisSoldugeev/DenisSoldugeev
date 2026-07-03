@@ -110,7 +110,7 @@ def render_text(result):
     print("Multi-window burn-rate alerts (Google SRE Workbook):")
     print("")
     for r in result["alert_rules"]:
-        print(f"  [{r['severity'].upper:6}]  {r['name']}")
+        print(f"  [{r['severity'].upper():6}]  {r['name']}")
         print(f"           windows:        {r['long_window']} long / {r['short_window']} short")
         print(f"           burn rate:      {r['burn_rate_threshold']}")
         print(f"           consumed:       {r['budget_pct_consumed']}% of monthly budget")
@@ -123,15 +123,23 @@ def render_text(result):
         print("")
 
 
-def main:
+def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--target", type=float, required=True, help="Target percent (e.g., 99.9)")
+    ap.add_argument("--target", type=float, help="Target percent (e.g., 99.9)")
     ap.add_argument("--window-days", type=int, default=28, help="Window in days (default: 28)")
     ap.add_argument("--format", choices=["text", "json"], default="text")
-    args = ap.parse_args
+    ap.add_argument("--sample", action="store_true", help="Run with embedded sample inputs (99.9%% / 28d)")
+    args = ap.parse_args()
+
+    if args.sample:
+        target, window_days = 99.9, 28
+    elif args.target is not None:
+        target, window_days = args.target, args.window_days
+    else:
+        ap.error("--target is required (or use --sample)")
 
     try:
-        result = compute(args.target, args.window_days)
+        result = compute(target, window_days)
     except ValueError as e:
         print(f"ERROR: {e}", file=sys.stderr)
         return 2
@@ -144,4 +152,4 @@ def main:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -261,7 +261,7 @@ db.query = async (...args) => {
   queryCount++;
   if (queryCount > 10) {
     console.warn(`High query count: ${queryCount} in single request`);
-    console.trace;
+    console.trace();
   }
   return originalQuery.apply(db, args);
 };
@@ -458,7 +458,7 @@ ALTER TABLE users DROP COLUMN IF EXISTS status;
 ALTER TABLE users ADD COLUMN phone VARCHAR(20);
 
 -- SAFE: Add column with volatile default (PG 11+)
-ALTER TABLE users ADD COLUMN created_at TIMESTAMP DEFAULT NOW;
+ALTER TABLE users ADD COLUMN created_at TIMESTAMP DEFAULT NOW();
 
 -- UNSAFE: Add column with constant default (table rewrite before PG 11)
 -- ALTER TABLE users ADD COLUMN score INTEGER DEFAULT 0;
@@ -509,11 +509,11 @@ GROUP BY state;
 -- Long-running queries
 SELECT
   pid,
-  now - pg_stat_activity.query_start AS duration,
+  now() - pg_stat_activity.query_start AS duration,
   query,
   state
 FROM pg_stat_activity
-WHERE (now - pg_stat_activity.query_start) > interval '5 minutes'
+WHERE (now() - pg_stat_activity.query_start) > interval '5 minutes'
   AND state != 'idle';
 
 -- Table bloat
@@ -540,7 +540,7 @@ SELECT
   round(total_exec_time::numeric, 2) as total_time_ms,
   calls,
   round(mean_exec_time::numeric, 2) as avg_time_ms,
-  round((100 * total_exec_time / sum(total_exec_time) over)::numeric, 2) as percentage,
+  round((100 * total_exec_time / sum(total_exec_time) over())::numeric, 2) as percentage,
   query
 FROM pg_stat_statements
 ORDER BY total_exec_time DESC

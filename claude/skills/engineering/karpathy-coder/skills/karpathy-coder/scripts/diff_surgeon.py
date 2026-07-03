@@ -64,7 +64,7 @@ def parse_hunks(diff_text):
     current_file = None
     current_lines = []
 
-    for line in diff_text.splitlines:
+    for line in diff_text.splitlines():
         if line.startswith("diff --git"):
             if current_file:
                 files.append({"file": current_file, "lines": current_lines})
@@ -94,8 +94,8 @@ def classify_line(line_text):
         return "docstring-addition"
     if SEMICOLON_CHANGE.match(line_text):
         # Check if ONLY change is semicolon
-        stripped = line_text[1:].rstrip(";").rstrip
-        if not stripped.strip:
+        stripped = line_text[1:].rstrip(";").rstrip()
+        if not stripped.strip():
             return None
         return "semicolon-style"
     return None
@@ -126,9 +126,9 @@ def analyze_file_diff(file_data):
 
     # Detect quote-style swaps (paired changes where only quotes differ)
     for a, d in zip(sorted(additions), sorted(deletions)):
-        a_norm = a[1:].replace('"', "'").strip
-        d_norm = d[1:].replace('"', "'").strip
-        if a_norm == d_norm and a[1:].strip != d[1:].strip:
+        a_norm = a[1:].replace('"', "'").strip()
+        d_norm = d[1:].replace('"', "'").strip()
+        if a_norm == d_norm and a[1:].strip() != d[1:].strip():
             findings.append({
                 "category": "quote-style-swap",
                 "line": f"{d[:60]} → {a[:60]}",
@@ -138,7 +138,7 @@ def analyze_file_diff(file_data):
     return findings
 
 
-def main:
+def main():
     p = argparse.ArgumentParser(
         description="Detect diff noise — changes that don't trace to the stated goal (Karpathy Principle #3).",
         epilog="Run before committing to catch drive-by refactors and style drift.",
@@ -146,10 +146,10 @@ def main:
     p.add_argument("--diff", default=None, help="Git diff range (e.g. HEAD~1..HEAD). Default: staged changes.")
     p.add_argument("--file", default=None, help="Read diff from a file instead of git")
     p.add_argument("--json", action="store_true", help="JSON output")
-    args = p.parse_args
+    args = p.parse_args()
 
     diff_text = get_diff(args)
-    if not diff_text.strip:
+    if not diff_text.strip():
         result = {"status": "ok", "message": "No diff to analyze", "files": 0, "noise_lines": 0, "verdict": "CLEAN"}
         if args.json:
             print(json.dumps(result, indent=2))
@@ -193,19 +193,19 @@ def main:
     print(f"Noise ratio: {noise_ratio:.0%} ({total_noise} noise lines)")
     print(f"Verdict: {verdict}")
     if file_results:
-        print
+        print()
         for fr in file_results:
             print(f"  {fr['file']}:")
             categories = {}
             for f in fr["findings"]:
                 categories.setdefault(f["category"], []).append(f["line"])
-            for cat, lines in categories.items:
+            for cat, lines in categories.items():
                 print(f"    [{cat}] {len(lines)} instance(s)")
                 for l in lines[:3]:
                     print(f"      {l}")
                 if len(lines) > 3:
                     print(f"      ... and {len(lines) - 3} more")
-        print
+        print()
         print("Recommendation: review flagged lines. Remove changes that don't trace to your task.")
     else:
         print("\n  All changes look intentional. Clean diff.")
@@ -214,4 +214,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

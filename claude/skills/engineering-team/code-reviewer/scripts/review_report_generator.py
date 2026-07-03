@@ -51,7 +51,7 @@ def load_json_file(filepath: str) -> Optional[Dict]:
 def run_pr_analyzer(repo_path: Path) -> Dict:
     """Run pr_analyzer.py and return results."""
     script_path = Path(__file__).parent / "pr_analyzer.py"
-    if not script_path.exists:
+    if not script_path.exists():
         return {"status": "error", "message": "pr_analyzer.py not found"}
 
     try:
@@ -71,7 +71,7 @@ def run_pr_analyzer(repo_path: Path) -> Dict:
 def run_quality_checker(repo_path: Path) -> Dict:
     """Run code_quality_checker.py and return results."""
     script_path = Path(__file__).parent / "code_quality_checker.py"
-    if not script_path.exists:
+    if not script_path.exists():
         return {"status": "error", "message": "code_quality_checker.py not found"}
 
     try:
@@ -142,7 +142,7 @@ def generate_findings_list(pr_analysis: Dict, quality_analysis: Dict) -> List[Di
 
     # Add PR risk findings
     if "risks" in pr_analysis:
-        for severity, items in pr_analysis["risks"].items:
+        for severity, items in pr_analysis["risks"].items():
             for item in items:
                 findings.append({
                     "source": "pr_analysis",
@@ -176,7 +176,7 @@ def generate_findings_list(pr_analysis: Dict, quality_analysis: Dict) -> List[Di
 def generate_action_items(findings: List[Dict]) -> List[Dict]:
     """Generate prioritized action items from findings."""
     action_items = []
-    seen_categories = set
+    seen_categories = set()
 
     for finding in findings:
         category = finding["category"]
@@ -244,7 +244,7 @@ def format_markdown_report(report: Dict) -> str:
         "block": "❌"
     }.get(verdict, "❓")
 
-    lines.append(f"**Verdict:** {verdict_emoji} {verdict.upper.replace('_', ' ')}")
+    lines.append(f"**Verdict:** {verdict_emoji} {verdict.upper().replace('_', ' ')}")
     lines.append(f"**Score:** {summary['score']}/100")
     lines.append(f"**Rationale:** {summary['rationale']}")
     lines.append("")
@@ -256,7 +256,7 @@ def format_markdown_report(report: Dict) -> str:
     lines.append("|----------|-------|")
     for severity in ["critical", "high", "medium", "low"]:
         count = summary["issue_counts"].get(severity, 0)
-        lines.append(f"| {severity.capitalize} | {count} |")
+        lines.append(f"| {severity.capitalize()} | {count} |")
     lines.append("")
 
     # PR Statistics (if available)
@@ -330,7 +330,7 @@ def format_text_report(report: Dict) -> str:
     lines.append("")
 
     summary = report["summary"]
-    verdict = summary["verdict"].upper.replace("_", " ")
+    verdict = summary["verdict"].upper().replace("_", " ")
     lines.append(f"VERDICT: {verdict}")
     lines.append(f"SCORE: {summary['score']}/100")
     lines.append(f"RATIONALE: {summary['rationale']}")
@@ -339,7 +339,7 @@ def format_text_report(report: Dict) -> str:
     lines.append("--- ISSUE SUMMARY ---")
     for severity in ["critical", "high", "medium", "low"]:
         count = summary["issue_counts"].get(severity, 0)
-        lines.append(f"  {severity.capitalize}: {count}")
+        lines.append(f"  {severity.capitalize()}: {count}")
     lines.append("")
 
     if report.get("action_items"):
@@ -398,7 +398,7 @@ def generate_report(
     # Build report
     report = {
         "metadata": {
-            "generated_at": datetime.now.isoformat,
+            "generated_at": datetime.now().isoformat(),
             "repository": str(repo_path),
             "version": "1.0.0"
         },
@@ -424,7 +424,7 @@ def generate_report(
     return report
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Generate comprehensive code review reports"
     )
@@ -458,10 +458,10 @@ def main:
         help="Output as JSON (shortcut for --format json)"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
-    repo_path = Path(args.repo_path).resolve
-    if not repo_path.exists:
+    repo_path = Path(args.repo_path).resolve()
+    if not repo_path.exists():
         print(f"Error: Path does not exist: {repo_path}", file=sys.stderr)
         sys.exit(1)
 
@@ -502,4 +502,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

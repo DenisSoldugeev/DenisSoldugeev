@@ -34,16 +34,16 @@ def parse_frontmatter(text: str) -> dict[str, str]:
     if not m:
         return {}
     fm: dict[str, str] = {}
-    for line in m.group(1).splitlines:
-        if ":" in line and not line.lstrip.startswith("#"):
+    for line in m.group(1).splitlines():
+        if ":" in line and not line.lstrip().startswith("#"):
             k, _, v = line.partition(":")
-            fm[k.strip] = v.strip.strip("'\"")
+            fm[k.strip()] = v.strip().strip("'\"")
     return fm
 
 
 def scan(vault: Path, stale_days: int, log_gap_days: int) -> dict:
     wiki = vault / "wiki"
-    if not wiki.exists:
+    if not wiki.exists():
         raise SystemExit(f"[error] {wiki} not found")
 
     pages: dict[str, dict] = {}
@@ -63,9 +63,9 @@ def scan(vault: Path, stale_days: int, log_gap_days: int) -> dict:
 
     # Build link graph
     stems = {Path(k).name: k for k in pages}
-    for key, page in pages.items:
+    for key, page in pages.items():
         for m in WIKILINK_RE.finditer(page["text"]):
-            target = m.group(1).strip
+            target = m.group(1).strip()
             # Normalize: strip .md, try full path match first, then stem
             if target.endswith(".md"):
                 target = target[:-3]
@@ -79,26 +79,26 @@ def scan(vault: Path, stale_days: int, log_gap_days: int) -> dict:
             else:
                 outbound[key].add(f"__BROKEN__:{target}")
 
-    today = dt.date.today
+    today = dt.date.today()
     stale_cutoff = today - dt.timedelta(days=stale_days)
 
     orphans = sorted(k for k in pages if not inbound.get(k))
     broken_links: list[tuple[str, str]] = []
-    for src, targets in outbound.items:
+    for src, targets in outbound.items():
         for t in targets:
             if t.startswith("__BROKEN__:"):
                 broken_links.append((src, t.split(":", 1)[1]))
-    broken_links.sort
+    broken_links.sort()
 
     stale: list[tuple[str, str]] = []
     missing_fm: list[str] = []
     titles: dict[str, list[str]] = defaultdict(list)
-    for key, page in pages.items:
+    for key, page in pages.items():
         fm = page["fm"]
         title = fm.get("title") or Path(key).name
         titles[title].append(key)
         required = {"title", "category", "summary"}
-        if not required.issubset(fm.keys):
+        if not required.issubset(fm.keys()):
             missing_fm.append(key)
         updated = fm.get("updated")
         if updated:
@@ -108,19 +108,19 @@ def scan(vault: Path, stale_days: int, log_gap_days: int) -> dict:
                     stale.append((key, updated))
             except ValueError:
                 pass
-    duplicate_titles = {t: ks for t, ks in titles.items if len(ks) > 1}
+    duplicate_titles = {t: ks for t, ks in titles.items() if len(ks) > 1}
 
     # Log gap check
     log_path = wiki / "log.md"
     log_gap = None
-    if log_path.exists:
+    if log_path.exists():
         log_text = log_path.read_text(encoding="utf-8", errors="replace")
         dates = [dt.date.fromisoformat(m) for m in LOG_ENTRY_RE.findall(log_text)]
         if dates:
             last = max(dates)
             gap = (today - last).days
             if gap > log_gap_days:
-                log_gap = {"last_entry": last.isoformat, "days_ago": gap}
+                log_gap = {"last_entry": last.isoformat(), "days_ago": gap}
         else:
             log_gap = {"last_entry": None, "days_ago": None}
 
@@ -139,7 +139,7 @@ def scan(vault: Path, stale_days: int, log_gap_days: int) -> dict:
 def print_report(r: dict) -> None:
     print(f"LLM Wiki health check — {r['vault']}")
     print(f"Total pages: {r['total_pages']}")
-    print
+    print()
 
     def header(label: str, count: int) -> None:
         sym = "OK" if count == 0 else "WARN"
@@ -150,27 +150,27 @@ def print_report(r: dict) -> None:
         print(f"   - {p}")
     if len(r["orphans"]) > 20:
         print(f"   ... and {len(r['orphans']) - 20} more")
-    print
+    print()
 
     header("broken wikilinks", len(r["broken_links"]))
     for src, tgt in r["broken_links"][:20]:
         print(f"   - {src} -> [[{tgt}]]")
-    print
+    print()
 
     header("stale pages", len(r["stale"]))
     for p, d in r["stale"][:20]:
         print(f"   - {p} (updated {d})")
-    print
+    print()
 
     header("pages missing frontmatter", len(r["missing_frontmatter"]))
     for p in r["missing_frontmatter"][:20]:
         print(f"   - {p}")
-    print
+    print()
 
     header("duplicate titles", len(r["duplicate_titles"]))
-    for title, keys in list(r["duplicate_titles"].items)[:10]:
+    for title, keys in list(r["duplicate_titles"].items())[:10]:
         print(f"   - '{title}': {keys}")
-    print
+    print()
 
     gap = r["log_gap"]
     if gap:
@@ -179,16 +179,16 @@ def print_report(r: dict) -> None:
         print("[OK] log gap: recent")
 
 
-def main -> None:
+def main() -> None:
     p = argparse.ArgumentParser(description="Lint an LLM Wiki vault")
     p.add_argument("--vault", required=True)
     p.add_argument("--stale-days", type=int, default=90)
     p.add_argument("--log-gap-days", type=int, default=14)
     p.add_argument("--json", action="store_true")
-    args = p.parse_args
+    args = p.parse_args()
 
     report = scan(
-        Path(args.vault).expanduser.resolve,
+        Path(args.vault).expanduser().resolve(),
         stale_days=args.stale_days,
         log_gap_days=args.log_gap_days,
     )
@@ -199,4 +199,4 @@ def main -> None:
 
 
 if __name__ == "__main__":
-    main
+    main()

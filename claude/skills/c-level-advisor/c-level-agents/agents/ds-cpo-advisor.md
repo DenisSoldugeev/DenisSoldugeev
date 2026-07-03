@@ -25,27 +25,27 @@ Pairs with `ds-cmo-advisor` (positioning ↔ product), `ds-cro-advisor` (win/los
 
 ## Skill Integration
 
-**Skill Location:** `../../skills/cpo-advisor/`
+**Skill Location:** `../../cpo-advisor/`
 
 ### Python Tools
 
 1. **PMF Scorer**
-   - Path: `../../skills/cpo-advisor/scripts/pmf_scorer.py`
+   - Path: `../../cpo-advisor/scripts/pmf_scorer.py`
    - Sean Ellis test, retention cohort score, organic-pull score → composite PMF rating
 
 2. **Portfolio Analyzer**
-   - Path: `../../skills/cpo-advisor/scripts/portfolio_analyzer.py`
+   - Path: `../../cpo-advisor/scripts/portfolio_analyzer.py`
    - 3-horizon analysis, kill candidates, double-down candidates, resource allocation
 
 ### Knowledge Bases
 
-- `../../skills/cpo-advisor/references/product_vision.md` — vision design, North Star metrics, opportunity solution tree
-- `../../skills/cpo-advisor/references/portfolio_strategy.md` — 3-horizon, ROI vs strategic fit, kill criteria
-- `../../skills/cpo-advisor/references/pmf_framework.md` — Sean Ellis, retention, organic pull, what PMF actually looks like
+- `../../cpo-advisor/references/product_strategy.md` — vision design, North Star metrics, opportunity solution tree
+- `../../cpo-advisor/references/product_org_design.md` — 3-horizon, ROI vs strategic fit, kill criteria
+- `../../cpo-advisor/references/pmf_playbook.md` — Sean Ellis, retention, organic pull, what PMF actually looks like
 
 ### Adjacent Execution
 
-- `../../../../product-team/product-manager-toolkit/` — RICE, OKR cascade, user stories
+- `../../../product-team/skills/product-manager-toolkit/` — RICE, OKR cascade, user stories
 
 ## Workflows
 
@@ -59,7 +59,7 @@ Pairs with `ds-cmo-advisor` (positioning ↔ product), `ds-cro-advisor` (win/los
 4. Output: composite PMF score, weakest signal, top-3 fixes to lift it
 
 ```bash
-python ../../skills/cpo-advisor/scripts/pmf_scorer.py
+python ../../cpo-advisor/scripts/pmf_scorer.py
 ```
 
 ### Workflow 2: Portfolio Rationalization
@@ -94,9 +94,9 @@ python ../../skills/cpo-advisor/scripts/pmf_scorer.py
 
 ```bash
 echo "✂️  CPO Portfolio Audit"
-python ../../skills/cpo-advisor/scripts/portfolio_analyzer.py
-python ../../skills/cpo-advisor/scripts/pmf_scorer.py
-echo "Pair with RICE: python ../../../product-team/product-manager-toolkit/scripts/rice_prioritizer.py"
+python ../../cpo-advisor/scripts/portfolio_analyzer.py
+python ../../cpo-advisor/scripts/pmf_scorer.py
+echo "Pair with RICE: python ../../../product-team/skills/product-manager-toolkit/scripts/rice_prioritizer.py"
 ```
 
 ## Success Metrics
@@ -111,12 +111,12 @@ echo "Pair with RICE: python ../../../product-team/product-manager-toolkit/scrip
 
 - [ds-cmo-advisor](ds-cmo-advisor.md) — positioning alignment
 - [ds-cro-advisor](ds-cro-advisor.md) — win/loss feedback
-- [ds-product-manager](../../../../agents/product/ds-product-manager.md) — execution
-- [ds-product-strategist](../../../../agents/product/ds-product-strategist.md) — OKR cascade
+- [ds-product-manager](../../../agents/product/ds-product-manager.md) — execution
+- [ds-product-strategist](../../../agents/product/ds-product-strategist.md) — OKR cascade
 
 ## References
 
-- Skill: [../../skills/cpo-advisor/SKILL.md](../../cpo-advisor/SKILL.md)
+- Skill: [../../cpo-advisor/SKILL.md](../../cpo-advisor/SKILL.md)
 - Voice spec: [../references/persona-voices.md](../references/persona-voices.md)
 
 ---

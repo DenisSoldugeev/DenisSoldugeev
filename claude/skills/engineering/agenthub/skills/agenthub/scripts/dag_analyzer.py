@@ -27,9 +27,9 @@ def run_git(*args):
             ["git"] + list(args),
             capture_output=True, text=True, check=True
         )
-        return result.stdout.strip
+        return result.stdout.strip()
     except subprocess.CalledProcessError as e:
-        print(f"Git error: {e.stderr.strip}", file=sys.stderr)
+        print(f"Git error: {e.stderr.strip()}", file=sys.stderr)
         return ""
 
 
@@ -38,7 +38,7 @@ def get_hub_branches(session_id=None):
     output = run_git("branch", "--list", "hub/*", "--format=%(refname:short)")
     if not output:
         return []
-    branches = output.strip.split("\n")
+    branches = output.strip().split("\n")
     if session_id:
         prefix = f"hub/{session_id}/"
         branches = [b for b in branches if b.startswith(prefix)]
@@ -91,9 +91,9 @@ def detect_frontier(session_id=None):
 
     # A branch is frontier if its commit is not an ancestor of any other branch
     frontier = []
-    for branch, commit in branch_commits.items:
+    for branch, commit in branch_commits.items():
         is_ancestor = False
-        for other_branch, other_commit in branch_commits.items:
+        for other_branch, other_commit in branch_commits.items():
             if other_branch == branch:
                 continue
             # Check if commit is ancestor of other_commit
@@ -110,9 +110,9 @@ def detect_frontier(session_id=None):
     return frontier
 
 
-def show_graph:
+def show_graph():
     """Display the git DAG graph for hub branches."""
-    branches = get_hub_branches
+    branches = get_hub_branches()
     if not branches:
         print("No hub/* branches found.")
         return
@@ -175,7 +175,7 @@ def show_status(session_id, output_format="table"):
     # Table output
     print(f"Session: {session_id}")
     print(f"Branches: {len(branches)} | Frontier: {len(frontier)}")
-    print
+    print()
     header = f"{'AGENT':<8} {'BRANCH':<45} {'COMMITS':<8} {'STATUS':<10} {'LAST UPDATE':<20}"
     print(header)
     print("-" * len(header))
@@ -184,31 +184,31 @@ def show_status(session_id, output_format="table"):
         print(f"agent-{a['agent']:<4} {a['branch']:<45} {a['commits_ahead']:<8} {status:<10} {a['last_update']:<20}")
 
 
-def run_demo:
+def run_demo():
     """Show demo output."""
     print("=" * 60)
     print("AgentHub DAG Analyzer — Demo Mode")
     print("=" * 60)
-    print
+    print()
 
     print("--- Frontier Detection ---")
     print("Frontier branches (leaves with no children):")
     print("  hub/20260317-143022/agent-1/attempt-1  (3 commits ahead)")
     print("  hub/20260317-143022/agent-2/attempt-1  (5 commits ahead)")
     print("  hub/20260317-143022/agent-3/attempt-1  (2 commits ahead)")
-    print
+    print()
 
     print("--- Session Status ---")
     print("Session: 20260317-143022")
     print("Branches: 3 | Frontier: 3")
-    print
+    print()
     header = f"{'AGENT':<8} {'BRANCH':<45} {'COMMITS':<8} {'STATUS':<10} {'LAST UPDATE':<20}"
     print(header)
     print("-" * len(header))
     print(f"{'agent-1':<8} {'hub/20260317-143022/agent-1/attempt-1':<45} {'3':<8} {'frontier':<10} {'2026-03-17 14:35:10':<20}")
     print(f"{'agent-2':<8} {'hub/20260317-143022/agent-2/attempt-1':<45} {'5':<8} {'frontier':<10} {'2026-03-17 14:36:45':<20}")
     print(f"{'agent-3':<8} {'hub/20260317-143022/agent-3/attempt-1':<45} {'2':<8} {'frontier':<10} {'2026-03-17 14:34:22':<20}")
-    print
+    print()
 
     print("--- DAG Graph ---")
     print("* abc1234 (hub/20260317-143022/agent-2/attempt-1) Replaced O(n²) with hash map")
@@ -221,7 +221,7 @@ def run_demo:
     print("* pqr1234 (dev) Base commit")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Analyze the AgentHub git DAG"
     )
@@ -237,14 +237,14 @@ def main:
                         help="Output format (default: table)")
     parser.add_argument("--demo", action="store_true",
                         help="Show demo output")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.demo:
-        run_demo
+        run_demo()
         return
 
     if not any([args.frontier, args.graph, args.status]):
-        parser.print_help
+        parser.print_help()
         return
 
     if args.frontier:
@@ -258,11 +258,11 @@ def main:
                     print(f"  {b}")
             else:
                 print("No frontier branches found.")
-        print
+        print()
 
     if args.graph:
-        show_graph
-        print
+        show_graph()
+        print()
 
     if args.status:
         if not args.session:
@@ -272,4 +272,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

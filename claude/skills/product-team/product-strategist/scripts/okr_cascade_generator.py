@@ -129,7 +129,7 @@ class OKRGenerator:
 
         company_okrs = {
             'level': 'Company',
-            'quarter': self._get_current_quarter,
+            'quarter': self._get_current_quarter(),
             'strategy': strategy,
             'objectives': []
         }
@@ -217,7 +217,7 @@ class OKRGenerator:
             for product_obj in product_okrs['objectives']:
                 if self._is_relevant_for_team(product_obj['title'], team):
                     team_obj = {
-                        'id': f'{team[:3].upper}-{product_obj["id"].split("-")[1]}',
+                        'id': f'{team[:3].upper()}-{product_obj["id"].split("-")[1]}',
                         'title': self._translate_to_team(product_obj['title'], team),
                         'parent_objective': product_obj['id'],
                         'key_results': [],
@@ -227,7 +227,7 @@ class OKRGenerator:
 
                     for kr in product_obj['key_results'][:2]:
                         team_kr = {
-                            'id': f'{team[:3].upper}-{team_obj["id"].split("-")[1]}-KR{kr["id"].split("KR")[1]}',
+                            'id': f'{team[:3].upper()}-{team_obj["id"].split("-")[1]}-KR{kr["id"].split("KR")[1]}',
                             'title': self._translate_kr_to_team(kr['title'], team),
                             'contributes_to': kr['id'],
                             'current': kr['current'],
@@ -250,7 +250,7 @@ class OKRGenerator:
         dashboard = ["=" * 60]
         dashboard.append("OKR CASCADE DASHBOARD")
         dashboard.append(f"Quarter: {all_okrs.get('quarter', 'Q1 2025')}")
-        dashboard.append(f"Strategy: {all_okrs.get('strategy', 'growth').upper}")
+        dashboard.append(f"Strategy: {all_okrs.get('strategy', 'growth').upper()}")
         dashboard.append(f"Teams: {', '.join(self.teams)}")
         dashboard.append(f"Product Contribution: {self.product_contribution * 100:.0f}%")
         dashboard.append("=" * 60)
@@ -334,7 +334,7 @@ class OKRGenerator:
 
         # Horizontal alignment: How well teams coordinate
         if 'teams' in all_okrs and len(all_okrs['teams']) > 1:
-            shared_objectives = set
+            shared_objectives = set()
             for team in all_okrs['teams']:
                 for obj in team['objectives']:
                     parent = obj.get('parent_objective')
@@ -370,14 +370,14 @@ class OKRGenerator:
 
     def _get_current_quarter(self) -> str:
         """Get current quarter"""
-        now = datetime.now
+        now = datetime.now()
         quarter = (now.month - 1) // 3 + 1
         return f"Q{quarter} {now.year}"
 
     def _fill_metrics(self, template: str, metrics: Dict) -> str:
         """Fill template with actual metrics"""
         result = template
-        for key, value in metrics.items:
+        for key, value in metrics.items():
             result = result.replace(f'{{{key}}}', str(value))
         return result
 
@@ -387,9 +387,9 @@ class OKRGenerator:
             return '%'
         elif '$' in kr_template:
             return '$'
-        elif 'days' in kr_template.lower:
+        elif 'days' in kr_template.lower():
             return 'days'
-        elif 'score' in kr_template.lower:
+        elif 'score' in kr_template.lower():
             return 'points'
         return 'count'
 
@@ -405,7 +405,7 @@ class OKRGenerator:
             'Improve organizational': 'Improve product delivery'
         }
 
-        for key, value in translations.items:
+        for key, value in translations.items():
             if key in company_objective:
                 return company_objective.replace(key, value)
         return f"Product: {company_objective}"
@@ -423,7 +423,7 @@ class OKRGenerator:
         }
 
         result = kr
-        for term, replacement in product_terms.items:
+        for term, replacement in product_terms.items():
             if term in result:
                 result = result.replace(term, replacement)
                 break
@@ -451,7 +451,7 @@ class OKRGenerator:
     def _is_relevant_for_team(self, objective: str, team: str) -> bool:
         """Check if objective is relevant for team"""
         keywords = self.team_relevance.get(team, [])
-        objective_lower = objective.lower
+        objective_lower = objective.lower()
 
         # Platform is always relevant (infrastructure supports everything)
         if team == 'Platform':
@@ -464,10 +464,10 @@ def parse_teams(teams_str: str) -> List[str]:
     """Parse comma-separated team string into list"""
     if not teams_str:
         return None
-    return [t.strip for t in teams_str.split(',') if t.strip]
+    return [t.strip() for t in teams_str.split(',') if t.strip()]
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description='Generate OKR cascade from company strategy to team level',
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -523,7 +523,7 @@ Examples:
         help='Metrics as JSON string (default: sample metrics)'
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     # Parse teams
     teams = parse_teams(args.teams)
@@ -576,9 +576,9 @@ Examples:
 
         print("\n\n🎯 ALIGNMENT SCORES")
         print("-" * 40)
-        for metric, score in alignment.items:
+        for metric, score in alignment.items():
             status = "✓" if score >= 80 else "!" if score >= 60 else "✗"
-            print(f"{status} {metric.replace('_', ' ').title}: {score}%")
+            print(f"{status} {metric.replace('_', ' ').title()}: {score}%")
 
         if alignment['overall'] >= 80:
             print("\n✅ Overall alignment is GOOD (≥80%)")
@@ -589,4 +589,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

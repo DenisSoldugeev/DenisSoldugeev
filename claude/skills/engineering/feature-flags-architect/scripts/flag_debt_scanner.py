@@ -34,10 +34,10 @@ def _walk_code_files(repo):
 def _scan_file(path):
     try:
         with open(path, "r", encoding="utf-8", errors="replace") as f:
-            text = f.read
+            text = f.read()
     except OSError:
         return []
-    found = set
+    found = set()
     for pat in FLAG_PATTERNS:
         for m in pat.finditer(text):
             found.add(m.group(1))
@@ -52,7 +52,7 @@ def _first_commit_date(repo, flag_name):
         )
     except (subprocess.SubprocessError, OSError):
         return None
-    lines = [ln for ln in out.stdout.strip.split("\n") if ln]
+    lines = [ln for ln in out.stdout.strip().split("\n") if ln]
     if not lines:
         return None
     try:
@@ -78,7 +78,7 @@ def collect_flags(repo):
 
 def assess(repo, flags_to_paths, max_age_days, min_uses):
     rows = []
-    for name in sorted(flags_to_paths.keys):
+    for name in sorted(flags_to_paths.keys()):
         paths = flags_to_paths[name]
         when = _first_commit_date(repo, name)
         age = _age_days(when)
@@ -91,7 +91,7 @@ def assess(repo, flags_to_paths, max_age_days, min_uses):
             "flag": name,
             "uses": len(paths),
             "age_days": age,
-            "first_seen": when.date.isoformat if when else None,
+            "first_seen": when.date().isoformat() if when else None,
             "files": paths[:5],
             "is_debt": is_debt,
         })
@@ -115,13 +115,13 @@ def render_text(rows, max_age_days):
     print("Suggested action: confirm reached 100% (or killed); delete dead branch; remove flag.")
 
 
-def main:
+def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--repo", default=".", help="Path to repo root (default: .)")
     ap.add_argument("--max-age-days", type=int, default=90, help="Flags older than this are debt candidates (default: 90)")
     ap.add_argument("--min-uses", type=int, default=2, help="Flags with ≤ this many uses are debt candidates (default: 2)")
     ap.add_argument("--format", choices=["text", "json"], default="text")
-    args = ap.parse_args
+    args = ap.parse_args()
 
     repo = os.path.abspath(args.repo)
     if not os.path.isdir(os.path.join(repo, ".git")):
@@ -137,4 +137,4 @@ def main:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

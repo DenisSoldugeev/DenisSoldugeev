@@ -232,7 +232,7 @@ module.exports = {
 import './design-tokens.css';
 import './styles.css';
 
-function App {
+function App() {
   return (
     <button className="btn btn-primary">
       Click me
@@ -342,7 +342,7 @@ module.exports = {
 
 ```tsx
 // page.tsx
-export default function Page {
+export default function Page() {
   return (
     <button className="bg-primary-500 hover:bg-primary-600 px-4 py-2 rounded-md text-white">
       Click me

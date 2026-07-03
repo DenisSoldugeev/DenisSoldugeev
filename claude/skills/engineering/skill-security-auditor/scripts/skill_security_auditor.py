@@ -108,7 +108,7 @@ class AuditReport:
                 "scripts_scanned": self.scripts_scanned,
                 "md_files_scanned": self.md_files_scanned,
             },
-            "findings": [f.to_dict for f in self.findings],
+            "findings": [f.to_dict() for f in self.findings],
         }
 
 
@@ -122,51 +122,51 @@ CODE_PATTERNS = [
         "regex": r"\bos\.system\s*\(",  # noqa: SEC-AUDITOR
         "category": "CMD-INJECT",
         "severity": Severity.CRITICAL,
-        "risk": "Arbitrary command execution via os.system",  # noqa: SEC-AUDITOR
-        "fix": "Use subprocess.run with list arguments and shell=False",  # noqa: SEC-AUDITOR
+        "risk": "Arbitrary command execution via os.system()",  # noqa: SEC-AUDITOR
+        "fix": "Use subprocess.run() with list arguments and shell=False",  # noqa: SEC-AUDITOR
     },
     {
         "regex": r"\bos\.popen\s*\(",  # noqa: SEC-AUDITOR
         "category": "CMD-INJECT",
         "severity": Severity.CRITICAL,
-        "risk": "Command execution via os.popen",  # noqa: SEC-AUDITOR
-        "fix": "Use subprocess.run with list arguments and capture_output=True",  # noqa: SEC-AUDITOR
+        "risk": "Command execution via os.popen()",  # noqa: SEC-AUDITOR
+        "fix": "Use subprocess.run() with list arguments and capture_output=True",  # noqa: SEC-AUDITOR
     },
     {
         "regex": r"\bsubprocess\.\w+\([^)]*shell\s*=\s*True",  # noqa: SEC-AUDITOR
         "category": "CMD-INJECT",
         "severity": Severity.CRITICAL,
         "risk": "Shell injection via subprocess with shell=True",  # noqa: SEC-AUDITOR
-        "fix": "Use subprocess.run with list arguments and shell=False",  # noqa: SEC-AUDITOR
+        "fix": "Use subprocess.run() with list arguments and shell=False",  # noqa: SEC-AUDITOR
     },
     {
         "regex": r"\bcommands\.get(?:status)?output\s*\(",  # noqa: SEC-AUDITOR
         "category": "CMD-INJECT",
         "severity": Severity.CRITICAL,
         "risk": "Deprecated command execution via commands module",  # noqa: SEC-AUDITOR
-        "fix": "Use subprocess.run with list arguments",  # noqa: SEC-AUDITOR
+        "fix": "Use subprocess.run() with list arguments",  # noqa: SEC-AUDITOR
     },
     # Code execution — CRITICAL
     {
         "regex": r"\beval\s*\(",  # noqa: SEC-AUDITOR
         "category": "CODE-EXEC",
         "severity": Severity.CRITICAL,
-        "risk": "Arbitrary code execution via eval",  # noqa: SEC-AUDITOR
-        "fix": "Use ast.literal_eval for data parsing or explicit parsing logic",  # noqa: SEC-AUDITOR
+        "risk": "Arbitrary code execution via eval()",  # noqa: SEC-AUDITOR
+        "fix": "Use ast.literal_eval() for data parsing or explicit parsing logic",  # noqa: SEC-AUDITOR
     },
     {
         "regex": r"\bexec\s*\(",  # noqa: SEC-AUDITOR
         "category": "CODE-EXEC",
         "severity": Severity.CRITICAL,
-        "risk": "Arbitrary code execution via exec",  # noqa: SEC-AUDITOR
-        "fix": "Remove exec — rewrite logic to avoid dynamic code execution",  # noqa: SEC-AUDITOR
+        "risk": "Arbitrary code execution via exec()",  # noqa: SEC-AUDITOR
+        "fix": "Remove exec() — rewrite logic to avoid dynamic code execution",  # noqa: SEC-AUDITOR
     },
     {
         "regex": r"\bcompile\s*\([^)]*['\"]exec['\"]",
         "category": "CODE-EXEC",
         "severity": Severity.CRITICAL,
         "risk": "Dynamic code compilation for execution",  # noqa: SEC-AUDITOR
-        "fix": "Remove compile with exec mode — use explicit logic instead",  # noqa: SEC-AUDITOR
+        "fix": "Remove compile() with exec mode — use explicit logic instead",  # noqa: SEC-AUDITOR
     },
     {
         "regex": r"\b__import__\s*\(",  # noqa: SEC-AUDITOR
@@ -209,7 +209,7 @@ CODE_PATTERNS = [
         "category": "OBFUSCATION",
         "severity": Severity.CRITICAL,
         "risk": "Character-by-character string construction — obfuscation technique",  # noqa: SEC-AUDITOR
-        "fix": "Replace chr chains with readable string literals",  # noqa: SEC-AUDITOR
+        "fix": "Replace chr() chains with readable string literals",  # noqa: SEC-AUDITOR
     },
     {
         "regex": r"bytes\.fromhex\s*\(",  # noqa: SEC-AUDITOR
@@ -368,21 +368,21 @@ CODE_PATTERNS = [
         "category": "DESERIAL",
         "severity": Severity.HIGH,
         "risk": "Pickle deserialization — can execute arbitrary code",  # noqa: SEC-AUDITOR
-        "fix": "Use json.loads or other safe serialization formats",  # noqa: SEC-AUDITOR
+        "fix": "Use json.loads() or other safe serialization formats",  # noqa: SEC-AUDITOR
     },
     {
         "regex": r"\byaml\.(?:load|unsafe_load)\s*\([^)]*(?!Loader\s*=\s*yaml\.SafeLoader)",  # noqa: SEC-AUDITOR
         "category": "DESERIAL",
         "severity": Severity.HIGH,
         "risk": "Unsafe YAML loading — can execute arbitrary code",  # noqa: SEC-AUDITOR
-        "fix": "Use yaml.safe_load or yaml.load(data, Loader=yaml.SafeLoader)",  # noqa: SEC-AUDITOR
+        "fix": "Use yaml.safe_load() or yaml.load(data, Loader=yaml.SafeLoader)",  # noqa: SEC-AUDITOR
     },
     {
         "regex": r"\bmarshal\.loads?\s*\(",  # noqa: SEC-AUDITOR
         "category": "DESERIAL",
         "severity": Severity.HIGH,
         "risk": "Marshal deserialization — can execute arbitrary code",  # noqa: SEC-AUDITOR
-        "fix": "Use json.loads or other safe serialization formats",  # noqa: SEC-AUDITOR
+        "fix": "Use json.loads() or other safe serialization formats",  # noqa: SEC-AUDITOR
     },
     {
         "regex": r"\bshelve\.open\s*\(",  # noqa: SEC-AUDITOR
@@ -576,14 +576,14 @@ JS_PATTERNS = [
         "regex": r"\bFunction\s*\([^)]*\)\s*\(",  # noqa: SEC-AUDITOR
         "category": "CODE-EXEC",
         "severity": Severity.CRITICAL,
-        "risk": "Dynamic Function constructor — equivalent to eval",  # noqa: SEC-AUDITOR
+        "risk": "Dynamic Function constructor — equivalent to eval()",  # noqa: SEC-AUDITOR
         "fix": "Use explicit function definitions instead",  # noqa: SEC-AUDITOR
     },
     {
         "regex": r"\bfetch\s*\([^)]*\{[^}]*method\s*:\s*['\"](?:POST|PUT|PATCH)",
         "category": "NET-EXFIL",
         "severity": Severity.CRITICAL,
-        "risk": "Outbound HTTP write request via fetch",  # noqa: SEC-AUDITOR
+        "risk": "Outbound HTTP write request via fetch()",  # noqa: SEC-AUDITOR
         "fix": "Remove or verify destination is trusted",  # noqa: SEC-AUDITOR
     },
 ]
@@ -606,7 +606,7 @@ def scan_file_code(filepath: Path, report: AuditReport):
         return
 
     lines = content.split("\n")
-    ext = filepath.suffix.lower
+    ext = filepath.suffix.lower()
 
     # Select pattern sets based on file type
     patterns = list(CODE_PATTERNS)
@@ -616,7 +616,7 @@ def scan_file_code(filepath: Path, report: AuditReport):
         patterns.extend(JS_PATTERNS)
 
     for i, line in enumerate(lines, 1):
-        stripped = line.strip
+        stripped = line.strip()
         # Skip comments
         if stripped.startswith("#") and ext in {".py", ".sh", ".bash"}:
             continue
@@ -664,7 +664,7 @@ def scan_file_prompt_injection(filepath: Path, report: AuditReport):
                         category=pat["category"],
                         file=str(filepath),
                         line=i,
-                        pattern=line.strip[:120],
+                        pattern=line.strip()[:120],
                         risk=pat["risk"],
                         fix=pat["fix"],
                     )
@@ -675,24 +675,24 @@ def scan_dependencies(skill_path: Path, report: AuditReport):
     """Scan dependency files for supply chain risks."""
     # Check requirements.txt
     req_file = skill_path / "requirements.txt"
-    if req_file.exists:
+    if req_file.exists():
         try:
-            lines = req_file.read_text.split("\n")
+            lines = req_file.read_text().split("\n")
         except Exception:
             return
 
         all_typosquats = {}
-        for real_pkg, fakes in TYPOSQUAT_TARGETS.items:
+        for real_pkg, fakes in TYPOSQUAT_TARGETS.items():
             for fake in fakes:
-                all_typosquats[fake.lower] = real_pkg
+                all_typosquats[fake.lower()] = real_pkg
 
         for i, line in enumerate(lines, 1):
-            line = line.strip
+            line = line.strip()
             if not line or line.startswith("#"):
                 continue
 
             # Extract package name
-            pkg_name = re.split(r"[>=<!\[;]", line)[0].strip.lower
+            pkg_name = re.split(r"[>=<!\[;]", line)[0].strip().lower()
 
             # Typosquatting check
             if pkg_name in all_typosquats:
@@ -724,7 +724,7 @@ def scan_dependencies(skill_path: Path, report: AuditReport):
 
     # Check for pip/npm install in code
     for code_file in skill_path.rglob("*"):
-        if code_file.suffix.lower not in CODE_EXTENSIONS:
+        if code_file.suffix.lower() not in CODE_EXTENSIONS:
             continue
         try:
             content = code_file.read_text(encoding="utf-8", errors="replace")
@@ -732,7 +732,7 @@ def scan_dependencies(skill_path: Path, report: AuditReport):
             continue
 
         for i, line in enumerate(content.split("\n"), 1):
-            stripped = line.strip
+            stripped = line.strip()
             # Skip comments (this line is documentation about install commands,
             # not actual install command at runtime)
             if stripped.startswith("#") or stripped.startswith("//"):
@@ -746,7 +746,7 @@ def scan_dependencies(skill_path: Path, report: AuditReport):
                         category="DEPS-RUNTIME",
                         file=str(code_file),
                         line=i,
-                        pattern=line.strip[:120],
+                        pattern=line.strip()[:120],
                         risk="Runtime package installation — may install untrusted code",
                         fix="Move dependencies to requirements.txt for pre-install review",
                     )
@@ -758,7 +758,7 @@ def scan_dependencies(skill_path: Path, report: AuditReport):
                         category="DEPS-RUNTIME",
                         file=str(code_file),
                         line=i,
-                        pattern=line.strip[:120],
+                        pattern=line.strip()[:120],
                         risk="Runtime package installation — may install untrusted code",
                         fix="Move dependencies to package.json for pre-install review",
                     )
@@ -798,7 +798,7 @@ def scan_filesystem(skill_path: Path, report: AuditReport):
             )
 
         # Binary files
-        if item.is_file and item.suffix.lower in (
+        if item.is_file() and item.suffix.lower() in (
             ".exe", ".dll", ".so", ".dylib", ".bin", ".elf",
             ".com", ".msi", ".deb", ".rpm", ".apk",
         ):
@@ -815,9 +815,9 @@ def scan_filesystem(skill_path: Path, report: AuditReport):
             )
 
         # Large files (>1MB)
-        if item.is_file:
+        if item.is_file():
             try:
-                size = item.stat.st_size
+                size = item.stat().st_size
                 if size > 1_000_000:
                     report.findings.append(
                         Finding(
@@ -834,10 +834,10 @@ def scan_filesystem(skill_path: Path, report: AuditReport):
                 pass
 
         # Symlinks
-        if item.is_symlink:
+        if item.is_symlink():
             try:
-                target = item.resolve
-                if not str(target).startswith(str(skill_path.resolve)):
+                target = item.resolve()
+                if not str(target).startswith(str(skill_path.resolve())):
                     report.findings.append(
                         Finding(
                             severity=Severity.CRITICAL,
@@ -853,9 +853,9 @@ def scan_filesystem(skill_path: Path, report: AuditReport):
                 pass
 
         # SUID/SGID bits
-        if item.is_file:
+        if item.is_file():
             try:
-                mode = item.stat.st_mode
+                mode = item.stat().st_mode
                 if mode & (stat.S_ISUID | stat.S_ISGID):
                     report.findings.append(
                         Finding(
@@ -881,7 +881,7 @@ def scan_skill(skill_path: Path) -> AuditReport:
 
     # Check SKILL.md exists
     skill_md = skill_path / "SKILL.md"
-    if not skill_md.exists:
+    if not skill_md.exists():
         report.findings.append(
             Finding(
                 severity=Severity.HIGH,
@@ -901,7 +901,7 @@ def scan_skill(skill_path: Path) -> AuditReport:
     for code_file in skill_path.rglob("*"):
         if ".git" in code_file.parts:
             continue
-        if code_file.is_file and code_file.suffix.lower in CODE_EXTENSIONS:
+        if code_file.is_file() and code_file.suffix.lower() in CODE_EXTENSIONS:
             report.scripts_scanned += 1
             scan_file_code(code_file, report)
 
@@ -909,7 +909,7 @@ def scan_skill(skill_path: Path) -> AuditReport:
     for md_file in skill_path.rglob("*"):
         if ".git" in md_file.parts:
             continue
-        if md_file.is_file and md_file.suffix.lower in MD_EXTENSIONS:
+        if md_file.is_file() and md_file.suffix.lower() in MD_EXTENSIONS:
             report.md_files_scanned += 1
             scan_file_prompt_injection(md_file, report)
 
@@ -936,7 +936,7 @@ def clone_repo(url: str, skill_name: Optional[str] = None, cleanup: bool = False
 
     if skill_name:
         skill_path = Path(tmp_dir) / skill_name
-        if not skill_path.exists:
+        if not skill_path.exists():
             # Try finding it
             matches = list(Path(tmp_dir).rglob(skill_name))
             if matches:
@@ -957,7 +957,7 @@ def print_report(report: AuditReport):
     v = report.verdict
     sym = verdict_symbols[v]
 
-    print
+    print()
     print("╔" + "═" * 54 + "╗")
     print(f"║  SKILL SECURITY AUDIT REPORT{' ' * 25}║")
     print(f"║  Skill: {report.skill_name:<44} ║")
@@ -979,7 +979,7 @@ def print_report(report: AuditReport):
         print("\n  No security issues found. Skill is safe to install.\n")
         return
 
-    print
+    print()
 
     # Sort by severity (critical first)
     sorted_findings = sorted(report.findings, key=lambda f: -f.severity)
@@ -991,10 +991,10 @@ def print_report(report: AuditReport):
         print(f"   Pattern: {f.pattern}")
         print(f"   Risk: {f.risk}")
         print(f"   Fix: {f.fix}")
-        print
+        print()
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Skill Security Auditor — Scan skills for security risks before installation"
     )
@@ -1023,7 +1023,7 @@ def main:
         help="Remove cloned repo after audit (only for git URLs)",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     cleanup_dir = None
 
@@ -1031,11 +1031,11 @@ def main:
     if args.path.startswith(("http://", "https://", "git@")):
         skill_path, cleanup_dir = clone_repo(args.path, args.skill, cleanup=True)
     else:
-        skill_path = Path(args.path).resolve
-        if not skill_path.exists:
+        skill_path = Path(args.path).resolve()
+        if not skill_path.exists():
             print(f"Error: path does not exist: {skill_path}", file=sys.stderr)
             sys.exit(1)
-        if not skill_path.is_dir:
+        if not skill_path.is_dir():
             print(f"Error: path is not a directory: {skill_path}", file=sys.stderr)
             sys.exit(1)
 
@@ -1043,7 +1043,7 @@ def main:
         report = scan_skill(skill_path)
 
         if args.json_output:
-            print(json.dumps(report.to_dict, indent=2))
+            print(json.dumps(report.to_dict(), indent=2))
         else:
             print_report(report)
 
@@ -1063,4 +1063,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

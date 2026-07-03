@@ -147,14 +147,14 @@ def load_controls(filepath: str) -> List[Dict[str, Any]]:
 
 def detect_categories(controls: List[Dict[str, Any]]) -> List[str]:
     """Detect which TSC categories are represented in the controls."""
-    tsc_values = set
+    tsc_values = set()
     for ctrl in controls:
         tsc = ctrl.get("tsc_criteria", "")
         if tsc:
             tsc_values.add(tsc)
 
-    categories = set
-    for cat, criteria in REQUIRED_TSC.items:
+    categories = set()
+    for cat, criteria in REQUIRED_TSC.items():
         for tsc_id in criteria:
             if tsc_id in tsc_values:
                 categories.add(cat)
@@ -185,7 +185,7 @@ def analyze_coverage(
     for cat in categories:
         if cat not in REQUIRED_TSC:
             continue
-        for tsc_id, tsc_desc in REQUIRED_TSC[cat].items:
+        for tsc_id, tsc_desc in REQUIRED_TSC[cat].items():
             if tsc_id not in covered_tsc:
                 gaps.append(
                     {
@@ -202,7 +202,7 @@ def analyze_coverage(
                 # Check for partial implementation
                 has_issues = False
                 for ctrl in ctrls:
-                    status = ctrl.get("status", "").lower
+                    status = ctrl.get("status", "").lower()
                     if status in ("not started", "not_started", ""):
                         has_issues = True
                     owner = ctrl.get("owner", "TBD")
@@ -265,7 +265,7 @@ def analyze_type2_gaps(controls: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             )
 
         # Check status for operating evidence
-        status = ctrl.get("status", "").lower
+        status = ctrl.get("status", "").lower()
         if status not in ("collected", "complete", "done"):
             issues.append(
                 {
@@ -334,7 +334,7 @@ def build_report(
         "report_metadata": {
             "audit_type": audit_type,
             "categories_assessed": categories,
-            "report_date": datetime.now.strftime("%Y-%m-%d"),
+            "report_date": datetime.now().strftime("%Y-%m-%d"),
             "total_controls_assessed": len(controls),
         },
         "coverage_summary": {
@@ -372,7 +372,7 @@ def format_text_report(report: Dict[str, Any]) -> str:
     ]
 
     meta = report["report_metadata"]
-    lines.append(f"Audit Type:    {meta['audit_type'].upper}")
+    lines.append(f"Audit Type:    {meta['audit_type'].upper()}")
     lines.append(f"Report Date:   {meta['report_date']}")
     lines.append(f"Categories:    {', '.join(meta['categories_assessed'])}")
     lines.append(f"Controls:      {meta['total_controls_assessed']}")
@@ -395,7 +395,7 @@ def format_text_report(report: Dict[str, Any]) -> str:
     if gaps:
         lines.append(f"--- Missing Controls ({len(gaps)}) ---")
         for g in gaps:
-            sev = g["severity"].upper
+            sev = g["severity"].upper()
             lines.append(
                 f"  [{sev}] {g['tsc_criteria']}: {g['description']}"
             )
@@ -409,7 +409,7 @@ def format_text_report(report: Dict[str, Any]) -> str:
         for p in partial:
             ctrls = ", ".join(p.get("controls", []))
             lines.append(
-                f"  [{p['severity'].upper}] {p['tsc_criteria']}: {p['description']}"
+                f"  [{p['severity'].upper()}] {p['tsc_criteria']}: {p['description']}"
             )
             lines.append(f"         Controls: {ctrls}")
             lines.append(f"         Remediation: {p['remediation']}")
@@ -425,14 +425,14 @@ def format_text_report(report: Dict[str, Any]) -> str:
             lines.append(f"  [{detail['control_id']}] {detail['description']}")
             for issue in detail["issues"]:
                 lines.append(
-                    f"    - [{issue['severity'].upper}] {issue['check']}: {issue['detail']}"
+                    f"    - [{issue['severity'].upper()}] {issue['check']}: {issue['detail']}"
                 )
         lines.append("")
 
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="SOC 2 Gap Analyzer — identifies gaps between current controls and SOC 2 requirements."
     )
@@ -455,7 +455,7 @@ def main:
         help="Output in JSON format",
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     controls = load_controls(args.controls)
     categories = detect_categories(controls)
@@ -476,4 +476,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

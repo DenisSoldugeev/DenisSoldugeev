@@ -231,7 +231,7 @@ def sequence_roadmap(profile: Dict[str, Any], architecture: str) -> List[Dict[st
         })
 
     # Q3
-    if ml_models >= 1 or "ml" in str(priorities).lower:
+    if ml_models >= 1 or "ml" in str(priorities).lower():
         roadmap.append({
             "quarter": "Q3",
             "focus": "ML enablement",
@@ -318,7 +318,7 @@ def _wrap(text: str, indent: int, width: int = 68) -> List[str]:
     return textwrap.wrap(text, width=width, initial_indent=" " * indent, subsequent_indent=" " * indent) or [" " * indent + text]
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Pick data architecture + build-vs-buy + sequencing roadmap from a company profile.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -326,7 +326,7 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to profile JSON (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
@@ -354,4 +354,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

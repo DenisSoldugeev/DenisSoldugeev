@@ -1,6 +1,6 @@
 ---
 name: "founder-mode"
-description: "/ds:founder-mode <question> — Auto-routes any founder question to the right C-role advisor or to /ds:boardroom for multi-role topics. The single-command entry point."
+description: "/ds:founder-mode <question> — Auto-routes any founder question to the right C-role advisor or to /ds:boardroom for multi-role topics. The single-command entry point. Use when a founder asks any strategic question without knowing which advisor or command fits — e.g. 'runway pressure' routes to the CFO, 'gross retention dropped' routes to the CCO."
 ---
 
 # /ds:founder-mode — The Auto-Router
@@ -18,14 +18,18 @@ The router (via `ds-chief-of-staff`) does keyword + intent matching:
 | Signal in question | Route |
 |---|---|
 | burn, runway, fundraise, dilution, model, LTV, CAC | `ds-cfo-advisor` |
-| pipeline, win rate, forecast, NRR, churn, ramp | `ds-cro-advisor` |
+| pipeline, win rate, forecast, quota, ramp, sales motion | `ds-cro-advisor` |
 | positioning, ICP, message, brand, channel, campaign | `ds-cmo-advisor` |
 | roadmap, PMF, JTBD, North Star, RICE, kill | `ds-cpo-advisor` |
 | cadence, OKR, scorecard, DRI, operating system, rhythm | `ds-coo-advisor` |
 | hiring, comp, ladder, level, attrition, eNPS, equity | `ds-chro-advisor` |
 | security, threat, breach, compliance, audit, SOC 2 | `ds-ciso-advisor` |
 | architecture, scaling, tech debt, SLO, latency | `ds-cto-advisor` |
-| contract, IP, term sheet, regulator, license | `/ds:gc-review` |
+| contract, IP, term sheet, regulator, license | `ds-general-counsel-advisor` |
+| retention, GRR, NRR, churn, customer success, CSM, time-to-value, renewals | `ds-cco-advisor` |
+| training data, data rights, consent, data asset, warehouse, lakehouse, data mesh | `ds-cdo-advisor` |
+| model selection, eval, hallucination, AI risk, EU AI Act, fine-tune, build vs buy AI | `ds-caio-advisor` |
+| DORA, cycle time, deploy frequency, eng hiring funnel, team topology, delivery throughput | `ds-vpe-advisor` |
 | strategy, vision, board, M&A, raise, exit | `ds-ceo-advisor` |
 | **2+ signals from different roles** | `/ds:boardroom` |
 | **ambiguous** | `/ds:office-hours` first, then route |
@@ -82,6 +86,9 @@ gstack requires the founder to know all 23 slash commands and pick the right one
 
 /ds:founder-mode "the win rate dropped 20% this month"
    → ds-cro-advisor
+
+/ds:founder-mode "gross retention dropped 5 points this quarter"
+   → ds-cco-advisor
 
 /ds:founder-mode "let's hire a VP Marketing"
    → boardroom (CHRO + CMO + CFO touched)

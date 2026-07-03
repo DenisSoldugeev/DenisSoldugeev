@@ -61,11 +61,11 @@ def analyze_email(email: dict, index: int) -> dict:
 
     # Subject analysis
     subject_len = len(subject)
-    subject_word_count = len(subject.split)
+    subject_word_count = len(subject.split())
     subject_ok = 30 <= subject_len <= 60
     subject_has_number = bool(re.search(r"\d", subject))
-    subject_question = subject.strip.endswith("?")
-    subject_all_caps = subject == subject.upper and len(subject) > 3
+    subject_question = subject.strip().endswith("?")
+    subject_all_caps = subject == subject.upper() and len(subject) > 3
 
     # Body analysis
     body_words = re.findall(r"\b\w+\b", body)
@@ -81,8 +81,8 @@ def analyze_email(email: dict, index: int) -> dict:
     total_tokens = len(tokens_in_subject) + len(tokens_in_body)
 
     # Spam triggers
-    combined = (subject + " " + body).lower
-    spam_found = [w for w in SPAM_TRIGGER_WORDS if w.lower in combined]
+    combined = (subject + " " + body).lower()
+    spam_found = [w for w in SPAM_TRIGGER_WORDS if w.lower() in combined]
 
     # Spam score (0-100, higher = more spammy)
     spam_score = min(100, len(spam_found) * 10)
@@ -226,7 +226,7 @@ def compute_sequence_score(email_analyses: list, pacing: dict) -> dict:
     return {
         "overall": overall,
         "grade": grade,
-        "breakdown": {k: {"score": v, "weight": f"{int(weights[k]*100)}%"} for k, v in scores.items},
+        "breakdown": {k: {"score": v, "weight": f"{int(weights[k]*100)}%"} for k, v in scores.items()},
     }
 
 
@@ -267,13 +267,13 @@ DEMO_SEQUENCE = [
 # Main
 # ---------------------------------------------------------------------------
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Email sequence analyzer — scores sequence quality 0-100."
     )
     parser.add_argument("--file", help="JSON file with email sequence array")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.file:
         with open(args.file, "r", encoding="utf-8") as f:
@@ -338,17 +338,17 @@ def main:
                 print(f"     Email {e['email_index']}: {triggers}")
 
     print(f"\n  SCORE BREAKDOWN")
-    for k, v in scoring["breakdown"].items:
-        label = k.replace("_", " ").title
+    for k, v in scoring["breakdown"].items():
+        label = k.replace("_", " ").title()
         bar_len = round(v["score"] / 10)
         bar = "█" * bar_len + "░" * (10 - bar_len)
         print(f"  {label:<22} [{bar}] {v['score']:>3}/100  (weight {v['weight']})")
 
-    print
+    print()
     print("=" * 64)
     print(f"  Overall: {overall}/100   Grade: {grade}")
     print("=" * 64)
 
 
 if __name__ == "__main__":
-    main
+    main()

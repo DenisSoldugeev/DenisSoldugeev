@@ -38,14 +38,14 @@ class GenerationSummary:
     scaffold_path: str
 
 
-def parse_args -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate MCP server scaffold from OpenAPI.")
     parser.add_argument("--input", help="OpenAPI file path (JSON or YAML). If omitted, reads from stdin.")
     parser.add_argument("--server-name", required=True, help="MCP server name.")
     parser.add_argument("--language", choices=["python", "typescript"], default="python", help="Scaffold language.")
     parser.add_argument("--output-dir", default=".", help="Directory to write generated files.")
     parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
-    return parser.parse_args
+    return parser.parse_args()
 
 
 def load_raw_input(input_path: Optional[str]) -> str:
@@ -55,10 +55,10 @@ def load_raw_input(input_path: Optional[str]) -> str:
         except Exception as exc:
             raise CLIError(f"Failed to read --input file: {exc}") from exc
 
-    if sys.stdin.isatty:
+    if sys.stdin.isatty():
         raise CLIError("No input provided. Use --input <spec-file> or pipe OpenAPI via stdin.")
 
-    data = sys.stdin.read.strip
+    data = sys.stdin.read().strip()
     if not data:
         raise CLIError("Stdin was provided but empty.")
     return data
@@ -84,7 +84,7 @@ def parse_openapi(raw: str) -> Dict[str, Any]:
 def sanitize_tool_name(name: str) -> str:
     cleaned = re.sub(r"[^a-zA-Z0-9_]+", "_", name).strip("_")
     cleaned = re.sub(r"_+", "_", cleaned)
-    return cleaned.lower or "unnamed_tool"
+    return cleaned.lower() or "unnamed_tool"
 
 
 def schema_from_parameter(param: Dict[str, Any]) -> Dict[str, Any]:
@@ -106,11 +106,11 @@ def extract_tools(spec: Dict[str, Any]) -> List[Dict[str, Any]]:
         raise CLIError("OpenAPI spec missing valid 'paths' object.")
 
     tools = []
-    for path, methods in paths.items:
+    for path, methods in paths.items():
         if not isinstance(methods, dict):
             continue
-        for method, operation in methods.items:
-            method_l = str(method).lower
+        for method, operation in methods.items():
+            method_l = str(method).lower()
             if method_l not in HTTP_METHODS or not isinstance(operation, dict):
                 continue
 
@@ -120,14 +120,14 @@ def extract_tools(spec: Dict[str, Any]) -> List[Dict[str, Any]]:
             else:
                 name = sanitize_tool_name(f"{method_l}_{path}")
 
-            description = str(operation.get("summary") or operation.get("description") or f"{method_l.upper} {path}")
+            description = str(operation.get("summary") or operation.get("description") or f"{method_l.upper()} {path}")
             properties: Dict[str, Any] = {}
             required: List[str] = []
 
             for param in operation.get("parameters", []):
                 if not isinstance(param, dict):
                     continue
-                pname = str(param.get("name", "")).strip
+                pname = str(param.get("name", "")).strip()
                 if not pname:
                     continue
                 properties[pname] = schema_from_parameter(param)
@@ -144,7 +144,7 @@ def extract_tools(spec: Dict[str, Any]) -> List[Dict[str, Any]]:
                         if isinstance(schema, dict) and schema.get("type") == "object":
                             rb_props = schema.get("properties", {})
                             if isinstance(rb_props, dict):
-                                for key, val in rb_props.items:
+                                for key, val in rb_props.items():
                                     if isinstance(val, dict):
                                         properties[key] = val
                             rb_required = schema.get("required", [])
@@ -171,7 +171,7 @@ def python_scaffold(server_name: str, tools: List[Dict[str, Any]]) -> str:
     for tool in tools:
         fname = sanitize_tool_name(tool["name"])
         handlers.append(
-            f"@mcp.tool\ndef {fname}(input: dict) -> dict:\n"
+            f"@mcp.tool()\ndef {fname}(input: dict) -> dict:\n"
             f"    \"\"\"{tool['description']}\"\"\"\n"
             f"    return {{\"tool\": \"{tool['name']}\", \"status\": \"todo\", \"input\": input}}\n"
         )
@@ -188,7 +188,7 @@ def python_scaffold(server_name: str, tools: List[Dict[str, Any]]) -> str:
             *handlers,
             "",
             "if __name__ == '__main__':",
-            "    mcp.run",
+            "    mcp.run()",
             "",
         ]
     )
@@ -217,7 +217,7 @@ def typescript_scaffold(server_name: str, tools: List[Dict[str, Any]]) -> str:
             "",
             *registrations,
             "",
-            "server.run;",
+            "server.run();",
             "",
         ]
     )
@@ -242,14 +242,14 @@ def write_outputs(server_name: str, language: str, output_dir: Path, tools: List
         language=language,
         operations_total=len(tools),
         tools_generated=len(tools),
-        output_dir=str(output_dir.resolve),
-        manifest_path=str(manifest_path.resolve),
-        scaffold_path=str(scaffold_path.resolve),
+        output_dir=str(output_dir.resolve()),
+        manifest_path=str(manifest_path.resolve()),
+        scaffold_path=str(scaffold_path.resolve()),
     )
 
 
-def main -> int:
-    args = parse_args
+def main() -> int:
+    args = parse_args()
     raw = load_raw_input(args.input)
     spec = parse_openapi(raw)
     tools = extract_tools(spec)
@@ -278,7 +278,7 @@ def main -> int:
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(main)
+        raise SystemExit(main())
     except CLIError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         raise SystemExit(2)

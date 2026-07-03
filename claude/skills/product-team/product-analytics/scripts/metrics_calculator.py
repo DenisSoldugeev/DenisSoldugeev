@@ -10,7 +10,7 @@ from collections import defaultdict
 
 
 def parse_date(value: str) -> dt.date:
-    return dt.date.fromisoformat(value.strip[:10])
+    return dt.date.fromisoformat(value.strip()[:10])
 
 
 def load_csv(path: str):
@@ -24,7 +24,7 @@ def retention(args: argparse.Namespace) -> int:
     activity = defaultdict(set)
 
     for row in rows:
-        user = row[args.user_column].strip
+        user = row[args.user_column].strip()
         cohort_date = parse_date(row[args.cohort_column])
         activity_date = parse_date(row[args.activity_column])
         cohorts[user] = min(cohorts.get(user, cohort_date), cohort_date)
@@ -39,7 +39,7 @@ def retention(args: argparse.Namespace) -> int:
 
     results = []
     for period in range(0, args.max_period + 1):
-        users = len(activity.get(period, set))
+        users = len(activity.get(period, set()))
         rate = users / base_users
         results.append({"period": period, "active_users": users, "retention_rate": round(rate, 4)})
 
@@ -59,14 +59,14 @@ def cohort(args: argparse.Namespace) -> int:
     activity = defaultdict(set)
 
     for row in rows:
-        user = row[args.user_column].strip
+        user = row[args.user_column].strip()
         cohort_date = parse_date(row[args.cohort_column])
         activity_date = parse_date(row[args.activity_column])
 
         if args.cohort_grain == "month":
             cohort_key = cohort_date.strftime("%Y-%m")
         else:
-            cohort_key = f"{cohort_date.isocalendar.year}-W{cohort_date.isocalendar.week:02d}"
+            cohort_key = f"{cohort_date.isocalendar().year}-W{cohort_date.isocalendar().week:02d}"
 
         cohorts.setdefault(user, cohort_key)
         age = (activity_date - cohort_date).days
@@ -74,15 +74,15 @@ def cohort(args: argparse.Namespace) -> int:
             activity[(cohort_key, age)].add(user)
 
     cohort_sizes = defaultdict(int)
-    for cohort_key in cohorts.values:
+    for cohort_key in cohorts.values():
         cohort_sizes[cohort_key] += 1
 
-    cohort_keys = sorted(cohort_sizes.keys)
+    cohort_keys = sorted(cohort_sizes.keys())
     results = []
     for cohort_key in cohort_keys:
         size = cohort_sizes[cohort_key]
         for age in range(0, args.max_period + 1):
-            active = len(activity.get((cohort_key, age), set))
+            active = len(activity.get((cohort_key, age), set()))
             rate = (active / size) if size else 0
             results.append({"cohort": cohort_key, "age_days": age, "active_users": active,
                             "cohort_size": size, "retention_rate": round(rate, 4)})
@@ -98,15 +98,15 @@ def cohort(args: argparse.Namespace) -> int:
 
 def funnel(args: argparse.Namespace) -> int:
     rows = load_csv(args.input)
-    stages = [item.strip for item in args.stages.split(",") if item.strip]
+    stages = [item.strip() for item in args.stages.split(",") if item.strip()]
     if not stages:
         print("No stages provided.")
         return 1
 
-    stage_users = {stage: set for stage in stages}
+    stage_users = {stage: set() for stage in stages}
     for row in rows:
-        user = row[args.user_column].strip
-        stage = row[args.stage_column].strip
+        user = row[args.user_column].strip()
+        stage = row[args.stage_column].strip()
         if stage in stage_users:
             stage_users[stage].add(user)
 
@@ -133,7 +133,7 @@ def funnel(args: argparse.Namespace) -> int:
     return 0
 
 
-def build_parser -> argparse.ArgumentParser:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Calculate retention, cohort, and funnel metrics from CSV data."
     )
@@ -175,9 +175,9 @@ def build_parser -> argparse.ArgumentParser:
     return parser
 
 
-def main -> int:
-    parser = build_parser
-    args = parser.parse_args
+def main() -> int:
+    parser = build_parser()
+    args = parser.parse_args()
     try:
         return args.func(args)
     except FileNotFoundError:
@@ -192,4 +192,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main)
+    raise SystemExit(main())

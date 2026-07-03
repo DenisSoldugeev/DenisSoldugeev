@@ -52,13 +52,13 @@ RISK_ACTIONS = {
         "color": "green"
     },
     "Medium": {
-        "acceptable": "ALARP",
-        "action": "Reduce risk if practicable. Document ALARP rationale if not reduced.",
+        "acceptable": "AFAP",
+        "action": "Reduce as far as possible (AFAP). Document why further reduction is impossible. EU MDR: no economic considerations in acceptability (MDR Annex I GSPR 1-4; EN ISO 14971:2019/A11:2021).",
         "color": "yellow"
     },
     "High": {
-        "acceptable": "ALARP",
-        "action": "Risk reduction required. Must demonstrate ALARP if residual risk remains high.",
+        "acceptable": "AFAP",
+        "action": "Risk reduction required. Must demonstrate reduction as far as possible (AFAP) if residual risk remains high. EU MDR: no economic considerations in acceptability.",
         "color": "orange"
     },
     "Unacceptable": {
@@ -177,7 +177,7 @@ def calculate_rpn(severity: int, occurrence: int, detection: int) -> dict:
     }
 
 
-def display_risk_matrix:
+def display_risk_matrix():
     """Display the full risk matrix."""
     print("\n" + "=" * 70)
     print("ISO 14971 RISK MATRIX (5x5)")
@@ -187,12 +187,12 @@ def display_risk_matrix:
     print("\n" + " " * 15, end="")
     for s in range(1, 6):
         print(f"S{s:^10}", end="")
-    print
+    print()
 
     print(" " * 15, end="")
     for s in range(1, 6):
         print(f"{SEVERITY_LEVELS[s]['name'][:10]:^10}", end="")
-    print
+    print()
 
     print("-" * 70)
 
@@ -202,19 +202,20 @@ def display_risk_matrix:
         for s in range(1, 6):
             level = RISK_MATRIX[p][s]
             print(f"{level:^10}", end="")
-        print
+        print()
 
     print("\n" + "-" * 70)
-    print("Risk Levels: Low (Acceptable) | Medium (ALARP) | High (ALARP) | Unacceptable")
+    print("Risk Levels: Low (Acceptable) | Medium (reduce AFAP) | High (reduce AFAP) | Unacceptable")
+    print("EU MDR: reduce as far as possible (AFAP), no economic considerations in acceptability.")
     print("=" * 70)
 
 
-def display_criteria:
+def display_criteria():
     """Display probability and severity criteria."""
     print("\n" + "=" * 70)
     print("PROBABILITY CRITERIA")
     print("=" * 70)
-    for level, info in PROBABILITY_LEVELS.items:
+    for level, info in PROBABILITY_LEVELS.items():
         print(f"\nP{level}: {info['name']}")
         print(f"   Description: {info['description']}")
         print(f"   Frequency: {info['frequency']}")
@@ -222,7 +223,7 @@ def display_criteria:
     print("\n" + "=" * 70)
     print("SEVERITY CRITERIA")
     print("=" * 70)
-    for level, info in SEVERITY_LEVELS.items:
+    for level, info in SEVERITY_LEVELS.items():
         print(f"\nS{level}: {info['name']}")
         print(f"   Description: {info['description']}")
         print(f"   Harm: {info['harm']}")
@@ -230,8 +231,8 @@ def display_criteria:
     print("\n" + "=" * 70)
     print("RISK LEVEL ACTIONS")
     print("=" * 70)
-    for level, info in RISK_ACTIONS.items:
-        acceptable = "Yes" if info['acceptable'] == True else ("ALARP" if info['acceptable'] == "ALARP" else "No")
+    for level, info in RISK_ACTIONS.items():
+        acceptable = "Yes" if info['acceptable'] == True else ("After reduction AFAP" if info['acceptable'] == "AFAP" else "No")
         print(f"\n{level}:")
         print(f"   Acceptable: {acceptable}")
         print(f"   Action: {info['action']}")
@@ -275,7 +276,7 @@ def format_result_text(result: dict, analysis_type: str) -> str:
     return "\n".join(lines)
 
 
-def interactive_mode:
+def interactive_mode():
     """Run interactive risk assessment."""
     print("\n" + "=" * 50)
     print("RISK MATRIX CALCULATOR - Interactive Mode")
@@ -288,10 +289,10 @@ def interactive_mode:
     print("4. Display Criteria")
     print("5. Exit")
 
-    choice = input("\nEnter choice (1-5): ").strip
+    choice = input("\nEnter choice (1-5): ").strip()
 
     if choice == "1":
-        display_criteria
+        display_criteria()
         print("\n" + "-" * 50)
         try:
             p = int(input("Enter Probability (1-5): "))
@@ -323,10 +324,10 @@ def interactive_mode:
             print("Invalid input. Please enter numbers.")
 
     elif choice == "3":
-        display_risk_matrix
+        display_risk_matrix()
 
     elif choice == "4":
-        display_criteria
+        display_criteria()
 
     elif choice == "5":
         print("Exiting.")
@@ -336,7 +337,7 @@ def interactive_mode:
         print("Invalid choice.")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Calculate risk levels per ISO 14971 or FMEA RPN",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -372,18 +373,18 @@ Examples:
     parser.add_argument("--list-criteria", action="store_true", help="Display probability and severity criteria")
     parser.add_argument("--interactive", action="store_true", help="Run in interactive mode")
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.interactive:
-        interactive_mode
+        interactive_mode()
         return
 
     if args.show_matrix:
-        display_risk_matrix
+        display_risk_matrix()
         return
 
     if args.list_criteria:
-        display_criteria
+        display_criteria()
         return
 
     if args.fmea:
@@ -416,4 +417,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main
+    main()

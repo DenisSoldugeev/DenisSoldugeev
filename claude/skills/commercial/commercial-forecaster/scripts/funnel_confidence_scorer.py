@@ -137,7 +137,7 @@ def render_markdown(rows: list[StageConfidence]) -> str:
     return "\n".join(L)
 
 
-def sample_context -> dict[str, Any]:
+def sample_context() -> dict[str, Any]:
     return {
         "funnel_stages": [
             {"stage_name": "discovery_to_demo", "conversion_pct_history": [
@@ -160,16 +160,16 @@ def sample_context -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(description=__doc__.splitlines[0])
+    p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--input", type=Path, help="Path to funnel-history JSON.")
     p.add_argument("--output", default="markdown", choices=["markdown", "json"], help="Output format.")
     p.add_argument("--sample", action="store_true", help="Run with built-in sample context.")
     args = p.parse_args(argv)
 
     if args.sample:
-        ctx = sample_context
+        ctx = sample_context()
     elif args.input:
-        ctx = json.loads(args.input.read_text)
+        ctx = json.loads(args.input.read_text())
     else:
         p.error("Provide --input or --sample.")
         return 2
@@ -201,4 +201,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

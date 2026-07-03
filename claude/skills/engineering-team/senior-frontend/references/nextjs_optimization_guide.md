@@ -24,9 +24,9 @@ Server Components render on the server and send HTML to the client. Use for data
 
 ```tsx
 // app/products/page.tsx - Server Component (default)
-async function ProductsPage {
+async function ProductsPage() {
   // This runs on the server - no client bundle impact
-  const products = await db.products.findMany;
+  const products = await db.products.findMany();
 
   return (
     <div className="grid grid-cols-3 gap-4">
@@ -54,7 +54,7 @@ import { useState } from 'react';
 function AddToCartButton({ productId }: { productId: string }) {
   const [isAdding, setIsAdding] = useState(false);
 
-  async function handleClick {
+  async function handleClick() {
     setIsAdding(true);
     await addToCart(productId);
     setIsAdding(false);
@@ -214,24 +214,24 @@ module.exports = {
 import dynamic from 'next/dynamic';
 
 // Basic dynamic import
-const HeavyChart = dynamic( => import('@/components/HeavyChart'), {
-  loading:  => <ChartSkeleton />,
+const HeavyChart = dynamic(() => import('@/components/HeavyChart'), {
+  loading: () => <ChartSkeleton />,
 });
 
 // Disable SSR for client-only components
-const MapComponent = dynamic( => import('@/components/Map'), {
+const MapComponent = dynamic(() => import('@/components/Map'), {
   ssr: false,
-  loading:  => <div className="h-[400px] bg-gray-100" />,
+  loading: () => <div className="h-[400px] bg-gray-100" />,
 });
 
 // Named exports
-const Modal = dynamic( =>
+const Modal = dynamic(() =>
   import('@/components/ui').then(mod => mod.Modal)
 );
 
 // With suspense
-const DashboardCharts = dynamic( => import('@/components/DashboardCharts'), {
-  loading:  => <Suspense fallback={<ChartsSkeleton />} />,
+const DashboardCharts = dynamic(() => import('@/components/DashboardCharts'), {
+  loading: () => <Suspense fallback={<ChartsSkeleton />} />,
 });
 ```
 
@@ -243,7 +243,7 @@ const DashboardCharts = dynamic( => import('@/components/DashboardCharts'), {
 import { Suspense } from 'react';
 import AnalyticsCharts from './AnalyticsCharts';
 
-export default function AnalyticsPage {
+export default function AnalyticsPage() {
   return (
     <Suspense fallback={<AnalyticsSkeleton />}>
       <AnalyticsCharts />
@@ -294,12 +294,12 @@ export default function DashboardLayout({
 
 ```tsx
 // Parallel data fetching
-async function Dashboard {
+async function Dashboard() {
   // Start both requests simultaneously
   const [user, stats, notifications] = await Promise.all([
-    getUser,
-    getStats,
-    getNotifications,
+    getUser(),
+    getStats(),
+    getNotifications(),
   ]);
 
   return (
@@ -351,16 +351,16 @@ async function Reviews({ productId }: { productId: string }) {
 ```tsx
 // Next.js automatically dedupes identical requests
 async function Layout({ children }) {
-  const user = await getUser; // Request 1
+  const user = await getUser(); // Request 1
   return <div>{children}</div>;
 }
 
-async function Header {
-  const user = await getUser; // Same request - cached!
+async function Header() {
+  const user = await getUser(); // Same request - cached!
   return <div>Hello, {user.name}</div>;
 }
 
-// Both components call getUser but only one request is made
+// Both components call getUser() but only one request is made
 ```
 
 ---
@@ -403,8 +403,8 @@ export const revalidate = 3600;
 export const dynamic = 'force-dynamic';
 
 // Generate static params at build
-export async function generateStaticParams {
-  const products = await getProducts;
+export async function generateStaticParams() {
+  const products = await getProducts();
   return products.map(p => ({ id: p.id }));
 }
 ```
@@ -523,7 +523,7 @@ export default function RootLayout({ children }) {
 // Optimize LCP hero image
 import Image from 'next/image';
 
-export default function Hero {
+export default function Hero() {
   return (
     <section className="relative h-[600px]">
       <Image
@@ -630,13 +630,13 @@ import { useEffect, useState } from 'react';
 function DataProcessor({ data }: { data: number[] }) {
   const [result, setResult] = useState<number | null>(null);
 
-  useEffect( => {
+  useEffect(() => {
     const worker = new Worker(new URL('../workers/processor.js', import.meta.url));
 
     worker.postMessage(data);
     worker.onmessage = (e) => setResult(e.data);
 
-    return  => worker.terminate;
+    return () => worker.terminate();
   }, [data]);
 
   return <div>Result: {result}</div>;
@@ -651,7 +651,7 @@ function DataProcessor({ data }: { data: number[] }) {
 
 import { useReportWebVitals } from 'next/web-vitals';
 
-export function PerformanceMonitor {
+export function PerformanceMonitor() {
   useReportWebVitals((metric) => {
     switch (metric.name) {
       case 'LCP':
@@ -709,7 +709,7 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
-  headers: async  => [
+  headers: async () => [
     {
       source: '/(.*)',
       headers: [

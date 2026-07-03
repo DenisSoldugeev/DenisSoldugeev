@@ -87,7 +87,7 @@ Track these metrics weekly: conversion rate, bounce rate, time on page, scroll d
 def check_heading_hierarchy(text):
     """Gate 1: H1 → H2 → H3 only, no skips."""
     findings = []
-    headings = [(m.start, len(m.group(1)), m.group(2)) for m in HEADING_RE.finditer(text)]
+    headings = [(m.start(), len(m.group(1)), m.group(2)) for m in HEADING_RE.finditer(text)]
     prev_level = 0
     for _, level, title in headings:
         if level > prev_level + 1 and prev_level > 0:
@@ -102,10 +102,10 @@ def check_paragraph_length(text):
     body = re.sub(r"^---.*?---\s*", "", text, count=1, flags=re.DOTALL)
     paragraphs = re.split(r"\n\s*\n", body)
     for i, para in enumerate(paragraphs, 1):
-        para = para.strip
+        para = para.strip()
         if not para or para.startswith("#") or para.startswith("```") or para.startswith("|"):
             continue
-        words = len(para.split)
+        words = len(para.split())
         if words > 150:
             findings.append(f"Paragraph {i}: {words} words (max 150). Break it up.")
     return {"gate": "paragraph-length", "passed": len(findings) == 0, "findings": findings}
@@ -115,7 +115,7 @@ def check_image_alt_text(text):
     """Gate 3: All images have alt text."""
     findings = []
     for m in IMAGE_RE.finditer(text):
-        alt = m.group(1).strip
+        alt = m.group(1).strip()
         if not alt:
             findings.append(f"Image missing alt text: ![](...) — add descriptive alt.")
     return {"gate": "image-alt-text", "passed": len(findings) == 0, "findings": findings}
@@ -125,9 +125,9 @@ def check_source_citations(text):
     """Gate 4: Statistics must have source markers."""
     findings = []
     body = re.sub(r"^---.*?---\s*", "", text, count=1, flags=re.DOTALL)
-    lines = body.splitlines
+    lines = body.splitlines()
     for i, line in enumerate(lines, 1):
-        if line.strip.startswith("#") or line.strip.startswith("```"):
+        if line.strip().startswith("#") or line.strip().startswith("```"):
             continue
         stats = STAT_RE.findall(line)
         if stats and not SOURCE_RE.search(line):
@@ -141,7 +141,7 @@ def check_title_length(text):
     findings = []
     m = TITLE_RE.search(text)
     if m:
-        title = m.group(1).strip
+        title = m.group(1).strip()
         length = len(title)
         if length < 50:
             findings.append(f"Title too short: {length} chars (aim for 50-60). Title: '{title}'")
@@ -157,7 +157,7 @@ def check_meta_description(text):
     findings = []
     m = META_DESC_RE.search(text)
     if m:
-        desc = m.group(1).strip
+        desc = m.group(1).strip()
         length = len(desc)
         if length < 150:
             findings.append(f"Meta description too short: {length} chars (aim for 150-160).")
@@ -218,7 +218,7 @@ def run_gates(text):
     }
 
 
-def main:
+def main():
     p = argparse.ArgumentParser(
         description="Non-negotiable quality gates for content publishing.",
         epilog="All gates must pass before publishing. Run with --demo for a sample article.",
@@ -226,18 +226,18 @@ def main:
     p.add_argument("file", nargs="?", help="Markdown file to check")
     p.add_argument("--json", action="store_true", help="JSON output")
     p.add_argument("--demo", action="store_true", help="Run with demo content")
-    args = p.parse_args
+    args = p.parse_args()
 
     if args.demo:
         text = DEMO_CONTENT
     elif args.file:
         path = Path(args.file)
-        if not path.exists:
+        if not path.exists():
             print(f"[error] {path} not found", file=sys.stderr)
             sys.exit(1)
         text = path.read_text(encoding="utf-8", errors="replace")
     else:
-        p.print_help
+        p.print_help()
         sys.exit(0)
 
     result = run_gates(text)
@@ -248,13 +248,13 @@ def main:
 
     print(f"Content Quality Gates — {result['gates_passed']}/{result['gates_total']} passed")
     print(f"Verdict: {result['verdict']}")
-    print
+    print()
     for r in result["results"]:
         icon = "✅" if r["passed"] else "❌"
         print(f"  {icon} {r['gate']}")
         for f in r["findings"]:
             print(f"     → {f}")
-    print
+    print()
     if result["verdict"] == "PUBLISH":
         print("  All gates pass. Ready to publish.")
     elif result["verdict"] == "TARGET":
@@ -264,4 +264,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

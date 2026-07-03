@@ -8,6 +8,8 @@ It ensures scripts meet quality standards and function correctly.
 
 Usage:
     python script_tester.py <skill_path> [--timeout SECONDS] [--json] [--verbose]
+
+Author: Claude Skills Engineering Team
 Version: 1.0.0
 Dependencies: Python Standard Library Only
 """
@@ -37,7 +39,7 @@ class ScriptTestResult:
     def __init__(self, script_path: str):
         self.script_path = script_path
         self.script_name = Path(script_path).name
-        self.timestamp = datetime.utcnow.isoformat + "Z"
+        self.timestamp = datetime.utcnow().isoformat() + "Z"
         self.tests = {}
         self.overall_status = "PENDING"
         self.execution_time = 0.0
@@ -66,7 +68,7 @@ class ScriptTestResult:
             self.overall_status = "NO_TESTS"
             return
             
-        failed_tests = [name for name, result in self.tests.items if not result["passed"]]
+        failed_tests = [name for name, result in self.tests.items() if not result["passed"]]
         
         if not failed_tests:
             self.overall_status = "PASS"
@@ -81,7 +83,7 @@ class TestSuite:
     
     def __init__(self, skill_path: str):
         self.skill_path = skill_path
-        self.timestamp = datetime.utcnow.isoformat + "Z"
+        self.timestamp = datetime.utcnow().isoformat() + "Z"
         self.script_results = {}
         self.summary = {}
         self.global_errors = []
@@ -106,7 +108,7 @@ class TestSuite:
             }
             return
             
-        statuses = [result.overall_status for result in self.script_results.values]
+        statuses = [result.overall_status for result in self.script_results.values()]
         
         self.summary = {
             "total_scripts": len(self.script_results),
@@ -129,7 +131,7 @@ class ScriptTester:
     """Main script testing engine"""
     
     def __init__(self, skill_path: str, timeout: int = 30, verbose: bool = False):
-        self.skill_path = Path(skill_path).resolve
+        self.skill_path = Path(skill_path).resolve()
         self.timeout = timeout
         self.verbose = verbose
         self.test_suite = TestSuite(str(self.skill_path))
@@ -145,12 +147,12 @@ class ScriptTester:
             self.log_verbose(f"Starting script testing for {self.skill_path}")
             
             # Check if skill path exists
-            if not self.skill_path.exists:
+            if not self.skill_path.exists():
                 self.test_suite.add_global_error(f"Skill path does not exist: {self.skill_path}")
                 return self.test_suite
                 
             scripts_dir = self.skill_path / "scripts"
-            if not scripts_dir.exists:
+            if not scripts_dir.exists():
                 self.test_suite.add_global_error("No scripts directory found")
                 return self.test_suite
                 
@@ -175,7 +177,7 @@ class ScriptTester:
                     self.test_suite.add_script_result(result)
                     
             # Calculate summary
-            self.test_suite.calculate_summary
+            self.test_suite.calculate_summary()
             
         except Exception as e:
             self.test_suite.add_global_error(f"Testing failed with exception: {str(e)}")
@@ -185,7 +187,7 @@ class ScriptTester:
     def test_single_script(self, script_path: Path) -> ScriptTestResult:
         """Test a single Python script comprehensively"""
         result = ScriptTestResult(str(script_path))
-        start_time = time.time
+        start_time = time.time()
         
         try:
             self.log_verbose(f"Testing script: {script_path.name}")
@@ -231,8 +233,8 @@ class ScriptTester:
             result.add_error(f"Unexpected error during testing: {str(e)}")
             
         finally:
-            result.execution_time = time.time - start_time
-            result.calculate_status
+            result.execution_time = time.time() - start_time
+            result.calculate_status()
             
         return result
         
@@ -431,9 +433,9 @@ class ScriptTester:
                 # Check for reasonable help content
                 help_indicators = ['usage:', 'positional arguments:', 'optional arguments:', 
                                  'options:', 'description:', 'help']
-                has_help_content = any(indicator in help_output.lower for indicator in help_indicators)
+                has_help_content = any(indicator in help_output.lower() for indicator in help_indicators)
                 
-                if has_help_content and len(help_output.strip) > 50:
+                if has_help_content and len(help_output.strip()) > 50:
                     result.add_test("help_functionality", True, "Provides comprehensive help text")
                 else:
                     result.add_test("help_functionality", False, 
@@ -458,13 +460,13 @@ class ScriptTester:
         self.log_verbose("Testing sample data processing...")
         
         assets_dir = self.skill_path / "assets"
-        if not assets_dir.exists:
+        if not assets_dir.exists():
             result.add_test("sample_data_processing", True, "No sample data to test (assets dir missing)")
             return
             
         # Look for sample input files
         sample_files = list(assets_dir.rglob("*sample*")) + list(assets_dir.rglob("*test*"))
-        sample_files = [f for f in sample_files if f.is_file and not f.name.startswith('.')]
+        sample_files = [f for f in sample_files if f.is_file() and not f.name.startswith('.')]
         
         if not sample_files:
             result.add_test("sample_data_processing", True, "No sample data files found to test")
@@ -528,7 +530,7 @@ class ScriptTester:
             content = script_path.read_text(encoding='utf-8')
             
             # Look for JSON-related code
-            if any(indicator in content.lower for indicator in ['json.dump', 'json.load', '"json"', '--json']):
+            if any(indicator in content.lower() for indicator in ['json.dump', 'json.load', '"json"', '--json']):
                 json_support = True
                 
             # Look for human-readable output indicators
@@ -588,7 +590,7 @@ class TestReportFormatter:
                     "errors": result.errors,
                     "warnings": result.warnings
                 }
-                for name, result in test_suite.script_results.items
+                for name, result in test_suite.script_results.items()
             }
         }, indent=2)
         
@@ -621,7 +623,7 @@ class TestReportFormatter:
             lines.append("")
             
         # Individual script results
-        for script_name, result in test_suite.script_results.items:
+        for script_name, result in test_suite.script_results.items():
             lines.append(f"SCRIPT: {script_name}")
             lines.append(f"  Status: {result.overall_status}")
             lines.append(f"  Execution Time: {result.execution_time:.2f}s")
@@ -630,7 +632,7 @@ class TestReportFormatter:
             # Tests
             if result.tests:
                 lines.append("  TESTS:")
-                for test_name, test_result in result.tests.items:
+                for test_name, test_result in result.tests.items():
                     status = "✓ PASS" if test_result["passed"] else "✗ FAIL"
                     lines.append(f"    {status}: {test_result['message']}")
                 lines.append("")
@@ -655,7 +657,7 @@ class TestReportFormatter:
         return "\n".join(lines)
 
 
-def main:
+def main():
     """Main entry point"""
     parser = argparse.ArgumentParser(
         description="Test Python scripts in a skill directory",
@@ -691,12 +693,12 @@ Test Categories:
                        action="store_true", 
                        help="Enable verbose logging")
                        
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Create tester and run tests
         tester = ScriptTester(args.skill_path, args.timeout, args.verbose)
-        test_suite = tester.test_all_scripts
+        test_suite = tester.test_all_scripts()
         
         # Format and output results
         if args.json:
@@ -721,9 +723,9 @@ Test Categories:
         print(f"Testing failed: {str(e)}", file=sys.stderr)
         if args.verbose:
             import traceback
-            traceback.print_exc
+            traceback.print_exc()
         sys.exit(1)
 
 
 if __name__ == "__main__":
-    main
+    main()

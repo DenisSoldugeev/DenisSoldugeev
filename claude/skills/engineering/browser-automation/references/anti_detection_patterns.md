@@ -35,7 +35,7 @@ The most critical fix. Every anti-bot check starts here.
 await page.add_init_script("""
     // Remove webdriver flag
     Object.defineProperty(navigator, 'webdriver', {
-        get:  => undefined,
+        get: () => undefined,
     });
 
     // Remove Playwright-specific properties
@@ -103,7 +103,7 @@ context = await browser.new_context(
 STEALTH_INIT = """
     // Plugins (headless Chrome has 0 plugins, real Chrome has 3-5)
     Object.defineProperty(navigator, 'plugins', {
-        get:  => {
+        get: () => {
             const plugins = [
                 { name: 'Chrome PDF Plugin', filename: 'internal-pdf-viewer' },
                 { name: 'Chrome PDF Viewer', filename: 'mhjfbmdgcfjbbpaeojofohoefgiehjai' },
@@ -116,27 +116,27 @@ STEALTH_INIT = """
 
     // Languages
     Object.defineProperty(navigator, 'languages', {
-        get:  => ['en-US', 'en'],
+        get: () => ['en-US', 'en'],
     });
 
     // Platform (match to user agent)
     Object.defineProperty(navigator, 'platform', {
-        get:  => 'Win32',  // or 'MacIntel' for macOS UA
+        get: () => 'Win32',  // or 'MacIntel' for macOS UA
     });
 
     // Hardware concurrency (real browsers report CPU cores)
     Object.defineProperty(navigator, 'hardwareConcurrency', {
-        get:  => 8,
+        get: () => 8,
     });
 
     // Device memory (Chrome-specific)
     Object.defineProperty(navigator, 'deviceMemory', {
-        get:  => 8,
+        get: () => 8,
     });
 
     // Connection info
     Object.defineProperty(navigator, 'connection', {
-        get:  => ({
+        get: () => ({
             effectiveType: '4g',
             rtt: 50,
             downlink: 10,
@@ -232,15 +232,15 @@ class RateLimiter:
         self.last_request_time = 0
 
     async def wait(self):
-        elapsed = time.time - self.last_request_time
+        elapsed = time.time() - self.last_request_time
         if elapsed < self.min_interval:
             await asyncio.sleep(self.min_interval - elapsed)
-        self.last_request_time = time.time
+        self.last_request_time = time.time()
 
 # Usage
 limiter = RateLimiter(min_interval_seconds=2.0)
 for url in urls:
-    await limiter.wait
+    await limiter.wait()
     await page.goto(url)
 ```
 
@@ -250,7 +250,7 @@ for url in urls:
 async def with_backoff(coro_factory, max_retries=5, base_delay=1.0):
     for attempt in range(max_retries):
         try:
-            return await coro_factory
+            return await coro_factory()
         except Exception as e:
             if attempt == max_retries - 1:
                 raise
@@ -304,13 +304,13 @@ Playwright does not support per-request proxy switching. Achieve it by creating 
 ```python
 async def scrape_url(browser, url, proxy):
     context = await browser.new_context(proxy={"server": proxy})
-    page = await context.new_page
+    page = await context.new_page()
     try:
         await page.goto(url)
         data = await extract_data(page)
         return data
     finally:
-        await context.close
+        await context.close()
 ```
 
 ### SOCKS5 Proxy
@@ -361,7 +361,7 @@ Anti-bot services track mouse events. A click without preceding mouse movement i
 async def human_click(page, selector):
     """Click with preceding mouse movement."""
     element = await page.query_selector(selector)
-    box = await element.bounding_box
+    box = await element.bounding_box()
     if box:
         # Move to element with slight offset
         x = box["x"] + box["width"] / 2 + random.uniform(-5, 5)
@@ -444,7 +444,7 @@ For most automation tasks, apply these in order of priority:
 1. **WebDriver flag removal** — Critical, takes 2 lines
 2. **Custom user agent** — Critical, takes 1 line
 3. **Viewport configuration** — High priority, takes 1 line
-4. **Request delays** — High priority, add random.uniform calls
+4. **Request delays** — High priority, add random.uniform() calls
 5. **Navigator properties** — Medium priority, init script block
 6. **Chrome channel** — Medium priority, one launch option
 7. **WebGL override** — Low priority unless hitting advanced anti-bot

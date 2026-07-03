@@ -39,10 +39,10 @@ This document provides a comprehensive catalog of multi-agent system architectur
 **Implementation Patterns:**
 ```
 Agent {
-    receive_request
-    process_task
-    use_tools
-    return_response
+    receive_request()
+    process_task()
+    use_tools()
+    return_response()
 }
 ```
 
@@ -79,17 +79,17 @@ Agent {
 **Implementation Patterns:**
 ```
 Supervisor {
-    decompose_task
-    delegate_to_specialists
-    monitor_progress
-    aggregate_results
-    quality_control
+    decompose_task()
+    delegate_to_specialists()
+    monitor_progress()
+    aggregate_results()
+    quality_control()
 }
 
 Specialist {
-    receive_assignment
-    execute_specialized_task
-    report_results
+    receive_assignment()
+    execute_specialized_task()
+    report_results()
 }
 ```
 
@@ -126,18 +126,18 @@ Specialist {
 **Implementation Patterns:**
 ```
 SwarmAgent {
-    discover_peers
-    share_information
-    negotiate_tasks
-    collaborate
-    adapt_behavior
+    discover_peers()
+    share_information()
+    negotiate_tasks()
+    collaborate()
+    adapt_behavior()
 }
 
 ConsensusProtocol {
-    propose_action
-    vote
-    reach_agreement
-    execute_collective_decision
+    propose_action()
+    vote()
+    reach_agreement()
+    execute_collective_decision()
 }
 ```
 
@@ -174,21 +174,21 @@ ConsensusProtocol {
 **Implementation Patterns:**
 ```
 Executive {
-    strategic_planning
-    resource_allocation
-    performance_monitoring
+    strategic_planning()
+    resource_allocation()
+    performance_monitoring()
 }
 
 Manager {
-    tactical_planning
-    team_coordination
-    progress_reporting
+    tactical_planning()
+    team_coordination()
+    progress_reporting()
 }
 
 Worker {
-    task_execution
-    status_reporting
-    resource_requests
+    task_execution()
+    status_reporting()
+    resource_requests()
 }
 ```
 
@@ -225,17 +225,17 @@ Worker {
 **Implementation Patterns:**
 ```
 PipelineStage {
-    receive_input
-    process_data
-    validate_output
-    send_to_next_stage
+    receive_input()
+    process_data()
+    validate_output()
+    send_to_next_stage()
 }
 
 PipelineController {
-    manage_flow
-    handle_errors
-    monitor_throughput
-    optimize_stages
+    manage_flow()
+    handle_errors()
+    monitor_throughput()
+    optimize_stages()
 }
 ```
 

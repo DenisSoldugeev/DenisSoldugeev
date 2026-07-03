@@ -220,12 +220,12 @@ LEGAL_BASES = {
 }
 
 
-def get_template -> Dict:
+def get_template() -> Dict:
     """Return a blank DPIA input template."""
     return {
         "project_name": "",
         "version": "1.0",
-        "date": datetime.now.strftime("%Y-%m-%d"),
+        "date": datetime.now().strftime("%Y-%m-%d"),
         "controller": {
             "name": "",
             "contact": "",
@@ -410,7 +410,7 @@ def generate_dpia_report(input_data: Dict) -> str:
 | Field | Value |
 |-------|-------|
 | Version | {input_data.get('version', '1.0')} |
-| Date | {input_data.get('date', datetime.now.strftime('%Y-%m-%d'))} |
+| Date | {input_data.get('date', datetime.now().strftime('%Y-%m-%d'))} |
 | Controller | {controller.get('name', 'N/A')} |
 | DPO Contact | {controller.get('dpo_contact', 'N/A')} |
 
@@ -537,9 +537,9 @@ Risk Score: {requirement['risk_score']}/100
 
 | Aspect | Assessment |
 |--------|------------|
-| Impact | {risk.get('impact', 'medium').upper} |
-| Likelihood | {risk.get('likelihood', 'medium').upper} |
-| Residual Risk | {risk.get('residual_risk', 'medium').upper} |
+| Impact | {risk.get('impact', 'medium').upper()} |
+| Likelihood | {risk.get('likelihood', 'medium').upper()} |
+| Residual Risk | {risk.get('residual_risk', 'medium').upper()} |
 
 **Recommended Mitigations:**
 
@@ -606,7 +606,7 @@ Next Review Date: _______________
     return report
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Generate DPIA documentation"
     )
@@ -629,10 +629,10 @@ def main:
         help="Run in interactive mode"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.template:
-        print(json.dumps(get_template, indent=2))
+        print(json.dumps(get_template(), indent=2))
         return
 
     if args.interactive:
@@ -649,7 +649,7 @@ def main:
         sys.exit(1)
 
     input_path = Path(args.input)
-    if not input_path.exists:
+    if not input_path.exists():
         print(f"Error: Input file not found: {input_path}")
         sys.exit(1)
 
@@ -667,4 +667,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

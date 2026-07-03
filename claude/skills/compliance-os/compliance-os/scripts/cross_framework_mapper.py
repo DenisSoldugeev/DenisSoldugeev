@@ -305,7 +305,7 @@ def merged_in_scope(enabled: Set[str]) -> List[Dict[str, Any]]:
     """Return merged controls where at least 1 enabled framework maps to them."""
     out: List[Dict[str, Any]] = []
     for mc in MERGED_CONTROLS:
-        active_maps = {fid: m for fid, m in mc["mappings"].items if fid in enabled}
+        active_maps = {fid: m for fid, m in mc["mappings"].items() if fid in enabled}
         if active_maps:
             out.append({
                 "id": mc["id"],
@@ -380,7 +380,7 @@ def render_text(r: Dict[str, Any], source: str) -> str:
     for mc in r["merged_controls"]:
         lines.append(f"  [{mc['id']}]  {mc['theme']}  ({mc['frameworks_count']} frameworks)")
         lines.append(f"      Evidence: {mc['evidence']}")
-        for fid, (ctrl, conf) in mc["frameworks"].items:
+        for fid, (ctrl, conf) in mc["frameworks"].items():
             conf_label = {"H": "HIGH ", "M": "MED  ", "L": "LOW  "}[conf]
             lines.append(f"        [{conf_label}] {fid:12s} -> {ctrl}")
         lines.append("")
@@ -393,7 +393,7 @@ def render_text(r: Dict[str, Any], source: str) -> str:
     return "\n".join(lines)
 
 
-def main -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Multi-framework control overlap computation.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -401,7 +401,7 @@ def main -> int:
     )
     parser.add_argument("path", nargs="?", help="Path to program JSON (uses embedded sample if omitted)")
     parser.add_argument("--output", choices=("text", "json"), default="text", help="Output format")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.path:
         try:
@@ -427,4 +427,4 @@ def main -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

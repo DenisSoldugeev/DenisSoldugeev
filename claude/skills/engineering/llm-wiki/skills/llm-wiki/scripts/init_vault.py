@@ -23,7 +23,7 @@ import json
 import sys
 from pathlib import Path
 
-SCRIPT_DIR = Path(__file__).resolve.parent
+SCRIPT_DIR = Path(__file__).resolve().parent
 PLUGIN_DIR = SCRIPT_DIR.parent
 ASSETS_DIR = PLUGIN_DIR / "assets"
 
@@ -55,7 +55,7 @@ TOOL_FILES = {
 
 def render_template(src, dest, variables):
     """Render a template file with {{VAR}} substitutions to dest."""
-    if not src.exists:
+    if not src.exists():
         print(f"[warn] template missing: {src}", file=sys.stderr)
         return False
     try:
@@ -63,7 +63,7 @@ def render_template(src, dest, variables):
     except OSError as e:
         print(f"[warn] could not read {src}: {e}", file=sys.stderr)
         return False
-    for key, value in variables.items:
+    for key, value in variables.items():
         text = text.replace("{{" + key + "}}", value)
     try:
         dest.write_text(text, encoding="utf-8")
@@ -83,7 +83,7 @@ def _error(message, as_json=False):
 
 def init_vault(vault_path, topic, tool, force, as_json=False):
     """Bootstrap a new LLM Wiki vault at vault_path."""
-    if vault_path.exists and any(vault_path.iterdir) and not force:
+    if vault_path.exists() and any(vault_path.iterdir()) and not force:
         _error(f"{vault_path} is not empty. Use --force to overwrite.", as_json)
 
     try:
@@ -93,7 +93,7 @@ def init_vault(vault_path, topic, tool, force, as_json=False):
     except OSError as e:
         _error(f"failed to create vault structure: {e}", as_json)
 
-    today = dt.date.today.isoformat
+    today = dt.date.today().isoformat()
     variables = {
         "TOPIC": topic,
         "DATE": today,
@@ -122,9 +122,9 @@ def init_vault(vault_path, topic, tool, force, as_json=False):
     tmpl_dest.mkdir(exist_ok=True)
     src_tmpl = ASSETS_DIR / "page-templates"
     template_count = 0
-    if src_tmpl.exists:
-        for f in src_tmpl.iterdir:
-            if f.is_file:
+    if src_tmpl.exists():
+        for f in src_tmpl.iterdir():
+            if f.is_file():
                 try:
                     (tmpl_dest / f.name).write_text(
                         f.read_text(encoding="utf-8"), encoding="utf-8"
@@ -175,7 +175,7 @@ def init_vault(vault_path, topic, tool, force, as_json=False):
     print("       wiki/         (LLM-maintained knowledge base)")
     print("       wiki/index.md (catalog)")
     print("       wiki/log.md   (timeline)")
-    print
+    print()
     print("Next steps:")
     print("  1. Open the vault in Obsidian")
     print("  2. Drop a source into raw/")
@@ -183,7 +183,7 @@ def init_vault(vault_path, topic, tool, force, as_json=False):
     return result
 
 
-def main:
+def main():
     p = argparse.ArgumentParser(
         description="Initialize an LLM Wiki vault — the three-layer structure (raw/, wiki/, schema) Karpathy describes in the LLM Wiki gist.",
     )
@@ -196,7 +196,7 @@ def main:
     p.add_argument(
         "--tool",
         default="all",
-        choices=sorted(TOOL_FILES.keys),
+        choices=sorted(TOOL_FILES.keys()),
         help="Which schema file(s) to install (default: all)",
     )
     p.add_argument(
@@ -205,9 +205,9 @@ def main:
     p.add_argument(
         "--json", action="store_true", help="Emit result as JSON instead of human-readable"
     )
-    args = p.parse_args
+    args = p.parse_args()
     init_vault(
-        Path(args.path).expanduser.resolve,
+        Path(args.path).expanduser().resolve(),
         args.topic,
         args.tool,
         args.force,
@@ -216,4 +216,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

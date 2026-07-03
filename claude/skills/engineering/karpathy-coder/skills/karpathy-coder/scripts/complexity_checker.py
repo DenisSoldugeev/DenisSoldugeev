@@ -71,7 +71,7 @@ BRANCH_KEYWORDS_TS = re.compile(
 )
 FUNC_DEF_PY = re.compile(r"^\s*(?:async\s+)?def\s+(\w+)", re.MULTILINE)
 FUNC_DEF_TS = re.compile(
-    r"^\s*(?:export\s+)?(?:async\s+)?(?:function\s+(\w+)|(?:const|let)\s+(\w+)\s*=\s*(?:async\s+)?\",
+    r"^\s*(?:export\s+)?(?:async\s+)?(?:function\s+(\w+)|(?:const|let)\s+(\w+)\s*=\s*(?:async\s+)?\()",
     re.MULTILINE,
 )
 CLASS_DEF_PY = re.compile(r"^\s*class\s+\w+", re.MULTILINE)
@@ -83,7 +83,7 @@ INDENT_RE = re.compile(r"^( *)\S", re.MULTILINE)
 
 
 def detect_lang(path):
-    ext = path.suffix.lower
+    ext = path.suffix.lower()
     if ext in {".py"}:
         return "python"
     if ext in {".ts", ".tsx", ".js", ".jsx"}:
@@ -99,21 +99,21 @@ def count_branches(text, lang):
 def extract_functions(text, lang):
     """Return list of (name, start_line, line_count)."""
     pat = FUNC_DEF_PY if lang == "python" else FUNC_DEF_TS
-    lines = text.splitlines
+    lines = text.splitlines()
     funcs = []
     for m in pat.finditer(text):
         name = m.group(1) or (m.group(2) if m.lastindex and m.lastindex >= 2 else "anonymous")
-        start = text[:m.start].count("\n")
+        start = text[:m.start()].count("\n")
         # Estimate function length: count indented lines until next same-level def or end
-        indent = len(m.group(0)) - len(m.group(0).lstrip)
+        indent = len(m.group(0)) - len(m.group(0).lstrip())
         end = start + 1
         for i in range(start + 1, len(lines)):
-            stripped = lines[i].rstrip
+            stripped = lines[i].rstrip()
             if not stripped:
                 continue
-            line_indent = len(stripped) - len(stripped.lstrip)
-            if line_indent <= indent and stripped.lstrip and not stripped.lstrip.startswith(("#", "//", "/*", "*")):
-                if lang == "python" and (stripped.lstrip.startswith("def ") or stripped.lstrip.startswith("class ") or stripped.lstrip.startswith("async def ")):
+            line_indent = len(stripped) - len(stripped.lstrip())
+            if line_indent <= indent and stripped.lstrip() and not stripped.lstrip().startswith(("#", "//", "/*", "*")):
+                if lang == "python" and (stripped.lstrip().startswith("def ") or stripped.lstrip().startswith("class ") or stripped.lstrip().startswith("async def ")):
                     break
                 if lang == "typescript" and pat.match(stripped):
                     break
@@ -142,7 +142,7 @@ def analyze_file(path, thresholds):
     if not lang:
         return None
 
-    lines = text.splitlines
+    lines = text.splitlines()
     line_count = len(lines)
     findings = []
 
@@ -232,7 +232,7 @@ def analyze_file(path, thresholds):
 
 def collect_files(target, extensions):
     target = Path(target)
-    if target.is_file:
+    if target.is_file():
         return [target]
     files = []
     for ext in extensions:
@@ -242,7 +242,7 @@ def collect_files(target, extensions):
     return [f for f in files if not any(p in skip for p in f.parts)]
 
 
-def main:
+def main():
     p = argparse.ArgumentParser(
         description="Detect over-engineering in Python/TypeScript files (Karpathy Principle #2).",
         epilog="Thresholds: strict (new code), medium (default), relaxed (legacy).",
@@ -250,7 +250,7 @@ def main:
     p.add_argument("target", help="File or directory to analyze")
     p.add_argument(
         "--threshold",
-        choices=sorted(THRESHOLDS.keys),
+        choices=sorted(THRESHOLDS.keys()),
         default="medium",
         help="Strictness level (default: medium)",
     )
@@ -260,10 +260,10 @@ def main:
         help="Comma-separated file extensions to scan (default: py,ts,tsx,js,jsx)",
     )
     p.add_argument("--json", action="store_true", help="JSON output")
-    args = p.parse_args
+    args = p.parse_args()
 
     thresholds = THRESHOLDS[args.threshold]
-    extensions = [e.strip.lstrip(".") for e in args.ext.split(",")]
+    extensions = [e.strip().lstrip(".") for e in args.ext.split(",")]
     files = collect_files(args.target, extensions)
 
     if not files:
@@ -299,19 +299,19 @@ def main:
 
     print(f"Karpathy Simplicity Check — {len(results)} files, threshold: {args.threshold}")
     print(f"Average score: {avg_score:.0f}/100  Findings: {total_findings}")
-    print
+    print()
     for r in results:
         if not r["findings"]:
             continue
         print(f"  {r['file']}  (score {r['score']}/100)")
         for f in r["findings"]:
             line = f"  line {f['line']}" if "line" in f else ""
-            print(f"    [{f['severity'].upper}] {f['rule']}{line}: {f['message']}")
-        print
+            print(f"    [{f['severity'].upper()}] {f['rule']}{line}: {f['message']}")
+        print()
     if total_findings == 0:
         print("  No findings. Code looks appropriately simple.")
     print(f"\nVerdict: {summary['verdict']}")
 
 
 if __name__ == "__main__":
-    main
+    main()

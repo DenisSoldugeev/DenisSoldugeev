@@ -65,7 +65,7 @@ EXPLAIN FORMAT=JSON SELECT * FROM orders WHERE status = 'paid' ORDER BY created_
 
 The workhorse index. Supports equality, range, prefix, and ORDER BY operations.
 
-**Best for:** `=`, `<`, `>`, `<=`, `>=`, `BETWEEN`, `LIKE 'prefix%'`, `ORDER BY`, `MIN`, `MAX`
+**Best for:** `=`, `<`, `>`, `<=`, `>=`, `BETWEEN`, `LIKE 'prefix%'`, `ORDER BY`, `MIN()`, `MAX()`
 
 ```sql
 CREATE INDEX idx_orders_created ON orders (created_at);

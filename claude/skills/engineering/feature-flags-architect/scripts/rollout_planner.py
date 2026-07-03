@@ -39,7 +39,7 @@ def _log_curve(target, days):
 
 
 def _dedupe_sorted(values):
-    seen = set
+    seen = set()
     out = []
     for v in values:
         if v not in seen:
@@ -71,7 +71,7 @@ def build_schedule(strategy, target, duration_days, population, start_date):
         cohort = DEFAULT_COHORTS[min(i, len(DEFAULT_COHORTS) - 1)] if strategy == "cohort" else None
         rows.append({
             "phase": i + 1,
-            "date": date.date.isoformat,
+            "date": date.date().isoformat(),
             "percent": pct,
             "users": users,
             "cohort": cohort,
@@ -92,7 +92,7 @@ def render_markdown(rows, strategy, target, duration_days, population):
         print(f"| {r['phase']} | {r['date']} | {r['percent']}% | {r['users']:,} | {cohort} | {r['abort_if']} | {r['verify']} |")
 
 
-def main:
+def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--population", type=int, required=True, help="Total user population")
     ap.add_argument("--target-percent", type=float, default=100, help="Final rollout percent (default: 100)")
@@ -100,7 +100,7 @@ def main:
     ap.add_argument("--strategy", choices=["ring", "linear", "log", "cohort"], default="ring")
     ap.add_argument("--start-date", default=None, help="ISO date YYYY-MM-DD (default: today)")
     ap.add_argument("--format", choices=["markdown", "json"], default="markdown")
-    args = ap.parse_args
+    args = ap.parse_args()
 
     if not 0 < args.target_percent <= 100:
         print("ERROR: --target-percent must be in (0, 100]", file=sys.stderr)
@@ -109,7 +109,7 @@ def main:
         print("ERROR: --population must be >= 1", file=sys.stderr)
         return 2
 
-    start = datetime.fromisoformat(args.start_date) if args.start_date else datetime.utcnow
+    start = datetime.fromisoformat(args.start_date) if args.start_date else datetime.utcnow()
     rows = build_schedule(args.strategy, args.target_percent, args.duration_days, args.population, start)
 
     if args.format == "json":
@@ -120,4 +120,4 @@ def main:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

@@ -123,7 +123,7 @@ Output:"""
 def classify_sentiment(text: str, provider: LLMProvider) -> str:
     prompt = FEW_SHOT_TEMPLATE.format(user_input=text)
     response = provider.complete(prompt, max_tokens=10, temperature=0)
-    return response.strip.lower
+    return response.strip().lower()
 ```
 
 ### System Prompts for Consistency

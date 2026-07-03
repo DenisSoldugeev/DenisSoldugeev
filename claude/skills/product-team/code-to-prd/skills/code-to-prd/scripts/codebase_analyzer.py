@@ -169,7 +169,7 @@ def detect_framework(project_root: Path) -> Dict[str, Any]:
 
     # Node.js detection via package.json
     pkg_path = project_root / "package.json"
-    if pkg_path.exists:
+    if pkg_path.exists():
         try:
             with open(pkg_path) as f:
                 pkg = json.load(f)
@@ -177,21 +177,21 @@ def detect_framework(project_root: Path) -> Dict[str, Any]:
             pkg_version = pkg.get("version", "")
             for key in ("dependencies", "devDependencies", "peerDependencies"):
                 all_deps.update(pkg.get(key, {}))
-            for framework, signals in FRAMEWORK_SIGNALS.items:
+            for framework, signals in FRAMEWORK_SIGNALS.items():
                 if any(s in all_deps for s in signals):
                     detected.append(framework)
         except (json.JSONDecodeError, IOError):
             pass
 
     # Python backend detection via project files and imports
-    if (project_root / "manage.py").exists:
+    if (project_root / "manage.py").exists():
         detected.append("django")
-    if (project_root / "requirements.txt").exists or (project_root / "pyproject.toml").exists:
+    if (project_root / "requirements.txt").exists() or (project_root / "pyproject.toml").exists():
         for req_file in ["requirements.txt", "pyproject.toml", "setup.py", "Pipfile"]:
             req_path = project_root / req_file
-            if req_path.exists:
+            if req_path.exists():
                 try:
-                    content = req_path.read_text(errors="replace").lower
+                    content = req_path.read_text(errors="replace").lower()
                     if "django" in content and "django" not in detected:
                         detected.append("django")
                     if "fastapi" in content:
@@ -220,7 +220,7 @@ def detect_framework(project_root: Path) -> Dict[str, Any]:
         "version": pkg_version,
         "detected_frameworks": detected,
         "dependency_count": len(all_deps),
-        "key_deps": {k: v for k, v in all_deps.items
+        "key_deps": {k: v for k, v in all_deps.items()
                      if any(s in k for s in ["router", "redux", "vuex", "pinia", "zustand",
                                               "mobx", "recoil", "jotai", "tanstack", "swr",
                                               "axios", "tailwind", "material", "ant",
@@ -235,7 +235,7 @@ def find_dirs(root: Path, patterns: List[str]) -> List[Path]:
     found = []
     for pattern in patterns:
         candidate = root / pattern
-        if candidate.is_dir:
+        if candidate.is_dir():
             found.append(candidate)
     return found
 
@@ -266,7 +266,7 @@ def extract_routes_from_file(filepath: Path) -> List[Dict[str, str]]:
                 routes.append({
                     "path": path,
                     "source": str(filepath),
-                    "line": content[:match.start].count("\n") + 1,
+                    "line": content[:match.start()].count("\n") + 1,
                 })
     return routes
 
@@ -275,7 +275,7 @@ def extract_routes_from_filesystem(pages_dir: Path, root: Path) -> List[Dict[str
     """Infer routes from file-system routing (Next.js, Nuxt, SvelteKit)."""
     routes = []
     for filepath in sorted(pages_dir.rglob("*")):
-        if filepath.is_file and filepath.suffix in CODE_EXTENSIONS:
+        if filepath.is_file() and filepath.suffix in CODE_EXTENSIONS:
             rel = filepath.relative_to(pages_dir)
             route = "/" + str(rel.with_suffix("")).replace("\\", "/")
             # Normalize index routes
@@ -307,10 +307,10 @@ def extract_apis_from_file(filepath: Path) -> List[Dict[str, Any]]:
             path = match.group(1) if match.lastindex else match.group(0)
             if path and len(path) < 200:
                 # Try to detect HTTP method
-                context = content[max(0, match.start - 100):match.end]
+                context = content[max(0, match.start() - 100):match.end()]
                 method = "UNKNOWN"
                 for m in ["GET", "POST", "PUT", "DELETE", "PATCH"]:
-                    if m.lower in context.lower:
+                    if m.lower() in context.lower():
                         method = m
                         break
 
@@ -318,7 +318,7 @@ def extract_apis_from_file(filepath: Path) -> List[Dict[str, Any]]:
                     "path": path,
                     "method": method,
                     "source": str(filepath),
-                    "line": content[:match.start].count("\n") + 1,
+                    "line": content[:match.start()].count("\n") + 1,
                     "integrated": is_real and not is_mock,
                     "mock_detected": is_mock,
                 })
@@ -341,7 +341,7 @@ def extract_enums(filepath: Path) -> List[Dict[str, Any]]:
         enums.append({
             "name": name,
             "type": "enum",
-            "values": {k.strip: v.strip.rstrip(",") for k, v in values},
+            "values": {k.strip(): v.strip().rstrip(",") for k, v in values},
             "source": str(filepath),
         })
 
@@ -398,17 +398,17 @@ def extract_backend_routes(filepath: Path, framework: str) -> List[Dict[str, str
 
             # Detect HTTP method from decorator name
             method = "UNKNOWN"
-            ctx = content[max(0, match.start - 30):match.start]
+            ctx = content[max(0, match.start() - 30):match.start()]
             for m_name in ["Get", "Post", "Put", "Delete", "Patch"]:
-                if f"@{m_name}" in ctx or f"@{m_name.lower}" in ctx:
-                    method = m_name.upper
+                if f"@{m_name}" in ctx or f"@{m_name.lower()}" in ctx:
+                    method = m_name.upper()
                     break
 
             routes.append({
                 "path": full_path,
                 "method": method,
                 "source": str(filepath),
-                "line": content[:match.start].count("\n") + 1,
+                "line": content[:match.start()].count("\n") + 1,
                 "type": "backend",
             })
     return routes
@@ -430,7 +430,7 @@ def extract_models(filepath: Path, framework: str) -> List[Dict[str, Any]]:
             fields = []
             # For Django models: field_name = models.FieldType(...)
             if framework == "django":
-                block_start = match.end
+                block_start = match.end()
                 block = content[block_start:block_start + 2000]
                 for fm in re.finditer(
                     r"(\w+)\s*=\s*models\.(\w+)\s*\(([^)]*)\)", block
@@ -438,7 +438,7 @@ def extract_models(filepath: Path, framework: str) -> List[Dict[str, Any]]:
                     fields.append({
                         "name": fm.group(1),
                         "type": fm.group(2),
-                        "args": fm.group(3).strip[:100],
+                        "args": fm.group(3).strip()[:100],
                     })
             models.append({
                 "name": name,
@@ -462,8 +462,8 @@ def count_components(files: List[Path]) -> Dict[str, int]:
 
 def analyze_project(project_root: Path) -> Dict[str, Any]:
     """Run full analysis on a frontend project."""
-    root = Path(project_root).resolve
-    if not root.is_dir:
+    root = Path(project_root).resolve()
+    if not root.is_dir():
         return {"error": f"Not a directory: {root}"}
 
     # 1. Framework detection
@@ -485,7 +485,7 @@ def analyze_project(project_root: Path) -> Dict[str, Any]:
 
     # Frontend: config-based routes
     for f in all_files:
-        if any(p in f.name.lower for p in ["router", "routes", "routing"]):
+        if any(p in f.name.lower() for p in ["router", "routes", "routing"]):
             routes.extend(extract_routes_from_file(f))
 
     # Frontend: file-system routes (Next.js, Nuxt, SvelteKit)
@@ -502,7 +502,7 @@ def analyze_project(project_root: Path) -> Dict[str, Any]:
                 routes.extend(extract_backend_routes(f, fw))
 
     # Deduplicate routes by path (+ method for backend)
-    seen_paths: Set[str] = set
+    seen_paths: Set[str] = set()
     unique_routes = []
     for r in routes:
         key = r["path"] if r.get("type") != "backend" else f"{r.get('method', '')}:{r['path']}"
@@ -517,7 +517,7 @@ def analyze_project(project_root: Path) -> Dict[str, Any]:
         apis.extend(extract_apis_from_file(f))
 
     # Deduplicate APIs by path+method
-    seen_apis: Set[Tuple[str, str]] = set
+    seen_apis: Set[Tuple[str, str]] = set()
     unique_apis = []
     for a in apis:
         key = (a["path"], a["method"])
@@ -541,7 +541,7 @@ def analyze_project(project_root: Path) -> Dict[str, Any]:
                 models.extend(extract_models(f, fw))
 
     # Deduplicate models by name
-    seen_models: Set[str] = set
+    seen_models: Set[str] = set()
     unique_models = []
     for m in models:
         if m["name"] not in seen_models:
@@ -674,7 +674,7 @@ def format_markdown(analysis: Dict[str, Any]) -> str:
             if e["values"]:
                 lines.append("| Key | Value |")
                 lines.append("|-----|-------|")
-                for k, v in e["values"].items:
+                for k, v in e["values"].items():
                     lines.append(f"| {k} | {v} |")
             lines.append("")
 
@@ -693,14 +693,14 @@ def format_markdown(analysis: Dict[str, Any]) -> str:
     if proj.get("key_dependencies"):
         lines.append("## Key Dependencies")
         lines.append("")
-        for dep, ver in sorted(proj["key_dependencies"].items):
+        for dep, ver in sorted(proj["key_dependencies"].items()):
             lines.append(f"- `{dep}`: {ver}")
         lines.append("")
 
     return "\n".join(lines)
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Analyze any codebase (frontend, backend, fullstack) for PRD generation"
     )
@@ -712,7 +712,7 @@ def main:
         default="json",
         help="Output format (default: json)",
     )
-    args = parser.parse_args
+    args = parser.parse_args()
 
     analysis = analyze_project(Path(args.project))
 
@@ -729,4 +729,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

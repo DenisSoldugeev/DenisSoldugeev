@@ -234,9 +234,9 @@ def validate_tc_record(record):
         cs = ctx.get("current_session")
         if isinstance(cs, dict):
             errors.extend(_required(cs, ["session_id", "platform", "model", "started"], "session_context.current_session"))
-            if "platform" in ds:
+            if "platform" in cs:
                 errors.extend(_enum(cs["platform"], VALID_PLATFORMS, "session_context.current_session.platform"))
-            if "started" in ds:
+            if "started" in cs:
                 errors.extend(_iso(cs["started"], "session_context.current_session.started"))
 
     meta = record.get("metadata")
@@ -276,7 +276,7 @@ def validate_registry(registry):
 
 def slugify(text):
     """Convert text to a kebab-case slug."""
-    text = text.lower.strip
+    text = text.lower().strip()
     text = re.sub(r"[^a-z0-9\s-]", "", text)
     text = re.sub(r"[\s_]+", "-", text)
     text = re.sub(r"-+", "-", text)
@@ -299,17 +299,17 @@ def compute_registry_statistics(records):
     return stats
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Validate a TC record or registry.")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--record", help="Path to tc_record.json")
     group.add_argument("--registry", help="Path to tc_registry.json")
     parser.add_argument("--json", action="store_true", help="Output results as JSON")
-    args = parser.parse_args
+    args = parser.parse_args()
 
     target = args.record or args.registry
     path = Path(target)
-    if not path.exists:
+    if not path.exists():
         msg = f"File not found: {path}"
         print(json.dumps({"status": "error", "error": msg}) if args.json else f"ERROR: {msg}")
         return 2
@@ -344,4 +344,4 @@ def main:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

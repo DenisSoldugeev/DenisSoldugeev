@@ -136,7 +136,7 @@ def estimate_survival(hr: float, alpha: float, power: float, prob_event: float, 
 
 def _render_human(result: dict) -> str:
     lines = [f"!! {BANNER}", "", f"Design: {result['design']}", ""]
-    for k, v in result.items:
+    for k, v in result.items():
         if k == "design":
             continue
         lines.append(f"  {k:28s} : {v}")
@@ -173,7 +173,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--sample", action="store_true", help="run the embedded sample (means design)")
     args = p.parse_args(argv)
 
-    conf = _cfg.load_config if _cfg else {}
+    conf = _cfg.load_config() if _cfg else {}
     alpha = args.alpha if args.alpha is not None else conf.get("default_alpha", 0.05)
     power = args.power if args.power is not None else conf.get("default_power", 0.80)
     dropout = args.dropout if args.dropout is not None else conf.get("default_dropout", 0.0)
@@ -202,4 +202,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main)
+    sys.exit(main())

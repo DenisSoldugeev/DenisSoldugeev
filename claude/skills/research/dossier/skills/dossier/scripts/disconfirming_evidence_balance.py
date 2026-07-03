@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 
-SESSIONS_DIR = Path.home / ".dossier_sessions"
+SESSIONS_DIR = Path.home() / ".dossier_sessions"
 MIN_RATIO = 0.30
 WARN_RATIO = 0.20
 
@@ -50,8 +50,8 @@ DISCONFIRMING_PIVOTS = {
 def suggest_disconfirming_queries(hypothesis: str, supporting_queries: List[str]) -> List[str]:
     """Heuristic: for each supporting term, suggest antonym-pivoted disconfirming."""
     suggestions: List[str] = []
-    hyp_lower = hypothesis.lower
-    for pivot, antonyms in DISCONFIRMING_PIVOTS.items:
+    hyp_lower = hypothesis.lower()
+    for pivot, antonyms in DISCONFIRMING_PIVOTS.items():
         if pivot in hyp_lower:
             for antonym in antonyms[:2]:  # first 2 only to avoid noise
                 disconfirming = hyp_lower.replace(pivot, antonym)
@@ -181,14 +181,14 @@ def main(argv: List[str]) -> int:
         data = SAMPLE_SESSION
     elif args.session:
         p = SESSIONS_DIR / f"{args.session}.json"
-        if not p.exists:
+        if not p.exists():
             print(f"error: session not found at {p}", file=sys.stderr); return 2
         try:
             data = json.loads(p.read_text(encoding="utf-8"))
         except json.JSONDecodeError as e:
             print(f"error: invalid session JSON: {e}", file=sys.stderr); return 2
     else:
-        parser.print_help; return 0
+        parser.print_help(); return 0
 
     result = analyze(data)
     if args.output == "json":

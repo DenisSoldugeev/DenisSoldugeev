@@ -217,19 +217,19 @@ class MDRGapAnalyzer:
         self.device_name = device_name
         self.device_class = device_class
         self.gaps: List[GapItem] = []
-        self._build_requirements_list
+        self._build_requirements_list()
 
     def _build_requirements_list(self):
         """Build complete requirements list based on device class."""
         # Add all base requirements
-        for category_gaps in self.REQUIREMENTS.values:
+        for category_gaps in self.REQUIREMENTS.values():
             for gap in category_gaps:
                 self.gaps.append(GapItem(
                     requirement=gap.requirement,
                     category=gap.category,
                     description=gap.description,
                     priority=gap.priority,
-                    evidence_needed=gap.evidence_needed.copy
+                    evidence_needed=gap.evidence_needed.copy()
                 ))
 
         # Add class-specific requirements
@@ -240,7 +240,7 @@ class MDRGapAnalyzer:
                     category=gap.category,
                     description=gap.description,
                     priority=gap.priority,
-                    evidence_needed=gap.evidence_needed.copy
+                    evidence_needed=gap.evidence_needed.copy()
                 ))
 
         # Class I self-certification: NB not required
@@ -271,12 +271,12 @@ class MDRGapAnalyzer:
         ]
 
         # Generate recommendations
-        recommendations = self._generate_recommendations
+        recommendations = self._generate_recommendations()
 
         return GapAnalysisResult(
             device_name=self.device_name,
             device_class=self.device_class.value,
-            analysis_date=datetime.now.isoformat,
+            analysis_date=datetime.now().isoformat(),
             total_requirements=len(applicable_gaps),
             gaps_identified=len(applicable_gaps) - len(complete_gaps),
             completion_percentage=round(completion, 1),
@@ -378,7 +378,7 @@ def format_text_output(result: GapAnalysisResult) -> str:
             categories[cat] = []
         categories[cat].append(gap)
 
-    for category, gaps in categories.items:
+    for category, gaps in categories.items():
         lines.append(f"\n{category}:")
         for gap in gaps:
             status_mark = "✓" if gap["status"] == "Complete" else "○"
@@ -397,13 +397,13 @@ def format_text_output(result: GapAnalysisResult) -> str:
     return "\n".join(lines)
 
 
-def interactive_mode:
+def interactive_mode():
     """Run interactive gap analysis session."""
     print("=" * 60)
     print("MDR 2017/745 Gap Analysis - Interactive Mode")
     print("=" * 60)
 
-    device_name = input("\nDevice name: ").strip
+    device_name = input("\nDevice name: ").strip()
     if not device_name:
         device_name = "Unnamed Device"
 
@@ -424,7 +424,7 @@ def interactive_mode:
         "6": DeviceClass.III,
     }
 
-    class_choice = input("\nSelect class (1-6): ").strip
+    class_choice = input("\nSelect class (1-6): ").strip()
     device_class = class_map.get(class_choice, DeviceClass.IIA)
 
     analyzer = MDRGapAnalyzer(device_name, device_class)
@@ -447,15 +447,15 @@ def interactive_mode:
     for gap in analyzer.gaps:
         if gap.status == GapStatus.NOT_APPLICABLE:
             continue
-        status_input = input(f"{gap.requirement} [c/i/n/x]: ").strip.lower
+        status_input = input(f"{gap.requirement} [c/i/n/x]: ").strip().lower()
         if status_input in status_map:
             gap.status = status_map[status_input]
 
-    result = analyzer.analyze
+    result = analyzer.analyze()
     print("\n" + format_text_output(result))
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="EU MDR 2017/745 Gap Analysis Tool"
     )
@@ -478,14 +478,14 @@ def main:
         help="Run in interactive mode"
     )
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     if args.interactive:
-        interactive_mode
+        interactive_mode()
         return
 
     if not args.device or not args.device_class:
-        parser.print_help
+        parser.print_help()
         print("\nError: --device and --class required (or use --interactive)")
         sys.exit(1)
 
@@ -499,7 +499,7 @@ def main:
     }
 
     analyzer = MDRGapAnalyzer(args.device, class_map[args.device_class])
-    result = analyzer.analyze
+    result = analyzer.analyze()
 
     if args.output == "json":
         print(json.dumps(asdict(result), indent=2))
@@ -508,4 +508,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

@@ -153,7 +153,7 @@ See `references/production_discipline.md` for the full operating model.
 
 ```bash
 # 1. Pull sprint metrics: deployment frequency, lead time, MTTR, change failure rate
-python ../../skills/vpe-advisor/scripts/delivery_throughput_analyzer.py sprint_metrics.json
+python ../../vpe-advisor/scripts/delivery_throughput_analyzer.py sprint_metrics.json
 # 2. Review DORA verdict per metric
 # 3. Identify top bottleneck (longest wait stage)
 # 4. Cross-check with ds-cto-advisor on architectural causes
@@ -166,7 +166,7 @@ python ../../skills/vpe-advisor/scripts/delivery_throughput_analyzer.py sprint_m
 
 ```bash
 # 1. Pull funnel data from ATS for last 90 days
-python ../../skills/vpe-advisor/scripts/eng_hiring_funnel_calculator.py funnel.json
+python ../../vpe-advisor/scripts/eng_hiring_funnel_calculator.py funnel.json
 # 2. Identify weakest conversion stage
 # 3. Compute pipeline volume needed for next quarter's hiring target
 # 4. Cross-check with ds-chro-advisor on comp/leveling competitiveness
@@ -179,7 +179,7 @@ python ../../skills/vpe-advisor/scripts/eng_hiring_funnel_calculator.py funnel.j
 
 ```bash
 # 1. Build team.json: headcount, work streams, manager count, IC distribution
-python ../../skills/vpe-advisor/scripts/eng_team_structure_designer.py team.json
+python ../../vpe-advisor/scripts/eng_team_structure_designer.py team.json
 # 2. Check manager-trigger thresholds (5-7 IC rule)
 # 3. Identify squad sizes outside 5-9 range
 # 4. Cross-check with ds-cto-advisor on Conway's Law alignment
@@ -207,13 +207,13 @@ python ../../skills/vpe-advisor/scripts/eng_team_structure_designer.py team.json
 
 ## Adjacent Skills
 
-- `../cto-advisor/` — Architecture, scaling cliffs, tech debt strategy (CTO decides what to build; VPE decides how to ship)
-- `../chro-advisor/` — Hiring systems (ladders, bands, leveling rubrics company-wide); VPE owns eng-specific funnel execution
-- `../coo-advisor/` — Operating cadence company-wide; VPE owns eng-specific cadence
-- `../../../engineering/slo-architect/` — SLO design (tactical; VPE owns the policy that SLOs are required)
-- `../../../engineering/chaos-engineering/` — Chaos experiment design (tactical resilience)
-- `../../../engineering/feature-flags-architect/` — Progressive delivery (tactical deployment)
-- `../../../engineering/kubernetes-operator/` — K8s operator pattern (tactical infra)
+- `c-level-advisor/skills/cto-advisor/` — Architecture, scaling cliffs, tech debt strategy (CTO decides what to build; VPE decides how to ship)
+- `c-level-advisor/skills/chro-advisor/` — Hiring systems (ladders, bands, leveling rubrics company-wide); VPE owns eng-specific funnel execution
+- `c-level-advisor/skills/coo-advisor/` — Operating cadence company-wide; VPE owns eng-specific cadence
+- `engineering/skills/slo-architect/` — SLO design (tactical; VPE owns the policy that SLOs are required)
+- `engineering/skills/chaos-engineering/` — Chaos experiment design (tactical resilience)
+- `engineering/skills/feature-flags-architect/` — Progressive delivery (tactical deployment)
+- `engineering/skills/kubernetes-operator/` — K8s operator pattern (tactical infra)
 - `ds-engineering-lead` agent — Day-to-day incident + on-call coordination (VPE owns the operating model that engineering-lead executes)
 
 ## References

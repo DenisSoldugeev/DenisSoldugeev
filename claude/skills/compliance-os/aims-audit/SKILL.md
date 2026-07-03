@@ -62,16 +62,16 @@ The ISO 42001 AIMS specialist pressure-tests any AI Management System work. Six 
 
 ```bash
 # 1. AIMS gap analysis
-python ../../ra-qm-team/skills/iso42001-specialist/scripts/aims_gap_analyzer.py evidence.json
+python ra-qm-team/skills/iso42001-specialist/scripts/aims_gap_analyzer.py evidence.json
 
 # 2. AI risk register
-python ../../ra-qm-team/skills/iso42001-specialist/scripts/ai_risk_register_builder.py risks.json
+python ra-qm-team/skills/iso42001-specialist/scripts/ai_risk_register_builder.py risks.json
 
 # 3. Internal audit plan
-python ../../ra-qm-team/skills/iso42001-specialist/scripts/aims_audit_scheduler.py audit_scope.json
+python ra-qm-team/skills/iso42001-specialist/scripts/aims_audit_scheduler.py audit_scope.json
 
 # 4. Cross-framework reuse map (via compliance-os)
-python ../../skills/compliance-os/scripts/cross_framework_mapper.py program.json
+python ../../compliance-os/scripts/cross_framework_mapper.py program.json
 ```
 
 ## Output Format
@@ -124,8 +124,8 @@ python ../../skills/compliance-os/scripts/cross_framework_mapper.py program.json
 ## Related
 
 - Agent: [`ds-aims-iso42001`](../../agents/ds-aims-iso42001.md)
-- Skill: [`iso42001-specialist`](../../ra-qm-team/compliance-team-iso42001/skills/iso42001-specialist/SKILL.md)
-- Adjacent: `../../skills/compliance-os/`, `../ai-act-readiness/`, `../compliance-readiness/`
+- Skill: [`iso42001-specialist`](../../../ra-qm-team/skills/iso42001-specialist/SKILL.md)
+- Adjacent: `../../compliance-os/`, `../ai-act-readiness/`, `../compliance-readiness/`
 
 ---
 

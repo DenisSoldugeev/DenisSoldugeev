@@ -78,13 +78,13 @@ class VisionModelTrainer:
 
         analysis = {
             'path': str(self.data_dir),
-            'exists': self.data_dir.exists,
+            'exists': self.data_dir.exists(),
             'images': {'train': 0, 'val': 0, 'test': 0},
             'annotations': {'format': None, 'classes': []},
             'recommendations': []
         }
 
-        if not self.data_dir.exists:
+        if not self.data_dir.exists():
             analysis['recommendations'].append(
                 f"Directory {self.data_dir} does not exist"
             )
@@ -92,11 +92,11 @@ class VisionModelTrainer:
 
         # Check for common dataset structures
         # COCO format
-        if (self.data_dir / 'annotations').exists:
+        if (self.data_dir / 'annotations').exists():
             analysis['annotations']['format'] = 'coco'
             for split in ['train', 'val', 'test']:
                 ann_file = self.data_dir / 'annotations' / f'{split}.json'
-                if ann_file.exists:
+                if ann_file.exists():
                     with open(ann_file, 'r') as f:
                         data = json.load(f)
                         analysis['images'][split] = len(data.get('images', []))
@@ -106,23 +106,23 @@ class VisionModelTrainer:
                             ]
 
         # YOLO format
-        elif (self.data_dir / 'labels').exists:
+        elif (self.data_dir / 'labels').exists():
             analysis['annotations']['format'] = 'yolo'
             for split in ['train', 'val', 'test']:
                 img_dir = self.data_dir / 'images' / split
-                if img_dir.exists:
+                if img_dir.exists():
                     analysis['images'][split] = len(list(img_dir.glob('*.*')))
 
             # Try to read classes from data.yaml
             data_yaml = self.data_dir / 'data.yaml'
-            if data_yaml.exists:
+            if data_yaml.exists():
                 import yaml
                 with open(data_yaml, 'r') as f:
                     data = yaml.safe_load(f)
                     analysis['annotations']['classes'] = data.get('names', [])
 
         # Generate recommendations
-        total_images = sum(analysis['images'].values)
+        total_images = sum(analysis['images'].values())
         if total_images < 100:
             analysis['recommendations'].append(
                 f"Dataset has only {total_images} images. "
@@ -148,7 +148,7 @@ class VisionModelTrainer:
                              **kwargs) -> Dict[str, Any]:
         """Generate Ultralytics YOLO training configuration."""
         if arch not in YOLO_ARCHITECTURES:
-            available = ', '.join(YOLO_ARCHITECTURES.keys)
+            available = ', '.join(YOLO_ARCHITECTURES.keys())
             raise ValueError(f"Unknown architecture: {arch}. Available: {available}")
 
         arch_info = YOLO_ARCHITECTURES[arch]
@@ -166,7 +166,7 @@ class VisionModelTrainer:
             'device': '0',
             'workers': 8,
             'project': 'runs/detect',
-            'name': f'{arch}_{datetime.now.strftime("%Y%m%d_%H%M%S")}',
+            'name': f'{arch}_{datetime.now().strftime("%Y%m%d_%H%M%S")}',
             'exist_ok': False,
             'pretrained': True,
             'optimizer': 'auto',
@@ -230,7 +230,7 @@ class VisionModelTrainer:
             'arch_info': arch_info,
             'task': self.task,
             'framework': 'ultralytics',
-            'generated_at': datetime.now.isoformat
+            'generated_at': datetime.now().isoformat()
         }
 
         self.config = config
@@ -240,7 +240,7 @@ class VisionModelTrainer:
                                    batch: int = 16, **kwargs) -> Dict[str, Any]:
         """Generate Detectron2 training configuration."""
         if arch not in DETECTRON2_ARCHITECTURES:
-            available = ', '.join(DETECTRON2_ARCHITECTURES.keys)
+            available = ', '.join(DETECTRON2_ARCHITECTURES.keys())
             raise ValueError(f"Unknown architecture: {arch}. Available: {available}")
 
         arch_info = DETECTRON2_ARCHITECTURES[arch]
@@ -250,7 +250,7 @@ class VisionModelTrainer:
             'MODEL': {
                 'WEIGHTS': f'detectron2://COCO-Detection/{arch}_3x/137849458/model_final_280758.pkl',
                 'ROI_HEADS': {
-                    'NUM_CLASSES': len(self._get_classes),
+                    'NUM_CLASSES': len(self._get_classes()),
                     'BATCH_SIZE_PER_IMAGE': 512,
                     'POSITIVE_FRACTION': 0.25,
                     'SCORE_THRESH_TEST': 0.05,
@@ -310,11 +310,11 @@ class VisionModelTrainer:
                 'EVAL_PERIOD': 5000,
                 'DETECTIONS_PER_IMAGE': 100,
             },
-            'OUTPUT_DIR': f'./output/{arch}_{datetime.now.strftime("%Y%m%d_%H%M%S")}',
+            'OUTPUT_DIR': f'./output/{arch}_{datetime.now().strftime("%Y%m%d_%H%M%S")}',
         }
 
         # Add mask head for instance segmentation
-        if 'mask' in arch.lower:
+        if 'mask' in arch.lower():
             config['MODEL']['MASK_ON'] = True
             config['MODEL']['ROI_MASK_HEAD'] = {
                 'POOLER_RESOLUTION': 14,
@@ -328,7 +328,7 @@ class VisionModelTrainer:
             'arch_info': arch_info,
             'task': self.task,
             'framework': 'detectron2',
-            'generated_at': datetime.now.isoformat
+            'generated_at': datetime.now().isoformat()
         }
 
         self.config = config
@@ -338,7 +338,7 @@ class VisionModelTrainer:
                                     batch: int = 16, **kwargs) -> Dict[str, Any]:
         """Generate MMDetection training configuration."""
         if arch not in MMDETECTION_ARCHITECTURES:
-            available = ', '.join(MMDETECTION_ARCHITECTURES.keys)
+            available = ', '.join(MMDETECTION_ARCHITECTURES.keys())
             raise ValueError(f"Unknown architecture: {arch}. Available: {available}")
 
         arch_info = MMDETECTION_ARCHITECTURES[arch]
@@ -353,7 +353,7 @@ class VisionModelTrainer:
             'model': {
                 'roi_head': {
                     'bbox_head': {
-                        'num_classes': len(self._get_classes)
+                        'num_classes': len(self._get_classes())
                     }
                 }
             },
@@ -406,7 +406,7 @@ class VisionModelTrainer:
                     {'type': 'TensorboardLoggerHook'}
                 ]
             },
-            'work_dir': f'./work_dirs/{arch}_{datetime.now.strftime("%Y%m%d_%H%M%S")}',
+            'work_dir': f'./work_dirs/{arch}_{datetime.now().strftime("%Y%m%d_%H%M%S")}',
             'load_from': None,
             'resume_from': None,
             'fp16': {'loss_scale': 512.0}
@@ -418,7 +418,7 @@ class VisionModelTrainer:
             'arch_info': arch_info,
             'task': self.task,
             'framework': 'mmdetection',
-            'generated_at': datetime.now.isoformat
+            'generated_at': datetime.now().isoformat()
         }
 
         self.config = config
@@ -426,7 +426,7 @@ class VisionModelTrainer:
 
     def _get_classes(self) -> List[str]:
         """Get class names from dataset."""
-        analysis = self.analyze_dataset
+        analysis = self.analyze_dataset()
         classes = analysis['annotations']['classes']
         if not classes:
             classes = ['object']  # Default fallback
@@ -446,7 +446,7 @@ class VisionModelTrainer:
             # Detectron2 and MMDetection use Python configs
             with open(output_path, 'w') as f:
                 f.write("# Auto-generated configuration\n")
-                f.write(f"# Generated at: {datetime.now.isoformat}\n\n")
+                f.write(f"# Generated at: {datetime.now().isoformat()}\n\n")
                 f.write(f"config = {json.dumps(self.config, indent=2)}\n")
 
         logger.info(f"Configuration saved to {output_path}")
@@ -485,11 +485,11 @@ class VisionModelTrainer:
 
         print("-" * 60)
         print("Training Command:")
-        print(f"  {self.generate_training_command}")
+        print(f"  {self.generate_training_command()}")
         print("=" * 60 + "\n")
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(
         description="Generate vision model training configurations"
     )
@@ -509,7 +509,7 @@ def main:
     parser.add_argument('--json', action='store_true',
                        help='Output as JSON')
 
-    args = parser.parse_args
+    args = parser.parse_args()
 
     trainer = VisionModelTrainer(
         data_dir=args.data_dir,
@@ -518,7 +518,7 @@ def main:
     )
 
     # Analyze dataset
-    analysis = trainer.analyze_dataset
+    analysis = trainer.analyze_dataset()
 
     if args.analyze_only:
         if args.json:
@@ -566,11 +566,11 @@ def main:
     if args.json:
         print(json.dumps(config, indent=2))
     else:
-        trainer.print_summary
+        trainer.print_summary()
 
         if args.output:
             trainer.save_config(args.output)
 
 
 if __name__ == '__main__':
-    main
+    main()

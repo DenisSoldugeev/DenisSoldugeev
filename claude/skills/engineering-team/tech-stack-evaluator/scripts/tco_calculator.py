@@ -36,13 +36,13 @@ class TCOCalculator:
         """
         costs = {
             'licensing': self.initial_costs.get('licensing', 0.0),
-            'training': self._calculate_training_costs,
+            'training': self._calculate_training_costs(),
             'migration': self.initial_costs.get('migration', 0.0),
             'setup': self.initial_costs.get('setup', 0.0),
             'tooling': self.initial_costs.get('tooling', 0.0)
         }
 
-        costs['total_initial'] = sum(costs.values)
+        costs['total_initial'] = sum(costs.values())
         return costs
 
     def _calculate_training_costs(self) -> float:
@@ -155,7 +155,7 @@ class TCOCalculator:
             user_projections.append(int(users))
 
         # Calculate cost per user
-        operational = self.calculate_operational_costs
+        operational = self.calculate_operational_costs()
         cost_per_user = []
 
         for year_idx, year_cost in enumerate(operational['total_yearly']):
@@ -163,7 +163,7 @@ class TCOCalculator:
             cost_per_user.append(year_cost / users if users > 0 else 0)
 
         # Infrastructure scaling costs
-        infra_scaling = self._calculate_infrastructure_scaling
+        infra_scaling = self._calculate_infrastructure_scaling()
 
         return {
             'user_projections': user_projections,
@@ -258,14 +258,14 @@ class TCOCalculator:
             Dictionary of hidden cost components
         """
         costs = {
-            'technical_debt': self._estimate_technical_debt,
-            'vendor_lock_in_risk': self._estimate_vendor_lock_in_cost,
-            'security_incidents': self._estimate_security_costs,
-            'downtime_risk': self._estimate_downtime_costs,
-            'developer_turnover': self._estimate_turnover_costs
+            'technical_debt': self._estimate_technical_debt(),
+            'vendor_lock_in_risk': self._estimate_vendor_lock_in_cost(),
+            'security_incidents': self._estimate_security_costs(),
+            'downtime_risk': self._estimate_downtime_costs(),
+            'developer_turnover': self._estimate_turnover_costs()
         }
 
-        costs['total_hidden_costs'] = sum(costs.values)
+        costs['total_hidden_costs'] = sum(costs.values())
         return costs
 
     def _estimate_technical_debt(self) -> float:
@@ -356,11 +356,11 @@ class TCOCalculator:
         Returns:
             Comprehensive TCO analysis
         """
-        initial = self.calculate_initial_costs
-        operational = self.calculate_operational_costs
-        scaling = self.calculate_scaling_costs
-        productivity = self.calculate_productivity_impact
-        hidden = self.calculate_hidden_costs
+        initial = self.calculate_initial_costs()
+        operational = self.calculate_operational_costs()
+        scaling = self.calculate_scaling_costs()
+        productivity = self.calculate_productivity_impact()
+        hidden = self.calculate_hidden_costs()
 
         # Calculate total costs
         total_operational = sum(operational['total_yearly'])
@@ -389,7 +389,7 @@ class TCOCalculator:
         Returns:
             TCO summary for reporting
         """
-        tco = self.calculate_total_tco
+        tco = self.calculate_total_tco()
 
         return {
             'technology': self.technology,

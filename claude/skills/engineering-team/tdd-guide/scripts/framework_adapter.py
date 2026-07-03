@@ -46,19 +46,19 @@ class FrameworkAdapter:
     def generate_imports(self) -> str:
         """Generate framework-specific imports."""
         if self.framework == Framework.JEST:
-            return self._jest_imports
+            return self._jest_imports()
         elif self.framework == Framework.VITEST:
-            return self._vitest_imports
+            return self._vitest_imports()
         elif self.framework == Framework.PYTEST:
-            return self._pytest_imports
+            return self._pytest_imports()
         elif self.framework == Framework.UNITTEST:
-            return self._unittest_imports
+            return self._unittest_imports()
         elif self.framework == Framework.JUNIT:
-            return self._junit_imports
+            return self._junit_imports()
         elif self.framework == Framework.TESTNG:
-            return self._testng_imports
+            return self._testng_imports()
         elif self.framework == Framework.MOCHA:
-            return self._mocha_imports
+            return self._mocha_imports()
         else:
             return ""
 
@@ -113,7 +113,7 @@ import { expect } from 'chai';"""
             Complete test suite code
         """
         if self.framework in [Framework.JEST, Framework.VITEST, Framework.MOCHA]:
-            return f"""describe('{suite_name}',  => {{
+            return f"""describe('{suite_name}', () => {{
 {self._indent(test_content, 2)}
 }});"""
 
@@ -173,14 +173,14 @@ import { expect } from 'chai';"""
 
     def _jest_test(self, test_name: str, test_body: str, description: str) -> str:
         """Generate Jest test."""
-        return f"""it('{test_name}',  => {{
+        return f"""it('{test_name}', () => {{
   // {description}
 {self._indent(test_body, 2)}
 }});"""
 
     def _vitest_test(self, test_name: str, test_body: str, description: str) -> str:
         """Generate Vitest test."""
-        return f"""it('{test_name}',  => {{
+        return f"""it('{test_name}', () => {{
   // {description}
 {self._indent(test_body, 2)}
 }});"""
@@ -207,7 +207,7 @@ import { expect } from 'chai';"""
         """Generate JUnit test."""
         method_name = self._to_camel_case(test_name)
         return f"""@Test
-public void test{method_name} {{
+public void test{method_name}() {{
     // {description}
 {self._indent(test_body, 4)}
 }}"""
@@ -216,14 +216,14 @@ public void test{method_name} {{
         """Generate TestNG test."""
         method_name = self._to_camel_case(test_name)
         return f"""@Test
-public void test{method_name} {{
+public void test{method_name}() {{
     // {description}
 {self._indent(test_body, 4)}
 }}"""
 
     def _mocha_test(self, test_name: str, test_body: str, description: str) -> str:
         """Generate Mocha test."""
-        return f"""it('{test_name}',  => {{
+        return f"""it('{test_name}', () => {{
   // {description}
 {self._indent(test_body, 2)}
 }});"""
@@ -267,7 +267,7 @@ public void test{method_name} {{
         elif assertion_type == "false":
             return f"expect({actual}).toBe(false);"
         elif assertion_type == "throws":
-            return f"expect( => {actual}).toThrow;"
+            return f"expect(() => {actual}).toThrow();"
         else:
             return f"expect({actual}).toBe({expected});"
 
@@ -297,7 +297,7 @@ public void test{method_name} {{
         elif assertion_type == "false":
             return f"assertFalse({actual});"
         elif assertion_type == "throws":
-            return f"assertThrows(Exception.class,  -> {actual});"
+            return f"assertThrows(Exception.class, () -> {actual});"
         else:
             return f"assertEquals({expected}, {actual});"
 
@@ -312,7 +312,7 @@ public void test{method_name} {{
         elif assertion_type == "false":
             return f"expect({actual}).to.be.false;"
         elif assertion_type == "throws":
-            return f"expect( => {actual}).to.throw;"
+            return f"expect(() => {actual}).to.throw();"
         else:
             return f"expect({actual}).to.equal({expected});"
 
@@ -326,11 +326,11 @@ public void test{method_name} {{
 
         if self.framework in [Framework.JEST, Framework.VITEST, Framework.MOCHA]:
             if setup_code:
-                result.append(f"""beforeEach( => {{
+                result.append(f"""beforeEach(() => {{
 {self._indent(setup_code, 2)}
 }});""")
             if teardown_code:
-                result.append(f"""afterEach( => {{
+                result.append(f"""afterEach(() => {{
 {self._indent(teardown_code, 2)}
 }});""")
 
@@ -356,14 +356,14 @@ def setup_method(self):
             annotation = "@BeforeEach" if self.framework == Framework.JUNIT else "@BeforeMethod"
             if setup_code:
                 result.append(f"""{annotation}
-public void setUp {{
+public void setUp() {{
 {self._indent(setup_code, 4)}
 }}""")
 
             annotation = "@AfterEach" if self.framework == Framework.JUNIT else "@AfterMethod"
             if teardown_code:
                 result.append(f"""{annotation}
-public void tearDown {{
+public void tearDown() {{
 {self._indent(teardown_code, 4)}
 }}""")
 
@@ -373,19 +373,19 @@ public void tearDown {{
         """Indent text by number of spaces."""
         indent = " " * spaces
         lines = text.split('\n')
-        return '\n'.join(indent + line if line.strip else line for line in lines)
+        return '\n'.join(indent + line if line.strip() else line for line in lines)
 
     def _to_camel_case(self, text: str) -> str:
         """Convert text to camelCase."""
-        words = text.replace('-', ' ').replace('_', ' ').split
+        words = text.replace('-', ' ').replace('_', ' ').split()
         if not words:
             return text
-        return words[0].lower + ''.join(word.capitalize for word in words[1:])
+        return words[0].lower() + ''.join(word.capitalize() for word in words[1:])
 
     def _to_class_name(self, text: str) -> str:
         """Convert text to ClassName."""
-        words = text.replace('-', ' ').replace('_', ' ').split
-        return ''.join(word.capitalize for word in words)
+        words = text.replace('-', ' ').replace('_', ' ').split()
+        return ''.join(word.capitalize() for word in words)
 
     def detect_framework(self, code: str) -> Optional[Framework]:
         """

@@ -45,7 +45,7 @@ When converting requirements to SQL, follow this sequence:
 **Top-N per group (window function)**
 ```sql
 SELECT * FROM (
-  SELECT *, ROW_NUMBER OVER (PARTITION BY department_id ORDER BY salary DESC) AS rn
+  SELECT *, ROW_NUMBER() OVER (PARTITION BY department_id ORDER BY salary DESC) AS rn
   FROM employees
 ) ranked WHERE rn <= 3;
 ```
@@ -68,14 +68,14 @@ WHERE prev.id IS NULL AND curr.seq_num > 1;
 **UPSERT (PostgreSQL)**
 ```sql
 INSERT INTO settings (key, value, updated_at)
-VALUES ('theme', 'dark', NOW)
+VALUES ('theme', 'dark', NOW())
 ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = EXCLUDED.updated_at;
 ```
 
 **UPSERT (MySQL)**
 ```sql
 INSERT INTO settings (key_name, value, updated_at)
-VALUES ('theme', 'dark', NOW)
+VALUES ('theme', 'dark', NOW())
 ON DUPLICATE KEY UPDATE value = VALUES(value), updated_at = VALUES(updated_at);
 ```
 
@@ -111,7 +111,7 @@ SELECT table_name, table_rows,
   ROUND(data_length / 1024 / 1024, 2) AS data_mb,
   ROUND(index_length / 1024 / 1024, 2) AS index_mb
 FROM information_schema.tables
-WHERE table_schema = DATABASE
+WHERE table_schema = DATABASE()
 ORDER BY data_length DESC;
 ```
 
@@ -170,7 +170,7 @@ python scripts/schema_explorer.py --dialect mysql --tables users,orders --format
 | `NOT IN (SELECT ...)` with NULLs | `NOT EXISTS (SELECT 1 ...)` |
 | `UNION` (dedup) when not needed | `UNION ALL` |
 | `LIKE '%search%'` | Full-text search index (GIN/FULLTEXT) |
-| `ORDER BY RAND` | Application-side random sampling or `TABLESAMPLE` |
+| `ORDER BY RAND()` | Application-side random sampling or `TABLESAMPLE` |
 
 ### N+1 Detection
 
@@ -293,15 +293,15 @@ python scripts/migration_generator.py --change "rename column name to full_name 
 **Schema definition**
 ```prisma
 model User {
-  id        Int      @id @default(autoincrement)
+  id        Int      @id @default(autoincrement())
   email     String   @unique
   name      String?
   posts     Post[]
-  createdAt DateTime @default(now)
+  createdAt DateTime @default(now())
 }
 
 model Post {
-  id       Int    @id @default(autoincrement)
+  id       Int    @id @default(autoincrement())
   title    String
   author   User   @relation(fields: [authorId], references: [id])
   authorId Int
@@ -317,29 +317,29 @@ model Post {
 **Schema-first definition**
 ```typescript
 export const users = pgTable('users', {
-  id: serial('id').primaryKey,
-  email: varchar('email', { length: 255 }).notNull.unique,
+  id: serial('id').primaryKey(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
   name: text('name'),
-  createdAt: timestamp('created_at').defaultNow,
+  createdAt: timestamp('created_at').defaultNow(),
 });
 ```
 
-**Query builder**: `db.select.from(users).where(eq(users.email, email))`
+**Query builder**: `db.select().from(users).where(eq(users.email, email))`
 **Migrations**: `npx drizzle-kit generate:pg` then `npx drizzle-kit push:pg`
 
 ### TypeORM
 
 **Entity decorators**
 ```typescript
-@Entity
+@Entity()
 export class User {
-  @PrimaryGeneratedColumn
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ unique: true })
   email: string;
 
-  @OneToMany( => Post, post => post.author)
+  @OneToMany(() => Post, post => post.author)
   posts: Post[];
 }
 ```
@@ -359,7 +359,7 @@ class User(Base):
     posts = relationship('Post', back_populates='author')
 ```
 
-**Session management**: Always use `with Session as session:` context manager
+**Session management**: Always use `with Session() as session:` context manager
 **Alembic migrations**: `alembic revision --autogenerate -m "add user email"`
 
 > See references/orm_patterns.md for side-by-side comparisons and migration workflows per ORM.
@@ -389,7 +389,7 @@ class User(Base):
 
 1. **Consistent lock ordering** — always acquire locks in the same table/row order
 2. **Short transactions** — minimize time between first lock and commit
-3. **Advisory locks** — use `pg_advisory_lock` for application-level coordination
+3. **Advisory locks** — use `pg_advisory_lock()` for application-level coordination
 4. **Retry logic** — catch deadlock errors and retry with exponential backoff
 
 ---

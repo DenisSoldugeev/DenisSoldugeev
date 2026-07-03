@@ -115,15 +115,15 @@ class ToolSchemaGenerator:
     """Generate structured tool schemas from descriptions"""
     
     def __init__(self):
-        self.common_patterns = self._define_common_patterns
-        self.format_validators = self._define_format_validators
-        self.security_templates = self._define_security_templates
+        self.common_patterns = self._define_common_patterns()
+        self.format_validators = self._define_format_validators()
+        self.security_templates = self._define_security_templates()
     
     def _define_common_patterns(self) -> Dict[str, str]:
         """Define common regex patterns for validation"""
         return {
             "email": r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
-            "url": r"^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$",
+            "url": r"^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$",
             "uuid": r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
             "phone": r"^\+?1?[0-9]{10,15}$",
             "ip_address": r"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
@@ -268,7 +268,7 @@ class ToolSchemaGenerator:
             "none": ParameterType.NULL
         }
         
-        return type_mapping.get(type_str.lower, ParameterType.STRING)
+        return type_mapping.get(type_str.lower(), ParameterType.STRING)
     
     def _generate_validation_rules(self, param_spec: Dict[str, Any], param_type: ParameterType) -> Dict[str, Any]:
         """Generate validation rules for a parameter"""
@@ -312,7 +312,7 @@ class ToolSchemaGenerator:
             rules["minLength"] = param_spec["min_len"]
         else:
             # Infer from description
-            desc = param_spec.get("description", "").lower
+            desc = param_spec.get("description", "").lower()
             if "password" in desc:
                 rules["minLength"] = 8
             elif "email" in desc:
@@ -326,7 +326,7 @@ class ToolSchemaGenerator:
             rules["maxLength"] = param_spec["max_len"]
         else:
             # Reasonable defaults
-            desc = param_spec.get("description", "").lower
+            desc = param_spec.get("description", "").lower()
             if "password" in desc:
                 rules["maxLength"] = 128
             elif "email" in desc:
@@ -350,8 +350,8 @@ class ToolSchemaGenerator:
             rules["minimum"] = param_spec["min"]
         else:
             # Infer from context
-            name = param_spec.get("name", "").lower
-            desc = param_spec.get("description", "").lower
+            name = param_spec.get("name", "").lower()
+            desc = param_spec.get("description", "").lower()
             if any(word in name + desc for word in ["count", "quantity", "amount", "size", "limit"]):
                 rules["minimum"] = 0
             elif "page" in name + desc:
@@ -435,7 +435,7 @@ class ToolSchemaGenerator:
     
     def _detect_format(self, name: str, description: str) -> Optional[str]:
         """Detect parameter format from name and description"""
-        combined = (name + " " + description).lower
+        combined = (name + " " + description).lower()
         
         format_indicators = {
             "email": ["email", "e-mail", "email_address"],
@@ -446,7 +446,7 @@ class ToolSchemaGenerator:
             "password": ["password", "secret", "token", "api_key"]
         }
         
-        for format_name, indicators in format_indicators.items:
+        for format_name, indicators in format_indicators.items():
             if any(indicator in combined for indicator in indicators):
                 return format_name
         
@@ -511,7 +511,7 @@ class ToolSchemaGenerator:
             if param.validation_rules:
                 # Filter to supported validation rules
                 supported_rules = ["minLength", "maxLength", "minimum", "maximum", "pattern", "enum", "items"]
-                for rule, value in param.validation_rules.items:
+                for rule, value in param.validation_rules.items():
                     if rule in supported_rules:
                         prop_def[rule] = value
             
@@ -575,27 +575,27 @@ class ToolSchemaGenerator:
         
         # Add tool-specific errors based on error conditions
         for condition in description.error_conditions:
-            if "not found" in condition.lower:
+            if "not found" in condition.lower():
                 error_specs.append(ErrorSpec(
                     error_code="resource_not_found",
                     error_message=f"Requested resource not found: {condition}",
                     http_status=404
                 ))
-            elif "timeout" in condition.lower:
+            elif "timeout" in condition.lower():
                 error_specs.append(ErrorSpec(
                     error_code="operation_timeout",
                     error_message=f"Operation timed out: {condition}",
                     http_status=408,
                     retry_after=30
                 ))
-            elif "quota" in condition.lower or "limit" in condition.lower:
+            elif "quota" in condition.lower() or "limit" in condition.lower():
                 error_specs.append(ErrorSpec(
                     error_code="quota_exceeded",
                     error_message=f"Quota or limit exceeded: {condition}",
                     http_status=429,
                     retry_after=3600
                 ))
-            elif "dependency" in condition.lower:
+            elif "dependency" in condition.lower():
                 error_specs.append(ErrorSpec(
                     error_code="dependency_failure",
                     error_message=f"Dependency service failure: {condition}",
@@ -618,7 +618,7 @@ class ToolSchemaGenerator:
             "communication": {"rpm": 30, "rph": 300, "rpd": 3000, "burst": 5}
         }
         
-        category_defaults = defaults.get(description.category.lower, defaults["api"])
+        category_defaults = defaults.get(description.category.lower(), defaults["api"])
         
         return RateLimitSpec(
             requests_per_minute=rate_limits.get("requests_per_minute", category_defaults["rpm"]),
@@ -719,7 +719,7 @@ class ToolSchemaGenerator:
                     return param.validation_rules["enum"][0]
             
             # Generate based on name/description
-            name_lower = param.name.lower
+            name_lower = param.name.lower()
             if "name" in name_lower:
                 return "example_name"
             elif "query" in name_lower or "search" in name_lower:
@@ -759,7 +759,7 @@ class ToolSchemaGenerator:
     
     def _generate_example_output(self, description: ToolDescription) -> Dict[str, Any]:
         """Generate example output based on tool description"""
-        category = description.category.lower
+        category = description.category.lower()
         
         if category == "search":
             return {
@@ -849,7 +849,7 @@ class ToolSchemaGenerator:
         )
 
 
-def main:
+def main():
     parser = argparse.ArgumentParser(description="Tool Schema Generator for AI Agents")
     parser.add_argument("input_file", help="JSON file with tool descriptions")
     parser.add_argument("-o", "--output", help="Output file prefix (default: tool_schemas)")
@@ -858,7 +858,7 @@ def main:
     parser.add_argument("--validate", action="store_true", 
                        help="Validate generated schemas")
     
-    args = parser.parse_args
+    args = parser.parse_args()
     
     try:
         # Load tool descriptions
@@ -872,7 +872,7 @@ def main:
             tool_descriptions.append(tool_desc)
         
         # Generate schemas
-        generator = ToolSchemaGenerator
+        generator = ToolSchemaGenerator()
         schemas = []
         
         for description in tool_descriptions:
@@ -975,4 +975,4 @@ def main:
 
 
 if __name__ == "__main__":
-    main
+    main()

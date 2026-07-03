@@ -28,10 +28,10 @@ Common errors, debugging queries, and resolution patterns for Snowflake developm
 | Error | Cause | Fix |
 |-------|-------|-----|
 | Task not running | Created but not resumed | `ALTER TASK task_name RESUME;` |
-| DT stuck in FAILED state | Query error or upstream dependency issue | Check `DYNAMIC_TABLE_REFRESH_HISTORY` for error messages |
-| DT shows full refresh instead of incremental | Non-deterministic function or unsupported pattern | Check `refresh_mode_reason` in `INFORMATION_SCHEMA.DYNAMIC_TABLES` |
+| DT stuck in FAILED state | Query error or upstream dependency issue | Check `DYNAMIC_TABLE_REFRESH_HISTORY()` for error messages |
+| DT shows full refresh instead of incremental | Non-deterministic function or unsupported pattern | Check `refresh_mode_reason` in `INFORMATION_SCHEMA.DYNAMIC_TABLES()` |
 | Stream shows no data | Stream was consumed or table was recreated | Verify stream is on the correct table, check `STALE_AFTER` |
-| Snowpipe not loading files | SQS notification misconfigured or file format mismatch | Check `SYSTEM$PIPE_STATUS`, verify notification channel |
+| Snowpipe not loading files | SQS notification misconfigured or file format mismatch | Check `SYSTEM$PIPE_STATUS()`, verify notification channel |
 | "UPSTREAM_FAILED" on DT | A DT dependency upstream has a refresh failure | Fix the upstream DT first, then downstream will recover |
 
 ### Cortex AI Errors
@@ -56,7 +56,7 @@ SELECT query_id, query_text, execution_status,
        bytes_scanned / (1024*1024*1024) AS gb_scanned,
        rows_produced, warehouse_name
 FROM TABLE(INFORMATION_SCHEMA.QUERY_HISTORY(
-    END_TIME_RANGE_START => DATEADD(HOUR, -24, CURRENT_TIMESTAMP),
+    END_TIME_RANGE_START => DATEADD(HOUR, -24, CURRENT_TIMESTAMP()),
     RESULT_LIMIT => 50
 ))
 WHERE total_elapsed_time > 30000  -- > 30 seconds
@@ -69,14 +69,14 @@ ORDER BY total_elapsed_time DESC;
 -- Overall DT status
 SELECT name, scheduling_state, last_completed_refresh_state,
        data_timestamp,
-       DATEDIFF('minute', data_timestamp, CURRENT_TIMESTAMP) AS lag_minutes
-FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLES)
+       DATEDIFF('minute', data_timestamp, CURRENT_TIMESTAMP()) AS lag_minutes
+FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLES())
 ORDER BY lag_minutes DESC;
 
 -- Recent failures
 SELECT name, state, state_message, refresh_trigger,
        DATEDIFF('second', refresh_start_time, refresh_end_time) AS duration_sec
-FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLE_REFRESH_HISTORY)
+FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLE_REFRESH_HISTORY())
 WHERE state = 'FAILED'
 ORDER BY refresh_end_time DESC
 LIMIT 20;
@@ -99,7 +99,7 @@ SELECT SYSTEM$STREAM_HAS_DATA('my_stream');
 SELECT name, state, error_message,
        scheduled_time, completed_time,
        DATEDIFF('second', scheduled_time, completed_time) AS duration_sec
-FROM TABLE(INFORMATION_SCHEMA.TASK_HISTORY)
+FROM TABLE(INFORMATION_SCHEMA.TASK_HISTORY())
 WHERE name = 'MY_TASK'
 ORDER BY scheduled_time DESC
 LIMIT 20;
@@ -129,7 +129,7 @@ SHOW GRANTS OF ROLE ACCOUNTADMIN;
 SELECT start_time, warehouse_name,
        avg_running, avg_queued_load, avg_blocked
 FROM TABLE(INFORMATION_SCHEMA.WAREHOUSE_LOAD_HISTORY(
-    DATE_RANGE_START => DATEADD(HOUR, -24, CURRENT_TIMESTAMP)
+    DATE_RANGE_START => DATEADD(HOUR, -24, CURRENT_TIMESTAMP())
 ))
 WHERE warehouse_name = 'MY_WH'
 ORDER BY start_time DESC;
