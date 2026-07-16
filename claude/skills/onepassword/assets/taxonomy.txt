@@ -1,0 +1,45 @@
+# Canonical 1Password tag taxonomy (nested via "/").
+# Generic starter set — customize for your own vaults.
+#
+# Keep your PERSONAL taxonomy in `taxonomy.local.txt` (gitignored). audit.sh
+# prefers that file automatically when present, so this generic list never has
+# to carry employer / client / location-specific tags.
+#
+# Rules enforced by audit.sh:
+#   - a tag is VALID only if it exactly matches one line below (non-comment).
+#   - a bare top-level domain that has sub-tags here (e.g. "work", "dev") is
+#     flagged as incomplete — it must carry a sub-tag.
+#   - "#remap A -> B" lines below are machine-read: the audit proposes
+#     rewriting tag A to B (e.g. a known typo / misfiling).
+
+# --- work ---
+work/email
+work/tools
+work/infra
+
+# --- dev ---
+dev/source
+dev/infra
+dev/services
+dev/ai
+
+# --- infra ---
+infra/ssh
+infra/vpn
+infra/server
+
+# --- finance ---
+finance/bank
+finance/crypto
+finance/payment
+
+# --- personal ---
+personal/account
+personal/email
+personal/social
+personal/shopping
+personal/media
+personal/gaming
+
+# --- example remap (machine-read; edit for your own typos) ---
+#remap dev/ci -> dev/infra
